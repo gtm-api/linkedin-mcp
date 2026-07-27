@@ -7,11 +7,17 @@ ID_BASE_URL=http://localhost:8021
 ORCHESTRATION_BASE_URL=http://localhost:8025
 
 # OAuth resource-server config (used from Stage 4 on).
+# AUTH_ISSUER must equal the id container's `config('jwt.issuer')`, which defaults
+# to its APP_URL - `http://localhost:8021` in the dev stack. Check it without
+# guessing: curl -s http://localhost:8021/.well-known/oauth-authorization-server
 AUTH_ISSUER=http://localhost:8021
 MCP_RESOURCE_URL=http://localhost:8788/mcp
 
 # AUTH_MODE=dev accepts locally-minted `./dev artisan jwt:fake` bearers and
 # relaxes the issuer check. NEVER set dev in deployed environments.
+# Set AUTH_MODE=jwt locally to rehearse the deployed auth path: id now mints the
+# explicit issuer above on EVERY path (login, refresh, both OAuth grants,
+# jwt:fake), so a real local token passes the exact-match check unchanged.
 AUTH_MODE=dev
 
 BACKEND_TIMEOUT_MS=25000

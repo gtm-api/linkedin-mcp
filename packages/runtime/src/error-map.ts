@@ -86,10 +86,35 @@ export function mapErrorEnvelope(
       lines.push(e.message);
       lines.push('The backend rejected the token (likely expired). Ask the user to reconnect the GTM connector.');
       break;
-    case 'forbidden':
-      lines.push(e.message);
-      if (e.context) lines.push(`context: ${JSON.stringify(e.context)}`);
+    // 403. Three shapes hide behind one code, and the difference decides what the
+    // model should do next, so they are split rather than dumped as a JSON blob.
+    // The backend gate (CheckPermissions) puts a machine-readable `reason` in
+    // context; the permission ones also carry the exact token.
+    case 'forbidden': {
+      const reason = typeof e.context?.reason === 'string' ? e.context.reason : undefined;
+      const required =
+        typeof e.context?.required_permission === 'string' ? e.context.required_permission : undefined;
+
+      if (reason === 'scope_missing' && required) {
+        // The single most likely 403 after permission enforcement went on. Retrying
+        // is pointless: the token set is frozen on this connection. Both repair
+        // paths are named because which one applies depends on how the caller
+        // connected, and the model cannot tell from here.
+        lines.push(`${tool} requires the '${required}' permission and this connection does not carry it.`);
+        lines.push(
+          `Two ways to fix it, both needing a human: ask a workspace admin to add '${required}' to the member's permissions, or reconnect the GTM connector and consent to a scope that includes it.`,
+        );
+        lines.push('Do not retry with the same credentials, and do not try a different tool to get the same data: the answer will not change until the permission is granted.');
+      } else if (reason === 'route_not_declared') {
+        lines.push(`${tool} was refused by the server's permission gate because the route it calls declares no required permission.`);
+        lines.push('This is a server-side configuration gap, not a missing permission on your side. Nothing the caller can grant will unblock it. Report it with the trace id below.');
+      } else {
+        lines.push(e.message);
+        if (e.context) lines.push(`context: ${JSON.stringify(e.context)}`);
+        lines.push('Do not retry: a 403 is a decision about the caller, not a transient failure.');
+      }
       break;
+    }
     case 'not_implemented':
       lines.push(`${tool} is planned but not shipped yet. The contract is locked, the capability lands in a future release.`);
       lines.push('Do not retry; pick an alternative tool or ask the user how to proceed.');

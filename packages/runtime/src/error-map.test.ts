@@ -30,6 +30,31 @@ describe('mapErrorEnvelope', () => {
     expect(r.content[0].text).toMatch(/sid: must be 18 chars/);
   });
 
+  it('renders forbidden(scope_missing) with the token and both repair paths', () => {
+    const r = mapErrorEnvelope(403, { success: false, error: { code: 'forbidden', message: 'Access denied: required scope is missing from the token', recoverable: false, context: { reason: 'scope_missing', required_permission: 'can_view_linkedin_accounts' } }, meta: { trace_id: 'tr-1' } }, ctx);
+    expect(r.isError).toBe(true);
+    const text = r.content[0].text;
+    expect(text).toContain('can_view_linkedin_accounts');
+    expect(text).toMatch(/workspace admin/i);
+    expect(text).toMatch(/reconnect the GTM connector/i);
+    expect(text).toMatch(/do not retry/i);
+    expect(text).toMatch(/trace: tr-1/);
+    // The raw JSON dump is what this case used to be; naming the token is the point.
+    expect(text).not.toMatch(/context: \{/);
+  });
+
+  it('renders forbidden(route_not_declared) as a server-side gap, not a caller problem', () => {
+    const r = mapErrorEnvelope(403, { success: false, error: { code: 'forbidden', message: 'Access denied', recoverable: false, context: { reason: 'route_not_declared', route: 'POST /api/x' } } }, ctx);
+    expect(r.content[0].text).toMatch(/server-side/i);
+    expect(r.content[0].text).not.toMatch(/workspace admin/i);
+  });
+
+  it('renders any other forbidden with its context and a do-not-retry', () => {
+    const r = mapErrorEnvelope(403, { success: false, error: { code: 'forbidden', message: 'Access denied: user is not a member of this team', recoverable: false, context: { reason: 'wrong_team' } } }, ctx);
+    expect(r.content[0].text).toMatch(/wrong_team/);
+    expect(r.content[0].text).toMatch(/do not retry/i);
+  });
+
   it('renders rate_limited with retry hint and trace footer', () => {
     const r = mapErrorEnvelope(429, { success: false, error: { code: 'rate_limited', message: 'slow down', recoverable: true, context: { retry_after: 42 } }, meta: { trace_id: 'abc' } }, ctx);
     expect(r.content[0].text).toMatch(/retry after 42s/i);

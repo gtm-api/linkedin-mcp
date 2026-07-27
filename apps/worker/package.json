@@ -24,8 +24,7 @@
   },
   "scripts": {
     "dev": "wrangler dev",
-    "deploy:production": "node ../../bin/deploy-preflight.mjs production && wrangler deploy --env production",
-    "deploy:staging": "node ../../bin/deploy-preflight.mjs staging && wrangler deploy --env staging",
+    "deploy:production": "node ../../bin/deploy-preflight.mjs && wrangler deploy --env production",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "lint": "tsc --noEmit -p tsconfig.json"

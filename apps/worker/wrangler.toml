@@ -1,23 +1,38 @@
 # gtm.mcp - Cloudflare Worker.
 #
-# Three environments, and the default one is NOT deployable on purpose:
+# TWO environments, and the default one is NOT deployable on purpose:
 #   default        `wrangler dev` on :8788. No cloud bindings at all.
-#   env.staging    `pnpm deploy:staging` -> gtm-mcp-staging.<account>.workers.dev
-#   env.production `pnpm deploy:production` -> gtm-mcp.<account>.workers.dev
+#   env.production `pnpm deploy:production` -> https://mcp.gtm-api.com
 # Full walkthrough, in order and marked by who runs each step: ../../DEPLOY.md.
-# `pnpm deploy:preflight` refuses either deploy while a placeholder below is
-# still unfilled, so read that failure rather than this file.
+# `pnpm deploy:preflight` refuses the deploy while a placeholder below is still
+# unfilled, so read that failure rather than this file.
+#
+# There is deliberately no `staging` env. It used to exist as a second worker
+# script on workers.dev, and it was the wrong shape: it pointed at the SAME beta
+# backends as production (there is no backend staging tier), so every write it
+# made was a production write, which is the one thing a staging env is supposed
+# to protect you from. Eugene's decision (2026-07-27) is that local development
+# keeps using local services, which leaves nobody who would develop against it.
+# What it was actually good for - not letting the first `wrangler deploy` this
+# project ever runs be the public one - is now done by a VERSION: DEPLOY.md step
+# 9 uploads the production config as an undeployed version, smokes its preview
+# URL with `pnpm smoke`, and only then promotes it. That rehearses the bytes that
+# go live instead of a different worker that resembles them.
 #
 # Analytics Engine lands in a later stage. COMMIT_TOKENS (preview gate) is
-# local-simulated under `wrangler dev`; a real namespace id is set per env
-# before deploy. The [[ratelimits]] bindings are deployed-env-only on purpose:
-# with none bound, the rate-limit gate falls back to an isolate-local counter,
-# which is what keeps `wrangler dev` offline.
+# local-simulated under `wrangler dev`; a real namespace id is set before the
+# deploy. The [[ratelimits]] bindings are production-only on purpose: with none
+# bound, the rate-limit gate falls back to an isolate-local counter, which is
+# what keeps `wrangler dev` offline.
 name = "gtm-mcp-dev"
 main = "src/index.ts"
 compatibility_date = "2026-06-01"
 compatibility_flags = ["nodejs_compat"]
-workers_dev = true
+# The default env is not meant to be published, and this is the guard rail: a
+# bare `wrangler deploy` (no --env) would otherwise put `gtm-mcp-dev` on the
+# account's workers.dev subdomain, with no rate-limit bindings and a KV id that
+# does not exist. With this false it uploads a worker nothing routes to.
+workers_dev = false
 
 [dev]
 port = 8788
@@ -30,13 +45,54 @@ binding = "COMMIT_TOKENS"
 id = "gtm_mcp_commit_tokens_local"
 
 # ── production ──────────────────────────────────────────────────────────────
-# Deployed with `wrangler deploy --env production` - full walkthrough in
-# ../../DEPLOY.md. AI + Vectorize bindings exist ONLY here: their absence in
-# the default (dev) env is what keeps `wrangler dev` fully local - the support
-# KB falls back to the bundled BM25 index (see mcp.support/kb_articles).
+# Deployed with `pnpm deploy:production` - full walkthrough in ../../DEPLOY.md.
+# AI + Vectorize bindings exist ONLY here: their absence in the default (dev)
+# env is what keeps `wrangler dev` fully local - the support KB falls back to
+# the bundled BM25 index (see mcp.support/kb_articles).
 [env.production]
 name = "gtm-mcp"
-workers_dev = true   # switch to a route/custom domain when mcp.gtm-api.com lands
+# CUSTOM DOMAIN, not a route, and the difference is not cosmetic.
+#
+#   custom_domain = true  -> the Worker OWNS the hostname. Cloudflare creates
+#     the (proxied, Workers-managed) DNS record for mcp.gtm-api.com itself,
+#     issues the edge certificate, and sends every request on that hostname to
+#     this Worker. There is no origin behind it, which is exactly our case: the
+#     worker IS the server, it answers /health, /.well-known/... and /mcp/*.
+#   { pattern = "mcp.gtm-api.com/*", zone_name = "gtm-api.com" } -> a ROUTE.
+#     A route puts a Worker IN FRONT of a zone's existing origin. It does not
+#     create DNS: the hostname still has to resolve through a proxied record
+#     somewhere, and with no origin behind it the usual trick is a dummy AAAA
+#     100:: record whose only purpose is to give Cloudflare something to attach
+#     the orange cloud to. That is a second moving part which exists only to be
+#     ignored, and forgetting it is the classic "the route is configured and the
+#     hostname still 1016s" failure.
+#
+# So: a Worker that answers on its own hostname takes a custom domain. Routes
+# are for a Worker that intercepts paths on a hostname something else serves,
+# which is what app.gtm-api.com is (OpenResty, the Laravel gateway) and is
+# precisely why the MCP worker gets its own subdomain rather than a path there.
+#
+# The pattern is a bare hostname: a custom domain accepts no path and no
+# wildcard. Wrangler creates the record on `wrangler deploy`; a pre-existing
+# mcp.gtm-api.com record makes that fail until it is deleted (DEPLOY.md step 7).
+# Requires gtm-api.com to be a zone in the SAME Cloudflare account (it is - the
+# zone's SSL/TLS mode is what caused the app.gtm-api.com redirect loop in July).
+routes = [{ pattern = "mcp.gtm-api.com", custom_domain = true }]
+# No second public entrance. With workers_dev = true the worker would ALSO
+# answer on gtm-mcp.<account>.workers.dev, a stable guessable hostname that is
+# not the one MCP_RESOURCE_URL names, so the discovery document and the aud
+# check would describe a different URL from the one being called.
+workers_dev = false
+# Version preview URLs stay ON, and they are load-bearing rather than a leftover:
+# `wrangler versions upload` prints
+# https://<8-char-version>-gtm-mcp.<account>.workers.dev for a version that has
+# been uploaded but NOT deployed, carrying these exact vars, bindings and
+# secrets. That is the pre-production rehearsal that replaces the deleted
+# staging env (DEPLOY.md step 9). Wrangler warns on this combination ("you are
+# disabling workers.dev but Preview URLs are still enabled") - that warning is
+# the intended state, not a mistake to fix. The URL is unguessable in practice
+# and runs the same auth checks; it is not an unauthenticated surface.
+preview_urls = true
 
 [env.production.observability]
 enabled = true
@@ -59,55 +115,60 @@ AUTH_MODE = "jwt"
 # path prefix on the base survives and /api/... lands correctly behind it.
 LINKEDIN_BASE_URL = "https://app.gtm-api.com/linkedin/v4"
 ID_BASE_URL = "https://app.gtm-api.com/id/v4"
-# 🛑 BLOCKED, and it blocks the whole worker, not just the orchestration mounts.
-# There is no orchestration host yet: `gateway_orchestration_backend` is the
-# literal "REPLACE_ME:80" and the /orchestration/v4 route is COMMENTED OUT in
-# gateway_routes (an unresolvable proxy_pass upstream fails `nginx -t` and would
-# take the whole edge down). The service is therefore not publicly reachable at
-# any URL. Because /mcp/orchestration/webhooks and /mcp/orchestration/mass-actions
-# are mounted, requiredBaseUrlServices() includes 'orchestration', so this
-# placeholder is a FATAL config problem: /health and EVERY mount answer 503.
-# Nothing in this repo can fix that. Supplied by: Eugene, by creating the
-# orchestration box, filling gateway_orchestration_backend + cluster_allowed_ips
-# + inventory/beta.ini, uncommenting the route and re-running
-# `provision-id.yml --tags gateway`. Then this becomes
-# "https://app.gtm-api.com/orchestration/v4".
-ORCHESTRATION_BASE_URL = "https://TODO-orchestration-prod-url"
+# This one is not just the orchestration mounts: /mcp/orchestration/webhooks and
+# /mcp/orchestration/mass-actions are mounted, so requiredBaseUrlServices()
+# includes 'orchestration' and an unusable value here is FATAL - /health and
+# EVERY mount answer 503, a total outage rather than a partial one.
+#
+# Filled on 2026-07-27, once the /orchestration/v4 entry in `gateway_routes`
+# (host_vars/id-beta.yml) stopped being commented out. It is a CONFIG value here
+# and a DEPLOY dependency out there, and the two are not the same date: the
+# ansible change is in the working tree, the orchestration box (65.109.84.210)
+# has never been provisioned, and `provision-id.yml --tags gateway` has not been
+# re-run. Until both happen the prefix answers 404 (route not published) or 502
+# (published, no app behind it). That is the failure the preflight's edge phase
+# exists to catch: it GETs {this}/live before any deploy and refuses on either,
+# so the ordering error surfaces on the laptop instead of as a green /health
+# with every orchestration tool 502ing at dispatch.
+# Sequence and owner: product/deployment/RUNBOOK-orchestration.md § 3.
+ORCHESTRATION_BASE_URL = "https://app.gtm-api.com/orchestration/v4"
 # OAuth resource-server identity. With AUTH_MODE=jwt these are REQUIRED: without
 # them the iss and aud checks would have nothing to compare against, so the
 # worker refuses every request with 503 and /health says which one is missing.
 # They are also the whole content of the discovery document.
 #
-# 🛑 AUTH_ISSUER CANNOT BE FILLED CORRECTLY TODAY. One var has to do two jobs
-# that currently want two different values, verified against the running id
-# service rather than reasoned about:
+# ONE value does both jobs now, and it used to be unfillable because it could
+# not: verifier.ts does an exact `payload.iss !== auth.issuer` match, while the
+# discovery document has to publish an RFC 8414 base. id set no `iss` claim, so
+# jwt-auth's Claims/Factory::iss() returned `$this->request->url()` - the URL of
+# the MINTING ENDPOINT, and behind the prefix-stripping gateway not even a URL
+# that routes back to id ("https://app.gtm-api.com/auth/login", measured).
 #
-#   1. verifier.ts does `payload.iss !== auth.issuer`, an EXACT match. The id
-#      service never sets an `iss` custom claim, so it falls through to
-#      php-open-source-saver/jwt-auth Claims/Factory::iss(), which returns
-#      `$this->request->url()`: the URL OF THE MINTING ENDPOINT. Probed through
-#      the real container, a token minted behind the gateway carries
-#      iss = "https://app.gtm-api.com/oauth/token" (the /id/v4 prefix is already
-#      stripped by then), and a login-minted one carries ".../auth/login".
-#   2. the discovery document publishes `authorization_servers: [AUTH_ISSUER]`,
-#      which a client resolves as an RFC 8414 base. That has to be
-#      "https://app.gtm-api.com/id/v4", which is what the id service itself
-#      advertises as `issuer` (OAuthFlowController::issuer() = config('app.url')).
+# Landed 2026-07-27 (Eugene's decision): id mints an EXPLICIT issuer -
+# `config('jwt.issuer')` in gtm.service.id, defaulting to APP_URL, applied at the
+# claim factory (App\Auth\IssuerClaimFactory) so every minting path emits it -
+# and OAuthFlowController::issuer() reads the same key. Token `iss`, RFC 8414
+# `issuer` and RFC 9728 `authorization_servers[0]` are now the one string below,
+# which is why AUTH_ISSUER needs no second variable and no normalisation.
 #
-# So value 2 makes every token fail "issuer mismatch", and value 1 publishes a
-# token endpoint as an authorization server, which no client can bootstrap from.
-# AUTH_MODE=jwt has never run against a real id-minted token: the worker tests
-# use a synthetic issuer that matches by construction, and the live e2e ran in
-# AUTH_MODE=dev, where the iss check is deliberately relaxed. Supplied by:
-# Eugene, after deciding the fix (either id mints an explicit `iss` custom claim
-# equal to config('app.url'), which is also what RFC 8414 requires of it, or the
-# worker separates the verify-issuer from the discovery-issuer). Leave the
-# placeholder until then: the worker refusing to serve is the correct outcome.
-AUTH_ISSUER = "https://TODO-id-issuer-url"
-# This worker's own public MCP URL, which is the *.workers.dev subdomain minted
-# for the account on first deploy and echoed by wrangler. Supplied by: Eugene,
-# from the first `pnpm deploy:staging` output (see DEPLOY.md step 4).
-MCP_RESOURCE_URL = "https://TODO-mcp-worker-url/mcp"
+# 🛑 THE ID DEPLOY IS THE PRECONDITION FOR THIS WORKER'S DEPLOY. A host still
+# running the pre-issuer id mints tokens whose `iss` is a per-endpoint URL, and
+# this exact-match check 401s every one of them with "issuer mismatch". Deploy
+# gtm.service.id first, then verify against the live host before promoting the
+# worker version:
+#   curl -s https://app.gtm-api.com/id/v4/.well-known/oauth-authorization-server
+# must answer `"issuer":"https://app.gtm-api.com/id/v4"`, and a real login token
+# from that host must carry the same string in `iss` (base64url-decode the
+# payload). Both were verified locally against the running id container before
+# this value was filled in; the beta host is Eugene's to deploy.
+AUTH_ISSUER = "https://app.gtm-api.com/id/v4"
+# This worker's own public MCP URL: the custom domain above plus the unified
+# facade mount (mounts.config.ts, path '/mcp'). It is not a lookup and not a
+# first-deploy echo any more - the hostname is ours by decision, so this is
+# derived from `routes` and the preflight enforces that they agree. It is both
+# the `resource` of the OAuth discovery document and the value a token's `aud`
+# must carry, so it names the URL clients actually POST to.
+MCP_RESOURCE_URL = "https://mcp.gtm-api.com/mcp"
 # Abuse + cost controls. These two numbers MUST stay equal to the `simple.limit`
 # of the matching [[ratelimits]] binding below: the binding is what enforces,
 # the var is what the error message quotes back to the agent, and an agent told
@@ -128,9 +189,9 @@ index_name = "gtm-kb"
 binding = "COMMIT_TOKENS"
 # An account-scoped resource id that only exists once someone creates it.
 # Supplied by: Eugene, by pasting the id echoed by
-# `wrangler kv namespace create COMMIT_TOKENS --env production` (DEPLOY.md step 5).
-# Unfilled it is a WARNING, not fatal: the worker serves reads and every
-# dangerous tool refuses at the confirm step (fail-closed).
+# `wrangler kv namespace create COMMIT_TOKENS --env production` (DEPLOY.md step 4).
+# Unfilled it is a WARNING to the worker (it serves reads and every dangerous
+# tool refuses at the confirm step, fail-closed) and a BLOCKER to the preflight.
 id = "TODO_kv_namespace_id"
 
 # Platform rate limiting. `namespace_id` is ours to choose and only has to be
@@ -147,80 +208,3 @@ simple = { limit = 600, period = 60 }
 name = "RATE_LIMIT_WRITES"
 namespace_id = "1002"
 simple = { limit = 120, period = 60 }
-
-# ── staging ─────────────────────────────────────────────────────────────────
-# Deployed with `pnpm deploy:staging` (wrangler deploy --env staging).
-#
-# Why this env exists: before it, the ONLY deployable target was `production`,
-# so the very first `wrangler deploy` this project ever ran would have been the
-# public one. Everything that can only be learned by deploying (does the OAuth
-# discovery document resolve, does a real id-minted token pass the iss check,
-# does the KV binding actually bind) gets learned here instead.
-#
-# It is a SEPARATE worker script (`gtm-mcp-staging`), so it shares nothing with
-# production: its own workers.dev URL, its own KV namespace, its own rate-limit
-# counters, its own secret. Deleting it never touches `gtm-mcp`.
-#
-# ⚠ It talks to the SAME backends as production, because there is no backend
-# staging to talk to: inventory/staging.ini in the ansible repo is a skeleton
-# with every ansible_host still REPLACE_ME, and the playbooks pin the beta hosts.
-# So treat writes here as production writes. Reads are what this env is for; the
-# preview gate stays fail-closed until a secret is set on purpose.
-#
-# No [env.staging.ai] / [[env.staging.vectorize]] blocks on purpose: without
-# them search_knowledge serves from the bundled BM25 index, which is the
-# documented fallback, and staging does not need a second copy of the paid
-# vector index to prove the worker boots.
-[env.staging]
-name = "gtm-mcp-staging"
-workers_dev = true
-
-[env.staging.observability]
-enabled = true
-
-[env.staging.vars]
-# NOT in config.ts's DEV_ENV_NAMES, so AUTH_MODE=dev is refused here exactly as
-# it is in production. Staging that accepts a server-side bearer would prove
-# nothing about the auth path production actually runs.
-ENV_NAME = "staging"
-AUTH_MODE = "jwt"
-# Same beta backends as production, same gateway, same evidence.
-LINKEDIN_BASE_URL = "https://app.gtm-api.com/linkedin/v4"
-ID_BASE_URL = "https://app.gtm-api.com/id/v4"
-# Same blocker as production: no orchestration host exists. See the production
-# block above for what has to happen and who does it.
-ORCHESTRATION_BASE_URL = "https://TODO-orchestration-prod-url"
-# Same unresolved issuer question as production. Deliberately NOT pre-filled
-# with a guess: staging is where the answer gets tested, and a guess that
-# happens to 401 everything would read as a staging bug rather than the design
-# question it is. Supplied by: Eugene, once the AUTH_ISSUER decision is made.
-AUTH_ISSUER = "https://TODO-id-issuer-url"
-# Supplied by: Eugene, from this env's own first-deploy URL, which is
-# https://gtm-mcp-staging.<account>.workers.dev/mcp
-MCP_RESOURCE_URL = "https://TODO-mcp-staging-url/mcp"
-# Deliberately tighter than production: staging shares production's backends, so
-# a runaway loop here spends the real account's LinkedIn actions and credits.
-RATE_LIMIT_CALLS_PER_WINDOW = "120"
-RATE_LIMIT_WRITES_PER_WINDOW = "20"
-RATE_LIMIT_WINDOW_SECONDS = "60"
-MAX_BATCH_SIZE = "8"
-
-[[env.staging.kv_namespaces]]
-binding = "COMMIT_TOKENS"
-# Supplied by: Eugene, from
-# `wrangler kv namespace create COMMIT_TOKENS --env staging` (DEPLOY.md step 4).
-# A commit token minted here must never be redeemable against production, which
-# is why this is its own namespace and not a reuse of the production id.
-id = "TODO_kv_namespace_id"
-
-# namespace_id only has to be unique WITHIN a worker, and this is a different
-# worker script, so reusing 1001/1002 here shares no counter with production.
-[[env.staging.ratelimits]]
-name = "RATE_LIMIT_CALLS"
-namespace_id = "1001"
-simple = { limit = 120, period = 60 }
-
-[[env.staging.ratelimits]]
-name = "RATE_LIMIT_WRITES"
-namespace_id = "1002"
-simple = { limit = 20, period = 60 }

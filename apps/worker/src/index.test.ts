@@ -202,6 +202,51 @@ describe('the healthy path still serves', () => {
     }
   });
 
+  // The production issuer is `https://app.gtm-api.com/id/v4` - a URL WITH a path
+  // component, because the API edge path-routes /{svc}/v4 to the backends. Every
+  // other test here uses a bare-origin issuer, which cannot tell an exact string
+  // match apart from an origin comparison, so this block pins the real shape.
+  //
+  // The second case is the migration guarantee. Until 2026-07-27 id set no `iss`
+  // and jwt-auth defaulted it to the minting request's URL, so real tokens
+  // carried `https://app.gtm-api.com/auth/login` (the gateway strips the /id/v4
+  // prefix before Laravel sees the path). Those are SAME-ORIGIN, longer-path
+  // strings: anything looser than equality would accept them, and accepting them
+  // would mean accepting any path on that host.
+  describe('the production issuer shape', () => {
+    const PROD_ISSUER = 'https://app.gtm-api.com/id/v4';
+    const prod = () => healthy({ AUTH_ISSUER: PROD_ISSUER, ID_BASE_URL: PROD_ISSUER });
+
+    it('accepts a token whose iss is the configured path-carrying issuer', async () => {
+      const res = await listTools(
+        prod(),
+        jwt({ iss: PROD_ISSUER, exp: inAnHour(), access_identity: { actor_type: 'user', actor_sid: 'us_mb_1' } }),
+      );
+      expect(res.status).toBe(200);
+    });
+
+    it('refuses the pre-2026-07-27 per-endpoint issuers, and every other same-origin variant', async () => {
+      const cases = [
+        'https://app.gtm-api.com/auth/login',
+        'https://app.gtm-api.com/auth/refresh',
+        'https://app.gtm-api.com/oauth/token',
+        'https://app.gtm-api.com',
+        'https://app.gtm-api.com/id/v4/oauth/token',
+        'https://app.gtm-api.com/id/v4/',
+      ];
+      for (const iss of cases) {
+        const res = await listTools(prod(), jwt({ iss, exp: inAnHour() }));
+        expect(res.status, iss).toBe(401);
+        expect((await body(res)).error, iss).toBe('invalid_token');
+      }
+    });
+
+    it('advertises the same issuer it verifies against', async () => {
+      const json = await body(await get(prod(), '/.well-known/oauth-protected-resource'));
+      expect(json.authorization_servers).toEqual([PROD_ISSUER]);
+    });
+  });
+
   it('401s a request with no bearer, pointing at the discovery document', async () => {
     const res = await listTools(healthy());
     expect(res.status).toBe(401);

@@ -8324,6 +8324,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinConversation\\Enums\\LinkedinConversationGroupableFieldsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "MessengerType",
+                    "value": "messenger_type"
+                },
+                {
+                    "name": "LinkedinAccountSid",
+                    "value": "linkedin_account_sid"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinConversation\\Enums\\LinkedinConversationMessengerTypeEnum": {
             "backing": "string",
             "cases": [
@@ -8368,6 +8381,35 @@
                 {
                     "name": "Synced",
                     "value": "synced"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinMessage\\Enums\\LinkedinMessageGroupableFieldsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "LinkedinAccountSid",
+                    "value": "linkedin_account_sid"
+                },
+                {
+                    "name": "LinkedinConversationSid",
+                    "value": "linkedin_conversation_sid"
+                },
+                {
+                    "name": "Type",
+                    "value": "type"
+                },
+                {
+                    "name": "LinkedinType",
+                    "value": "linkedin_type"
+                },
+                {
+                    "name": "Automation",
+                    "value": "automation"
+                },
+                {
+                    "name": "MessengerType",
+                    "value": "messenger_type"
                 }
             ]
         },
@@ -15655,12 +15697,16 @@
                     "field": "group_by",
                     "rules": [
                         "sometimes",
-                        "string"
+                        "string",
+                        "in:\"messenger_type\",\"linkedin_account_sid\""
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
-                    "in": null,
+                    "in": [
+                        "messenger_type",
+                        "linkedin_account_sid"
+                    ],
                     "min": null,
                     "max": null,
                     "size": null,
@@ -19059,12 +19105,20 @@
                     "field": "group_by",
                     "rules": [
                         "sometimes",
-                        "string"
+                        "string",
+                        "in:\"linkedin_account_sid\",\"linkedin_conversation_sid\",\"type\",\"linkedin_type\",\"automation\",\"messenger_type\""
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
-                    "in": null,
+                    "in": [
+                        "linkedin_account_sid",
+                        "linkedin_conversation_sid",
+                        "type",
+                        "linkedin_type",
+                        "automation",
+                        "messenger_type"
+                    ],
                     "min": null,
                     "max": null,
                     "size": null,

@@ -11086,9 +11086,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_notifications",
             "internal": false,
             "request_class": "App\\Entities\\Notification\\Requests\\NotificationMetricsRequest",
             "rules": [
@@ -11355,9 +11356,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_notifications",
             "internal": false,
             "request_class": "App\\Entities\\Notification\\Requests\\NotificationSearchRequest",
             "rules": [
@@ -11661,9 +11663,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_notifications",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -11680,9 +11683,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_notifications",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -11699,9 +11703,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_sessions",
             "internal": false,
             "request_class": "App\\Entities\\OauthAuthorization\\Requests\\OauthAuthorizationSearchRequest",
             "rules": [
@@ -11935,9 +11940,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_sessions",
             "internal": false,
             "request_class": "App\\Entities\\OauthAuthorization\\Requests\\OauthAuthorizationUpdateRequest",
             "rules": [
@@ -12036,9 +12042,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_sessions",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13417,9 +13424,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_support_requests",
             "internal": false,
             "request_class": "App\\Entities\\SupportRequest\\Requests\\SupportRequestCreateRequest",
             "rules": [
@@ -13508,9 +13516,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_support_requests",
             "internal": false,
             "request_class": "App\\Entities\\SupportRequest\\Requests\\SupportRequestSearchRequest",
             "rules": [
@@ -13772,9 +13781,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_support_requests",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13891,7 +13901,8 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
             "required_permission": null,
             "internal": false,
@@ -14879,7 +14890,8 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
             "required_permission": null,
             "internal": false,
@@ -14932,7 +14944,8 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
             "required_permission": null,
             "internal": false,
