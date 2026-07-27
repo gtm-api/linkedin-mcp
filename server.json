@@ -1,0 +1,18 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.gtm-api/linkedin-mcp",
+  "description": "Managed LinkedIn MCP server for AI agents: search, connect, message and enrich on accounts you own.",
+  "title": "GTM API: LinkedIn MCP Server",
+  "websiteUrl": "https://gtm-api.com/linkedin-mcp-server/",
+  "repository": {
+    "url": "https://github.com/gtm-api/linkedin-mcp",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://mcp.gtm-api.com/mcp"
+    }
+  ]
+}
