@@ -4,7 +4,7 @@ import { mapErrorEnvelope } from './error-map';
 import type { DispatchContext, RuntimeDeps, ToolDefinition } from './types';
 
 const deps = {
-  config: { envName: 'test', version: '0', baseUrls: { linkedin: '', id: '', orchestration: '', support: '' }, backendTimeoutMs: 1, responseCharBudget: 1, previewGate: { enabled: false, secret: null, ttlSeconds: 1 } },
+  config: { envName: 'test', version: '0', baseUrls: { linkedin: '', id: '', orchestration: '', support: '' }, backendTimeoutMs: 1, responseCharBudget: 1, maxBatchSize: 16, rateLimit: { enabled: false, windowSeconds: 60, callsPerWindow: 0, writesPerWindow: 0 }, previewGate: { enabled: false, secret: null, ttlSeconds: 1 } },
   logger: { info() {}, error() {} },
 } as RuntimeDeps;
 

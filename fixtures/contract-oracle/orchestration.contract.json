@@ -268,11 +268,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "MassActionItem": {
@@ -532,11 +527,6 @@
                     "created_at",
                     "updated_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "Webhook": {
@@ -745,11 +735,6 @@
                     "deleted",
                     "q"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "WebhookLog": {
@@ -1034,11 +1019,6 @@
                     "executed_at",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         }
     },
@@ -1850,9 +1830,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_mass_actions",
             "internal": false,
             "request_class": "App\\Entities\\MassActionItem\\Requests\\MassActionItemRetryRequest",
             "rules": [
@@ -1902,9 +1883,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_mass_actions",
             "internal": false,
             "request_class": "App\\Entities\\MassActionItem\\Requests\\MassActionItemSearchRequest",
             "rules": [
@@ -2002,9 +1984,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_mass_actions",
             "internal": false,
             "request_class": "App\\Entities\\MassAction\\Requests\\MassActionCreateRequest",
             "rules": [
@@ -2302,9 +2285,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_mass_actions",
             "internal": false,
             "request_class": "App\\Entities\\MassAction\\Requests\\MassActionMetricsRequest",
             "rules": [
@@ -2338,9 +2322,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_mass_actions",
             "internal": false,
             "request_class": "App\\Entities\\MassAction\\Requests\\MassActionPreviewRequest",
             "rules": [
@@ -2622,9 +2607,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_mass_actions",
             "internal": false,
             "request_class": "App\\Entities\\MassAction\\Requests\\MassActionSearchRequest",
             "rules": [
@@ -2722,9 +2708,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_mass_actions",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -2741,9 +2728,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_mass_actions",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -2761,9 +2749,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_mass_actions",
             "internal": false,
             "request_class": "App\\Entities\\MassAction\\Requests\\MassActionPauseRequest",
             "rules": [
@@ -2798,9 +2787,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_mass_actions",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -2818,9 +2808,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_mass_actions",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -2837,9 +2828,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\WebhookLog\\Requests\\WebhookLogMetricsRequest",
             "rules": [
@@ -2939,9 +2931,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\WebhookLog\\Requests\\WebhookLogSearchRequest",
             "rules": [
@@ -3112,9 +3105,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\WebhookLog\\Requests\\WebhookLogCancelRequest",
             "rules": [
@@ -3156,9 +3150,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\WebhookLog\\Requests\\WebhookLogRetryRequest",
             "rules": [
@@ -3199,9 +3194,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\Webhook\\Requests\\WebhookCreateRequest",
             "rules": [
@@ -3405,9 +3401,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\Webhook\\Requests\\WebhookSearchRequest",
             "rules": [
@@ -3576,9 +3573,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_webhooks",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -3595,9 +3593,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\Webhook\\Requests\\WebhookGetRequest",
             "rules": [
@@ -3647,9 +3646,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\Webhook\\Requests\\WebhookUpdateRequest",
             "rules": [
@@ -3887,9 +3887,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_webhooks",
             "internal": false,
             "request_class": "App\\Entities\\Webhook\\Requests\\WebhookTestRequest",
             "rules": [

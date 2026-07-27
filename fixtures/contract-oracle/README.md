@@ -158,13 +158,12 @@ dump with an empty `entities` map.
     "LinkedinAccount": {
       "domain":   { "class": "...Domain",   "fields": [{ "name", "type", "nullable", "has_default" }] },
       "response": { "class": "...Response", "fields": [ ... ] },   // null when the entity has no {Entity}Response
-      "filter":   { "class": "...Filter",   "fields": ["status", ...] },  // null when there is no {Entity}Filter
-      "enums": { "sortable": [...], "filterable": [...], "group_by": [...] }
+      "filter":   { "class": "...Filter",   "fields": ["status", ...] }   // null when there is no {Entity}Filter
     }
   },
   "enums": {
-    // EVERY enum the contract can express, keyed by FQCN. Separate from the
-    // per-entity block above, which resolves three enums by naming convention.
+    // EVERY enum the contract can express, keyed by FQCN. The one enum block:
+    // entities carry no nested enums (see the note below the route facts).
     "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccount\\Enums\\LinkedinAccountStatusEnum": {
       "backing": "string",            // null for a pure enum
       "cases": [{ "name": "Active", "value": "active" }, ...]
@@ -253,14 +252,19 @@ Notes for consumers:
   `Rule::in(SomeEnum::values())`, `Rule::in(SomeEnum::cases())` or
   `new Enum(SomeEnum::class)`. A class name would be unusable to a consumer that
   cannot load PHP. The raw token stays in `rules` next to it.
-- top-level `enums` answers the question the per-entity `enums` block cannot.
-  That block resolves exactly three enums per entity by naming convention
-  (`{Entity}{Sortable|Filterable|GroupBy}FieldEnum`), so 49 of 63 entities emit
-  three empty arrays and not one status / kind / action-type enum appears. The
-  top-level map is convention-free: every real `enum` under the service's folder
-  and under `Core/`, keyed by FQCN so a gate resolves without guessing. Both
-  blocks stay: the entity one keeps its keys and its meaning for the gates
-  reading it today.
+- top-level `enums` is the ONE enum block, and it is convention-free: every real
+  `enum` under the service's folder and under `Core/`, keyed by FQCN so a gate
+  resolves without guessing.
+
+  It used to sit next to a per-entity `enums` block that resolved three enums
+  per entity by naming convention (`{Entity}{Sortable|Filterable|GroupBy}FieldEnum`).
+  That block is **deleted**, on the evidence: 49 of the 63 entities emitted three
+  empty arrays, not one status / kind / action-type enum ever appeared in it, all
+  14 non-empty entries were already in this map under their FQCN, and no gate in
+  this repo ever read it (`OracleEntity` never had the key). It was payload that
+  looked like an answer, which is worse than an absent one - a reader who trusted
+  `entities.X.enums.filterable === []` would conclude the entity closes no field.
+  Ask this map by FQCN instead.
 
 ## The two route gates
 
@@ -466,11 +470,11 @@ baseline because the tool names real relations the backend has not built.
 ## The enum-parity gate (`tests/enum-parity.test.ts`)
 
 The gate that reads the top-level `enums` map. It exists because nothing else
-could: the per-entity `enums` block resolves exactly three enums per entity by
-naming convention, so 49 of 63 entities emit three empty arrays and no status /
-kind / action-type enum appears anywhere, while the registry declares 193 literal
-`z.enum([...])` value lists that are each a promise to an agent about what the
-backend accepts. It asserts the same value SET on both sides, order-insensitive:
+could: the registry declares 193 literal `z.enum([...])` value lists that are
+each a promise to an agent about what the backend accepts, and the only enum
+payload the oracle carried before that map was a per-entity block resolved by
+naming convention, empty for 49 of 63 entities and never carrying a status /
+kind / action-type enum at all (now deleted, see the Shape notes above). It asserts the same value SET on both sides, order-insensitive:
 a value we offer and PHP rejects is a 422 the agent was invited to make, and a
 PHP case we omit is a state the agent can neither express nor parse.
 

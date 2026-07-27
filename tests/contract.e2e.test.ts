@@ -1,10 +1,11 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { execSync } from 'node:child_process';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
 import { McpErrorResponse } from '@gtm/mcp-shared';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
+import { mintDevToken } from './e2e/token';
+import { COVERAGE_OUT, formatReport, writeReport } from './e2e/coverage';
 
 // Registry-driven CONTRACT test: for every SAFE READ tool (search / get / metrics)
 // call it live through the facade and Zod-parse the response against the tool's
@@ -18,8 +19,6 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 
 const RUN = process.env.RUN_E2E === '1';
 const FACADE = `${process.env.MCP_URL ?? 'http://localhost:8788'}/mcp`;
-const LINKEDIN_DIR = process.env.LINKEDIN_DIR ?? '/Users/eugene/sites/gtm.ai/product/backend/gtm.service.linkedin';
-const TEAM = process.env.E2E_TEAM_SID ?? 'ts_tm_seeddev00001';
 
 const READ_OPS = new Set(['search', 'get', 'metrics']);
 const allTools: ToolDefinition[] = [...linkedinPackages, ...idPackages, ...orchestrationPackages]
@@ -53,10 +52,7 @@ const stats = { ok: 0, needsArgs: 0, noData: 0, otherError: 0 };
 
 beforeAll(() => {
   if (!RUN) return;
-  try {
-    const out = execSync(`./dev artisan jwt:fake --team-sid=${TEAM} --ttl=3600`, { cwd: LINKEDIN_DIR, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-    token = (out.match(/eyJ[A-Za-z0-9_.-]{40,}/g) ?? []).pop() ?? '';
-  } catch { token = ''; }
+  token = mintDevToken();
 });
 
 const suite = RUN ? describe : describe.skip;
@@ -95,9 +91,29 @@ suite('contract - every read tool parses against its Zod outputSchema (live)', (
     });
   }
 
-  it('summary', () => {
+  // Runs last (vitest keeps declaration order inside a describe), so every read
+  // tool above has landed in exactly one bucket by the time this writes the
+  // report bin/e2e.sh prints.
+  //
+  // Write and print BEFORE asserting, deliberately. The equality below is a real
+  // guard (a case that threw never reached a bucket, so the sum comes up short),
+  // but making it the first statement meant a red run produced NO report at all,
+  // which is the run where the buckets are most worth seeing: "9 failures and
+  // the read surface fell from 59 parsed to 12" and "9 failures, coverage
+  // unchanged" are different problems. The shortfall is reported as
+  // `unaccounted` instead of being hidden by a thrown assertion.
+  it('coverage report', () => {
+    const report = writeReport(readTools.map((t) => t.name), {
+      contractChecked: stats.ok,
+      needsArgs: stats.needsArgs,
+      noData: stats.noData,
+      otherError: stats.otherError,
+    });
     // eslint-disable-next-line no-console
-    console.log(`contract read-surface: ${readTools.length} tools | success-parsed ${stats.ok} | needs-args ${stats.needsArgs} | no-data ${stats.noData} | other-error ${stats.otherError}`);
-    expect(stats.ok + stats.needsArgs + stats.noData + stats.otherError).toBe(readTools.length);
+    console.log(`${formatReport(report)}  written to ${COVERAGE_OUT}\n`);
+    expect(
+      report.contract.unaccounted,
+      `${report.contract.unaccounted} read tool(s) reached no bucket: their case failed before it could classify the response.`,
+    ).toBe(0);
   });
 });

@@ -331,11 +331,6 @@
                     "planned_return_at",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "AccountTransfer": {
@@ -626,11 +621,6 @@
                     "target_account_sid",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "ApiKey": {
@@ -812,16 +802,6 @@
                     "created_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "last_used_at",
-                    "expires_at",
-                    "name"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "BillingPaddleCustomer": {
@@ -930,14 +910,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "updated_at"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "BillingPaymentMethod": {
@@ -1047,12 +1019,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "BillingPrice": {
             "domain": {
@@ -1221,12 +1188,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "BillingProduct": {
             "domain": {
@@ -1384,15 +1346,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "updated_at",
-                    "created_at",
-                    "slug"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "BillingSubscription": {
@@ -1688,16 +1641,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "updated_at",
-                    "current_period_ends_at",
-                    "trial_ends_at"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "BillingTransaction": {
@@ -1919,15 +1862,6 @@
                     "billed_at",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "billed_at",
-                    "created_at",
-                    "total"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "CreditLot": {
@@ -2085,12 +2019,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "CreditTransaction": {
             "domain": {
@@ -2296,15 +2225,6 @@
                     "created_at",
                     "confirmed_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "confirmed_at",
-                    "amount"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "Notification": {
@@ -2586,15 +2506,6 @@
                     "created_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "scheduled_at",
-                    "delivered_at"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "OauthAuthorization": {
@@ -2737,14 +2648,6 @@
                     "created_at",
                     "last_used_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "last_used_at"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "OauthClient": {
@@ -2939,14 +2842,6 @@
                     "created_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "name"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "ObservabilityAgentSession": {
@@ -3092,12 +2987,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "ObservabilityRequest": {
             "domain": {
@@ -3338,12 +3228,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "Session": {
             "domain": {
@@ -3537,15 +3422,6 @@
                     "expires_at",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "last_active_at",
-                    "created_at",
-                    "expires_at"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "SslCertificate": {
@@ -3725,11 +3601,6 @@
                     "created_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "SupportRequest": {
@@ -3948,15 +3819,6 @@
                     "created_at",
                     "handed_off_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "handed_off_at",
-                    "status"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "Team": {
@@ -4162,15 +4024,6 @@
                     "created_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "updated_at",
-                    "name"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "TeamMember": {
@@ -4327,15 +4180,6 @@
                     "created_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "updated_at",
-                    "email"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "User": {
@@ -4576,11 +4420,6 @@
                     "created_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         }
     },
@@ -10079,6 +9918,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.owner_user_sid",
                     "rules": [
                         "nullable"
@@ -10108,6 +9961,34 @@
                 },
                 {
                     "field": "filter.subscription_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.paddle_transaction_id",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.invoice_number",
                     "rules": [
                         "nullable"
                     ],
@@ -10164,6 +10045,34 @@
                 },
                 {
                     "field": "filter.currency",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.billed_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.created_at",
                     "rules": [
                         "nullable"
                     ],
@@ -10681,6 +10590,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.kind",
                     "rules": [
                         "nullable"
@@ -10724,6 +10647,62 @@
                 },
                 {
                     "field": "filter.operation",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.reference_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.request_id",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.created_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.confirmed_at",
                     "rules": [
                         "nullable"
                     ],
@@ -11175,7 +11154,63 @@
                     "between": null
                 },
                 {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.team_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.user_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.event_name",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.entity_sid",
                     "rules": [
                         "nullable"
                     ],
@@ -11211,6 +11246,96 @@
                     "nullable": true,
                     "type": null,
                     "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.scheduled_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.delivered_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.failed_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.created_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.deleted_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "group_by",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"event_name\",\"status\",\"channel\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "event_name",
+                        "status",
+                        "channel"
+                    ],
                     "min": null,
                     "max": null,
                     "size": null,

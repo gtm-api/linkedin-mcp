@@ -72,6 +72,16 @@ const LinkedinConnectionRequestFilter = z.object({
     .describe('Default scope is { is_null: true } (pending rows).'),
 }).partial();
 
+// METRICS takes ONE axis, and that narrowness is the contract rather than an
+// oversight. LinkedinConnectionRequestService::metrics() builds no
+// LinkedinConnectionRequestFilter: it reads filter.linkedin_account_sid off the
+// input, bounds created_at by the period and aggregates. Any other axis offered
+// here would be accepted and then dropped by the aggregation, so the agent would
+// read unfiltered numbers as the answer to a filtered question and have no way
+// to tell. Slice the other dimensions with search instead.
+const LinkedinConnectionRequestMetricsFilter = LinkedinConnectionRequestFilter
+  .pick({ linkedin_account_sid: true });
+
 const LinkedinConnectionRequestInclude = z.enum(['linkedin_account']);
 
 const LinkedinConnectionRequestSortable = z.enum([
@@ -110,7 +120,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'get_linkedin_connection_requests_metrics',
     description:
-      'Period-bound aggregates over a filtered request set (filter must scope an account). Requires period {from,to}. Returns avg_note_length_of_accepted and avg_time_to_accept_seconds; acceptance / withdraw / expiry rates are derived client-side from the counts block.',
+      'Period-bound aggregates over one account\'s sent requests. Requires period {from,to} and filter.linkedin_account_sid (.eq or .in) - that is the ONLY filter axis the aggregation applies, unlike search. Returns avg_note_length_of_accepted and avg_time_to_accept_seconds; acceptance / withdraw / expiry rates are derived client-side from the counts block.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-requests/metrics' },
     operation: 'metrics',
@@ -118,7 +128,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     creditable: false,
-    inputSchema: McpMetricsRequestSchema(LinkedinConnectionRequestFilter).extend({
+    inputSchema: McpMetricsRequestSchema(LinkedinConnectionRequestMetricsFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
         to: z.string().describe('ISO 8601 UTC window end (exclusive); must be after from.'),

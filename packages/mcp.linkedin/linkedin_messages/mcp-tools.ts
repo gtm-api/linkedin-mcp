@@ -172,6 +172,16 @@ const LinkedinMessageFilter = z.object({
   deleted_at: filterOp(z.string(), ['is_null', 'gte', 'lte']),
 }).partial();
 
+// METRICS takes ONE axis, and that narrowness is the contract rather than an
+// oversight. LinkedinMessageService::metrics() builds no LinkedinMessageFilter:
+// it reads filter.linkedin_account_sid off the input, bounds sent_at by the
+// period and aggregates. Any other axis offered here would be accepted and then
+// dropped by the aggregation, so the agent would read unfiltered numbers as the
+// answer to a filtered question and have no way to tell. Slice the other
+// dimensions with search instead.
+const LinkedinMessageMetricsFilter = LinkedinMessageFilter
+  .pick({ linkedin_account_sid: true });
+
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
@@ -203,7 +213,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'get_linkedin_messages_metrics',
     description:
-      'Period-bound message aggregates over a filtered set (reply_rate_pct, avg_time_to_reply_seconds, avg_thread_depth) with an optional group_by axis. Requires period {from,to} (≤ 90 days) and a linkedin_account_sid filter. Returns the counts block alongside.',
+      'Period-bound message aggregates for one account (reply_rate_pct, avg_time_to_reply_seconds, avg_thread_depth) with an optional group_by axis. Requires period {from,to} (≤ 90 days) and filter.linkedin_account_sid - that is the ONLY filter axis the aggregation applies, unlike search. Returns the counts block alongside.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/metrics' },
     operation: 'metrics',
@@ -212,7 +222,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     dangerous: false,
     creditable: false,
     inputSchema: z.object({
-      filter: LinkedinMessageFilter.describe('Row scope; linkedin_account_sid is REQUIRED (422 without it).'),
+      filter: LinkedinMessageMetricsFilter.describe('Row scope; linkedin_account_sid is REQUIRED (422 without it).'),
       period: Period,
       group_by: LinkedinMessageGroupableFields.optional().describe('Optional single split axis.'),
       ...usageMetaField,

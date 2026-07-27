@@ -80,6 +80,21 @@ const LinkedinAccountActivityLogFilter = z.object({
   deleted_at: str(['is_null', 'gte', 'lte']).describe('Default scope: { is_null: true }.'),
 }).partial();
 
+// METRICS does not reuse the search filter, and that gap is the contract, not an
+// oversight. LinkedinAccountActivityLogService::metrics() builds no
+// LinkedinAccountActivityLogFilter: it reads two hand-picked keys off
+// input(filter) and applies nothing else, so every other axis would be accepted
+// by z.object, stripped by no one, and dropped by the aggregation - a filtered
+// question answered with unfiltered numbers, which an agent cannot detect. The
+// MetricsRequest declares exactly these two.
+const LinkedinAccountActivityLogMetricsFilter = z.object({
+  linkedin_account_sid: str(['eq', 'in'])
+    .describe('REQUIRED: metrics rejects an unbounded scan with bounded_scan_required.'),
+  // The service reads .eq (or a bare string); .ne / .in / .nin are not applied.
+  status: filterOp(z.string(), ['eq']).optional()
+    .describe('pending | success | failed | skipped. Only .eq is applied here.'),
+}).partial();
+
 const LinkedinAccountActivityLogInclude = z.enum([
   'linkedin_account',
   'linkedin_account_smart_limit',
@@ -124,7 +139,8 @@ export const linkedinAccountActivityLogTools: ToolDefinition[] = [
     description:
       'Period-bound aggregates over a filtered activity-log set (avg plugin duration, avg pending age) plus the counts block and an optional group_by axis (action_type | status | linkedin_account_sid). ' +
       'Use for: "what was done today/this week grouped by action_type", at-a-glance fail rate (group_by status). ' +
-      'Guardrail (high-write table): period {from,to} is REQUIRED and filter must include linkedin_account_sid.eq/.in. Unbounded scans are rejected; window may not exceed 90 days. created_at operators in filter are ignored (the window is [from,to)).',
+      'Guardrail (high-write table): period {from,to} is REQUIRED and filter must include linkedin_account_sid.eq/.in. Unbounded scans are rejected; window may not exceed 90 days. ' +
+      'The filter here is NARROWER than search: linkedin_account_sid and status are the only axes the aggregation applies. Slice any other dimension with group_by, or use search.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-account-activity-log/metrics' },
     operation: 'metrics',
@@ -132,7 +148,7 @@ export const linkedinAccountActivityLogTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     creditable: false,
-    inputSchema: McpMetricsRequestSchema(LinkedinAccountActivityLogFilter).extend({
+    inputSchema: McpMetricsRequestSchema(LinkedinAccountActivityLogMetricsFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
         to: z.string().describe('ISO 8601 UTC window end (exclusive); must be after from.'),

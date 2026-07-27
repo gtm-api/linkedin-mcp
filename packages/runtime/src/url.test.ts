@@ -7,7 +7,7 @@ const deps: RuntimeDeps = {
   config: {
     envName: 'test', version: '0',
     baseUrls: { linkedin: 'http://backend', id: 'http://id', orchestration: 'http://orchestration', support: '' },
-    backendTimeoutMs: 1000, responseCharBudget: 1000,
+    backendTimeoutMs: 1000, responseCharBudget: 1000, maxBatchSize: 16, rateLimit: { enabled: false, windowSeconds: 60, callsPerWindow: 0, writesPerWindow: 0 },
     previewGate: { enabled: false, secret: null, ttlSeconds: 300 },
   },
   logger: { info() {}, error() {} },

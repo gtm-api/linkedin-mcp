@@ -1,19 +1,18 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { execSync } from 'node:child_process';
 import { McpErrorResponse } from '@gtm/mcp-shared';
 import { mountToolCount, mountToolNames } from './registry';
+import { WAVE1_MOUNTS, searchArgsOf, stubArgsOf } from './smoke-mounts';
+import { mintDevToken } from './token';
 
 // Live smoke for the wave-1 domain mounts (messaging / network / scraping /
 // enrichment). Opt-in (RUN_E2E=1), needs a running worker + backend.
 // Deterministic + side-effect-free: mount loads (initialize), tool counts
-// (tools/list), a read search where safe, and a stub_501 call (returns
-// not_implemented BEFORE any credit/plugin work). GA scraping/enrichment pulls
-// are NOT called (they debit credits / need the node automation).
+// (tools/list), a read search where safe, and a stub call (answered in-worker,
+// before any credit / plugin / backend work). GA scraping/enrichment pulls are
+// NOT called: they debit credits and need the node automation.
 
 const RUN = process.env.RUN_E2E === '1';
 const BASE = process.env.MCP_URL ?? 'http://localhost:8788';
-const LINKEDIN_DIR = process.env.LINKEDIN_DIR ?? '/Users/eugene/sites/gtm.ai/product/backend/gtm.service.linkedin';
-const TEAM = process.env.E2E_TEAM_SID ?? 'ts_tm_seeddev00001';
 
 let token = '';
 async function rpc(path: string, method: string, params?: unknown): Promise<any> {
@@ -27,27 +26,19 @@ async function rpc(path: string, method: string, params?: unknown): Promise<any>
 
 beforeAll(() => {
   if (!RUN) return;
-  try {
-    const out = execSync(`./dev artisan jwt:fake --team-sid=${TEAM} --ttl=3600`, { cwd: LINKEDIN_DIR, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-    const m = out.match(/eyJ[A-Za-z0-9_.-]{40,}/g);
-    token = m ? m[m.length - 1] : '';
-  } catch { token = ''; }
+  token = mintDevToken();
 });
 
 const suite = RUN ? describe : describe.skip;
 
-// Tool counts are NOT written here: they come from the resolved mount (see
-// ./registry). The count each mount serves is the registry's fact, and a copy of
-// it in this file only rots, because this suite is skipped unless RUN_E2E=1.
-const MOUNTS = [
-  { path: '/mcp/linkedin/messaging', name: 'gtm-linkedin-messaging', search: 'search_linkedin_conversations' },
-  { path: '/mcp/linkedin/network', name: 'gtm-linkedin-network', search: 'search_linkedin_connections' },
-  { path: '/mcp/linkedin/scraping', name: 'gtm-linkedin-scraping', stub: 'scrape_linkedin_similar_profiles' },
-  { path: '/mcp/linkedin/enrichment', name: 'gtm-linkedin-enrichment', stub: 'enrich_linkedin_person_contact_info' },
-];
+// The mount table lives in ./smoke-mounts, shared with the other live suites and
+// checked against the resolved mounts at collection time. Tool counts are NOT
+// written here either: they come from the resolved mount (see ./registry). Both
+// are registry facts, and a copy of a registry fact in a file that only runs
+// under RUN_E2E=1 rots unseen.
 
 suite('e2e wave-1 domain mounts (live worker + backend)', () => {
-  for (const m of MOUNTS) {
+  for (const m of WAVE1_MOUNTS) {
     it(`${m.path}: initialize + tools/list (${mountToolCount(m.path)})`, async () => {
       const init = await rpc(m.path, 'initialize', { protocolVersion: '2025-06-18', capabilities: {}, clientInfo: { name: 'e2e', version: '0' } });
       expect(init.result.serverInfo.name).toBe(m.name);
@@ -60,7 +51,7 @@ suite('e2e wave-1 domain mounts (live worker + backend)', () => {
 
     if (m.search) {
       it(`${m.path}: ${m.search} dispatches to the live backend`, async () => {
-        const r = await rpc(m.path, 'tools/call', { name: m.search, arguments: { page_size: 3, _meta: { user_goal: 'wave1 smoke' } } });
+        const r = await rpc(m.path, 'tools/call', { name: m.search, arguments: { ...searchArgsOf(m), _meta: { user_goal: 'wave1 smoke' } } });
         // Either a valid search envelope, or a cleanly-mapped backend error
         // (e.g. a required account filter): both prove end-to-end dispatch.
         expect(r.result).toBeDefined();
@@ -71,16 +62,17 @@ suite('e2e wave-1 domain mounts (live worker + backend)', () => {
     }
 
     if (m.stub) {
-      it(`${m.path}: ${m.stub} is gated & side-effect-free (no credits)`, async () => {
-        const r = await rpc(m.path, 'tools/call', { name: m.stub, arguments: { _meta: { user_goal: 'wave1 stub check' } } });
+      it(`${m.path}: ${m.stub} short-circuits in the worker`, async () => {
+        const r = await rpc(m.path, 'tools/call', { name: m.stub, arguments: { ...stubArgsOf(m), _meta: { user_goal: 'wave1 stub check' } } });
         expect(r.result.isError).toBe(true);
-        // Called with minimal args, so the tool short-circuits BEFORE any work /
-        // credit debit: either the § 5.9 not_implemented stub guard fires, or
-        // the backend/SDK rejects the missing required args (validation_failed).
-        // All three prove the tool is reachable and non-executing.
-        const sc = r.result.structuredContent;
-        if (sc) expect(['not_implemented', 'validation_failed']).toContain(McpErrorResponse.parse(sc).error.code);
-        else expect(r.result.content[0].text).toMatch(/validation|Invalid|required/i);
+        // The arguments are VALID (stubOnMount checks them against the tool's
+        // own schema at collection), so this reaches the stub gate rather than
+        // dying in input validation. The gate is the first middleware in the
+        // chain, so `source: 'mcp_runtime'` is the proof that nothing was sent
+        // to the backend: no credit debit, no plugin work, no round trip.
+        const parsed = McpErrorResponse.parse(r.result.structuredContent);
+        expect(parsed.error.code).toBe('not_implemented');
+        expect(parsed.error.context?.['source']).toBe('mcp_runtime');
       });
     }
   }

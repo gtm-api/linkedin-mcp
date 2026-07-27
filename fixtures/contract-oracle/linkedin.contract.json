@@ -360,11 +360,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "AntidetectBrowserLog": {
@@ -510,11 +505,6 @@
                     "code",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "AntidetectBrowserProxy": {
@@ -710,11 +700,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "AutomationServer": {
@@ -860,12 +845,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "CloudBrowser": {
             "domain": {
@@ -1082,12 +1062,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "CloudBrowserSession": {
             "domain": {
@@ -1424,11 +1399,6 @@
                     "created_at",
                     "updated_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "DataRequest": {
@@ -1756,11 +1726,6 @@
                     "updated_at",
                     "completed_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAccount": {
@@ -2189,25 +2154,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [
-                    "created_at",
-                    "updated_at",
-                    "last_premium_check_at",
-                    "last_snapshot_at",
-                    "last_heartbeat_at",
-                    "last_connections_sync_at",
-                    "last_conversations_sync_at",
-                    "last_sales_navigator_conversations_sync_at",
-                    "last_connection_requests_sync_at",
-                    "last_connection_invitations_sync_at",
-                    "initial_sync_completed_at",
-                    "inmail_credits",
-                    "full_name"
-                ],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAccountActivityLog": {
@@ -2456,11 +2402,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAccountBlockLog": {
@@ -2619,11 +2560,6 @@
                     "linkedin_connection_sid",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAccountQuotaHit": {
@@ -2821,11 +2757,6 @@
                     "has_recruiter",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAccountSmartLimit": {
@@ -3086,11 +3017,6 @@
                     "created_at",
                     "updated_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAccountSnapshot": {
@@ -3489,11 +3415,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAccountSyncRun": {
@@ -3787,11 +3708,6 @@
                     "finished_at",
                     "created_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAutoScrape": {
@@ -4088,11 +4004,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAutoScrapeResult": {
@@ -4329,11 +4240,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinAutoScrapeRun": {
@@ -4592,11 +4498,6 @@
                     "created_at",
                     "updated_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinBenchmark": {
@@ -4730,12 +4631,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "LinkedinConnection": {
             "domain": {
@@ -4959,11 +4855,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinConnectionInvitation": {
@@ -5188,11 +5079,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinConnectionRequest": {
@@ -5414,11 +5300,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinConversation": {
@@ -5669,11 +5550,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinFollower": {
@@ -5846,11 +5722,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         },
         "LinkedinFollowing": {
@@ -6044,12 +5915,7 @@
                     }
                 ]
             },
-            "filter": null,
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
-            }
+            "filter": null
         },
         "LinkedinMessage": {
             "domain": {
@@ -6348,11 +6214,6 @@
                     "updated_at",
                     "deleted_at"
                 ]
-            },
-            "enums": {
-                "sortable": [],
-                "filterable": [],
-                "group_by": []
             }
         }
     },
@@ -8582,9 +8443,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowserLog\\Requests\\AntidetectBrowserLogSearchRequest",
             "rules": [
@@ -8715,9 +8577,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_change_proxy",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowserProxy\\Requests\\AntidetectBrowserProxyCheckRequest",
             "rules": [
@@ -8768,9 +8631,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_change_proxy",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowserProxy\\Requests\\AntidetectBrowserProxyCheckRequest",
             "rules": [
@@ -8820,9 +8684,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_change_proxy",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowserProxy\\Requests\\AntidetectBrowserProxySearchRequest",
             "rules": [
@@ -8920,9 +8785,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserCreateRequest",
             "rules": [
@@ -9122,9 +8988,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_cloud_browser_external_links",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserGenerateCloudBrowserAccessKeyRequest",
             "rules": [
@@ -9256,9 +9123,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_cloud_browser_external_links",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserRevokeCloudBrowserAccessKeyRequest",
             "rules": [
@@ -9312,9 +9180,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_update_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserActionRequest",
             "rules": [
@@ -9364,9 +9233,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserSearchRequest",
             "rules": [
@@ -9543,9 +9413,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_update_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserActionRequest",
             "rules": [
@@ -9595,9 +9466,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_linkedin_accounts",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -9614,9 +9486,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserSearchRequest",
             "rules": [
@@ -9792,9 +9665,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\CloudBrowserSession\\Requests\\CloudBrowserSessionMetricsRequest",
             "rules": [
@@ -9897,9 +9771,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\CloudBrowserSession\\Requests\\CloudBrowserSessionSearchRequest",
             "rules": [
@@ -9998,9 +9873,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_open_cloud_browser",
             "internal": false,
             "request_class": "App\\Entities\\CloudBrowser\\Requests\\CloudBrowserListTeamOccupancyRequest",
             "rules": [],
@@ -10017,9 +9893,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\DataRequestSearchRequest",
             "rules": [
@@ -10117,9 +9994,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_enrichment",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -10136,9 +10014,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountActivityLog\\Requests\\LinkedinAccountActivityLogMetricsRequest",
             "rules": [
@@ -10219,6 +10098,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.status",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "group_by",
                     "rules": [
                         "nullable",
@@ -10251,9 +10144,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountActivityLog\\Requests\\LinkedinAccountActivityLogSearchRequest",
             "rules": [
@@ -10611,9 +10505,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountBlockLog\\Requests\\LinkedinAccountBlockLogSearchRequest",
             "rules": [
@@ -10745,9 +10640,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountQuotaHit\\Requests\\LinkedinAccountQuotaHitSearchRequest",
             "rules": [
@@ -10845,9 +10741,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountSmartLimit\\Requests\\LinkedinAccountSmartLimitSearchRequest",
             "rules": [
@@ -10945,9 +10842,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_smart_limits",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountSmartLimit\\Requests\\LinkedinAccountSmartLimitUpdateRequest",
             "rules": [
@@ -11048,9 +10946,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_smart_limits",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountSmartLimit\\Requests\\LinkedinAccountSmartLimitResetHoldRequest",
             "rules": [],
@@ -11067,9 +10966,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountSnapshot\\Requests\\LinkedinAccountSnapshotSearchRequest",
             "rules": [
@@ -11167,9 +11067,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountSyncRun\\Requests\\LinkedinAccountSyncRunMetricsRequest",
             "rules": [
@@ -11267,9 +11168,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccountSyncRun\\Requests\\LinkedinAccountSyncRunSearchRequest",
             "rules": [
@@ -11589,9 +11491,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -11608,9 +11511,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSearchRequest",
             "rules": [
@@ -12176,9 +12080,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountGetRequest",
             "rules": [
@@ -12237,9 +12142,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountCheckPremiumSubscriptionRequest",
             "rules": [],
@@ -12257,9 +12163,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
@@ -12277,9 +12184,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
@@ -12297,9 +12205,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountCheckTargetBlockRequest",
             "rules": [
@@ -12396,9 +12305,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_engagements",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountEndorseSkillRequest",
             "rules": [
@@ -12501,9 +12411,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
@@ -12521,9 +12432,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
@@ -12541,9 +12453,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountGetMyFollowingRequest",
             "rules": [
@@ -12596,9 +12509,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
@@ -12616,9 +12530,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
@@ -12636,9 +12551,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
@@ -12656,9 +12572,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
@@ -12676,9 +12593,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_update_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountEditMyProfileRequest",
             "rules": [
@@ -12765,9 +12683,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_update_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountResetSyncRequest",
             "rules": [
@@ -12823,9 +12742,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_edit_schedule",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountUpdateSyncConfigRequest",
             "rules": [
@@ -12978,9 +12898,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_engagements",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountVisitProfileRequest",
             "rules": [
@@ -13064,9 +12985,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAutoScrapeResult\\Requests\\LinkedinAutoScrapeResultSearchRequest",
             "rules": [
@@ -13164,9 +13086,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAutoScrapeRun\\Requests\\LinkedinAutoScrapeRunSearchRequest",
             "rules": [
@@ -13264,9 +13187,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_searches",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13283,9 +13207,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAutoScrape\\Requests\\LinkedinAutoScrapeCreateRequest",
             "rules": [
@@ -13441,9 +13366,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAutoScrape\\Requests\\LinkedinAutoScrapeSearchRequest",
             "rules": [
@@ -13541,9 +13467,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13560,9 +13487,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_searches",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13579,9 +13507,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAutoScrape\\Requests\\LinkedinAutoScrapeUpdateRequest",
             "rules": [
@@ -13639,9 +13568,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13659,9 +13589,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13679,9 +13610,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13699,9 +13631,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAutoScrape\\Requests\\LinkedinAutoScrapeSetMassActionRequest",
             "rules": [
@@ -13737,9 +13670,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -13757,9 +13691,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinBenchmark\\Requests\\LinkedinBenchmarkGetLatestRequest",
             "rules": [],
@@ -13777,9 +13712,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionInvitation\\Requests\\LinkedinConnectionInvitationGetMyLatestRequest",
             "rules": [
@@ -13848,9 +13784,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionInvitation\\Requests\\LinkedinConnectionInvitationMetricsRequest",
             "rules": [
@@ -13929,21 +13866,6 @@
                     "max": null,
                     "size": null,
                     "between": null
-                },
-                {
-                    "field": "group_by",
-                    "rules": [
-                        "sometimes",
-                        "string"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
                 }
             ],
             "rules_reason": null
@@ -13959,9 +13881,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionInvitation\\Requests\\LinkedinConnectionInvitationSearchRequest",
             "rules": [
@@ -14075,9 +13998,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionInvitation\\Requests\\LinkedinConnectionInvitationSyncRequest",
             "rules": [
@@ -14113,9 +14037,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionInvitation\\Requests\\LinkedinConnectionInvitationAcceptRequest",
             "rules": [],
@@ -14133,9 +14058,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionInvitation\\Requests\\LinkedinConnectionInvitationIgnoreRequest",
             "rules": [],
@@ -14153,9 +14079,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionRequest\\Requests\\LinkedinConnectionRequestGetMyLatestRequest",
             "rules": [
@@ -14224,9 +14151,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionRequest\\Requests\\LinkedinConnectionRequestMetricsRequest",
             "rules": [
@@ -14320,9 +14248,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionRequest\\Requests\\LinkedinConnectionRequestSearchRequest",
             "rules": [
@@ -14628,9 +14557,10 @@
                 "description",
                 "massAction",
                 "operation",
+                "requiredPermission",
                 "stepEligible"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionRequest\\Requests\\LinkedinConnectionRequestSendRequest",
             "rules": [
@@ -14711,9 +14641,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnectionRequest\\Requests\\LinkedinConnectionRequestSyncRequest",
             "rules": [
@@ -14748,9 +14679,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_connections",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -14768,9 +14700,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnection\\Requests\\LinkedinConnectionCheckDegreeRequest",
             "rules": [
@@ -14872,9 +14805,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnection\\Requests\\LinkedinConnectionGetMyLatestRequest",
             "rules": [
@@ -14943,9 +14877,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnection\\Requests\\LinkedinConnectionMetricsRequest",
             "rules": [
@@ -15045,9 +14980,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnection\\Requests\\LinkedinConnectionSearchRequest",
             "rules": [
@@ -15411,9 +15347,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnection\\Requests\\LinkedinConnectionSyncRequest",
             "rules": [
@@ -15448,9 +15385,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConnection\\Requests\\LinkedinConnectionRemoveRequest",
             "rules": [
@@ -15485,9 +15423,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationGetMyLatestRequest",
             "rules": [
@@ -15557,9 +15496,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationGetMyLatestRequest",
             "rules": [
@@ -15628,9 +15568,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationMetricsRequest",
             "rules": [
@@ -15739,9 +15680,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationSearchRequest",
             "rules": [
@@ -15855,9 +15797,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationSyncRequest",
             "rules": [
@@ -15893,9 +15836,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationSyncRequest",
             "rules": [
@@ -15930,9 +15874,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationGetRequest",
             "rules": [
@@ -15966,9 +15911,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationAddParticipantsRequest",
             "rules": [
@@ -16020,9 +15966,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationMarkReadRequest",
             "rules": [],
@@ -16040,9 +15987,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationMarkReadRequest",
             "rules": [],
@@ -16060,9 +16008,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationMuteRequest",
             "rules": [
@@ -16096,9 +16045,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationRemoveParticipantsRequest",
             "rules": [
@@ -16150,9 +16100,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationRenameRequest",
             "rules": [
@@ -16188,9 +16139,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_custom_requests",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinCustomRequest\\Requests\\LinkedinCustomRequestExecuteRequest",
             "rules": [
@@ -16338,9 +16290,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentCompanyPostsRequest",
             "rules": [
@@ -16477,9 +16430,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentCompanyProfileRequest",
             "rules": [
@@ -16548,9 +16502,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentGetActivityUrnByUrlRequest",
             "rules": [
@@ -16619,9 +16574,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonCertificationsRequest",
             "rules": [
@@ -16709,9 +16665,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonCommentActivityRequest",
             "rules": [
@@ -16832,9 +16789,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonContactInfoRequest",
             "rules": [
@@ -16922,9 +16880,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonEducationRequest",
             "rules": [
@@ -17012,9 +16971,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonExperienceRequest",
             "rules": [
@@ -17135,9 +17095,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonFeaturedRequest",
             "rules": [
@@ -17225,9 +17186,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonFullProfileRequest",
             "rules": [
@@ -17315,9 +17277,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonInterestsRequest",
             "rules": [
@@ -17405,9 +17368,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonLanguagesRequest",
             "rules": [
@@ -17495,9 +17459,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonLiteProfileRequest",
             "rules": [
@@ -17585,9 +17550,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonPostsRequest",
             "rules": [
@@ -17708,9 +17674,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonReactionActivityRequest",
             "rules": [
@@ -17831,9 +17798,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonRecommendationsRequest",
             "rules": [
@@ -17921,9 +17889,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonServicesRequest",
             "rules": [
@@ -18011,9 +17980,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonSkillsRequest",
             "rules": [
@@ -18134,9 +18104,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_enrichment",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPostDetailsRequest",
             "rules": [
@@ -18225,9 +18196,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinFollower\\Requests\\LinkedinFollowerGetMyLatestRequest",
             "rules": [
@@ -18293,9 +18265,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinFollower\\Requests\\LinkedinFollowerMetricsRequest",
             "rules": [
@@ -18392,9 +18365,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_connections",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinFollower\\Requests\\LinkedinFollowerSearchRequest",
             "rules": [
@@ -18700,9 +18674,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageDownloadMessageAttachmentRequest",
             "rules": [
@@ -18783,9 +18758,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageDownloadSalesMessageAttachmentRequest",
             "rules": [
@@ -18851,9 +18827,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageGetMyLatestRequest",
             "rules": [
@@ -18923,9 +18900,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageGetMyLatestRequest",
             "rules": [
@@ -18994,9 +18972,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageMetricsRequest",
             "rules": [
@@ -19105,9 +19084,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageSearchRequest",
             "rules": [
@@ -19221,9 +19201,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageSendRequest",
             "rules": [
@@ -19343,9 +19324,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageSendInmailRequest",
             "rules": [
@@ -19464,9 +19446,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageSendSalesNavRequest",
             "rules": [
@@ -19586,9 +19569,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageSendVoiceRequest",
             "rules": [
@@ -19725,9 +19709,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageStartGroupRequest",
             "rules": [
@@ -19877,9 +19862,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_messages",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageReactRequest",
             "rules": [
@@ -19930,9 +19916,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_engagements",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingCommentRequest",
             "rules": [
@@ -20033,9 +20020,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_engagements",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingCreatePostRequest",
             "rules": [
@@ -20189,9 +20177,10 @@
                 "description",
                 "massAction",
                 "operation",
+                "requiredPermission",
                 "stepEligible"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_engagements",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingReactRequest",
             "rules": [
@@ -20282,9 +20271,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingCompanyDecisionMakersRequest",
             "rules": [
@@ -20405,9 +20395,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingCompanyEmployeesRequest",
             "rules": [
@@ -20528,9 +20519,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetPostCommentersRequest",
             "rules": [
@@ -20631,9 +20623,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetPostCommentsRequest",
             "rules": [
@@ -20734,9 +20727,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetPostReactorsRequest",
             "rules": [
@@ -20837,9 +20831,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetPostResharersRequest",
             "rules": [
@@ -20940,9 +20935,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingParamIdLookupRequest",
             "rules": [
@@ -21052,9 +21048,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSalesNavParamIdLookupRequest",
             "rules": [
@@ -21176,9 +21173,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchCompaniesByParamsRequest",
             "rules": [
@@ -21371,9 +21369,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchCompaniesByUrlRequest",
             "rules": [
@@ -21459,9 +21458,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchPeopleByParamsRequest",
             "rules": [
@@ -21944,9 +21944,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchPeopleByUrlRequest",
             "rules": [
@@ -22032,9 +22033,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchPostsRequest",
             "rules": [
@@ -22463,9 +22465,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchPostsByUrlRequest",
             "rules": [
@@ -22567,9 +22570,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavCompaniesByParamsRequest",
             "rules": [
@@ -22810,9 +22814,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavCompaniesByUrlRequest",
             "rules": [
@@ -22898,9 +22903,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavPeopleByParamsRequest",
             "rules": [
@@ -23233,9 +23239,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavPeopleByUrlRequest",
             "rules": [
@@ -23321,9 +23328,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchServiceProvidersRequest",
             "rules": [
@@ -23485,9 +23493,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSimilarCompaniesRequest",
             "rules": [
@@ -23608,9 +23617,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_linkedin_searches",
             "internal": false,
             "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSimilarProfilesRequest",
             "rules": [

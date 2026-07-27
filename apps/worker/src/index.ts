@@ -1,7 +1,10 @@
 import {
   buildRegistry,
+  checkBatchSize,
   createServerFactory,
   makePreviewGate,
+  makeRateLimitGate,
+  makeSizeBudget,
   resolveMounts,
   stubGate,
   runWithAuthScope,
@@ -15,6 +18,7 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 import { MOUNTS } from './mounts.config';
 import { buildRuntimeConfig, type Env } from './env';
+import { fatalProblems, inspectConfig, requiredBaseUrlServices } from './config';
 import { kvCommitTokenStore } from './bindings';
 import { makeVerifier } from './auth/verifier';
 import { handleMcpMessage } from './transport';
@@ -31,13 +35,42 @@ const RESOLVED = resolveMounts(REGISTRY, MOUNTS);
 const MOUNT_BY_PATH = new Map<string, ResolvedMount>(RESOLVED.map((m) => [m.config.path, m]));
 // Domain mounts form the facade's toolset catalog (the facade itself excluded).
 const DOMAIN_MOUNTS = RESOLVED.filter((m) => m.config.facade !== 'toolsets');
+// Which services this build actually dispatches to, so the config check demands
+// a base URL for exactly those. Env-independent, hence module scope.
+const REQUIRED_SERVICES = requiredBaseUrlServices(RESOLVED);
 
+// The wildcard origin stays, and the reasoning is recorded here so the next
+// reader does not have to re-derive it.
+//
+// `*` is safe HERE because this server has no ambient authority to steal. Every
+// request is authorized by a Bearer header and nothing else: no cookies, no
+// session, no client certificate. A browser will not attach an Authorization
+// header cross-origin on its own, and the CORS spec forbids pairing `*` with
+// credentialed requests at all, so a hostile page cannot make an authenticated
+// call in a visitor's name. It can only replay a token it was already given,
+// and a page holding our bearer can call the API directly from a server with no
+// browser and no CORS involved. Tightening the origin would therefore cost the
+// browser-hosted MCP clients (which is how a connector is mounted) and buy
+// nothing.
+//
+// The invariant that MUST hold for that argument: never add
+// `Access-Control-Allow-Credentials: true`, and never move authentication into
+// a cookie. Either change turns this wildcard into a cross-site request forgery
+// hole against every tool on the server.
+//
+// Max-Age is the one thing that was missing: without it a browser client
+// preflights every single POST, doubling the request count on a public edge.
 const CORS: Record<string, string> = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
   'Access-Control-Allow-Headers':
     'Content-Type, Accept, Authorization, Team-SID, X-Trace-Id, Mcp-Protocol-Version, Mcp-Session-Id',
+  'Access-Control-Max-Age': '86400',
 };
+
+// Health, discovery and the config refusal must never be read from a cache:
+// a stale 200 is exactly the "looks fine, serves nothing" state this closes.
+const NO_STORE: Record<string, string> = { 'Cache-Control': 'no-store' };
 
 function json(body: unknown, status = 200, extra: Record<string, string> = {}): Response {
   return new Response(JSON.stringify(body), {
@@ -81,23 +114,79 @@ export default {
       return new Response(null, { status: 204, headers: CORS });
     }
 
+    // One config verdict per request, shared by /health, discovery and the
+    // refusal below, so the three can never disagree about whether this worker
+    // is operational. It is a handful of string checks over env vars.
+    const config = inspectConfig(env, REQUIRED_SERVICES);
+
     if (url.pathname === '/health') {
-      return json({
-        status: 'ok',
-        env: env.ENV_NAME ?? 'local',
-        version: '0.0.0',
-        gate: env.PREVIEW_TOKEN_SECRET ? 'armed' : 'off',
-        mounts: RESOLVED.map((m) => ({ path: m.config.path, tools: m.tools.length })),
-        tools: REGISTRY.byName.size,
-      });
+      // 503 when the worker is not operational, 200 with status 'degraded' when
+      // it serves with a fail-closed piece missing. Rationale in config.ts.
+      return json(
+        {
+          status: config.status,
+          env: env.ENV_NAME ?? 'local',
+          version: '0.0.0',
+          auth_mode: env.AUTH_MODE ?? null,
+          gate: config.previewGate,
+          commit_tokens: config.commitTokens,
+          // Which enforcer is counting, not just whether the feature is on:
+          // 'edge' and 'isolate_local' are different guarantees, and only
+          // /health can tell an operator which one a deploy actually got.
+          rate_limit: config.rateLimit,
+          max_batch_size: config.maxBatchSize,
+          discovery: config.discovery.status,
+          problems: config.problems,
+          mounts: RESOLVED.map((m) => ({ path: m.config.path, tools: m.tools.length })),
+          tools: REGISTRY.byName.size,
+        },
+        config.status === 'fail' ? 503 : 200,
+        NO_STORE,
+      );
     }
 
     if (url.pathname === '/.well-known/oauth-protected-resource') {
-      return json({
-        resource: env.MCP_RESOURCE_URL,
-        authorization_servers: env.AUTH_ISSUER ? [env.AUTH_ISSUER] : [],
-        bearer_methods_supported: ['header'],
-      });
+      if (config.discovery.status === 'unconfigured') {
+        return json(
+          {
+            status: 'fail',
+            error: 'configuration_error',
+            message:
+              `This worker cannot produce an OAuth protected-resource document: ${config.discovery.missing.join(', ')} ` +
+              'unset or unusable. See /health.',
+            missing: config.discovery.missing,
+          },
+          503,
+          NO_STORE,
+        );
+      }
+      return json(
+        {
+          resource: config.discovery.resource,
+          authorization_servers: config.discovery.authorizationServers,
+          bearer_methods_supported: ['header'],
+        },
+        200,
+        NO_STORE,
+      );
+    }
+
+    // A misconfigured worker refuses every MCP request instead of serving a
+    // 250-tool catalog whose every call fails (or, worse, serving with the
+    // token checks silently disabled). `config.auth === null` is implied by
+    // status 'fail'; it is spelled out because it is what narrows AuthConfig
+    // for makeVerifier below.
+    if (config.status === 'fail' || config.auth === null) {
+      return json(
+        {
+          status: 'fail',
+          error: 'configuration_error',
+          message: 'This MCP worker is misconfigured and is refusing to serve. See /health.',
+          problems: fatalProblems(config),
+        },
+        503,
+        NO_STORE,
+      );
     }
 
     const mount = MOUNT_BY_PATH.get(url.pathname);
@@ -119,7 +208,7 @@ export default {
       );
     }
 
-    const verify = makeVerifier(env);
+    const verify = makeVerifier(config.auth);
     const auth = verify(request);
     if (auth.kind === 'fail') {
       return json({ error: auth.error }, auth.status, { 'WWW-Authenticate': auth.wwwAuthenticate });
@@ -132,10 +221,22 @@ export default {
       return json({ jsonrpc: '2.0', id: null, error: { code: -32700, message: 'Parse error' } }, 400);
     }
 
+    const runtime = buildRuntimeConfig(env);
+
+    // Batch cap, before anything is built. The loop below gives every element
+    // its own backend call with its own 25s timeout, so the length of this
+    // array is a fan-out multiplier on a public URL. Rejected whole: a partial
+    // batch would leave the caller guessing which half ran. Rationale for the
+    // number in packages/runtime/src/middleware/batch-cap.ts.
+    const batch = Array.isArray(message) ? message : [message];
+    const rejected = checkBatchSize(batch.length, runtime.maxBatchSize);
+    if (rejected) return json(rejected.body, rejected.status);
+
     const deps = {
-      config: buildRuntimeConfig(env),
+      config: runtime,
       logger,
       commitTokens: env.COMMIT_TOKENS ? kvCommitTokenStore(env.COMMIT_TOKENS) : undefined,
+      rateLimiters: { calls: env.RATE_LIMIT_CALLS, writes: env.RATE_LIMIT_WRITES },
       // Support-KB vector search: present only where the env binds AI+Vectorize
       // (production). Absent → the KB tools fall back to the bundled BM25 index.
       extensions:
@@ -143,12 +244,31 @@ export default {
           ? { supportKb: { ai: env.AI, vectorize: env.VECTORIZE_KB } }
           : undefined,
     };
-    // stubGate FIRST: a stub_501 tool is answered in-worker, so a dangerous stub
-    // never mints a commit token, never writes KV and never hits the backend.
-    const factory = createServerFactory(REGISTRY, deps, [stubGate, makePreviewGate(deps)]);
+    // Chain order, outermost first, and every position is load-bearing:
+    //
+    //   makeSizeBudget    outermost, because it is the only result TRANSFORM
+    //                     here. Everything below it can short-circuit, and a
+    //                     short-circuit result (a preview echoing its args, an
+    //                     error envelope with a long field_errors map) has to
+    //                     be measured too. Outermost is the only position that
+    //                     sees every result that leaves the server.
+    //   makeRateLimitGate first of the gates, ahead of the free ones. A limiter
+    //                     a caller can dodge by picking a tool name is not a
+    //                     limiter, and worker CPU is billed whether or not the
+    //                     targeted tool would have reached a backend.
+    //   stubGate          a stub_501 tool is answered in-worker, so a dangerous
+    //                     stub never mints a commit token, never writes KV and
+    //                     never hits the backend.
+    //   makePreviewGate   last gate before dispatch: by here the call is within
+    //                     its budget and is going to really run.
+    const factory = createServerFactory(REGISTRY, deps, [
+      makeSizeBudget(deps),
+      makeRateLimitGate(deps),
+      stubGate,
+      makePreviewGate(deps),
+    ]);
     const scope: AuthScope = { ...auth.scope, mountPath: mount.config.path };
 
-    const batch = Array.isArray(message) ? message : [message];
     const responses = await runWithAuthScope(scope, async () => {
       const out: unknown[] = [];
       for (const msg of batch) {

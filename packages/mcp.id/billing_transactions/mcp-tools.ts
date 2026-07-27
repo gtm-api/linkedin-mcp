@@ -109,7 +109,7 @@ export const billingTransactionsTools: ToolDefinition[] = [
     ...base,
     name: 'get_billing_transactions_metrics',
     description:
-      "Period-bound money sums over the caller's transactions. Requires period {from,to}. Money never crosses currencies; every sum lives inside a per-currency by_currency entry keyed by ISO 4217. Answers 'how much did I pay / tax this quarter'. Sums are GROSS (refunds not modeled in v1). Filter is the same object as search. Requires billing.view.",
+      "Period-bound money sums over the caller's transactions. Requires period {from,to}. Money never crosses currencies; every sum lives inside a per-currency by_currency entry keyed by ISO 4217. Answers 'how much did I pay / tax this quarter'. Sums are GROSS (refunds not modeled in v1). Filter is the same object as search and every axis is applied; billed_at / created_at operators are dropped from the period-bound sums (period is the one window there) but they DO scope the counts block, which carries no period of its own. Requires billing.view.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-transactions/metrics' },
     operation: 'metrics',

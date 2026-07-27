@@ -1,5 +1,5 @@
 import type { AuthScope } from '@gtm/mcp-runtime';
-import type { Env } from '../env';
+import type { AuthConfig } from '../config';
 
 export type VerifyResult =
   | { kind: 'ok'; scope: Omit<AuthScope, 'mountPath'> }
@@ -22,6 +22,25 @@ function decodeSegment(seg: string): Record<string, unknown> | null {
   }
 }
 
+// The protected-resource metadata URL a 401 points the client at. It is
+// origin-rooted (RFC 9728) and index.ts serves it at exactly that path, so
+// derive it with the URL parser. It used to be `resource.replace(/\/mcp.*$/, '')`,
+// which silently produced `https:/` for any resource whose HOST starts with
+// `mcp.` (the intended production URL is https://mcp.gtm-api.com/mcp: the trim
+// matched the host, not the path), and the client was then sent to a URL that
+// does not exist. A resource that is absent or unparseable can only be answered
+// with the relative path, which at least resolves against this same origin.
+const PRM_PATH = '/.well-known/oauth-protected-resource';
+
+function prmUrlFor(resource: string | null): string {
+  if (!resource) return PRM_PATH;
+  try {
+    return `${new URL(resource).origin}${PRM_PATH}`;
+  } catch {
+    return PRM_PATH;
+  }
+}
+
 // OAuth 2.1 resource-server token check.
 //
 // The platform signs JWTs with a shared HS256 secret; that secret must never
@@ -33,13 +52,18 @@ function decodeSegment(seg: string): Record<string, unknown> | null {
 //
 // Dev bypass: AUTH_MODE=dev + DEV_BEARER lets the local connector be a bare URL
 // and relaxes the issuer check (jwt:fake carries an artisan-context iss). Never
-// active in deployed environments.
-export function makeVerifier(env: Env) {
-  const origin = (env.MCP_RESOURCE_URL ?? '').replace(/\/mcp.*$/, '');
-  const prmUrl = `${origin}/.well-known/oauth-protected-resource`;
-  const devMode = env.AUTH_MODE === 'dev';
-  const issuer = env.AUTH_ISSUER;
-  const resource = env.MCP_RESOURCE_URL;
+// active in deployed environments: config.ts refuses AUTH_MODE=dev outside a
+// local ENV_NAME.
+//
+// The verifier takes the VERIFIED AuthConfig, never the raw Env. That is the
+// fix for the hole the audit found: the iss and aud checks used to be guarded
+// on `issuer &&` / `resource &&`, so an unset var silently turned each one into
+// a no-op and any expired token from any issuer passed. In `jwt` mode those two
+// fields are non-optional strings, so the check cannot disable itself; a config
+// that lacks them never produces an AuthConfig at all and the worker refuses to
+// serve (index.ts, 503).
+export function makeVerifier(auth: AuthConfig) {
+  const prmUrl = prmUrlFor(auth.resource);
 
   const fail = (error: string, desc: string): VerifyResult => ({
     kind: 'fail',
@@ -52,7 +76,7 @@ export function makeVerifier(env: Env) {
     const header = request.headers.get('Authorization');
     let token: string | null = null;
     if (header && header.startsWith('Bearer ')) token = header.slice(7).trim();
-    else if (devMode && env.DEV_BEARER) token = env.DEV_BEARER;
+    else if (auth.mode === 'dev' && auth.devBearer) token = auth.devBearer;
     if (!token) return fail('invalid_request', 'missing bearer token');
 
     const parts = token.split('.');
@@ -71,13 +95,16 @@ export function makeVerifier(env: Env) {
     if (nbf !== undefined && now < nbf - LEEWAY_S) return fail('invalid_token', 'token not yet valid');
 
     // iss enforced outside dev (jwt:fake tokens carry an artisan-context iss).
-    if (!devMode && issuer && payload.iss !== issuer) {
+    // Unconditional in jwt mode: the issuer is part of the config or the worker
+    // is not serving.
+    if (auth.mode === 'jwt' && payload.iss !== auth.issuer) {
       return fail('invalid_token', 'issuer mismatch');
     }
-    // aud, when present, must target this MCP resource.
-    if (resource && payload.aud !== undefined) {
+    // aud, when present, must target this MCP resource. Optional in dev, where
+    // the resource itself is optional; always applied in jwt mode.
+    if (auth.resource && payload.aud !== undefined) {
       const aud = payload.aud;
-      const ok = Array.isArray(aud) ? aud.includes(resource) : aud === resource;
+      const ok = Array.isArray(aud) ? aud.includes(auth.resource) : aud === auth.resource;
       if (!ok) return fail('invalid_token', 'audience mismatch');
     }
 
@@ -96,6 +123,11 @@ export function makeVerifier(env: Env) {
       scope: {
         token,
         teamSid: request.headers.get('Team-SID'),
+        // The team CLAIM, read but never forwarded (backend-client sends only
+        // `teamSid`, the header). It exists so the rate-limit gate can key on
+        // the paying tenant in the ordinary case, which is a client that sends
+        // no Team-SID header and lets the backend read this same claim.
+        tokenTeamSid: (ai.team_sid as string | undefined) ?? null,
         actor: { type: actorType, sid: actorSid },
         permissions: permTokens,
         traceId: request.headers.get('X-Trace-Id') ?? crypto.randomUUID(),

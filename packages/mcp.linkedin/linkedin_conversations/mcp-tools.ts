@@ -106,6 +106,16 @@ const LinkedinConversationFilter = z.object({
   deleted_at: filterOp(z.string(), ['is_null', 'gte', 'lte']),
 }).partial();
 
+// METRICS takes ONE axis, and that narrowness is the contract rather than an
+// oversight. LinkedinConversationService::metrics() builds no
+// LinkedinConversationFilter: it reads filter.linkedin_account_sid off the
+// input, bounds created_at by the period and aggregates. Any other axis offered
+// here would be accepted and then dropped by the aggregation, so the agent would
+// read unfiltered numbers as the answer to a filtered question and have no way
+// to tell. Slice the other dimensions with search instead.
+const LinkedinConversationMetricsFilter = LinkedinConversationFilter
+  .pick({ linkedin_account_sid: true });
+
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
@@ -153,7 +163,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     ...base,
     name: 'get_linkedin_conversations_metrics',
     description:
-      'Period-bound conversation aggregates over a filtered set (new_conversations_count, active_count) with an optional group_by axis. Requires period {from,to} (≤ 90 days) and a linkedin_account_sid filter. Returns the counts block alongside.',
+      'Period-bound conversation aggregates for one account (new_conversations_count, active_count) with an optional group_by axis. Requires period {from,to} (≤ 90 days) and filter.linkedin_account_sid - that is the ONLY filter axis the aggregation applies, unlike search. Returns the counts block alongside.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/metrics' },
     operation: 'metrics',
@@ -162,7 +172,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     dangerous: false,
     creditable: false,
     inputSchema: z.object({
-      filter: LinkedinConversationFilter.describe('Row scope; linkedin_account_sid is REQUIRED (422 without it).'),
+      filter: LinkedinConversationMetricsFilter.describe('Row scope; linkedin_account_sid is REQUIRED (422 without it).'),
       period: Period,
       group_by: LinkedinConversationGroupableFields.optional().describe('Optional single split axis.'),
       ...usageMetaField,

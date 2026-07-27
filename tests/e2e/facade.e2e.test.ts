@@ -1,20 +1,19 @@
 import { describe, it, expect, beforeAll } from 'vitest';
-import { execSync } from 'node:child_process';
 import { DOMAIN_TOOLSETS, enumArg, mountToolNames, toolsetIdFor } from './registry';
+import { PREVIEW_SMOKE_TOOL } from './smoke-mounts';
+import { mintDevToken } from './token';
 
 const MESSAGING = '/mcp/linkedin/messaging';
 const MESSAGING_TOOLSET = toolsetIdFor(MESSAGING);
 // Checked against the tool's live enum at collection time, so this suite can
 // never go back to sending a value reset_linkedin_account_sync stopped taking.
-const RESET_SYNC_TYPE = enumArg('reset_linkedin_account_sync', 'types', 'conversations');
+const RESET_SYNC_TYPE = enumArg(PREVIEW_SMOKE_TOOL, 'types', 'conversations');
 
 // Live smoke for the unified facade endpoint /mcp (list_toolsets /
 // get_toolset_tools / call_tool over the whole registry). Opt-in (RUN_E2E=1).
 
 const RUN = process.env.RUN_E2E === '1';
 const URL = `${process.env.MCP_URL ?? 'http://localhost:8788'}/mcp`;
-const LINKEDIN_DIR = process.env.LINKEDIN_DIR ?? '/Users/eugene/sites/gtm.ai/product/backend/gtm.service.linkedin';
-const TEAM = process.env.E2E_TEAM_SID ?? 'ts_tm_seeddev00001';
 
 let token = '';
 async function rpc(method: string, params?: unknown): Promise<any> {
@@ -29,11 +28,7 @@ const call = (name: string, args: Record<string, unknown> = {}) => rpc('tools/ca
 
 beforeAll(() => {
   if (!RUN) return;
-  try {
-    const out = execSync(`./dev artisan jwt:fake --team-sid=${TEAM} --ttl=3600`, { cwd: LINKEDIN_DIR, encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-    const m = out.match(/eyJ[A-Za-z0-9_.-]{40,}/g);
-    token = m ? m[m.length - 1] : '';
-  } catch { token = ''; }
+  token = mintDevToken();
 });
 
 const suite = RUN ? describe : describe.skip;
@@ -74,7 +69,7 @@ suite('e2e facade /mcp (live worker + backend)', () => {
   });
 
   it('call_tool honors the preview gate for dangerous tools', async () => {
-    const r = await call('call_tool', { name: 'reset_linkedin_account_sync', arguments: { sid: 'ln_ac_000000000000', types: [RESET_SYNC_TYPE] } });
+    const r = await call('call_tool', { name: PREVIEW_SMOKE_TOOL, arguments: { sid: 'ln_ac_000000000000', types: [RESET_SYNC_TYPE] } });
     expect(r.result.isError).toBeUndefined();
     expect(r.result.structuredContent.preview).toBe(true);
     expect(typeof r.result.structuredContent.commit_token).toBe('string');

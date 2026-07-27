@@ -38,7 +38,7 @@ function mkDeps(store: CommitTokenStore, puts: string[]): RuntimeDeps {
   return {
     config: {
       envName: 'test', version: '0', baseUrls: { linkedin: '', id: '', orchestration: '', support: '' },
-      backendTimeoutMs: 1000, responseCharBudget: 1000,
+      backendTimeoutMs: 1000, responseCharBudget: 1000, maxBatchSize: 16, rateLimit: { enabled: false, windowSeconds: 60, callsPerWindow: 0, writesPerWindow: 0 },
       previewGate: { enabled: true, secret: SECRET, ttlSeconds: 300 },
     },
     logger: { info() {}, error() {} },

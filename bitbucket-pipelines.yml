@@ -37,9 +37,16 @@
 #                         fixtures against this repo's TypeScript on every push.
 #                         What neither they nor CI can catch is a fixture that went
 #                         stale against a backend that moved. Only oracle:check can.
-#   pnpm test:e2e         RUN_E2E=1 calls every safe read tool through a RUNNING
+#   pnpm e2e              RUN_E2E=1 calls every safe read tool through a RUNNING
 #                         worker against the live backends, with a seeded team and
-#                         a JWT minted by artisan. Same reason.
+#                         a JWT minted by artisan. Same reason, and it is the ONLY
+#                         gate anywhere that holds a tool's outputSchema against a
+#                         response a backend really sent: everything runnable here
+#                         compares TypeScript with TypeScript or with a committed
+#                         fixture. bin/e2e.sh owns the whole dance (backends,
+#                         token, worker, suites, coverage, teardown) and prints
+#                         what a green run actually covered. Cadence and owner:
+#                         DEPLOY.md, "The live e2e arm".
 #   pnpm lint             Identical work to `pnpm typecheck`: every package's lint
 #                         script is the same `tsc --noEmit -p tsconfig.json`.
 #   the OAS validator     bin/openapi-public.sh normally ends by running

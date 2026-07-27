@@ -9,3 +9,4 @@ coverage/
 .env
 .env.local
 bin/.vectorize-manifest.json
+tests/.e2e-coverage.json

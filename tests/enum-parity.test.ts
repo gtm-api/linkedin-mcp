@@ -15,16 +15,17 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 // service list and the Zod-walking helpers are the same shape on both sides;
 // the small helpers are restated here so neither file has to import the other.
 //
-// Why it exists: the per-entity `enums` block of the oracle resolves exactly
-// three enums per entity by naming convention ({Entity}{Sortable|Filterable|
-// GroupBy}FieldEnum), so 49 of 63 entities emit three empty arrays and not one
-// status / kind / action-type enum appears. Meanwhile the registry declares 193
-// literal z.enum([...]) value lists, every one of them a promise to an agent
-// about what the backend will accept. Nothing compared the two, and the drift
-// was what an unpinned contract predicts: an actor type (`mcp_agent`) that
-// AccessIdentityValue::validate() rejects outright, a browser status two cases
-// short, an account status enum missing entirely, and an 89-value webhook event
-// vocabulary modelled as z.string().
+// Why it exists: the registry declares 193 literal z.enum([...]) value lists,
+// every one of them a promise to an agent about what the backend will accept,
+// and until the oracle grew a top-level FQCN `enums` map there was nothing to
+// compare them to. The only enum payload before it was a per-entity block
+// resolved by naming convention ({Entity}{Sortable|Filterable|GroupBy}FieldEnum),
+// empty for 49 of 63 entities and never carrying a status / kind / action-type
+// enum at all; it is deleted now that this map answers the question. Nothing
+// compared the two sides, and the drift was what an unpinned contract predicts:
+// an actor type (`mcp_agent`) that AccessIdentityValue::validate() rejects
+// outright, a browser status two cases short, an account status enum missing
+// entirely, and an 89-value webhook event vocabulary modelled as z.string().
 //
 // ─── The resolution bridge ──────────────────────────────────────────────
 // A Zod enum carries no class name, so it has to be resolved before it can be

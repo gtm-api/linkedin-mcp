@@ -142,7 +142,7 @@ export const creditTransactionsTools: ToolDefinition[] = [
     ...base,
     name: 'get_credit_transactions_metrics',
     description:
-      'Credit spend/grant metrics over a period (period column = created_at, half-open [from,to)). Returns spent, granted, refunded, expired, net_change and debit_count. filter scopes non-time dimensions (type / operation); operators on created_at in filter are ignored; period is the single source of truth. Optional single group_by (type / status / operation).',
+      'Credit spend/grant metrics over a period (period column = created_at, half-open [from,to)). Returns spent, granted, refunded, expired, net_change and debit_count. filter is the same object as search and every axis is applied. The time axes are the exception worth knowing: created_at / confirmed_at operators are dropped from the period-bound metrics (period is the one window there) but they DO scope the counts block, which carries no period of its own. Optional single group_by (type / status / operation).',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/credit-transactions/metrics' },
     operation: 'metrics',

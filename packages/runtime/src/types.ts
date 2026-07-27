@@ -105,6 +105,15 @@ export interface AuthScope {
   /** Team-SID header override, or null (backend falls back to the token claim). */
   teamSid: string | null;
   /**
+   * The `access_identity.team_sid` CLAIM off the bearer, when the token carries
+   * one. Deliberately separate from `teamSid`: that field is the Team-SID
+   * HEADER and backend-client forwards it verbatim, so putting a claim in it
+   * would start sending a header we do not send today. This one is never
+   * forwarded. It exists so a cost control can key on the billing tenant in the
+   * normal case, which is a client that sends no Team-SID header at all.
+   */
+  tokenTeamSid?: string | null;
+  /**
    * Read off the token's `access_identity.actor_type` claim, so the union is
    * Core\Enums\ActorType and nothing else: `support` is a real case the backend
    * mints, and `mcp_agent` never was one (AccessIdentityValue::validate()
@@ -129,12 +138,33 @@ export interface PreviewGateConfig {
   ttlSeconds: number;
 }
 
+export interface RateLimitConfig {
+  /** Off means every tool call passes. Never a silent default: env.ts sets it. */
+  enabled: boolean;
+  /**
+   * 10 or 60. Those are the only two periods Cloudflare's rate-limit binding
+   * accepts, and the isolate-local fallback uses the same value so the two
+   * enforcement paths cannot disagree about what a window is.
+   */
+  windowSeconds: number;
+  /** Ceiling on ALL tool calls per subject per window. 0 disables the bucket. */
+  callsPerWindow: number;
+  /**
+   * Ceiling on the subset whose annotations say `readOnlyHint: false`, per
+   * subject per window. Always <= callsPerWindow: a write also spends a call.
+   */
+  writesPerWindow: number;
+}
+
 export interface RuntimeConfig {
   envName: string;
   version: string;
   baseUrls: Record<ServiceId, string>;
   backendTimeoutMs: number;
   responseCharBudget: number;
+  /** Max JSON-RPC messages accepted in one batched POST. */
+  maxBatchSize: number;
+  rateLimit: RateLimitConfig;
   previewGate: PreviewGateConfig;
 }
 
@@ -144,10 +174,27 @@ export interface CommitTokenStore {
   put(jti: string, value: string, ttlSeconds: number): Promise<void>;
 }
 
+/**
+ * One Cloudflare rate-limit binding ([[ratelimits]] in wrangler.toml).
+ * Structurally identical to the platform's `RateLimit` type, restated here so
+ * the runtime package needs no @cloudflare/workers-types dependency. The
+ * binding counts and decides in one call and reports nothing but success, so
+ * the limit and the period live in wrangler.toml, not in RateLimitConfig.
+ */
+export interface EdgeRateLimiter {
+  limit(options: { key: string }): Promise<{ success: boolean }>;
+}
+
 export interface RuntimeDeps {
   config: RuntimeConfig;
   logger: Logger;
   commitTokens?: CommitTokenStore;
+  /**
+   * Platform rate-limit bindings, one per bucket. Absent (local dev, tests, an
+   * env that binds neither) means the gate falls back to an isolate-local
+   * counter, which is weaker and says so in the error it returns.
+   */
+  rateLimiters?: { calls?: EdgeRateLimiter; writes?: EdgeRateLimiter };
   now?: () => number;
   /**
    * Worker-provided capability bindings for local tools (e.g. Vectorize/AI for

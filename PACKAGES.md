@@ -202,7 +202,12 @@ Remaining coverage debt is **44** routes and all of it is `gtm.service.email`. `
 `gtm.service.id` and `gtm.service.orchestration` are each at full coverage (ratchet 0, empty ledger):
 linkedin and id got there on 2026-07-27 with the auto-scrapes and account-shares packages.
 
-One follow-up this wave did not do: `/mcp/linkedin/auto-scrapes` has no live smoke row yet. It needs
-no e2e edit to reach the facade (`tests/e2e/registry.ts` derives `DOMAIN_TOOLSETS` from `MOUNTS`, so
-`list_toolsets` already serves it), but add a row next to the others in
-`tests/e2e/wave2-mounts.e2e.test.ts` so the live arm exercises the mount.
+Live smoke coverage is no longer a thing to remember. `/mcp/linkedin/auto-scrapes` shipped without a
+row and the gap sat here as a written-down follow-up; `/mcp/support/knowledge` had the same gap and
+nobody had noticed it at all. Both now have rows, and the table they live in
+(`tests/e2e/smoke-mounts.ts`) throws at COLLECTION time when a mount in `mounts.config.ts` has none,
+so `pnpm test` goes red on the offline run rather than a mount shipping unexercised. The same module
+checks each row against the registry: the named tool has to be on that mount, a row's "stub" has to
+actually be `availability: 'stub_501'`, and its arguments have to satisfy the tool's own schema.
+That last pair caught two rows calling GA creditable tools (`scrape_linkedin_similar_profiles`,
+`enrich_linkedin_person_contact_info`) in the belief they were stubs.

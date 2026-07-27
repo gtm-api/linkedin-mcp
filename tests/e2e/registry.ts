@@ -1,4 +1,5 @@
-import { buildRegistry, resolveMounts, type ResolvedMount } from '@gtm/mcp-runtime';
+import { buildRegistry, callableSchema, resolveMounts, type ResolvedMount } from '@gtm/mcp-runtime';
+import type { ToolDefinition } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
@@ -46,6 +47,70 @@ export const mountToolNames = (path: string): string[] => mount(path).tools.map(
 
 /** Tool count on `path`. For test titles, so the number in the report stays true. */
 export const mountToolCount = (path: string): number => mount(path).tools.length;
+
+/** Every domain mount path the worker serves (the facade excluded). */
+export const DOMAIN_MOUNT_PATHS: string[] = RESOLVED
+  .filter((m) => m.config.facade !== 'toolsets')
+  .map((m) => m.config.path);
+
+/**
+ * `name`, checked to be a tool the worker really serves on `path`.
+ *
+ * A smoke row names one tool per mount. When that tool is renamed or moves
+ * mounts, the row goes on calling a name the mount no longer has, the worker
+ * answers "unknown tool", and the assertion the row makes ("either a search
+ * envelope or a mapped backend error") accepts the failure as a pass. Resolving
+ * the name here turns that into a collection error instead.
+ */
+export function toolOnMount(path: string, name: string): ToolDefinition {
+  const found = mount(path).tools.find((t) => t.name === name);
+  if (!found) {
+    throw new Error(
+      `e2e: '${name}' is not served on '${path}'. Tools there: ${mountToolNames(path).join(', ')}. ` +
+        'It was renamed, moved to another mount, or dropped; point the smoke row at a tool the mount still has.',
+    );
+  }
+  return found;
+}
+
+/**
+ * `name` on `path`, checked to be a stub AND to be callable with `args`.
+ *
+ * Both halves earned their place the hard way. The wave-1 rows named
+ * `scrape_linkedin_similar_profiles` and `enrich_linkedin_person_contact_info`
+ * as the mount's "stub", and neither has been `stub_501` for a long time: those
+ * two tests were dispatching CREDITABLE tools at the live backend and passing
+ * because a missing required argument happened to be rejected first. And every
+ * stub row called its tool with `_meta` alone, so on any stub that has a
+ * required field (`create_linkedin_post` needs an account and a text) the SDK
+ * rejected the arguments and the stub gate was never reached at all. The test
+ * titled "the stub is gated and side-effect-free" was, in three of four cases,
+ * proving that input validation works.
+ *
+ * So: availability has to say `stub_501`, and `args` has to satisfy the same
+ * schema the SDK parses against (`callableSchema`, commit_token included), or
+ * this fails at collection with the reason.
+ */
+export function stubOnMount(path: string, name: string, args: Record<string, unknown>): ToolDefinition {
+  const tool = toolOnMount(path, name);
+  if (tool.availability !== 'stub_501') {
+    const stubs = mount(path).tools.filter((t) => t.availability === 'stub_501').map((t) => t.name);
+    throw new Error(
+      `e2e: '${name}' is availability '${tool.availability}', not 'stub_501', so calling it does NOT exercise the stub gate. ` +
+        (stubs.length
+          ? `Stubs on '${path}': ${stubs.join(', ')}.`
+          : `'${path}' has no stub tool left; drop the stub row.`),
+    );
+  }
+  const parsed = callableSchema(tool).safeParse(args);
+  if (!parsed.success) {
+    throw new Error(
+      `e2e: the arguments for the stub '${name}' do not satisfy its own inputSchema, so the SDK rejects the call ` +
+        `before the stub gate runs and the test proves nothing: ${parsed.error.issues.map((i) => `${i.path.join('.') || '(root)'}: ${i.message}`).join('; ')}`,
+    );
+  }
+  return tool;
+}
 
 // The facade's toolset catalog: every non-facade mount, keyed the way
 // registerFacadeTools() keys it (the `toolsetId` mapping in
