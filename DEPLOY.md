@@ -49,14 +49,14 @@ out of sequence:
 | If you do this too early | What you see | What is actually wrong |
 |---|---|---|
 | Promote the worker before **gtm.service.id** is deployed | every real token 401s with `issuer mismatch` | `verifier.ts` compares `payload.iss` to `AUTH_ISSUER` with `!==`. A host on the old code mints a per-endpoint issuer (`https://app.gtm-api.com/auth/login`). |
-| Deploy **linkedin or orchestration** before the permissions backfill | api keys and OAuth installation tokens get `403 forbidden / scope_missing` on tools that worked yesterday | permission enforcement now defaults **ON**, and `TeamService::ownerPermissions()` had been seeding team owners with the 19 id-owned tokens and **no channel tokens at all**. Step 6 is what fills them in. |
+| Issue a narrow api key against a service deployed before the catalog landed | `403 forbidden / scope_missing` on a tool the key was meant to reach | enforcement defaults **ON**. Not an ordering hazard today: there are no production identities, and `TeamService::ownerPermissions()` seeds a new team's owner with the whole catalog. |
 | Publish the `/orchestration/v4` gateway prefix before the orchestration app is deployed | `502` on the whole prefix | nginx has a route with nothing serving behind it. |
 | Run the worker preflight or deploy before the prefix is published | `/health` 503 and **every** mount dead, not just the two orchestration mounts | `requiredBaseUrlServices()` includes `orchestration`, so an unusable `ORCHESTRATION_BASE_URL` is fatal to the whole worker. |
 
 One thing that is **not** a dependency, and does not need a maintenance window: the web
 app. `App\Auth\LoginTokenMinter` mints `tokens: ['*']` for every logged-in human, so a
 browser session cannot be refused by the permission flip even in principle. The exposure
-is api keys and OAuth grants only, which is exactly what step 5 counts.
+is api keys and OAuth grants only, and there are none in production yet.
 
 ## Already done, do not redo
 
@@ -69,8 +69,7 @@ Committed or in the working tree, verified, and needing nothing from Eugene.
 | **Gateway route** | `/orchestration/v4` is uncommented in `gateway_routes` with `internal: "deny"`, pointing at `gateway_orchestration_backend: "65.109.84.210:80"`. The template was rendered against the live host_vars and emits the same three blocks as `/linkedin/v4`, plus the case-insensitive `$gtm_denied_internal` map entry. |
 | **Vault schema** | `host_vars/id-beta.vault.example.yml` gains `vault_orchestration_access_key`; `host_vars/orchestration-beta.yml` gains `orchestration_access_key_previous_expires_at`. `orchestration-beta.vault.example.yml` needed no change. |
 | **`sync-ansible-vault.sh`** | Real bug fixed before it bit: the MAP still emitted the retired flat `vault_linkedin_access_key` / `vault_emails_access_key`. Nothing reads those any more, and an unmapped key is skipped **silently**, so step 12 would have produced a vault with no `vault_cluster1_linkedin_access_key` and the failure would have shown up as `401 bad_access_key` per mass-action item on a live host. |
-| **Permission enforcement** | `enforce` defaults **true** in linkedin and orchestration (`config/permissions.php`, with an empty-string guard so a bare `PERMISSIONS_ENFORCE=` cannot silently disarm it); `undeclared => 'closed'` in all three services; id keeps no `enforce` switch by design. 13 previously ungated id routes declared, 4 new tokens added, `PermissionCatalog` (47 live tokens, 2 retired) is now the single source for owner/admin/member presets, `permissions.refused` logging carries `identity_reason`, and a `PermissionDeclarationScan` test per service fails the build on an undeclared or off-catalog route. Coverage: id 81 routes (78 gated, 3 open by name), linkedin 150, orchestration 21, zero undeclared anywhere. |
-| **`permissions:backfill`** | Command exists in gtm.service.id, dry-run proven, 10 tests. |
+| **Permission enforcement** | `enforce` defaults **true** in linkedin and orchestration (`config/permissions.php`, with an empty-string guard so a bare `PERMISSIONS_ENFORCE=` cannot silently disarm it); `undeclared => 'closed'` in all three services; id keeps no `enforce` switch by design. 13 previously ungated id routes declared, 4 new tokens added, `PermissionCatalog` (47 live tokens) is the single source for the owner preset a new team is seeded with, `permissions.refused` logging carries `identity_reason`, and a `PermissionDeclarationScan` test per service fails the build on an undeclared or off-catalog route. Coverage: id 81 routes (78 gated, 3 open by name), linkedin 150, orchestration 21, zero undeclared anywhere. |
 | **Worker deploy tooling** | Custom domain rather than a route, no staging env; `bin/deploy-preflight.mjs` rewritten into three phases with seven new checks; `bin/smoke.sh` written and exercised end to end against a local worker, including the KV commit-token replay, which had never been executed anywhere in this repo. |
 | **Docs** | `RUNBOOK-orchestration.md`, `RUNBOOK-handover.md`, `gtm.deployment.ansible/README.md`, `inventory/beta.ini`, `run.txt` all updated off the real state. |
 
@@ -187,79 +186,24 @@ default now agrees with it.
 is the exact value `AUTH_ISSUER` is already set to in `wrangler.toml`, and step W8 checks
 it again from the laptop.
 
-## Phase 2. Permissions data, before any channel deploy
+## Phase 2. Permissions
 
-Enforcement is already ON in the code that step 2 pushed. These four steps are what stops
-that from being a visible outage for narrow bearers.
+Nothing to run. Enforcement is ON in the code phase 1 pushed, and there is no legacy
+identity population to catch up: a new team's owner is seeded with the full catalog by
+`TeamService::ownerPermissions()` (`PermissionCatalog::owner()`, every token), and an api
+key is issued with an explicit scope bounded by its parent's ceiling.
 
-> **The one window in this runbook.** Deploying id (step 3) gates 10 previously ungated id
-> routes (notifications, support requests, oauth authorizations) whose tokens nobody holds
-> until step 6 runs. Humans are unaffected (login tokens carry `*`); an api key or an
-> OAuth agent touching those routes gets a 403 in between. Do steps 3, 5 and 6 in one
-> sitting, which is minutes.
+There was a `permissions:backfill` command here, for rows written before the catalog
+existed. It was deleted on 2026-07-27 together with the catalog members only it used
+(`RETIRED`, `forRole`, `admin`, `member`, `unknown`): with no production identities, the
+one thing it had to fix was the local dev database, which it fixed once before it went.
 
-### 5. Audit production, writing nothing (Eugene)
-
-On the id host, as the deploy user, in the app directory:
-
-```bash
-php artisan permissions:backfill --json > /tmp/permissions-audit.json
-```
-
-**Expect.** JSON. Read three numbers: `team_members.changed`,
-`api_keys.empty_permission_keys` and `oauth_authorizations.grants_below_member_preset`. On
-the dev database this reported 5 rows changing, 0 api keys and 0 grants; that proves the
-command, not your exposure. **Keep this file**, it is the only before state that exists.
-
-**If it differs.** A non-zero grant count is the only thing the command cannot fix for
-you, and it is step 7. `Command not found` means step 3 did not land.
-
-**Rollback.** None, it writes nothing.
-
-### 6. Backfill, and prove it converged (Eugene)
+If a narrow bearer ever does get a 403 it should not, the lever is one env var and takes
+effect on the next request with no deploy:
 
 ```bash
-php artisan permissions:backfill --apply
-php artisan permissions:backfill --json | python3 -c "import json,sys;print(json.load(sys.stdin)['team_members']['changed'])"
+PERMISSIONS_ENFORCE=false   # in the service's .env, then the next request is ungated
 ```
-
-**Expect.** The second command prints `0`. Spot-check one owner: 47 tokens, and no
-`can_view_access_grants` / `can_manage_access_grants` (those two are retired).
-
-**If it differs.** A non-zero second reading means rows are being rewritten on every pass,
-which is a bug and not a slow convergence: stop and read the JSON diff rather than
-re-running.
-
-**Rollback.** The command only adds tokens and drops the two retired ones, and it never
-touches a wildcard row. To undo, restore each row's `permissions` from the step 5 file.
-This is the reason step 5 is not optional.
-
-### 7. Re-consent the OAuth grants the audit listed (Eugene, only if non-zero)
-
-```bash
-python3 -c "import json;d=json.load(open('/tmp/permissions-audit.json'));[print(r['sid'], r['user_sid'], r['oauth_client_sid'], len(r['needs_reconsent_for'])) for r in d['oauth_authorizations']['rows']]"
-```
-
-**Expect.** No rows, on the dev data there were none.
-
-**If it differs.** Contact each grant's owner and have the app re-consent. **Do not edit
-the grant in the database.** An installation token freezes its scope at mint, so widening
-the consent record does not move a live token, and editing a consent record is forging
-consent. The alternative is accepting that their agent 403s until they reconnect.
-
-### 8. Decide the empty api keys (Eugene, only if non-zero)
-
-Default is to leave them refused: a key nobody scoped is a key nobody meant to work.
-
-```bash
-php artisan permissions:backfill --apply --widen-empty-api-keys   # only if you disagree
-```
-
-**Expect.** It touches literally empty lists only. Re-run `--json` and diff `api_keys.rows`
-against the step 5 file to confirm no scoped key moved.
-
-**Phase landed when** `team_members.changed` is 0 and you have decided about grants and
-empty keys rather than deferred them.
 
 ## Phase 3. gtm.service.linkedin
 
