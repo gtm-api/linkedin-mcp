@@ -10,7 +10,7 @@ This repository holds the public interface: what the server exposes, how to conn
 
 ## What is a LinkedIn MCP server?
 
-A LinkedIn MCP server exposes LinkedIn actions as Model Context Protocol tools, so an AI agent calls them directly, the way a person would click through the UI. LinkedIn publishes no official API for invitations, member messages or open profile search, so a LinkedIn MCP server works through an account you own rather than through LinkedIn's developer platform.
+A LinkedIn MCP server exposes LinkedIn actions as Model Context Protocol tools, so an AI agent calls them directly, the way a person would click through the UI. LinkedIn publishes no [official API](https://learn.microsoft.com/en-us/linkedin/shared/authentication/getting-access) for invitations, member messages or open profile search, so a LinkedIn MCP server works through an account you own rather than through [LinkedIn's developer platform](https://developer.linkedin.com/).
 
 Two shapes exist today. **Cookie-driven open-source servers** run a browser session with your own cookie and no pacing. **Managed servers** run each account in isolated infrastructure with limits enforced before every action. GTM API is the second kind.
 
@@ -50,7 +50,7 @@ The agent discovers the tools and chains them: `get_my_latest_linkedin_connectio
 
 ## What the agent can do
 
-160+ typed tools across 10 LinkedIn toolsets:
+160+ typed tools across 10 LinkedIn toolsets, grouped here into seven areas:
 
 | Toolset | Representative tools |
 |---|---|
@@ -68,7 +68,7 @@ LinkedIn is the live channel today. Email (Gmail, Outlook, IMAP), messengers (Wh
 
 Safety is enforced by the server itself, under every tool call. Six mechanisms:
 
-- **Owned accounts.** The agent acts through an account you connected and control, never a shared pool.
+- **Owned accounts.** The agent acts through an account you connected and control. There is no shared account pool.
 - **Session isolation.** Each account runs in its own anti-detect cloud browser with a dedicated proxy. One account, one session, one device signature.
 - **Warm-up.** A new account starts at a fraction of platform maximum, and its allowance is raised programmatically as the account ages and builds history.
 - **Server-side limits.** Per-action daily budgets are checked before dispatch, across 16 action buckets.
@@ -79,16 +79,18 @@ On this setup GTM API reports 20,000+ LinkedIn accounts running at under 1% mont
 
 ## How it compares to open-source LinkedIn MCP servers
 
-Open-source servers such as [`stickerdaniel/linkedin-mcp-server`](https://github.com/stickerdaniel/linkedin-mcp-server) or [Apify](https://apify.com/)'s LinkedIn actors drive a browser with your cookie and leave pacing to you. That works for a prototype and gets expensive at volume.
+Cookie-driven servers such as [`stickerdaniel/linkedin-mcp-server`](https://github.com/stickerdaniel/linkedin-mcp-server) run a browser session with your own LinkedIn cookie and leave pacing to you: the project's README documents the cookie login flow and lists no rate limiting. [Apify](https://apify.com/)'s LinkedIn actors are a different shape, hosted scrapers priced per result and focused on pulling data out.
 
 | | GTM API (managed) | Cookie-driven open source |
 |---|---|---|
 | Account model | Owned, warmed, isolated | Your live cookie session |
-| Safety layer | Anti-detect browser, dedicated proxy, limits | None |
+| Safety layer | Anti-detect browser, dedicated proxy, limits | Not built in |
 | Limit enforcement | Server side, before every action | You build it |
 | Sends (connect, message, InMail) | Yes, with preview then confirm | Partial or none |
 | Published ban rate | Self-reported: under 1% monthly across 20,000+ accounts | Not published |
 | Support | Managed | Community |
+| Price | From $19 per connected account per month | Free, run it yourself |
+| Self-hosted, auditable code | No, managed service | Yes |
 
 ## Pricing
 
@@ -96,7 +98,7 @@ From $19 per connected account per month, scaling to $5 at volume, with unlimite
 
 ## A note on LinkedIn's terms
 
-LinkedIn's User Agreement does not permit third-party automation, so every tool in this space carries risk and no vendor can honestly promise otherwise. GTM API reduces that risk by acting only on accounts you own, with warm-up, human-like pacing and enforced limits, which is why the reported ban rate is under 1% rather than zero. This is information, not legal advice.
+[LinkedIn's User Agreement](https://www.linkedin.com/legal/user-agreement) does not permit third-party automation, so every tool in this space carries risk and no vendor can honestly promise otherwise. GTM API reduces that risk by acting only on accounts you own, with warm-up, human-like pacing and enforced limits, which is why the reported ban rate is under 1%. This is not legal advice.
 
 ## Links
 
