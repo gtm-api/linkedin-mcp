@@ -1,0 +1,72 @@
+{
+  "_comment": "Known, accepted disagreements between the machine-generated contract oracle (*.contract.json) and this repo's TypeScript surface. tests/oracle-freshness.test.ts fails on any drift that is NOT listed here, and equally fails on a listed entry that no longer drifts, so these lists can only shrink. Adding an entry is a deliberate, reviewable act: it records debt, it does not excuse it. Regenerate the oracle first (pnpm oracle:refresh) before touching this file.",
+  "_keys": {
+    "stale_routes": "Route a registered MCP tool points at, which the live backend no longer serves. The coverage gate fails on every one of these; listing it here only records that we know, it does not silence that gate. Burn down by retiring or repointing the tool, then deleting the entry.",
+    "uncovered_routes": "Public /api route the backend serves with an #[ApiMethod] operation, which no MCP tool covers. ratchet.json caps how many there may be per service; this list says which ones they are."
+  },
+  "linkedin": {
+    "_note": "Both lists are empty: this service is at FULL MCP coverage. stale_routes is empty because no registered tool points at a route this backend has dropped. The 23 entries that used to sit there (linkedin-searches / -search-results / -tracked-posts / -comments / -engagements, absorbed by the §9.6 linkedin-scraping + data-requests surface) are gone because the tools that pointed at them were retired or repointed; the webhooks + webhook_logs tools moved to mcp.orchestration and now point at gtm.service.orchestration, which serves them. uncovered_routes was the 13 linkedin-auto-scrape* routes, and they came off on 2026-07-27 with mcp.linkedin/linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2) and linkedin_auto_scrape_results (1). The 3 linkedin-posting routes (create-post, comment, react) were covered earlier by mcp.linkedin/linkedin_posting.",
+    "stale_routes": [],
+    "uncovered_routes": []
+  },
+  "orchestration": {
+    "_note": "Both lists are empty: this service is at FULL MCP coverage. stale_routes has been empty since the webhook surface (10 routes) moved here from gtm.service.linkedin. uncovered_routes was the 11 mass-actions / mass-action-items routes; the 2 child ones (search, retry) came off on 2026-07-27 with mcp.orchestration/mass_action_items, and the 9 parent ones came off the same day with mcp.orchestration/mass_actions (search, get, create, delete, preview, metrics, pause, resume, release). The 8 api/example-entity routes that used to sit here are gone for good: the service.empty ExampleEntity bundle was deleted from gtm.service.orchestration on 2026-07-26 (backend routes, entity folder, tests, table), so they were never a product surface and are no longer served.",
+    "stale_routes": [],
+    "uncovered_routes": []
+  },
+  "id": {
+    "_note": "Both lists are empty: this service is at FULL MCP coverage. uncovered_routes held the 5 account-shares routes (the backend shipped ahead of its tools) until 2026-07-27, when mcp.id/account_shares covered all five (search, list-received, create, recall, return) and the ratchet baseline went 5 -> 0. The account-transfers routes are deliberately absent from this list and always were: they carry no #[ApiMethod], so they are not an MCP surface at all (share = MCP, transfer = no MCP, by design).",
+    "stale_routes": [],
+    "uncovered_routes": []
+  },
+  "email": {
+    "_note": "uncovered_routes is the ENTIRE public surface of gtm.service.email: 44 routes, because this service has no MCP package at all. It is listed here route by route for the same reason every other gap is: the freshness gate reads a service list, and a service missing from that list is not covered debt, it is invisible debt. Added 2026-07-27, when email joined the registry-keyed gates with an empty package set. stale_routes is empty and will stay empty until an @gtm/mcp-email package exists to point anywhere. Burn down by authoring packages: every route a new tool covers must be deleted from this list and taken off ratchet.json in the same change.",
+    "stale_routes": [],
+    "uncovered_routes": [
+      "DELETE api/email-accounts/{sid}",
+      "DELETE api/email-messages/{sid}",
+      "DELETE api/email-sending-domains/{sid}",
+      "DELETE api/email-suppressions/{sid}",
+      "DELETE api/email-tracking-domains/{sid}",
+      "GET api/email-accounts/{sid}",
+      "GET api/email-messages/{sid}",
+      "PATCH api/email-accounts/{sid}",
+      "PATCH api/email-messages/{sid}",
+      "POST api/email-account-activity-log/search",
+      "POST api/email-account-health/search",
+      "POST api/email-account-sync-runs/search",
+      "POST api/email-accounts",
+      "POST api/email-accounts/detect-provider",
+      "POST api/email-accounts/metrics",
+      "POST api/email-accounts/request-connect-link",
+      "POST api/email-accounts/search",
+      "POST api/email-accounts/{sid}/disconnect",
+      "POST api/email-accounts/{sid}/pause-sending",
+      "POST api/email-accounts/{sid}/reconnect",
+      "POST api/email-accounts/{sid}/resume-sending",
+      "POST api/email-accounts/{sid}/sync-email-account",
+      "POST api/email-bounce-log/metrics",
+      "POST api/email-bounce-log/search",
+      "POST api/email-engagements/metrics",
+      "POST api/email-engagements/search",
+      "POST api/email-folders/search",
+      "POST api/email-messages/metrics",
+      "POST api/email-messages/search",
+      "POST api/email-messages/send",
+      "POST api/email-messages/{sid}/get-attachment",
+      "POST api/email-sending-domains",
+      "POST api/email-sending-domains/search",
+      "POST api/email-sending-domains/{sid}/verify-dns",
+      "POST api/email-suppressions",
+      "POST api/email-suppressions/metrics",
+      "POST api/email-suppressions/search",
+      "POST api/email-threads/metrics",
+      "POST api/email-threads/search",
+      "POST api/email-threads/{sid}/get-llm-context",
+      "POST api/email-threads/{sid}/mark-as-read",
+      "POST api/email-tracking-domains",
+      "POST api/email-tracking-domains/search",
+      "POST api/email-tracking-domains/{sid}/verify-dns"
+    ]
+  }
+}

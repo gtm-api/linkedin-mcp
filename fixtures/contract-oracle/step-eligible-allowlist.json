@@ -1,0 +1,16 @@
+{
+  "_comment": "Public /api routes the backend reports as step_eligible: true and that NO MCP tool covers. Read by tests/contract-parity.test.ts (step-eligibility parity, backend -> TS direction). A step-eligible verb is one the orchestration engine may name as a mass-action plan step and call once per item, so 'the backend can plan it and we expose no tool for it' means an agent can watch a run spend its targets on a verb it cannot describe, inspect or call itself. Every public one is either covered by a tool that declares stepEligible, or named here with the reason it is not. Empty arrays are the goal state, not a placeholder. Adding a line is a deliberate, reviewable act: it records debt, it does not excuse it. An entry that stops applying (route retired, step_eligible dropped, or a tool now covers it) FAILS the gate, so this list can only shrink. Separate from mass-action-allowlist.json because the two flags are independent facts with different failure modes (§R4). Regenerate the oracle (pnpm oracle:refresh) before touching it.",
+  "_keys": {
+    "route": "METHOD uri, exactly as it appears in {service}.contract.json routes[] (no leading slash).",
+    "reason": "One line: why no tool covers it yet, and what would clear the entry."
+  },
+  "linkedin": [],
+  "orchestration": [],
+  "id": [],
+  "email": [
+    {
+      "route": "POST api/email-messages/send",
+      "reason": "gtm.service.email has no MCP package at all, so the platform's paced bulk-send verb is one orchestration plans and drives per item while no agent can describe, inspect or call it. Clears when the email_messages package ships its send tool with stepEligible: true and scheduleRequired: true."
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "name": "@gtm/mcp-linkedin",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "index.ts",
+  "exports": { ".": "./index.ts" },
+  "dependencies": {
+    "@gtm/mcp-shared": "workspace:*",
+    "@gtm/mcp-runtime": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  }
+}

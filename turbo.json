@@ -1,0 +1,14 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "typecheck": { "dependsOn": ["^typecheck"] },
+    // Never cached, and it cannot honestly be. Turbo hashes the files of the
+    // package a task runs in, but two gates in tests/ read far outside it:
+    // dash-lint walks every text file under the repo root (a dash added to a
+    // .md, a .sh or to this file included), and research-parity reads
+    // ../../research, which is a different repository. A cache hit on either is
+    // a green that proves nothing. The whole suite is about two seconds.
+    "test": { "cache": false },
+    "lint": {}
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "name": "gtm-mcp",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.34.4",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "bash bin/mcp-dev.sh",
+    "dev:plain": "pnpm --filter @gtm/mcp-worker dev",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "test:e2e": "pnpm --filter @gtm/mcp-tests test:e2e",
+    "lint": "turbo lint",
+    "hooks:install": "bash bin/install-hooks.sh",
+    "oracle:refresh": "bash bin/oracle-refresh.sh",
+    "oracle:check": "bash bin/oracle-refresh.sh --check",
+    "openapi:public": "bash bin/openapi-public.sh",
+    "openapi:public:check": "bash bin/openapi-public.sh --check"
+  },
+  "devDependencies": {
+    "turbo": "2.10.4",
+    "typescript": "5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild", "workerd", "sharp"]
+  }
+}

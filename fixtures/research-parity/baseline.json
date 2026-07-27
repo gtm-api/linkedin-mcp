@@ -1,0 +1,14 @@
+{
+  "_comment": "Drift that tests/research-parity.test.ts found on its first run and that is accepted for now. This list may only ever SHRINK. A waiver that stops applying FAILS the gate, so the change that fixes a finding deletes its line in the same commit, and nothing can hide here by going quiet. Adding a line is a deliberate, reviewable act: it records debt, it does not excuse it. Every entry is drift between the RESEARCH file (the design source of truth) and the built MCP registry. It is NOT backend drift: ratchet.json, mass-action-allowlist.json and the contract oracle own that side and are unaffected by anything here.",
+  "_keys": {
+    "missing_tools": "'{service}/{entity}.md {METHOD} {path}' for a research row whose Status is `mcp` and for which no registry tool serves that route.",
+    "orphan_tools": "'{service} {tool_name} {METHOD} {path}' for a registry tool whose entity research file carries no Endpoints row for its route.",
+    "marker_mismatches": "'{service}/{entity}.md {action} {flag}' where flag is massAction, stepEligible or scheduleRequired.",
+    "description_issues": "'{tool_name} {issue}' where issue is empty, over_hard_budget, dash, missing_stub_prefix or stray_stub_prefix.",
+    "reason": "One line: why the drift stands, and what clears the entry."
+  },
+  "missing_tools": [],
+  "orphan_tools": [],
+  "marker_mismatches": [],
+  "description_issues": []
+}

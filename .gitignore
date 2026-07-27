@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.turbo/
+.wrangler/
+coverage/
+*.log
+.dev.vars
+.DS_Store
+.env
+.env.local
+bin/.vectorize-manifest.json

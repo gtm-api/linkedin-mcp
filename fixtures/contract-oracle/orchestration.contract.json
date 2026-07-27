@@ -1,0 +1,4439 @@
+{
+    "service": "orchestration",
+    "entities": {
+        "MassAction": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\MassActionDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "target_entity",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "plan",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Values\\MassActionPlanValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "canary_mode",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "total_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "credits_spent",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "title",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "schedule",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Values\\MassActionScheduleValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "paused_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "hold_till",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "canary_satisfied_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "started_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "settled_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Responses\\MassActionResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "target_entity",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "plan",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Values\\MassActionPlanValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "canary_mode",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "total_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "credits_spent",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "title",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "schedule",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Values\\MassActionScheduleValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "paused_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "hold_till",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "canary_satisfied_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "started_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "settled_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\MassActionFilter",
+                "fields": [
+                    "sid",
+                    "team_sid",
+                    "target_entity",
+                    "status",
+                    "paused_reason",
+                    "hold_till",
+                    "canary_satisfied_at",
+                    "started_at",
+                    "settled_at",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at"
+                ]
+            },
+            "enums": {
+                "sortable": [],
+                "filterable": [],
+                "group_by": []
+            }
+        },
+        "MassActionItem": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassActionItem\\MassActionItemDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "mass_action_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "position",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "current_step",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "retry_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "object_type",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "object_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "payload",
+                        "type": "?array",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "step_log",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "scheduled_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "wait_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_message",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "started_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "finished_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "duration_ms",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassActionItem\\Responses\\MassActionItemResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "mass_action_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "position",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "current_step",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "retry_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "object_type",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "object_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "payload",
+                        "type": "?array",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "step_log",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "scheduled_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "wait_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_message",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "started_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "finished_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "duration_ms",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassActionItem\\MassActionItemFilter",
+                "fields": [
+                    "sid",
+                    "team_sid",
+                    "mass_action_sid",
+                    "object_sid",
+                    "status",
+                    "current_step",
+                    "wait_reason",
+                    "retry_count",
+                    "scheduled_at",
+                    "started_at",
+                    "finished_at",
+                    "duration_ms",
+                    "created_at",
+                    "updated_at"
+                ]
+            },
+            "enums": {
+                "sortable": [],
+                "filterable": [],
+                "group_by": []
+            }
+        },
+        "Webhook": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\WebhookDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "target_url",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "events",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "secret",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\Enums\\WebhookStatusEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "consecutive_failed_attempts",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "filters",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\Values\\WebhookFiltersValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_failure_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\Responses\\WebhookResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "target_url",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "events",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "secret",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\Enums\\WebhookStatusEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "consecutive_failed_attempts",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "filters",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\Values\\WebhookFiltersValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_failure_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\WebhookFilter",
+                "fields": [
+                    "team_sid",
+                    "status",
+                    "events",
+                    "name",
+                    "consecutive_failed_attempts",
+                    "last_failure_at",
+                    "created_at",
+                    "updated_at",
+                    "deleted_at",
+                    "deleted",
+                    "q"
+                ]
+            },
+            "enums": {
+                "sortable": [],
+                "filterable": [],
+                "group_by": []
+            }
+        },
+        "WebhookLog": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\WebhookLogDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "webhook_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "event_type",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogStatusEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "retry_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "request_method",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogRequestMethodEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "request_url",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "request_headers",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "request_payload",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Values\\WebhookDeliveryEnvelopeValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "scheduled_at",
+                        "type": "Carbon\\Carbon|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "account_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "event_source_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "source_service",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "cancel_reason",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogCancelReasonEnum|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "response_code",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_message",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "duration_ms",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "executed_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Responses\\WebhookLogResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "webhook_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "event_type",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogStatusEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "retry_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "request_method",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogRequestMethodEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "request_url",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "request_headers",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "request_payload",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Values\\WebhookDeliveryEnvelopeValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "scheduled_at",
+                        "type": "Carbon\\Carbon|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "account_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "event_source_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "source_service",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "cancel_reason",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogCancelReasonEnum|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "response_code",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_message",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "duration_ms",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "executed_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\WebhookLogFilter",
+                "fields": [
+                    "sid",
+                    "team_sid",
+                    "webhook_sid",
+                    "account_sid",
+                    "source_service",
+                    "event_type",
+                    "event_source_sid",
+                    "status",
+                    "cancel_reason",
+                    "retry_count",
+                    "response_code",
+                    "duration_ms",
+                    "scheduled_at",
+                    "executed_at",
+                    "created_at"
+                ]
+            },
+            "enums": {
+                "sortable": [],
+                "filterable": [],
+                "group_by": []
+            }
+        }
+    },
+    "enums": {
+        "Gtm\\Lib\\Common\\Core\\Automation\\ProtocolStatus": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Success",
+                    "value": "success"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                },
+                {
+                    "name": "Skipped",
+                    "value": "skipped"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Core\\Enums\\AccountChannelEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Linkedin",
+                    "value": "linkedin"
+                },
+                {
+                    "name": "Email",
+                    "value": "email"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Core\\Enums\\ActorType": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "USER",
+                    "value": "user"
+                },
+                {
+                    "name": "SUPPORT",
+                    "value": "support"
+                },
+                {
+                    "name": "API_KEY",
+                    "value": "api_key"
+                },
+                {
+                    "name": "SYSTEM",
+                    "value": "system"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Core\\Enums\\EmailStatus": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "PENDING",
+                    "value": "pending"
+                },
+                {
+                    "name": "VERIFIED",
+                    "value": "verified"
+                },
+                {
+                    "name": "BOUNCED",
+                    "value": "bounced"
+                },
+                {
+                    "name": "SUPPRESSED",
+                    "value": "suppressed"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Core\\Enums\\HandoverKindEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Share",
+                    "value": "share"
+                },
+                {
+                    "name": "Transfer",
+                    "value": "transfer"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Core\\Enums\\HandoverRoleEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Owner",
+                    "value": "owner"
+                },
+                {
+                    "name": "Holder",
+                    "value": "holder"
+                },
+                {
+                    "name": "Giver",
+                    "value": "giver"
+                },
+                {
+                    "name": "Receiver",
+                    "value": "receiver"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Core\\Enums\\McpErrorCode": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "VALIDATION_FAILED",
+                    "value": "validation_failed"
+                },
+                {
+                    "name": "NOTHING_TO_UPDATE",
+                    "value": "nothing_to_update"
+                },
+                {
+                    "name": "NOT_FOUND",
+                    "value": "not_found"
+                },
+                {
+                    "name": "RELATION_NOT_FOUND",
+                    "value": "relation_not_found"
+                },
+                {
+                    "name": "INVALID_TRANSITION",
+                    "value": "invalid_transition"
+                },
+                {
+                    "name": "LIMIT_EXCEEDED",
+                    "value": "limit_exceeded"
+                },
+                {
+                    "name": "PAYMENT_REQUIRED",
+                    "value": "payment_required"
+                },
+                {
+                    "name": "DUPLICATE_REJECTED",
+                    "value": "duplicate_rejected"
+                },
+                {
+                    "name": "CONFLICT",
+                    "value": "conflict"
+                },
+                {
+                    "name": "DELETE_BLOCKED",
+                    "value": "delete_blocked"
+                },
+                {
+                    "name": "UNAUTHORIZED",
+                    "value": "unauthorized"
+                },
+                {
+                    "name": "FORBIDDEN",
+                    "value": "forbidden"
+                },
+                {
+                    "name": "RATE_LIMITED",
+                    "value": "rate_limited"
+                },
+                {
+                    "name": "INTERNAL_ERROR",
+                    "value": "internal_error"
+                },
+                {
+                    "name": "SERVICE_UNAVAILABLE",
+                    "value": "service_unavailable"
+                },
+                {
+                    "name": "NOT_IMPLEMENTED",
+                    "value": "not_implemented"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Core\\Enums\\McpOperation": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "SEARCH",
+                    "value": "search"
+                },
+                {
+                    "name": "GET",
+                    "value": "get"
+                },
+                {
+                    "name": "CREATE",
+                    "value": "create"
+                },
+                {
+                    "name": "UPDATE",
+                    "value": "update"
+                },
+                {
+                    "name": "DELETE",
+                    "value": "delete"
+                },
+                {
+                    "name": "METRICS",
+                    "value": "metrics"
+                },
+                {
+                    "name": "GROUP_BY",
+                    "value": "group_by"
+                },
+                {
+                    "name": "ACTION",
+                    "value": "action"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassActionItem\\Enums\\MassActionItemStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pending",
+                    "value": "pending"
+                },
+                {
+                    "name": "Queued",
+                    "value": "queued"
+                },
+                {
+                    "name": "Running",
+                    "value": "running"
+                },
+                {
+                    "name": "Succeeded",
+                    "value": "succeeded"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                },
+                {
+                    "name": "Skipped",
+                    "value": "skipped"
+                },
+                {
+                    "name": "Cancelled",
+                    "value": "cancelled"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassActionItem\\Enums\\MassActionItemStepStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Running",
+                    "value": "running"
+                },
+                {
+                    "name": "Deferred",
+                    "value": "deferred"
+                },
+                {
+                    "name": "Succeeded",
+                    "value": "succeeded"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                },
+                {
+                    "name": "Skipped",
+                    "value": "skipped"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassActionItem\\Enums\\MassActionItemWaitReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "TaskPending",
+                    "value": "task_pending"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Enums\\MassActionCanaryModeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "None",
+                    "value": "none"
+                },
+                {
+                    "name": "FirstItem",
+                    "value": "first_item"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Enums\\MassActionPausedReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Manual",
+                    "value": "manual"
+                },
+                {
+                    "name": "LimitReached",
+                    "value": "limit_reached"
+                },
+                {
+                    "name": "AccountUnavailable",
+                    "value": "account_unavailable"
+                },
+                {
+                    "name": "CanaryFailed",
+                    "value": "canary_failed"
+                },
+                {
+                    "name": "Other",
+                    "value": "other"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Enums\\MassActionStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Active",
+                    "value": "active"
+                },
+                {
+                    "name": "Paused",
+                    "value": "paused"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\MassAction\\Enums\\MassActionStepToolEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "SendLinkedinConnectionRequest",
+                    "value": "linkedin-connection-requests.send-linkedin-connection-request"
+                },
+                {
+                    "name": "ReactToLinkedinPost",
+                    "value": "linkedin-posting.react"
+                },
+                {
+                    "name": "SendEmailMessage",
+                    "value": "email-messages.send"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogCancelReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Manual",
+                    "value": "manual"
+                },
+                {
+                    "name": "WebhookDeleted",
+                    "value": "webhook_deleted"
+                },
+                {
+                    "name": "WebhookDisabled",
+                    "value": "webhook_disabled"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogRequestMethodEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Post",
+                    "value": "POST"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\WebhookLog\\Enums\\WebhookLogStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pending",
+                    "value": "pending"
+                },
+                {
+                    "name": "InProgress",
+                    "value": "in_progress"
+                },
+                {
+                    "name": "Retrying",
+                    "value": "retrying"
+                },
+                {
+                    "name": "Success",
+                    "value": "success"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                },
+                {
+                    "name": "Cancelled",
+                    "value": "cancelled"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\Enums\\WebhookEventTypeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "LinkedinAccountsCreated",
+                    "value": "linkedin-accounts.created"
+                },
+                {
+                    "name": "LinkedinAccountsRestored",
+                    "value": "linkedin-accounts.restored"
+                },
+                {
+                    "name": "LinkedinAccountsDeleted",
+                    "value": "linkedin-accounts.deleted"
+                },
+                {
+                    "name": "LinkedinAccountsInitialSyncStarted",
+                    "value": "linkedin-accounts.initial-sync-started"
+                },
+                {
+                    "name": "LinkedinAccountsInitialSyncDone",
+                    "value": "linkedin-accounts.initial-sync-done"
+                },
+                {
+                    "name": "LinkedinAccountsSyncReset",
+                    "value": "linkedin-accounts.sync-reset"
+                },
+                {
+                    "name": "LinkedinAccountsPremiumChanged",
+                    "value": "linkedin-accounts.premium-changed"
+                },
+                {
+                    "name": "LinkedinAccountsLoginSucceeded",
+                    "value": "linkedin-accounts.login-succeeded"
+                },
+                {
+                    "name": "LinkedinAccountsLoginFailed",
+                    "value": "linkedin-accounts.login-failed"
+                },
+                {
+                    "name": "LinkedinAccountsLoggedOut",
+                    "value": "linkedin-accounts.logged-out"
+                },
+                {
+                    "name": "LinkedinAccountsHeartbeatStale",
+                    "value": "linkedin-accounts.heartbeat-stale"
+                },
+                {
+                    "name": "LinkedinAccountBlockLogRecorded",
+                    "value": "linkedin-account-block-log.recorded"
+                },
+                {
+                    "name": "LinkedinAccountSnapshotCaptured",
+                    "value": "linkedin-account-snapshot.captured"
+                },
+                {
+                    "name": "LinkedinAccountQuotaHitsRecorded",
+                    "value": "linkedin-account-quota-hits.recorded"
+                },
+                {
+                    "name": "LinkedinAccountSmartLimitsLimitReached",
+                    "value": "linkedin-account-smart-limits.limit-reached"
+                },
+                {
+                    "name": "LinkedinAccountSmartLimitsLimitReleased",
+                    "value": "linkedin-account-smart-limits.limit-released"
+                },
+                {
+                    "name": "LinkedinAccountSmartLimitsSmartLimitRecomputed",
+                    "value": "linkedin-account-smart-limits.smart-limit-recomputed"
+                },
+                {
+                    "name": "LinkedinConnectionRequestsSent",
+                    "value": "linkedin-connection-requests.sent"
+                },
+                {
+                    "name": "LinkedinConnectionRequestsAccepted",
+                    "value": "linkedin-connection-requests.accepted"
+                },
+                {
+                    "name": "LinkedinConnectionRequestsWithdrawn",
+                    "value": "linkedin-connection-requests.withdrawn"
+                },
+                {
+                    "name": "LinkedinConnectionRequestsExpiredDetected",
+                    "value": "linkedin-connection-requests.expired-detected"
+                },
+                {
+                    "name": "LinkedinConnectionRequestsResendAvailable",
+                    "value": "linkedin-connection-requests.resend-available"
+                },
+                {
+                    "name": "LinkedinConnectionRequestsSyncCompleted",
+                    "value": "linkedin-connection-requests.sync-completed"
+                },
+                {
+                    "name": "LinkedinConnectionInvitationsReceived",
+                    "value": "linkedin-connection-invitations.received"
+                },
+                {
+                    "name": "LinkedinConnectionInvitationsAccepted",
+                    "value": "linkedin-connection-invitations.accepted"
+                },
+                {
+                    "name": "LinkedinConnectionInvitationsIgnored",
+                    "value": "linkedin-connection-invitations.ignored"
+                },
+                {
+                    "name": "LinkedinConnectionInvitationsExpiredDetected",
+                    "value": "linkedin-connection-invitations.expired-detected"
+                },
+                {
+                    "name": "LinkedinConnectionInvitationsSyncCompleted",
+                    "value": "linkedin-connection-invitations.sync-completed"
+                },
+                {
+                    "name": "LinkedinConnectionsAdded",
+                    "value": "linkedin-connections.added"
+                },
+                {
+                    "name": "LinkedinConnectionsRemoved",
+                    "value": "linkedin-connections.removed"
+                },
+                {
+                    "name": "LinkedinConnectionsSyncCompleted",
+                    "value": "linkedin-connections.sync-completed"
+                },
+                {
+                    "name": "LinkedinFollowersAdded",
+                    "value": "linkedin-followers.added"
+                },
+                {
+                    "name": "LinkedinMessagesReceived",
+                    "value": "linkedin-messages.received"
+                },
+                {
+                    "name": "LinkedinMessagesSent",
+                    "value": "linkedin-messages.sent"
+                },
+                {
+                    "name": "LinkedinMessagesSendFailed",
+                    "value": "linkedin-messages.send-failed"
+                },
+                {
+                    "name": "LinkedinConversationsCreated",
+                    "value": "linkedin-conversations.created"
+                },
+                {
+                    "name": "LinkedinConversationsSyncCompleted",
+                    "value": "linkedin-conversations.sync-completed"
+                },
+                {
+                    "name": "DataRequestsCompleted",
+                    "value": "data-requests.completed"
+                },
+                {
+                    "name": "DataRequestsFailed",
+                    "value": "data-requests.failed"
+                },
+                {
+                    "name": "LinkedinAutoScrapeRunsCompleted",
+                    "value": "linkedin-auto-scrape-runs.completed"
+                },
+                {
+                    "name": "LinkedinAutoScrapeRunsFailed",
+                    "value": "linkedin-auto-scrape-runs.failed"
+                },
+                {
+                    "name": "LinkedinAutoScrapesPaused",
+                    "value": "linkedin-auto-scrapes.paused"
+                },
+                {
+                    "name": "AntidetectBrowsersLoggedIn",
+                    "value": "antidetect-browsers.logged-in"
+                },
+                {
+                    "name": "AntidetectBrowsersLoggedOut",
+                    "value": "antidetect-browsers.logged-out"
+                },
+                {
+                    "name": "AntidetectBrowsersStarted",
+                    "value": "antidetect-browsers.started"
+                },
+                {
+                    "name": "AntidetectBrowsersStopped",
+                    "value": "antidetect-browsers.stopped"
+                },
+                {
+                    "name": "AntidetectBrowsersStartFailed",
+                    "value": "antidetect-browsers.start-failed"
+                },
+                {
+                    "name": "AntidetectBrowsersRunningIssue",
+                    "value": "antidetect-browsers.running-issue"
+                },
+                {
+                    "name": "AntidetectBrowsersErrorInvestigation",
+                    "value": "antidetect-browsers.error-investigation"
+                },
+                {
+                    "name": "AntidetectBrowsersMaintenance",
+                    "value": "antidetect-browsers.maintenance"
+                },
+                {
+                    "name": "AntidetectBrowsersProxyIssue",
+                    "value": "antidetect-browsers.proxy-issue"
+                },
+                {
+                    "name": "AntidetectBrowsersProxyBackAlive",
+                    "value": "antidetect-browsers.proxy-back-alive"
+                },
+                {
+                    "name": "AntidetectBrowsersIdle",
+                    "value": "antidetect-browsers.idle"
+                },
+                {
+                    "name": "AccountSharesCreated",
+                    "value": "account-shares.created"
+                },
+                {
+                    "name": "AccountSharesReturned",
+                    "value": "account-shares.returned"
+                },
+                {
+                    "name": "AccountSharesRecalled",
+                    "value": "account-shares.recalled"
+                },
+                {
+                    "name": "AccountSharesFailed",
+                    "value": "account-shares.failed"
+                },
+                {
+                    "name": "AccountTransfersCompleted",
+                    "value": "account-transfers.completed"
+                },
+                {
+                    "name": "AccountTransfersFailed",
+                    "value": "account-transfers.failed"
+                },
+                {
+                    "name": "WebhooksFailed",
+                    "value": "webhooks.failed"
+                },
+                {
+                    "name": "EmailAccountsConnected",
+                    "value": "email-accounts.connected"
+                },
+                {
+                    "name": "EmailAccountsReconnectRequired",
+                    "value": "email-accounts.reconnect-required"
+                },
+                {
+                    "name": "EmailAccountsSendingPaused",
+                    "value": "email-accounts.sending-paused"
+                },
+                {
+                    "name": "EmailAccountsSendingResumed",
+                    "value": "email-accounts.sending-resumed"
+                },
+                {
+                    "name": "EmailAccountsDisconnected",
+                    "value": "email-accounts.disconnected"
+                },
+                {
+                    "name": "EmailAccountsDeleted",
+                    "value": "email-accounts.deleted"
+                },
+                {
+                    "name": "EmailAccountsSyncCompleted",
+                    "value": "email-accounts.sync-completed"
+                },
+                {
+                    "name": "EmailMessagesReceived",
+                    "value": "email-messages.received"
+                },
+                {
+                    "name": "EmailMessagesSent",
+                    "value": "email-messages.sent"
+                },
+                {
+                    "name": "EmailMessagesBounced",
+                    "value": "email-messages.bounced"
+                },
+                {
+                    "name": "EmailMessagesComplained",
+                    "value": "email-messages.complained"
+                },
+                {
+                    "name": "EmailMessagesFailed",
+                    "value": "email-messages.failed"
+                },
+                {
+                    "name": "EmailMessagesDeleted",
+                    "value": "email-messages.deleted"
+                },
+                {
+                    "name": "EmailThreadsUpdated",
+                    "value": "email-threads.updated"
+                },
+                {
+                    "name": "EmailEngagementsOpened",
+                    "value": "email-engagements.opened"
+                },
+                {
+                    "name": "EmailEngagementsClicked",
+                    "value": "email-engagements.clicked"
+                },
+                {
+                    "name": "EmailEngagementsUnsubscribed",
+                    "value": "email-engagements.unsubscribed"
+                },
+                {
+                    "name": "EmailAccountHealthSnapshotCaptured",
+                    "value": "email-account-health.snapshot-captured"
+                },
+                {
+                    "name": "EmailAccountHealthScoreCritical",
+                    "value": "email-account-health.score-critical"
+                },
+                {
+                    "name": "EmailSuppressionsCreated",
+                    "value": "email-suppressions.created"
+                },
+                {
+                    "name": "EmailSuppressionsDeleted",
+                    "value": "email-suppressions.deleted"
+                },
+                {
+                    "name": "EmailTrackingDomainsVerified",
+                    "value": "email-tracking-domains.verified"
+                },
+                {
+                    "name": "EmailTrackingDomainsFailed",
+                    "value": "email-tracking-domains.failed"
+                },
+                {
+                    "name": "EmailSendingDomainsVerified",
+                    "value": "email-sending-domains.verified"
+                },
+                {
+                    "name": "EmailSendingDomainsFailed",
+                    "value": "email-sending-domains.failed"
+                },
+                {
+                    "name": "MassActionsCreated",
+                    "value": "mass-actions.created"
+                },
+                {
+                    "name": "MassActionsPaused",
+                    "value": "mass-actions.paused"
+                },
+                {
+                    "name": "MassActionsResumed",
+                    "value": "mass-actions.resumed"
+                },
+                {
+                    "name": "MassActionsSettled",
+                    "value": "mass-actions.settled"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\Enums\\WebhookFailedReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "ConsecutiveFailures",
+                    "value": "consecutive_failures"
+                },
+                {
+                    "name": "Gone410",
+                    "value": "gone_410"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Orchestration\\Webhook\\Enums\\WebhookStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "On",
+                    "value": "on"
+                },
+                {
+                    "name": "Off",
+                    "value": "off"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                }
+            ]
+        }
+    },
+    "routes": [
+        {
+            "method": "POST",
+            "uri": "api/mass-action-items/retry",
+            "controller": "App\\Entities\\MassActionItem\\MassActionItemController",
+            "action": "retry",
+            "operation": "action",
+            "mass_action": true,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassActionItem\\Requests\\MassActionItemRetryRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "starts_with:ma_im_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "filter",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/mass-action-items/search",
+            "controller": "App\\Entities\\MassActionItem\\MassActionItemController",
+            "action": "search",
+            "operation": "search",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassActionItem\\Requests\\MassActionItemSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/mass-actions",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "store",
+            "operation": "create",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\MassActionCreateRequest",
+            "rules": [
+                {
+                    "field": "title",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target_entity",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.kind",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"objects\",\"targets\",\"generate\",\"none\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "objects",
+                        "targets",
+                        "generate",
+                        "none"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.object_sids",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.object_sids.*",
+                    "rules": [
+                        "string",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.count",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan.steps",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:3"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 3,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan.steps.*.tool",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan.steps.*.args",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "schedule",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "schedule.interval_seconds_min",
+                    "rules": [
+                        "required_with:schedule",
+                        "integer",
+                        "min:30",
+                        "max:86400"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 30,
+                    "max": 86400,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "schedule.interval_seconds_max",
+                    "rules": [
+                        "required_with:schedule",
+                        "integer",
+                        "min:30",
+                        "max:86400",
+                        "gte:schedule.interval_seconds_min"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 30,
+                    "max": 86400,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "canary_mode",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"none\",\"first_item\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "none",
+                        "first_item"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "commit_token",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/mass-actions/metrics",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "metrics",
+            "operation": "metrics",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\MassActionMetricsRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/mass-actions/preview",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "preview",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\MassActionPreviewRequest",
+            "rules": [
+                {
+                    "field": "title",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target_entity",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.kind",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"objects\",\"targets\",\"generate\",\"none\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "objects",
+                        "targets",
+                        "generate",
+                        "none"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.object_sids",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.object_sids.*",
+                    "rules": [
+                        "string",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.count",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan.steps",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:3"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 3,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan.steps.*.tool",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan.steps.*.args",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "schedule",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "schedule.interval_seconds_min",
+                    "rules": [
+                        "required_with:schedule",
+                        "integer",
+                        "min:30",
+                        "max:86400"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 30,
+                    "max": 86400,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "schedule.interval_seconds_max",
+                    "rules": [
+                        "required_with:schedule",
+                        "integer",
+                        "min:30",
+                        "max:86400",
+                        "gte:schedule.interval_seconds_min"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 30,
+                    "max": 86400,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "canary_mode",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"none\",\"first_item\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "none",
+                        "first_item"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/mass-actions/search",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "search",
+            "operation": "search",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\MassActionSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "DELETE",
+            "uri": "api/mass-actions/{sid}",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "destroy",
+            "operation": "delete",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "GET",
+            "uri": "api/mass-actions/{sid}",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "get",
+            "operation": "get",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "api/mass-actions/{sid}/pause",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "pause",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\MassActionPauseRequest",
+            "rules": [
+                {
+                    "field": "hold_till",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/mass-actions/{sid}/release",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "release",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "api/mass-actions/{sid}/resume",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "resume",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "api/webhook-logs/metrics",
+            "controller": "App\\Entities\\WebhookLog\\WebhookLogController",
+            "action": "metrics",
+            "operation": "metrics",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\WebhookLog\\Requests\\WebhookLogMetricsRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "period",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "period.from",
+                    "rules": [
+                        "required",
+                        "string"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "period.to",
+                    "rules": [
+                        "required",
+                        "string"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "group_by",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:status,event_type,response_code,webhook_sid,account_sid"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "status",
+                        "event_type",
+                        "response_code",
+                        "webhook_sid",
+                        "account_sid"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/webhook-logs/search",
+            "controller": "App\\Entities\\WebhookLog\\WebhookLogController",
+            "action": "search",
+            "operation": "search",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\WebhookLog\\Requests\\WebhookLogSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.field",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:created_at,scheduled_at,executed_at,duration_ms"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "created_at",
+                        "scheduled_at",
+                        "executed_at",
+                        "duration_ms"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.direction",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:asc,desc"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:webhook"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "webhook"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/webhook-logs/{sid}/cancel",
+            "controller": "App\\Entities\\WebhookLog\\WebhookLogController",
+            "action": "cancel",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\WebhookLog\\Requests\\WebhookLogCancelRequest",
+            "rules": [
+                {
+                    "field": "expected_status",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"pending\",\"in_progress\",\"retrying\",\"success\",\"failed\",\"cancelled\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "pending",
+                        "in_progress",
+                        "retrying",
+                        "success",
+                        "failed",
+                        "cancelled"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/webhook-logs/{sid}/retry",
+            "controller": "App\\Entities\\WebhookLog\\WebhookLogController",
+            "action": "retry",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\WebhookLog\\Requests\\WebhookLogRetryRequest",
+            "rules": [
+                {
+                    "field": "expected_status",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"pending\",\"in_progress\",\"retrying\",\"success\",\"failed\",\"cancelled\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "pending",
+                        "in_progress",
+                        "retrying",
+                        "success",
+                        "failed",
+                        "cancelled"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/webhooks",
+            "controller": "App\\Entities\\Webhook\\WebhookController",
+            "action": "create",
+            "operation": "create",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\Webhook\\Requests\\WebhookCreateRequest",
+            "rules": [
+                {
+                    "field": "name",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target_url",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:2048"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "events",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "events.*",
+                    "rules": [
+                        "string",
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin-accounts.created",
+                        "linkedin-accounts.restored",
+                        "linkedin-accounts.deleted",
+                        "linkedin-accounts.initial-sync-started",
+                        "linkedin-accounts.initial-sync-done",
+                        "linkedin-accounts.sync-reset",
+                        "linkedin-accounts.premium-changed",
+                        "linkedin-accounts.login-succeeded",
+                        "linkedin-accounts.login-failed",
+                        "linkedin-accounts.logged-out",
+                        "linkedin-accounts.heartbeat-stale",
+                        "linkedin-account-block-log.recorded",
+                        "linkedin-account-snapshot.captured",
+                        "linkedin-account-quota-hits.recorded",
+                        "linkedin-account-smart-limits.limit-reached",
+                        "linkedin-account-smart-limits.limit-released",
+                        "linkedin-account-smart-limits.smart-limit-recomputed",
+                        "linkedin-connection-requests.sent",
+                        "linkedin-connection-requests.accepted",
+                        "linkedin-connection-requests.withdrawn",
+                        "linkedin-connection-requests.expired-detected",
+                        "linkedin-connection-requests.resend-available",
+                        "linkedin-connection-requests.sync-completed",
+                        "linkedin-connection-invitations.received",
+                        "linkedin-connection-invitations.accepted",
+                        "linkedin-connection-invitations.ignored",
+                        "linkedin-connection-invitations.expired-detected",
+                        "linkedin-connection-invitations.sync-completed",
+                        "linkedin-connections.added",
+                        "linkedin-connections.removed",
+                        "linkedin-connections.sync-completed",
+                        "linkedin-followers.added",
+                        "linkedin-messages.received",
+                        "linkedin-messages.sent",
+                        "linkedin-messages.send-failed",
+                        "linkedin-conversations.created",
+                        "linkedin-conversations.sync-completed",
+                        "data-requests.completed",
+                        "data-requests.failed",
+                        "linkedin-auto-scrape-runs.completed",
+                        "linkedin-auto-scrape-runs.failed",
+                        "linkedin-auto-scrapes.paused",
+                        "antidetect-browsers.logged-in",
+                        "antidetect-browsers.logged-out",
+                        "antidetect-browsers.started",
+                        "antidetect-browsers.stopped",
+                        "antidetect-browsers.start-failed",
+                        "antidetect-browsers.running-issue",
+                        "antidetect-browsers.error-investigation",
+                        "antidetect-browsers.maintenance",
+                        "antidetect-browsers.proxy-issue",
+                        "antidetect-browsers.proxy-back-alive",
+                        "antidetect-browsers.idle",
+                        "account-shares.created",
+                        "account-shares.returned",
+                        "account-shares.recalled",
+                        "account-shares.failed",
+                        "account-transfers.completed",
+                        "account-transfers.failed",
+                        "webhooks.failed",
+                        "email-accounts.connected",
+                        "email-accounts.reconnect-required",
+                        "email-accounts.sending-paused",
+                        "email-accounts.sending-resumed",
+                        "email-accounts.disconnected",
+                        "email-accounts.deleted",
+                        "email-accounts.sync-completed",
+                        "email-messages.received",
+                        "email-messages.sent",
+                        "email-messages.bounced",
+                        "email-messages.complained",
+                        "email-messages.failed",
+                        "email-messages.deleted",
+                        "email-threads.updated",
+                        "email-engagements.opened",
+                        "email-engagements.clicked",
+                        "email-engagements.unsubscribed",
+                        "email-account-health.snapshot-captured",
+                        "email-account-health.score-critical",
+                        "email-suppressions.created",
+                        "email-suppressions.deleted",
+                        "email-tracking-domains.verified",
+                        "email-tracking-domains.failed",
+                        "email-sending-domains.verified",
+                        "email-sending-domains.failed",
+                        "mass-actions.created",
+                        "mass-actions.paused",
+                        "mass-actions.resumed",
+                        "mass-actions.settled"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/webhooks/search",
+            "controller": "App\\Entities\\Webhook\\WebhookController",
+            "action": "search",
+            "operation": "search",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\Webhook\\Requests\\WebhookSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.field",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:created_at,updated_at,name"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "created_at",
+                        "updated_at",
+                        "name"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.direction",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:asc,desc"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:latest_webhook_logs"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "latest_webhook_logs"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "DELETE",
+            "uri": "api/webhooks/{sid}",
+            "controller": "App\\Entities\\Webhook\\WebhookController",
+            "action": "delete",
+            "operation": "delete",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "GET",
+            "uri": "api/webhooks/{sid}",
+            "controller": "App\\Entities\\Webhook\\WebhookController",
+            "action": "get",
+            "operation": "get",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\Webhook\\Requests\\WebhookGetRequest",
+            "rules": [
+                {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:latest_webhook_logs"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "latest_webhook_logs"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "PATCH",
+            "uri": "api/webhooks/{sid}",
+            "controller": "App\\Entities\\Webhook\\WebhookController",
+            "action": "update",
+            "operation": "update",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\Webhook\\Requests\\WebhookUpdateRequest",
+            "rules": [
+                {
+                    "field": "name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target_url",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "events",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "events.*",
+                    "rules": [
+                        "string",
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin-accounts.created",
+                        "linkedin-accounts.restored",
+                        "linkedin-accounts.deleted",
+                        "linkedin-accounts.initial-sync-started",
+                        "linkedin-accounts.initial-sync-done",
+                        "linkedin-accounts.sync-reset",
+                        "linkedin-accounts.premium-changed",
+                        "linkedin-accounts.login-succeeded",
+                        "linkedin-accounts.login-failed",
+                        "linkedin-accounts.logged-out",
+                        "linkedin-accounts.heartbeat-stale",
+                        "linkedin-account-block-log.recorded",
+                        "linkedin-account-snapshot.captured",
+                        "linkedin-account-quota-hits.recorded",
+                        "linkedin-account-smart-limits.limit-reached",
+                        "linkedin-account-smart-limits.limit-released",
+                        "linkedin-account-smart-limits.smart-limit-recomputed",
+                        "linkedin-connection-requests.sent",
+                        "linkedin-connection-requests.accepted",
+                        "linkedin-connection-requests.withdrawn",
+                        "linkedin-connection-requests.expired-detected",
+                        "linkedin-connection-requests.resend-available",
+                        "linkedin-connection-requests.sync-completed",
+                        "linkedin-connection-invitations.received",
+                        "linkedin-connection-invitations.accepted",
+                        "linkedin-connection-invitations.ignored",
+                        "linkedin-connection-invitations.expired-detected",
+                        "linkedin-connection-invitations.sync-completed",
+                        "linkedin-connections.added",
+                        "linkedin-connections.removed",
+                        "linkedin-connections.sync-completed",
+                        "linkedin-followers.added",
+                        "linkedin-messages.received",
+                        "linkedin-messages.sent",
+                        "linkedin-messages.send-failed",
+                        "linkedin-conversations.created",
+                        "linkedin-conversations.sync-completed",
+                        "data-requests.completed",
+                        "data-requests.failed",
+                        "linkedin-auto-scrape-runs.completed",
+                        "linkedin-auto-scrape-runs.failed",
+                        "linkedin-auto-scrapes.paused",
+                        "antidetect-browsers.logged-in",
+                        "antidetect-browsers.logged-out",
+                        "antidetect-browsers.started",
+                        "antidetect-browsers.stopped",
+                        "antidetect-browsers.start-failed",
+                        "antidetect-browsers.running-issue",
+                        "antidetect-browsers.error-investigation",
+                        "antidetect-browsers.maintenance",
+                        "antidetect-browsers.proxy-issue",
+                        "antidetect-browsers.proxy-back-alive",
+                        "antidetect-browsers.idle",
+                        "account-shares.created",
+                        "account-shares.returned",
+                        "account-shares.recalled",
+                        "account-shares.failed",
+                        "account-transfers.completed",
+                        "account-transfers.failed",
+                        "webhooks.failed",
+                        "email-accounts.connected",
+                        "email-accounts.reconnect-required",
+                        "email-accounts.sending-paused",
+                        "email-accounts.sending-resumed",
+                        "email-accounts.disconnected",
+                        "email-accounts.deleted",
+                        "email-accounts.sync-completed",
+                        "email-messages.received",
+                        "email-messages.sent",
+                        "email-messages.bounced",
+                        "email-messages.complained",
+                        "email-messages.failed",
+                        "email-messages.deleted",
+                        "email-threads.updated",
+                        "email-engagements.opened",
+                        "email-engagements.clicked",
+                        "email-engagements.unsubscribed",
+                        "email-account-health.snapshot-captured",
+                        "email-account-health.score-critical",
+                        "email-suppressions.created",
+                        "email-suppressions.deleted",
+                        "email-tracking-domains.verified",
+                        "email-tracking-domains.failed",
+                        "email-sending-domains.verified",
+                        "email-sending-domains.failed",
+                        "mass-actions.created",
+                        "mass-actions.paused",
+                        "mass-actions.resumed",
+                        "mass-actions.settled"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "secret",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "status",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"on\",\"off\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "on",
+                        "off"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/webhooks/{sid}/test",
+            "controller": "App\\Entities\\Webhook\\WebhookController",
+            "action": "test",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation"
+            ],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\Webhook\\Requests\\WebhookTestRequest",
+            "rules": [
+                {
+                    "field": "override_event_type",
+                    "rules": [
+                        "sometimes",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/mass-actions/find",
+            "controller": "App\\Entities\\MassAction\\InternalMassActionController",
+            "action": "find",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\InternalMassActionFindRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/mass-actions/pause-for-account",
+            "controller": "App\\Entities\\MassAction\\InternalMassActionController",
+            "action": "pauseForAccount",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\InternalMassActionPauseForAccountRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "reason",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/mass-actions/resume-for-account",
+            "controller": "App\\Entities\\MassAction\\InternalMassActionController",
+            "action": "resumeForAccount",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\InternalMassActionResumeForAccountRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/mass-actions/{sid}/append-items",
+            "controller": "App\\Entities\\MassAction\\InternalMassActionController",
+            "action": "appendItems",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\InternalMassActionAppendItemsRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "identities",
+                    "rules": [
+                        "required",
+                        "array",
+                        "max:1000"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 1000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/webhooks/emit",
+            "controller": "App\\Entities\\Webhook\\InternalWebhookController",
+            "action": "emit",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\Webhook\\Requests\\InternalWebhookEmitRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "event_type",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin-accounts.created",
+                        "linkedin-accounts.restored",
+                        "linkedin-accounts.deleted",
+                        "linkedin-accounts.initial-sync-started",
+                        "linkedin-accounts.initial-sync-done",
+                        "linkedin-accounts.sync-reset",
+                        "linkedin-accounts.premium-changed",
+                        "linkedin-accounts.login-succeeded",
+                        "linkedin-accounts.login-failed",
+                        "linkedin-accounts.logged-out",
+                        "linkedin-accounts.heartbeat-stale",
+                        "linkedin-account-block-log.recorded",
+                        "linkedin-account-snapshot.captured",
+                        "linkedin-account-quota-hits.recorded",
+                        "linkedin-account-smart-limits.limit-reached",
+                        "linkedin-account-smart-limits.limit-released",
+                        "linkedin-account-smart-limits.smart-limit-recomputed",
+                        "linkedin-connection-requests.sent",
+                        "linkedin-connection-requests.accepted",
+                        "linkedin-connection-requests.withdrawn",
+                        "linkedin-connection-requests.expired-detected",
+                        "linkedin-connection-requests.resend-available",
+                        "linkedin-connection-requests.sync-completed",
+                        "linkedin-connection-invitations.received",
+                        "linkedin-connection-invitations.accepted",
+                        "linkedin-connection-invitations.ignored",
+                        "linkedin-connection-invitations.expired-detected",
+                        "linkedin-connection-invitations.sync-completed",
+                        "linkedin-connections.added",
+                        "linkedin-connections.removed",
+                        "linkedin-connections.sync-completed",
+                        "linkedin-followers.added",
+                        "linkedin-messages.received",
+                        "linkedin-messages.sent",
+                        "linkedin-messages.send-failed",
+                        "linkedin-conversations.created",
+                        "linkedin-conversations.sync-completed",
+                        "data-requests.completed",
+                        "data-requests.failed",
+                        "linkedin-auto-scrape-runs.completed",
+                        "linkedin-auto-scrape-runs.failed",
+                        "linkedin-auto-scrapes.paused",
+                        "antidetect-browsers.logged-in",
+                        "antidetect-browsers.logged-out",
+                        "antidetect-browsers.started",
+                        "antidetect-browsers.stopped",
+                        "antidetect-browsers.start-failed",
+                        "antidetect-browsers.running-issue",
+                        "antidetect-browsers.error-investigation",
+                        "antidetect-browsers.maintenance",
+                        "antidetect-browsers.proxy-issue",
+                        "antidetect-browsers.proxy-back-alive",
+                        "antidetect-browsers.idle",
+                        "account-shares.created",
+                        "account-shares.returned",
+                        "account-shares.recalled",
+                        "account-shares.failed",
+                        "account-transfers.completed",
+                        "account-transfers.failed",
+                        "webhooks.failed",
+                        "email-accounts.connected",
+                        "email-accounts.reconnect-required",
+                        "email-accounts.sending-paused",
+                        "email-accounts.sending-resumed",
+                        "email-accounts.disconnected",
+                        "email-accounts.deleted",
+                        "email-accounts.sync-completed",
+                        "email-messages.received",
+                        "email-messages.sent",
+                        "email-messages.bounced",
+                        "email-messages.complained",
+                        "email-messages.failed",
+                        "email-messages.deleted",
+                        "email-threads.updated",
+                        "email-engagements.opened",
+                        "email-engagements.clicked",
+                        "email-engagements.unsubscribed",
+                        "email-account-health.snapshot-captured",
+                        "email-account-health.score-critical",
+                        "email-suppressions.created",
+                        "email-suppressions.deleted",
+                        "email-tracking-domains.verified",
+                        "email-tracking-domains.failed",
+                        "email-sending-domains.verified",
+                        "email-sending-domains.failed",
+                        "mass-actions.created",
+                        "mass-actions.paused",
+                        "mass-actions.resumed",
+                        "mass-actions.settled"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "payload",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source_service",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "event_source_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "trace_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "emitted_at",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:40"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 40,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/webhooks/{sid}/rotate-secret",
+            "controller": "App\\Entities\\Webhook\\InternalWebhookController",
+            "action": "rotateSecret",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "GET",
+            "uri": "live",
+            "controller": "App\\Http\\Controllers\\HealthController",
+            "action": "live",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "GET",
+            "uri": "metrics",
+            "controller": "App\\Http\\Controllers\\HealthController",
+            "action": "metrics",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "GET",
+            "uri": "ready",
+            "controller": "App\\Http\\Controllers\\HealthController",
+            "action": "ready",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        }
+    ]
+}

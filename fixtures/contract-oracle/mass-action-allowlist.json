@@ -1,0 +1,11 @@
+{
+  "_comment": "Public /api routes the backend reports as mass_action: true and that NO MCP tool covers. Read by tests/contract-parity.test.ts (mass-action parity, backend -> TS direction). A mass-action route is the dangerous class: it is dispatchable over filter/targets[] and fans out one call into thousands, so 'the backend has it, we forgot the tool' must never pass silently. Every such route is either covered by a tool that declares massAction, or named here with the reason it is not. Adding a line is a deliberate, reviewable act: it records debt, it does not excuse it. An entry that stops applying (route retired, mass_action dropped, or a tool now covers it) FAILS the gate, so this list can only shrink. Regenerate the oracle (pnpm oracle:refresh) before touching it.",
+  "_keys": {
+    "route": "METHOD uri, exactly as it appears in {service}.contract.json routes[] (no leading slash).",
+    "reason": "One line: why no tool covers it yet, and what would clear the entry."
+  },
+  "linkedin": [],
+  "orchestration": [],
+  "email": [],
+  "id": []
+}

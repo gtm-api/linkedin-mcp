@@ -1,0 +1,19 @@
+{
+  "_comment": "A baseline may only ever DECREASE: lower it the moment coverage improves, never raise it to make a red suite green. Per service it is the number of public api/ routes (uri starts with api/, not #[InternalMethod]) that carry an #[ApiMethod] operation and that no MCP tool covers, measured against {service}.contract.json by tests/coverage-gate.test.ts. 0 means full coverage.",
+  "linkedin": {
+    "baseline": 0,
+    "_debt": "None: full coverage. Was 13 until 2026-07-27, when the auto-scrape surface shipped its MCP tools and closed the last gap: mcp.linkedin/linkedin_auto_scrapes (10 routes: create, search, get, update, delete, pause, resume, run-now, set-mass-action, unset-mass-action), mcp.linkedin/linkedin_auto_scrape_runs (2: search, get) and mcp.linkedin/linkedin_auto_scrape_results (1: search). The 3 linkedin-posting routes (create-post, comment, react) used to sit here too and were covered earlier by mcp.linkedin/linkedin_posting."
+  },
+  "orchestration": {
+    "baseline": 0,
+    "_debt": "None: full coverage. Was 9 until 2026-07-27, when mcp.orchestration/mass_actions shipped the 9 parent routes (search, get, create, delete, preview, metrics, pause, resume, release) and closed the last gap. Was 11 earlier the same day, before mcp.orchestration/mass_action_items covered the 2 child routes. Was 19 until 2026-07-26, when 8 (api/example-entity) were paid off the only way that surface ever could be - the service.empty ExampleEntity bundle was DELETED from gtm.service.orchestration, routes and table included."
+  },
+  "id": {
+    "baseline": 0,
+    "_debt": "None: full coverage. Was 5 until 2026-07-27, when mcp.id/account_shares shipped the whole account-shares group (search, list-received, create, recall, return) and closed the last gap; the two mass-action routes (recall, return) came off fixtures/contract-oracle/mass-action-allowlist.json in the same change, because a waiver that outlives the tool it was waiting for hides the next drift instead of recording debt. The 4 account-transfers routes were never counted and still are not: they carry no #[ApiMethod], so they are not an MCP surface at all."
+  },
+  "email": {
+    "baseline": 44,
+    "_debt": "The WHOLE public surface of gtm.service.email: 44 routes, 13 of them ACTION, none covered because there is no @gtm/mcp-email package at all. The gates carry email with an empty package set (tests/coverage-gate.test.ts, oracle-freshness.test.ts, contract-parity.test.ts) rather than skipping the service, so this number is measured the same way as every other and the debt is counted instead of invisible. Baseline added 2026-07-27; before that the service had no ratchet entry and its 44 uncovered routes counted as zero. Clears one package at a time: each MCP package authored here lowers the baseline by the routes it covers."
+  }
+}

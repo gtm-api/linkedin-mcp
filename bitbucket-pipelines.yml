@@ -1,0 +1,125 @@
+# gtm.mcp CI. Bitbucket Pipelines, same platform as the PHP service repos
+# (product/deployment/gtm.deployment.ansible/ci/README.md: each repo carries its
+# own full pipeline and evolves it freely).
+#
+# IMAGE. The service repos declare `image:` per step because their image name is
+# the ${CI_IMAGE} variable, and a top-level `image: ${CI_IMAGE}` fails pipeline
+# validation whenever that variable is unset. This repo needs no custom image, so
+# a pinned public one sits at the top level. Keep it a LITERAL, never a variable,
+# and the same warning applies the day a deploy step lands here.
+#
+# node:24-bookworm, not -slim: git has to be in the image (Pipelines clones with
+# it, and ci/fetch-corpus.sh clones the umbrella repo with it). Node 24 is the
+# LTS line and strips TypeScript types natively, which bin/openapi-public.sh
+# depends on: it runs the generator through bare `node` with only a resolver
+# hook, no bundler. Node 22 (the floor in package.json engines) would not.
+#
+# WHAT RUNS HERE
+#   ci/setup.sh                pnpm pinned to package.json packageManager, then
+#                              pnpm install --frozen-lockfile
+#   pnpm typecheck             tsc over every workspace package
+#   pnpm test                  the offline gate suite: contract-parity,
+#                              oracle-freshness, coverage-gate, step-eligibility,
+#                              research-parity, openapi-public-drift, dash-lint,
+#                              worker-boot, plus the runtime unit tests
+#   pnpm openapi:public:check  the committed public spec still matches the registry
+#
+# WHAT DOES NOT RUN HERE, AND WHY
+#   pnpm oracle:check     Regenerates fixtures/contract-oracle/*.contract.json FROM
+#                         THE LIVE BACKENDS: four Laravel services on Docker, each
+#                         with its own DB. CI has none of that, and no reviewer can
+#                         fix that failure from the diff in front of them, so it
+#                         would be permanent red noise. It stays a workstation gate,
+#                         named in DEPLOY.md (first line of the deploy checklist)
+#                         and in the pre-push hook (`pnpm hooks:install`). The half
+#                         of the question that IS answerable offline is gated here:
+#                         oracle-freshness and contract-parity hold the committed
+#                         fixtures against this repo's TypeScript on every push.
+#                         What neither they nor CI can catch is a fixture that went
+#                         stale against a backend that moved. Only oracle:check can.
+#   pnpm test:e2e         RUN_E2E=1 calls every safe read tool through a RUNNING
+#                         worker against the live backends, with a seeded team and
+#                         a JWT minted by artisan. Same reason.
+#   pnpm lint             Identical work to `pnpm typecheck`: every package's lint
+#                         script is the same `tsc --noEmit -p tsconfig.json`.
+#   the OAS validator     bin/openapi-public.sh normally ends by running
+#                         gtm.openapi.tech/_tools/validate.py. That validator, its
+#                         requirements.txt and its Python venv live in a THIRD repo,
+#                         and it already runs on the workstation every time the spec
+#                         is generated (write mode validates too, and refuses to run
+#                         without it). CI sets SKIP_VALIDATE=1 and keeps the half
+#                         this repo owns: drift against the Zod registry.
+#
+# CROSS REPO INPUT. Two gates read files that live in the umbrella repo
+# (gtm-api/gtm.ai), resolved relative to this repo root because a workstation has
+# gtm.mcp at <umbrella>/product/mcp/gtm.mcp:
+#   ../../research                    tests/research-parity.test.ts
+#   ../../openapi/gtm.openapi.public  tests/openapi-public-drift.test.ts and
+#                                     bin/openapi-public.sh
+# ci/fetch-corpus.sh rebuilds that offset from a sparse clone. It needs read access
+# to gtm.ai (SSH key on this repo, or a read-scoped token in UMBRELLA_TOKEN), and it
+# fails loudly rather than skipping when it cannot get it: a gate that silently
+# stops reading its corpus is worse than one that is red. Consequence to know
+# about: a tool change here that also needs a research edit or a regenerated public
+# spec goes green only once that change is on gtm.ai master. Land the umbrella side
+# first. DEPLOY.md has the setup and the ordering rule.
+
+image: node:24-bookworm
+
+definitions:
+  caches:
+    # Kept out of the clone deliberately: tests/dash-lint.test.ts walks every text
+    # file under the repo root, so a package store inside it would fail the gate on
+    # third-party punctuation. ci/setup.sh passes the same path to --store-dir.
+    pnpm-store:
+      key:
+        files:
+          - pnpm-lock.yaml
+      path: /opt/pnpm-store
+
+  steps:
+    - step: &typecheck
+        name: Typecheck
+        caches:
+          - pnpm-store
+        script:
+          - bash ci/setup.sh
+          - pnpm typecheck
+
+    - step: &gates
+        name: Gates (vitest)
+        caches:
+          - pnpm-store
+        script:
+          - bash ci/setup.sh
+          - bash ci/fetch-corpus.sh
+          - pnpm test
+
+    - step: &openapi
+        name: OpenAPI public drift
+        caches:
+          - pnpm-store
+        script:
+          - bash ci/setup.sh
+          - bash ci/fetch-corpus.sh
+          # Runs the generator CLI under bare node, which the vitest copy of this
+          # assertion does not: vitest has its own transform, so this step is also
+          # what keeps the command DEPLOY.md tells people to run executable.
+          - SKIP_VALIDATE=1 pnpm openapi:public:check
+
+pipelines:
+  pull-requests:
+    '**':
+      - parallel:
+          - step: *typecheck
+          - step: *gates
+          - step: *openapi
+
+  # A push straight to master skips the PR pipeline, and this repo has no branch
+  # protection yet, so run the same three there.
+  branches:
+    master:
+      - parallel:
+          - step: *typecheck
+          - step: *gates
+          - step: *openapi

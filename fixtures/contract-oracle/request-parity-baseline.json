@@ -1,0 +1,629 @@
+{
+  "_comment": [
+    "REQUEST-PARITY BASELINE. Read by the unknown-key gate in tests/contract-parity.test.ts:",
+    "every inputSchema key the route rules() does not declare is either fixed on the tool or listed",
+    "here with the reason it is not. IT MAY ONLY SHRINK. An entry that stopped drifting FAILS the",
+    "gate and prints the line to delete, exactly like ratchet.json and the two allow-lists next to it,",
+    "so the list cannot quietly grow into a blanket skip. Adding a line is a deliberate, reviewable act:",
+    "it records debt, it does not excuse it.",
+    "",
+    "The other three request gates (required-field, bound, enum) carry NO baseline, by design: their",
+    "drift was driven to zero on 2026-07-27 and every one of those classes is a tool-side fix.",
+    "",
+    "What is in here today, by class:",
+    "1. 89 metrics filter axes. The 8 *_metrics tools reuse their entity search filter, while each",
+    "   {Entity}MetricsRequest declares a much narrower set and the metrics service reads hand-picked",
+    "   keys off input(filter). Those axes are ignored, which is a silent wrong answer rather than a",
+    "   422. Narrowing the tools needs the backend to agree with itself first: LinkedinAccountActivityLog",
+    "   MetricsRequest declares only filter.linkedin_account_sid while its service also reads filter.status.",
+    "2. 14 account-share filter operators. The SearchRequest enumerates .eq / .in per field; FilterOp",
+    "   accepts the whole operator set and McpFormRequest reads input(filter), so .ne / .nin / .is_null",
+    "   are applied but unvalidated.",
+    "3. 7 include params the SearchRequest never declares. Four work anyway (the controller reads",
+    "   input(include)); three name documented relations no controller builds. Nine more of this class",
+    "   were fixed instead, with .omit({ include: true }), where the tool named no relation at all.",
+    "4. 4 linkedin_tracked_post_sid inputs. The research file documents the XOR with post; the backend",
+    "   implements only post since the tracked-post entity moved to gs.service.signals.",
+    "5. 4 singles: the antidetect BYO-proxy credential pair, one api-keys filter axis, one connection-",
+    "   requests filter axis, and the notifications metrics group_by the service ignores."
+  ],
+  "unknown_keys": {
+    "linkedin": [
+      {
+        "tool": "create_antidetect_browser",
+        "path": "custom_proxy_config.password",
+        "reason": "AntidetectBrowserCreateRequest enumerates ip/port/mode of the proxy value object and omits the credential pair; the controller reads input(custom_proxy_config) whole and persists it, so the credentials travel unvalidated"
+      },
+      {
+        "tool": "create_antidetect_browser",
+        "path": "custom_proxy_config.username",
+        "reason": "AntidetectBrowserCreateRequest enumerates ip/port/mode of the proxy value object and omits the credential pair; the controller reads input(custom_proxy_config) whole and persists it, so the credentials travel unvalidated"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.action_type",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.created_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.deleted_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.duration_ms",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.error_code",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.status",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.sync_run_sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.target_ln_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.target_ln_member_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.target_nickname",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.target_sn_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.trace_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_account_activity_log_metrics",
+        "path": "filter.updated_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.created_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.deleted_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.last_check_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.ln_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.ln_member_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.nickname",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.note",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.received_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.removal_kind",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.sn_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_invitations_metrics",
+        "path": "filter.updated_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.created_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.deleted_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.ln_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.ln_member_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.nickname",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.removal_kind",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.resend_available_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.sent_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.sn_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_connection_requests_metrics",
+        "path": "filter.updated_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.conversation_hash",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.created_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.deleted_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.event_count",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.is_muted",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.last_activity_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.last_message_sync_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.last_stored_message_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.ln_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.ln_member_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.messenger_type",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.nickname",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.q",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.sn_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_conversations_metrics",
+        "path": "filter.updated_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.automation",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.created_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.deleted_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.linkedin_conversation_sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.linkedin_type",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.ln_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.ln_member_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.message_hash",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.messenger_type",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.nickname",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.q",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.sent_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.sn_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.type",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_linkedin_messages_metrics",
+        "path": "filter.updated_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "scrape_linkedin_get_post_commenters",
+        "path": "linkedin_tracked_post_sid",
+        "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
+      },
+      {
+        "tool": "scrape_linkedin_get_post_comments",
+        "path": "linkedin_tracked_post_sid",
+        "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
+      },
+      {
+        "tool": "scrape_linkedin_get_post_reactors",
+        "path": "linkedin_tracked_post_sid",
+        "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
+      },
+      {
+        "tool": "scrape_linkedin_get_post_resharers",
+        "path": "linkedin_tracked_post_sid",
+        "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
+      },
+      {
+        "tool": "search_linkedin_account_quota_hits",
+        "path": "include",
+        "reason": "the tool offers a documented include enum that the SearchRequest does not declare and the controller does not build; dropping it would remove documented relations, so the gap belongs to the backend"
+      },
+      {
+        "tool": "search_linkedin_account_smart_limits",
+        "path": "include",
+        "reason": "the tool offers a documented include enum that the SearchRequest does not declare and the controller does not build; dropping it would remove documented relations, so the gap belongs to the backend"
+      },
+      {
+        "tool": "search_linkedin_account_snapshots",
+        "path": "include",
+        "reason": "the tool offers a documented include enum that the SearchRequest does not declare and the controller does not build; dropping it would remove documented relations, so the gap belongs to the backend"
+      },
+      {
+        "tool": "search_linkedin_auto_scrape_runs",
+        "path": "include",
+        "reason": "the controller reads input(include) and builds the included block, but the SearchRequest declares no include rule: backend under-declaration, the param works"
+      },
+      {
+        "tool": "search_linkedin_auto_scrapes",
+        "path": "include",
+        "reason": "the controller reads input(include) and builds the included block, but the SearchRequest declares no include rule: backend under-declaration, the param works"
+      },
+      {
+        "tool": "search_linkedin_connection_requests",
+        "path": "filter.updated_at",
+        "reason": "LinkedinConnectionRequestSearchRequest omits updated_at while the Filter class accepts it and the controller applies it through input(filter)"
+      }
+    ],
+    "id": [
+      {
+        "tool": "get_billing_transactions_metrics",
+        "path": "filter.billed_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_billing_transactions_metrics",
+        "path": "filter.created_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_billing_transactions_metrics",
+        "path": "filter.invoice_number",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_billing_transactions_metrics",
+        "path": "filter.paddle_transaction_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_billing_transactions_metrics",
+        "path": "filter.sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_credit_transactions_metrics",
+        "path": "filter.confirmed_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_credit_transactions_metrics",
+        "path": "filter.created_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_credit_transactions_metrics",
+        "path": "filter.reference_sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_credit_transactions_metrics",
+        "path": "filter.request_id",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_credit_transactions_metrics",
+        "path": "filter.sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.created_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.deleted_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.delivered_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.entity_sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.failed_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.scheduled_at",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.team_sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "filter.user_sid",
+        "reason": "metrics reuses the search filter schema; the MetricsRequest does not declare this axis and the metrics service reads hand-picked keys, so it is neither validated nor applied (silently ignored, not a 422)"
+      },
+      {
+        "tool": "get_notifications_metrics",
+        "path": "group_by",
+        "reason": "NotificationMetricsRequest declares no group_by rule; the service groups on its own fixed columns, so the axis the tool offers is ignored"
+      },
+      {
+        "tool": "list_received_account_shares",
+        "path": "filter.channel.in",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "list_received_account_shares",
+        "path": "filter.end_reason.in",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "list_received_account_shares",
+        "path": "filter.end_reason.is_null",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "list_received_account_shares",
+        "path": "filter.failure_reason.in",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "list_received_account_shares",
+        "path": "filter.failure_reason.is_null",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "list_received_account_shares",
+        "path": "filter.status.ne",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "list_received_account_shares",
+        "path": "filter.status.nin",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "search_account_shares",
+        "path": "filter.channel.in",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "search_account_shares",
+        "path": "filter.end_reason.in",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "search_account_shares",
+        "path": "filter.end_reason.is_null",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "search_account_shares",
+        "path": "filter.failure_reason.in",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "search_account_shares",
+        "path": "filter.failure_reason.is_null",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "search_account_shares",
+        "path": "filter.status.ne",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "search_account_shares",
+        "path": "filter.status.nin",
+        "reason": "AccountShareSearchRequest enumerates only the operators it validates on this field; FilterOp::fromInput accepts the full set and McpFormRequest reads input(filter), so the operator is applied but unvalidated"
+      },
+      {
+        "tool": "search_api_keys",
+        "path": "filter.created_by_actor_sid",
+        "reason": "ApiKeySearchRequest omits this axis while ApiKeyMetricsRequest declares it and ApiKeyFilter accepts it; the search controller applies it through input(filter)"
+      },
+      {
+        "tool": "search_api_keys",
+        "path": "include",
+        "reason": "the controller reads input(include) and builds the included block, but the SearchRequest declares no include rule: backend under-declaration, the param works"
+      }
+    ],
+    "orchestration": [
+      {
+        "tool": "search_mass_actions",
+        "path": "include",
+        "reason": "the controller reads input(include) and builds the included block, but the SearchRequest declares no include rule: backend under-declaration, the param works"
+      }
+    ],
+    "email": []
+  }
+}

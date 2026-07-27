@@ -1,0 +1,31 @@
+{
+  "name": "@gtm/mcp-openapi",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@asteasolutions/zod-to-openapi": "7.3.4",
+    "@gtm/mcp-id": "workspace:*",
+    "@gtm/mcp-linkedin": "workspace:*",
+    "@gtm/mcp-orchestration": "workspace:*",
+    "@gtm/mcp-runtime": "workspace:*",
+    "@gtm/mcp-shared": "workspace:*",
+    "@gtm/mcp-support": "workspace:*",
+    "yaml": "2.8.1",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run --passWithNoTests",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  }
+}

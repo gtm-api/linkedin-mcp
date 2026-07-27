@@ -1,0 +1,42 @@
+# gtm.mcp CI on GitHub Actions - the public-repo port of bitbucket-pipelines.yml.
+#
+# WHAT RUNS HERE
+#   ci/setup.sh     pnpm pinned to package.json packageManager, frozen install
+#   pnpm typecheck  tsc over every workspace package
+#   offline tests   the gate suite MINUS the two corpus gates (below)
+#
+# WHAT DOES NOT RUN HERE, AND WHY
+#   research-parity + openapi-public-drift  Both read the PRIVATE umbrella repo
+#     (../../research and ../../openapi/gtm.openapi.public on a workstation;
+#     ci/fetch-corpus.sh in Bitbucket CI). This repo is public: cloning the
+#     corpus here would need a secret to a private repo AND would print private
+#     research content into public Actions logs on any diff. They stay
+#     workstation gates, enforced by the pre-push hook (pnpm hooks:install).
+#   pnpm openapi:public:check  Same umbrella dependency, same home.
+#   pnpm oracle:check / test:e2e  Need the live Laravel backends; workstation
+#     gates, named in DEPLOY.md. Unchanged from the Bitbucket setup.
+#
+# node:24-bookworm for the same reason as the Bitbucket image: git in the image
+# and native TS type-stripping for bin/openapi-public.sh (not used here, kept
+# for parity so local expectations hold).
+
+name: ci
+on:
+  push:
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    container: node:24-bookworm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup (pinned pnpm, frozen install)
+        run: bash ci/setup.sh
+      - name: Typecheck (all workspace packages)
+        run: pnpm typecheck
+      - name: Tests in non-corpus packages
+        run: pnpm turbo test --filter='!@gtm/mcp-tests'
+      - name: Offline gate suite (corpus gates excluded, see header)
+        working-directory: tests
+        run: pnpm exec vitest run --exclude '**/research-parity.test.ts' --exclude '**/openapi-public-drift.test.ts'

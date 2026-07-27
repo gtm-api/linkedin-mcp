@@ -1,0 +1,20 @@
+# Copy to .dev.vars (gitignored) for local `wrangler dev`.
+# Base URLs are the service roots BEFORE the /api prefix.
+# Locally the services are reached directly (no /{service}/v4 gateway prefix).
+ENV_NAME=local
+LINKEDIN_BASE_URL=http://localhost:8020
+ID_BASE_URL=http://localhost:8021
+ORCHESTRATION_BASE_URL=http://localhost:8025
+
+# OAuth resource-server config (used from Stage 4 on).
+AUTH_ISSUER=http://localhost:8021
+MCP_RESOURCE_URL=http://localhost:8788/mcp
+
+# AUTH_MODE=dev accepts locally-minted `./dev artisan jwt:fake` bearers and
+# relaxes the issuer check. NEVER set dev in deployed environments.
+AUTH_MODE=dev
+
+BACKEND_TIMEOUT_MS=25000
+RESPONSE_CHAR_BUDGET=48000
+
+# PREVIEW_TOKEN_SECRET=<32+ random bytes>   # required once the preview gate lands (Stage 1)

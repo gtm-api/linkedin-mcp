@@ -1,0 +1,331 @@
+// Entity: Antidetect Browser (gtm.service.linkedin)
+// Source of truth: product/research/gtm.service.linkedin/entities/antidetect_browsers.md
+// Format: registry v2, where each tool carries route metadata so the generic
+// dispatcher can drive it. 8 tools (the antidetect-browsers route group),
+// mounted on linkedin.browsers alongside proxies / logs / cloud-browsers /
+// cloud-browser-sessions.
+
+import { z } from 'zod';
+import type { ToolDefinition } from '@gtm/mcp-runtime/types';
+import {
+  HandoverRoleEnum,
+  filterOp,
+  usageMetaField,
+  AccessIdentityValue,
+  McpActionResponse,
+  McpCreateResponse,
+  McpCascadeDeleteResponse,
+  McpCascadeDeleteRequestSchema,
+  McpGetRequestSchema,
+  McpGetResponse,
+  McpSearchRequestSchema,
+  McpSearchResponse,
+} from '@gtm/mcp-shared';
+
+const SID = z.string().length(18).startsWith('ab_br_')
+  .describe('Antidetect browser sid (ab_br_…).');
+const PROXY_SID = z.string().length(18).startsWith('ab_px_')
+  .describe('Antidetect browser proxy sid (ab_px_…).');
+const ACCESS_KEY = z.string().length(18).startsWith('cb_ak_')
+  .describe('Cloud-browser access key (cb_ak_…).');
+
+// Owner + vendor enums mirror the create FormRequest (only `gologin` is wired).
+const BrowserOwner = z.enum(['getsales', 'customer', 'mirror_profiles']);
+const VendorProvider = z.enum(['gologin', 'multilogin', 'adspower', 'dolphin']);
+
+// AntidetectBrowserStatusEnum, in its PHP order. Named once and reused by the
+// item projection and the status filter so the two cannot drift apart.
+const AntidetectBrowserStatus = z.enum([
+  'stopped', 'queued_to_start', 'initializing', 'running', 'idle',
+  'queued_to_stop', 'start_issue', 'running_issue', 'login_issue',
+  'error_investigation', 'maintenance', 'shared_out', 'subscription_required',
+]);
+
+// Customer bring-your-own proxy tuple (forbidden for getsales-owned browsers).
+const CustomProxyConfig = z.object({
+  ip: z.string().describe('Proxy host.'),
+  port: z.number().int().min(1).max(65535),
+  username: z.string().optional(),
+  password: z.string().optional(),
+  mode: z.enum(['http', 'socks4', 'socks5']).optional().describe('Default http.'),
+}).describe('Custom proxy connection tuple (customer BYO path).');
+
+// Tight item projection: every AntidetectBrowserDomain field (research §Domain),
+// correct type + nullability. passthrough tolerates future additions.
+// custom_proxy_config is deliberately ABSENT: it is a persistence-only column
+// (backend SERVICE_CONVENTIONS §M2) because it carries a plaintext password, so
+// it rides no Domain and no read path serializes it: not search, not get, not
+// an Include, not even the create envelope that just accepted it on input.
+// Credentials on the bound-profile path are all NULL.
+const AntidetectBrowser = z.object({
+  sid: z.string(),
+  team_sid: z.string(),
+  // Lifecycle linkage
+  linkedin_account_sid: z.string().nullable(),
+  automation_server_sid: z.string().nullable(),
+  // Sharing linkage (AntidetectBrowserDomain, sharing rework). Non-null only
+  // while the browser is inside a share; share_role says which side of it this
+  // row is, which is what tells a `shared_out` browser apart from a borrowed one.
+  account_share_sid: z.string().nullable(),
+  share_role: HandoverRoleEnum.nullable(),
+  // Identity / ownership
+  vendor_provider: VendorProvider,
+  vendor_name: z.string().nullable(),
+  vendor_profile_id: z.string().nullable(),
+  browser_owner: BrowserOwner,
+  // Operational state: AntidetectBrowserStatusEnum, all 13 cases. The last two
+  // came with the sharing rework and are not operational states at all: a
+  // browser parked for a share reads shared_out, and one whose team lost its
+  // plan reads subscription_required. Both are terminal for automation, so an
+  // agent that cannot parse them mis-reads a parked browser as a live one.
+  status: AntidetectBrowserStatus,
+  error_reason: z.string().nullable(),
+  fail_count: z.number(),
+  last_fail_at: z.string().nullable(),
+  logout_count: z.number(),
+  last_logout_at: z.string().nullable(),
+  last_start_at: z.string().nullable(),
+  last_health_check_at: z.string().nullable(),
+  last_activity_at: z.string().nullable(),
+  // Proxy assignment (XOR: exactly one populated on managed browsers)
+  antidetect_browser_proxy_sid: z.string().nullable(),
+  proxy_country_code: z.string().nullable(),
+  // Cloud-browser access
+  cloud_browser_access: z.array(z.object({
+    key: z.string(),
+    till: z.string(),
+    max_connects: z.number().nullable(),
+    allowed_ips: z.array(z.string()).nullable(),
+    allowed_countries: z.array(z.string()).nullable(),
+  })),
+  // Audit
+  created_by: AccessIdentityValue,
+  deleted_by: AccessIdentityValue.nullable(),
+  // Timestamps
+  created_at: z.string(),
+  updated_at: z.string(),
+  deleted_at: z.string().nullable(),
+}).passthrough();
+
+// Counts block: concrete shape from research (search per-tool block).
+const AntidetectBrowserCounts = z.object({
+  total_count: z.number(),
+  groups: z.record(z.unknown()), // dynamic breakdown, object even when empty
+}).passthrough();
+
+const AntidetectBrowserFilter = z.object({
+  sid: filterOp(z.string(), ['eq', 'in']).optional(),
+  status: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']).optional(),
+  browser_owner: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']).optional(),
+  vendor_provider: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']).optional(),
+  vendor_name: filterOp(z.string(), ['eq', 'in']).optional()
+    .describe('Vendor profile display name (the supported name lookup path).'),
+  vendor_profile_id: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
+  linkedin_account_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
+  automation_server_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
+    .describe('is_null:true = ops scan for browsers not assigned to a server.'),
+  antidetect_browser_proxy_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
+  proxy_country_code: filterOp(z.string(), ['eq', 'in']).optional(),
+  fail_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
+  logout_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
+  last_start_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
+  last_fail_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
+  last_logout_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
+  created_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
+  updated_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
+  deleted_at: filterOp(z.string(), ['is_null', 'gte', 'lte']).optional()
+    .describe('Default scope is { is_null: true } (live browsers).'),
+}).partial();
+
+const AntidetectBrowserInclude = z.enum([
+  'linkedin_account',
+  'antidetect_browser_proxy',
+  'antidetect_browser_logs',
+]);
+
+const AntidetectBrowserSortable = z.enum([
+  'created_at', 'updated_at', 'last_start_at', 'last_fail_at',
+  'last_logout_at', 'fail_count', 'logout_count', 'vendor_name',
+]);
+
+const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
+const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
+const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
+
+const base = {
+  service: 'linkedin',
+  entity: 'antidetect_browsers',
+  mount: 'linkedin.browsers',
+} as const;
+
+export const antidetectBrowsersTools: ToolDefinition[] = [
+  {
+    ...base,
+    name: 'search_antidetect_browsers',
+    description:
+      'List antidetect browsers on the team with filters (name lookup via the vendor_name filter, eq/in), sorting and cursor pagination. Live browsers by default (deleted_at.is_null:true). Returns a counts block of predicate tallies; include[] can eager-load linkedin_account, antidetect_browser_proxy and antidetect_browser_logs. Use this to find a browser sid before run / stop / delete.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/search' },
+    operation: 'search',
+    envelope: 'search',
+    availability: 'ga',
+    dangerous: false,
+    creditable: false,
+    inputSchema: McpSearchRequestSchema(AntidetectBrowserFilter, AntidetectBrowserInclude, AntidetectBrowserSortable),
+    outputSchema: McpSearchResponse(AntidetectBrowser, undefined, AntidetectBrowserCounts),
+    annotations: { title: 'Search antidetect browsers', ...RO },
+  },
+  {
+    ...base,
+    name: 'get_antidetect_browser',
+    description: 'Fetch a single antidetect browser by sid, with optional eager-loaded relations.',
+    toolClass: 'trivial',
+    route: { service: 'linkedin', method: 'GET', pathTemplate: '/api/antidetect-browsers/{sid}', sidParam: 'sid' },
+    operation: 'get',
+    envelope: 'get',
+    availability: 'ga',
+    dangerous: false,
+    creditable: false,
+    inputSchema: McpGetRequestSchema('ab_br_', AntidetectBrowserInclude),
+    outputSchema: McpGetResponse(AntidetectBrowser),
+    annotations: { title: 'Get antidetect browser', ...RO },
+  },
+  {
+    ...base,
+    name: 'create_antidetect_browser',
+    description:
+      'Provision an antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source (antidetect_browser_proxy_sid | proxy_country_code | custom_proxy_config). Bind an existing vendor_profile_id for the customer bring-your-own path (no proxy source then). DANGEROUS: creates real vendor + proxy infrastructure.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers' },
+    operation: 'create',
+    envelope: 'create',
+    availability: 'ga',
+    dangerous: true,
+    creditable: false,
+    inputSchema: z.object({
+      browser_owner: BrowserOwner.optional()
+        .describe('Omit to infer: vendor_profile_id present ⇒ customer, absent ⇒ getsales.'),
+      vendor_provider: VendorProvider.optional().describe('Default gologin (the only wired vendor).'),
+      vendor_profile_id: z.string().max(128).nullable().optional()
+        .describe('Bind an EXISTING vendor profile (BYO). Omit to mint a fresh one.'),
+      os: z.enum(['win', 'mac', 'lin', 'android']).optional().describe('OS for a freshly-minted profile (default win).'),
+      antidetect_browser_proxy_sid: PROXY_SID.optional().describe('Assign an existing pooled proxy.'),
+      proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy.'),
+      custom_proxy_config: CustomProxyConfig.optional(),
+      ...usageMetaField,
+    }),
+    outputSchema: McpCreateResponse(AntidetectBrowser),
+    annotations: { title: 'Create antidetect browser', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'run_antidetect_browser',
+    description:
+      'Start an antidetect browser session by sid. Two-phase: transitions to queued_to_start, dispatches to an automation server, then settles into initializing / running / start_issue. Identify the browser by its ab_br_ sid in the body.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/run' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    creditable: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ sid: SID, ...usageMetaField }),
+    outputSchema: McpActionResponse(AntidetectBrowser),
+    annotations: { title: 'Run antidetect browser', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'stop_antidetect_browser',
+    description:
+      'Stop an antidetect browser session by sid. Default is graceful (queued_to_stop → stopped on the node teardown confirmation); now:true commits stopped immediately and dispatches a best-effort teardown. Identify the browser by its ab_br_ sid in the body.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/stop' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    creditable: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      now: z.boolean().optional().describe('Emergency stop: commit stopped immediately.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(AntidetectBrowser),
+    annotations: { title: 'Stop antidetect browser', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'generate_cloud_browser_access_key',
+    description:
+      'Mint a cloud-browser access key (smart-link) on a browser so a user can sign into LinkedIn through the cloud browser. Returns the raw cb_ak_ key in result.access_key (shown once) AND result.public_connect_url, the ready-to-share link to hand to whoever signs the account in (no platform account needed on their side). Optional ttl_hours / max_connects / allowed_ips / allowed_countries scope the key. DANGEROUS: the link is a bearer secret granting remote browser access.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/generate-cloud-browser-access-key' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    creditable: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      ttl_hours: z.number().int().min(1).max(720).optional().describe('Key lifetime in hours (default 8; the link is a bearer secret, keep it short).'),
+      max_connects: z.number().int().min(1).max(1000).optional().describe('Max connect count before the key is spent.'),
+      allowed_ips: z.array(z.string().max(45)).optional().describe('IP allow-list checked at connect time.'),
+      allowed_countries: z.array(z.string().length(2)).optional().describe('ISO country allow-list checked at connect time.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(
+      AntidetectBrowser,
+      z
+        .object({
+          access_key: z.string(),
+          public_connect_url: z.string().describe('Shareable smart link carrying the key. Give this to the person signing the account in.'),
+        })
+        .passthrough(),
+    ),
+    annotations: { title: 'Generate cloud-browser access key', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'revoke_cloud_browser_access_key',
+    description:
+      'Revoke a cloud-browser access key on a browser. Pass the cb_ak_ key to revoke one; omit key to revoke EVERY key on the row. Only removes the key; live cloud-browser sessions are not force-disconnected. DANGEROUS: cuts off remote access.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/revoke-cloud-browser-access-key' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    creditable: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      key: ACCESS_KEY.nullable().optional().describe('Single key to revoke; omit to revoke all keys on the browser.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(AntidetectBrowser),
+    annotations: { title: 'Revoke cloud-browser access key', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'delete_antidetect_browser',
+    description:
+      'Decommission (soft-delete) a single antidetect browser by sid: outward, destructive, one-way through MCP. Variant B cascade: the bound linkedin-account is soft-deleted and pending plugin tasks transition to failed; the cascade block reports the counts. The vendor profile is left intact.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'DELETE', pathTemplate: '/api/antidetect-browsers/{sid}', sidParam: 'sid' },
+    operation: 'delete',
+    envelope: 'delete_cascade',
+    availability: 'ga',
+    dangerous: true,
+    creditable: false,
+    inputSchema: McpCascadeDeleteRequestSchema('ab_br_'),
+    outputSchema: McpCascadeDeleteResponse,
+    annotations: { title: 'Delete antidetect browser', ...DANGER },
+  },
+];

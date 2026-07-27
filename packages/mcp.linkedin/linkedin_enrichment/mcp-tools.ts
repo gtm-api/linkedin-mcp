@@ -1,0 +1,681 @@
+// Entity: LinkedIn Enrichment (gtm.service.linkedin)
+// Source of truth: product/research/gtm.service.linkedin/entities/linkedin_enrichment.md
+// Format: registry v2, where each tool carries route metadata so the generic
+// dispatcher can drive it. 19 verb-only tools on the /api/linkedin-enrichment/*
+// surface: one-shot, credit-metered pulls of ONE known target's OWN data.
+//
+// Stateless surface over the DataRequest ledger (kind='enrich'): every accepted
+// call is a thin pass through DataRequestExecutionService (§9.5 flagless executor
+// resolution, credits, cache, idempotency, §5.9 stub guard) and lands as one
+// ledger row, embedded in the response as `result.data_request`. Execution is
+// SYNC inline (≤120 s, §9.6); every response is a sync action envelope
+// (`async: true` never appears here: the controller uses mcpAction for all 19).
+//
+// 11 methods are live (GA); 8 ship as §5.9 blocked-on-plugin 501 stubs
+// (route + full validation, contract locked), availability: 'stub_501'. The
+// stub 501 is raised by DataRequestExecutionService when the method enum's
+// wireGetter() is null (DataRequestMethodEnum::isImplemented()).
+
+import { z } from 'zod';
+import type { ToolDefinition } from '@gtm/mcp-runtime/types';
+import { usageMetaField, McpActionResponse } from '@gtm/mcp-shared';
+
+// ─── Shared input fragments ────────────────────────────────────────────────
+
+// Executor + replay controls, shared by all 19 methods (creditable, §9.5).
+// There is NO use_credit flag: resolution is automatic (§9.5).
+const executorFields = {
+  linkedin_account_sid: z.string().length(18).startsWith('ln_ac_').nullable().optional()
+    .describe('Preferred executor account (ln_ac_…). OPTIONAL: given + enrichment bucket budget → own account, charged 0; given + bucket saturated → pool + credits; omitted → pool + credits. There is no use_credit flag: §9.5 resolution is automatic.'),
+  idempotency_key: z.string().max(128).nullable().optional()
+    .describe('Replay guard (team_sid, idempotency_key). A repeat with the same key returns the stored ledger outcome: no re-execution, no double charge.'),
+};
+
+// Person target: EXACTLY ONE of the two (both/neither → 422, backend-validated).
+const personTargetFields = {
+  profile_id: z.string().max(128).optional()
+    .describe('ln_id (ACoAA…) or sn_id (ACwAA…), interchangeable for dispatch. Provide profile_id XOR public_identifier.'),
+  public_identifier: z.string().max(100).optional()
+    .describe('Vanity slug from /in/…. Provide public_identifier XOR profile_id. On sub-record methods a slug-only call needs a stored URN (run person-lite-profile first) or is refused not_dispatchable.'),
+};
+
+// Pagination for sub-record list methods (wire offset cursor, opaque to callers).
+const pageFields = {
+  page_size: z.number().int().min(1).max(100).optional()
+    .describe('Items per page, 1..100 (wire default 10).'),
+  cursor: z.string().nullable().optional()
+    .describe('Opaque cursor: pass back paging.next_page_cursor verbatim; omitted = first page.'),
+};
+
+// Company target, company-profile only: URL, flat (v1).
+const companyTargetFields = {
+  company_url: z.string().max(2048)
+    .describe('https://www.linkedin.com/company/{slug}/ (or a Sales Nav company URL).'),
+};
+
+// Company target, company-posts only: NESTED and id-first. The wire getter has
+// no vanity addressing, so a bare company_url is accepted by validation and then
+// refused not_dispatchable; company_ln_id is the path that works. Exactly one of
+// the two (the FormRequest `prohibits` the other).
+const companyPostsTargetField = {
+  company: z.object({
+    company_ln_id: z.string().max(64).nullable().optional()
+      .describe('Numeric LinkedIn company id: the `company_id` returned by enrich_linkedin_company_profile. THIS is the dispatchable form.'),
+    company_url: z.string().max(512).startsWith('https://www.linkedin.com/').nullable().optional()
+      .describe('Vanity company URL. Ledgered, then refused not_dispatchable: only pass it if you deliberately want that. Provide company_ln_id instead.'),
+  }).describe('Company target; exactly one of company_ln_id / company_url (both or neither is a 422).'),
+};
+
+// ─── Shared output fragments ────────────────────────────────────────────────
+// Item projections tightened to the research field set (source of truth:
+// research linkedin_enrichment.md §MCP Tools) and cross-checked against the
+// actual emitted JSON in LinkedinEnrichmentController. Every item keeps a
+// trailing .passthrough() so unmodeled wire fields still validate. The paging
+// envelope stays loose: its wire key set is not modeled here (envelope, not item).
+
+// The kind="enrich" DataRequestDomain ledger row: its full field set is owned
+// by data_requests.md, so it stays loose here (not this surface's projection).
+const DataRequestRow = z.object({}).passthrough()
+  .describe('The kind="enrich" DataRequest ledger row (status / charged / served_from_cache / cached_from_sid). The public audit anchor for this call.');
+
+// Generic loose item, used for full-profile's RAW-WIRE truncated sub-record
+// heads, which diverge from the dedicated methods' projected shapes (the head
+// skills carry the wire `id`, head posts carry epoch-ms created_at).
+const LooseItem = z.object({}).passthrough();
+
+// Paged wrapper factory ({elements, paging}). The element shape is supplied per
+// method so each list validates its own item projection. Paging stays loose.
+const PagedList = (item: z.ZodTypeAny) => z.object({
+  elements: z.array(item),
+  paging: z.object({}).passthrough(),
+}).passthrough();
+
+// Canonical identifier quad (KNOWLEDGE §3) returned by person-addressed methods.
+const PersonRef = z.object({
+  ln_member_id: z.string().nullable(),
+  ln_id: z.string().nullable(),
+  sn_id: z.string().nullable(),
+  nickname: z.string().nullable(),
+}).passthrough();
+
+// person-experience item (row 50): raw-wire work-history row (no per-item projection).
+const ExperienceItem = z.object({
+  company_name: z.string().nullable(),
+  company_public_identifier: z.string().nullable(),
+  company_id: z.string().nullable(),
+  position: z.string().nullable(),
+  employment_type: z.string().nullable(),
+  location: z.string().nullable(),
+  start_date: z.string().nullable(),
+  end_date: z.string().nullable(),
+  description: z.string().nullable(),
+}).passthrough();
+
+// person-skills item (row 51): controller renames the wire `id` to `skill_id`.
+const SkillItem = z.object({
+  name: z.string(),
+  skill_id: z.string().nullable(),
+  urn: z.string().nullable(),
+  endorsement_count: z.number().nullable(),
+}).passthrough();
+
+// person-education item (row 52): native-slug, raw-wire education row.
+const EducationItem = z.object({
+  school_name: z.string().nullable(),
+  company_id: z.string().nullable(),
+  degree: z.string().nullable(),
+  field_of_study: z.string().nullable(),
+  start_date: z.string().nullable(),
+  end_date: z.string().nullable(),
+  description: z.string().nullable(),
+}).passthrough();
+
+// Author ref embedded in post + activity items.
+const PostAuthorRef = z.object({
+  name: z.string(),
+  headline: z.string().nullable(),
+  profile_id: z.string().nullable(),
+  public_identifier: z.string().nullable(),
+  profile_url: z.string().nullable(),
+  picture_url: z.string().nullable(),
+}).passthrough();
+
+// person-posts item (row 53): controller rewrites created_at (top-level + the
+// nested reshared_post) from epoch-ms to ISO 8601; every other field passes through.
+const PostItem = z.object({
+  activity_urn: z.string(),
+  post_urn: z.string().nullable(),
+  url: z.string().nullable(),
+  created_at: z.string().nullable(),
+  text: z.string(),
+  author: PostAuthorRef,
+  images: z.array(z.string()),
+  is_reshare: z.boolean(),
+  reshared_post: z.object({
+    activity_urn: z.string().nullable(),
+    url: z.string().nullable(),
+    created_at: z.string().nullable(),
+    text: z.string(),
+    author: PostAuthorRef,
+    images: z.array(z.string()),
+  }).passthrough().nullable(),
+  num_likes: z.number(),
+  num_comments: z.number(),
+  num_shares: z.number(),
+  num_impressions: z.number().nullable(),
+  reactions: z.record(z.number()),
+}).passthrough();
+
+// person-featured item (row 54): element of the bare wire array payload.
+const FeaturedItem = z.object({
+  type: z.string().nullable(),
+  url: z.string().nullable(),
+  activity_urn: z.string().nullable(),
+  title: z.string().nullable(),
+  subtitle: z.string().nullable(),
+  text: z.string().nullable(),
+  image_url: z.string().nullable(),
+  num_likes: z.number().nullable(),
+  num_comments: z.number().nullable(),
+}).passthrough();
+
+// person-full-profile result (row 49): scalar contract tightened (incl. the
+// picture_url→avatar_url rework); network_distance is STRIPPED by the controller
+// (executor-relative) so it is absent here. Sub-record heads stay loose: they are
+// RAW WIRE truncated heads, distinct from the dedicated methods' projected items.
+const FullProfileResult = z.object({
+  ln_member_id: z.string().nullable(),
+  ln_id: z.string().nullable(),
+  sn_id: z.string().nullable(),
+  nickname: z.string().nullable(),
+  full_name: z.string(),
+  headline: z.string().nullable(),
+  position: z.string().nullable(),
+  company_name: z.string().nullable(),
+  company_public_identifier: z.string().nullable(),
+  country: z.string().nullable(),
+  location: z.string().nullable(),
+  about: z.string().nullable(),
+  avatar_url: z.string().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  twitter: z.string().nullable(),
+  facebook: z.string().nullable(),
+  connections_number: z.number().nullable(),
+  followers_number: z.number().nullable(),
+  primary_language: z.string().nullable(),
+  supported_languages: z.array(z.string()),
+  has_open_profile: z.boolean().nullable(),
+  has_verified_profile: z.boolean().nullable(),
+  has_premium: z.boolean().nullable(),
+  experience: z.array(LooseItem),   // TRUNCATED raw-wire head; full list: person-experience
+  educations: z.array(LooseItem),   // raw-wire head; same data person-education projects
+  skills: z.array(LooseItem),       // TRUNCATED raw-wire head (carries wire `id`, not skill_id)
+  posts: z.array(LooseItem),        // recent raw-wire head (epoch-ms created_at, not ISO)
+  top_voices: z.array(LooseItem),   // followed Top Voices; open-ended wire shape
+  featured: z.array(LooseItem),     // pinned Featured head; raw-wire
+}).passthrough();
+
+// person-contact-info result (row 55 stub; reserved shape, finalizes with the plugin verb).
+const ContactInfoResult = z.object({
+  // Wire shape from LinkedinContactInfoMapper::fromWireProfile: singular email,
+  // typed phones/websites objects (richer than the flat string[] sketch); the wire
+  // does not parse address/birthday/connected_at, so they are not projected.
+  email: z.string().nullable(),
+  phones: z.array(z.object({ type: z.string().nullable(), number: z.string() }).passthrough()),
+  websites: z.array(z.object({ url: z.string(), category: z.string().nullable(), label: z.string().nullable() }).passthrough()),
+  twitter_handles: z.array(z.string()),
+}).passthrough();
+
+// person-languages item (row 56 stub; reserved shape).
+const LanguageItem = z.object({
+  name: z.string(),
+  proficiency: z.string().nullable(),
+}).passthrough();
+
+// person-certifications item (row 57 stub; reserved shape).
+const CertificationItem = z.object({
+  name: z.string(),
+  authority: z.string().nullable(),
+  license_number: z.string().nullable(),
+  issued_at: z.string().nullable(),
+  expires_at: z.string().nullable(),
+  url: z.string().nullable(),
+}).passthrough();
+
+// person-recommendations item (row 58 stub; reserved shape).
+const RecommendationItem = z.object({
+  direction: z.enum(['received', 'given']),
+  counterpart: PersonRef.extend({
+    full_name: z.string().nullable(),
+    headline: z.string().nullable(),
+  }),
+  relationship: z.string().nullable(),
+  text: z.string(),
+  created_at: z.string().nullable(),
+}).passthrough();
+
+// person-comment-activity item (row 59 stub; reserved shape).
+const CommentActivityItem = z.object({
+  comment_urn: z.string(),
+  activity_urn: z.string(),
+  post_url: z.string().nullable(),
+  post_author: PostAuthorRef.nullable(),
+  text: z.string(),
+  created_at: z.string().nullable(),
+}).passthrough();
+
+// person-reaction-activity item (row 60 stub; reserved shape).
+const ReactionActivityItem = z.object({
+  reaction_type: z.string(),
+  activity_urn: z.string(),
+  post_url: z.string().nullable(),
+  post_author: PostAuthorRef.nullable(),
+  post_text_preview: z.string().nullable(),
+  created_at: z.string().nullable(),
+}).passthrough();
+
+// person-interests item + grouped result (row 61 stub; reserved shape).
+const InterestItem = z.object({
+  name: z.string(),
+  url: z.string().nullable(),
+  followers_number: z.number().nullable(),
+}).passthrough();
+
+const InterestsResult = z.object({
+  influencers: z.array(InterestItem),
+  companies: z.array(InterestItem),
+  groups: z.array(InterestItem),
+  newsletters: z.array(InterestItem),
+  schools: z.array(InterestItem),
+}).passthrough();
+
+// company-profile result (row 70 stub; reserved shape).
+const CompanyProfileResult = z.object({
+  company_id: z.string().nullable(),
+  universal_name: z.string().nullable(),
+  name: z.string().nullable(),
+  url: z.string().nullable(),
+  website: z.string().nullable(),
+  industry: z.string().nullable(),
+  headquarters: z.string().nullable(),
+  employee_count_range: z.string().nullable(),
+  followers_number: z.number().nullable(),
+  founded_year: z.number().nullable(),
+  about: z.string().nullable(),
+  specialities: z.array(z.string()),
+  logo_url: z.string().nullable(),
+}).passthrough();
+
+// item is ALWAYS null on this stateless surface (controller passes item: null).
+const NullItem = z.null();
+
+// ─── Shared annotations ─────────────────────────────────────────────────────
+// Paid pulls: not read-only (they trigger a creditable fetch), not idempotent
+// (a repeat outside the cache TTL re-executes and re-charges), not destructive
+// (enrichment reads data). Matches research per-method annotations.
+const PAID = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
+
+const base = {
+  service: 'linkedin',
+  entity: 'linkedin_enrichment',
+  mount: 'linkedin.enrichment',
+} as const;
+
+const STUB = '⛔ NOT SHIPPED YET. Contract locked, capability not built; returns not_implemented, do not retry. ';
+
+export const linkedinEnrichmentTools: ToolDefinition[] = [
+  {
+    ...base,
+    name: 'enrich_linkedin_person_lite_profile',
+    description:
+      'Cheapest person read: existence check + full identifier resolution. THE tool for turning a vanity slug (/in/…) or a bare URN into the canonical identifier quad (ln_member_id + both URNs + nickname) that every deeper enrich and stored-domain join keys on. 1 credit, cached 24h. Does NOT surface relationship degree (executor-relative; use linkedin-connections.check-degree). Address by profile_id XOR public_identifier.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-lite-profile' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ profile: PersonRef.extend({ full_name: z.string() }), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person lite profile', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_full_profile',
+    description:
+      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, plus truncated heads of experience/education/skills/recent posts. 5 credits, cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-full-profile' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ profile: FullProfileResult, data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person full profile', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_experience',
+    description:
+      'Complete, paginated work history ("Show all experiences"), unlike the truncated head on full-profile. One call = one page; loop cursor until paging.next_page_cursor is absent. 2 credits/page, cached 7d. A public_identifier-only call needs a stored URN (run person-lite-profile first) or is refused not_dispatchable.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-experience' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...pageFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ experience: PagedList(ExperienceItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person experience', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_skills',
+    description:
+      'Complete, paginated skills list ("Show all skills") with endorsement counts (skill_id is the endorse handle). 2 credits/page, cached 7d. Use to see/reason over skills; to simply ENDORSE, use linkedin-accounts.endorse-skill (auto-discovers skills, no enrich credit). A public_identifier-only call needs a stored URN.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-skills' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...pageFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ skills: PagedList(SkillItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person skills', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_education',
+    description:
+      'Education history only, a subset projection of the full-profile wire call (NOT a stub: shares get-full-profile, no dedicated verb). 2 credits (vs 5 for the full profile), cached 7d under its own method key (a cached full profile does NOT satisfy it). Not paginated. public_identifier passes straight through (native slug support).',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-education' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ educations: z.array(EducationItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person education', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_posts',
+    description:
+      "Posts authored or reshared by the target, newest-first: the personalization goldmine before outreach. Reshares carry the original in reshared_post; created_at is ISO 8601. 2 credits/page, cached 7d. This is the target's OWN feed; to harvest who ENGAGED with a post use the scraping surface. A public_identifier-only call needs a stored URN.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-posts' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...pageFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ posts: PagedList(PostItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person posts', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_featured',
+    description:
+      "The Featured section: what the target chose to pin (posts, links, media). Small, cheap, high-signal for personalization: pinned content is what the person WANTS noticed. 1 credit, cached 7d. Not paginated. A public_identifier-only call needs a stored URN.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-featured' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ featured: z.array(FeaturedItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person featured', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_contact_info',
+    description:
+      'Contact details for ONE person: email, phones (typed, so HOME/WORK is kept, unlike the lossy flat `phone` on person-full-profile), websites and twitter handles. Cached 24h. IMPORTANT: LinkedIn reveals contacts to 1st-degree connections ONLY, so this runs from whichever of YOUR accounts is connected to the target (picked automatically, respecting limits; linkedin_account_sid is only a preference). It therefore never costs credits. If none of your accounts is connected it refuses 422 no_connected_account, so connect first (linkedin_connection_requests send), then retry after the invite is accepted. An empty block means the connected account still cannot see them.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-contact-info' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ contact_info: ContactInfoResult, data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person contact info', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_languages',
+    description:
+      STUB + 'The Languages section: spoken languages with self-declared proficiency. Cheap localization signal: write the opener in the prospect\'s native language. 1 credit, cached 7d.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-languages' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'stub_501',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ languages: z.array(LanguageItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person languages (not shipped)', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_certifications',
+    description:
+      STUB + 'Licenses & certifications: issuing authority, license number, validity window. Qualification/compliance signal for recruiting and technical ICP fit. 1 credit, cached 7d.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-certifications' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'stub_501',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ certifications: z.array(CertificationItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person certifications (not shipped)', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_recommendations',
+    description:
+      STUB + 'Received and given recommendations: who vouches for the target and in what words. Each counterpart\'s identifier quad makes the recommendation a lead-graph edge. 2 credits, cached 7d.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-recommendations' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'stub_501',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ recommendations: z.array(RecommendationItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person recommendations (not shipped)', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_comment_activity',
+    description:
+      STUB + "The target's recent comments across OTHER people's posts (activity feed → Comments): where the target spends attention, and warm entry points. 3 credits/page, cached 7d, paginated. The target's OWN posts are person-posts; the commenters OF a post are scraping.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-comment-activity' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'stub_501',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...pageFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ comments: PagedList(CommentActivityItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person comment activity (not shipped)', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_reaction_activity',
+    description:
+      STUB + "The target's recent reactions on OTHER people's posts (activity feed → Reactions): topical interest signal, cheaper to act on than comments. 3 credits/page, cached 7d, paginated. The reactors OF a post are scraping (get-post-reactors).",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-reaction-activity' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'stub_501',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...pageFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ reactions: PagedList(ReactionActivityItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person reaction activity (not shipped)', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_interests',
+    description:
+      STUB + 'The Interests section: followed influencers, companies, groups, newsletters, schools. Cheap ICP-fit and conversation-hook signal. 1 credit, cached 7d.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-interests' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'stub_501',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ interests: InterestsResult, data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person interests (not shipped)', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_services',
+    description:
+      STUB + 'The "Providing services" card (service-provider profiles): offered service categories. Complements scraping-side search-service-providers (that discovers providers, this reads one provider\'s own card). 1 credit, cached 7d.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-services' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'stub_501',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ services: z.array(z.string()), services_page_url: z.string().nullable(), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person services (not shipped)', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_company_profile',
+    description:
+      "One company page's own data: name, industry, size, HQ, about, website, followers. URL-addressed (ledgered input_kind='url'). 2 credits, cached 7d. To LIST a company's people use scraping (company-employees / company-decision-makers).",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/company-profile' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...companyTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ company: CompanyProfileResult, data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich company profile', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_company_posts',
+    description:
+      "The company page's own feed, newest-first: the company-side twin of person-posts (author = the company page). Addressed by NUMERIC company id, nested: {company:{company_ln_id}}. If all you have is a company URL or slug, call enrich_linkedin_company_profile first and take company_id off its result; passing {company:{company_url}} here validates and is then refused not_dispatchable, having still opened a ledger row. 2 credits/page, cached 7d, paginated.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/company-posts' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...companyPostsTargetField, ...pageFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ posts: PagedList(PostItem), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich company posts', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_post_details',
+    description:
+      STUB + "One post's own data: full text, author, media, engagement counters, per-reaction breakdown. Accepts activity_urn XOR url (a URL is resolved to the URN backend-side). 2 credits, cached 7d. WHO engaged is scraping (get-post-commenters / get-post-reactors / get-post-resharers).",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/post-details' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'stub_501',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      activity_urn: z.string().optional()
+        .describe('urn:li:activity:… . Provide activity_urn XOR url.'),
+      url: z.string().max(2048).optional()
+        .describe('Any post URL/shortlink; resolved to the URN backend-side. Provide url XOR activity_urn.'),
+      ...executorFields,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(NullItem, z.object({ post: PostItem, data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich post details (not shipped)', ...PAID },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_get_activity_urn_by_url',
+    description:
+      'Resolve any linkedin.com post URL (feed permalink, /posts/ slug, shortlink) to its stable activity URN (urn:li:activity:…). The URN never changes, so this is a cacheable enrichment lookup at 1 credit, cached 7d. It is the resolver the get-post-* / tracked-post flows build on. Returns activity_urn (null if the URL could not be resolved).',
+    toolClass: 'trivial',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/get-activity-urn-by-url' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      url: z.string().max(2048).describe('Any linkedin.com post URL (feed permalink, /posts/ slug, shortlink).'),
+      ...executorFields,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(NullItem, z.object({ activity_urn: z.string().nullable(), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich activity URN by URL', ...PAID },
+  },
+];

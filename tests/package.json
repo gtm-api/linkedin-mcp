@@ -1,0 +1,28 @@
+{
+  "name": "@gtm/mcp-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@gtm/mcp-id": "workspace:*",
+    "@gtm/mcp-linkedin": "workspace:*",
+    "@gtm/mcp-openapi": "workspace:*",
+    "@gtm/mcp-orchestration": "workspace:*",
+    "@gtm/mcp-runtime": "workspace:*",
+    "@gtm/mcp-shared": "workspace:*",
+    "@gtm/mcp-support": "workspace:*",
+    "@gtm/mcp-worker": "workspace:*",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:e2e": "RUN_E2E=1 vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  }
+}

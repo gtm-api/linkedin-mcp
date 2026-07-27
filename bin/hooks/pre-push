@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# gtm.mcp pre-push: run the offline gates before anything leaves the machine, and
+# say out loud the one thing CI cannot check.
+#
+# Install with `pnpm hooks:install` (sets core.hooksPath to bin/hooks). Opt in per
+# clone, versioned with the repo, removed with `git config --unset core.hooksPath`.
+# Bypass a single push with `git push --no-verify`.
+#
+# The whole offline suite takes a couple of seconds, so this is not a "run the fast
+# subset" hook: it runs exactly what CI runs, minus the umbrella clone that a
+# workstation already has next door. What it CANNOT run is `pnpm oracle:check`:
+# that regenerates the contract fixtures from four live backends and needs Docker
+# up, which is not a thing to force on every push. It prints the reminder instead,
+# because a stale fixture takes every contract gate green with it, here and in CI
+# alike.
+set -uo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT"
+
+if ! command -v pnpm >/dev/null 2>&1; then
+  echo "pre-push: pnpm not on PATH, skipping the gates (git GUI?). Run 'pnpm test' yourself." >&2
+  exit 0
+fi
+
+if [ ! -d "$ROOT/../../research" ]; then
+  echo "pre-push: no ../../research next to this repo. research-parity and the openapi"
+  echo "          drift gate read the umbrella checkout (<umbrella>/product), so the"
+  echo "          suite below will fail until gtm.mcp sits inside it."
+fi
+
+echo "pre-push: pnpm typecheck && pnpm test"
+if ! pnpm typecheck || ! pnpm test; then
+  echo >&2
+  echo "pre-push: gates failed, push aborted. Fix them, or bypass with 'git push --no-verify'." >&2
+  exit 1
+fi
+
+cat <<'REMINDER'
+
+pre-push: gates green. One gate did NOT run and cannot run in CI either:
+
+    pnpm oracle:check     (needs Docker up for linkedin, id, orchestration, email)
+
+It re-dumps each backend's contract and compares it with the committed
+fixtures/contract-oracle/*.contract.json. Everything that just passed reads those
+fixtures, so if a backend moved since the last refresh, they all agree with a file
+that is out of date. Run it whenever a backend changed, then `pnpm oracle:refresh`
+and reconcile ratchet.json / drift-ledger.json / the allow-lists.
+REMINDER

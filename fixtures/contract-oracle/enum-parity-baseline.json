@@ -1,0 +1,31 @@
+{
+  "_comment": [
+    "ENUM-PARITY BASELINE. Read by tests/enum-parity.test.ts. One number per service: the maximum",
+    "count of DISTINCT Zod enum sites that no PHP enum resolves to, by rule key, manual bridge or",
+    "class name. IT MAY ONLY SHRINK. The gate prints the new number the moment it falls, and fails",
+    "when it rises, exactly like ratchet.json and the allow-lists next to it. Never raise it to turn",
+    "a red suite green: an unmapped enum is a value list we promise an agent and compare to nothing.",
+    "",
+    "Distinct SITES, not occurrences: one shared value object reached from 99 tools is one unpinned",
+    "promise and one edit, and counting it 99 times would make the number a popularity contest.",
+    "",
+    "What is in the count today, by class (run pnpm test to print the full list with an owning tool):",
+    "1. CreditsSpentValue.reason / .executed_on, on every creditable action envelope in all three",
+    "   services. Core\\Values\\CreditsSpentValue::validate() constrains them with Rule::in over CLASS",
+    "   CONSTANTS, not an enum, so no enum dump can ever carry them and no name can reach them. Clears",
+    "   only by promoting those constants to a real enum in gtm.lib.common.",
+    "2. sort.field / sort.direction / include.* / group_by on searches whose FormRequest constrains",
+    "   none of them. gtm.service.id resolves nearly all of these positionally because its search",
+    "   requests carry Rule::in; most linkedin and orchestration ones declare 'nullable' only, so our",
+    "   Zod enum is STRICTER than the backend rather than drifting from it. Clears one FormRequest at",
+    "   a time, backend side.",
+    "3. Four singles with no PHP enum behind them at all: the latest-engine refresh stop_reason, the",
+    "   webhook test-send error_kind, the recommendations direction and the notifications group_by."
+  ],
+  "unmapped_ceiling": {
+    "linkedin": 27,
+    "id": 7,
+    "orchestration": 7,
+    "email": 0
+  }
+}

@@ -1,0 +1,52 @@
+# gtm.mcp - Cloudflare Worker (local dev).
+# Rate-limit binding, Analytics Engine and staging/production envs land in
+# later stages. COMMIT_TOKENS (preview gate) is local-simulated under
+# `wrangler dev`; a real namespace id is set per env before deploy.
+name = "gtm-mcp-dev"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[dev]
+port = 8788
+
+[observability]
+enabled = true
+
+[[kv_namespaces]]
+binding = "COMMIT_TOKENS"
+id = "gtm_mcp_commit_tokens_local"
+
+# ── production ──────────────────────────────────────────────────────────────
+# Deployed with `wrangler deploy --env production` - full walkthrough in
+# ../../DEPLOY.md. AI + Vectorize bindings exist ONLY here: their absence in
+# the default (dev) env is what keeps `wrangler dev` fully local - the support
+# KB falls back to the bundled BM25 index (see mcp.support/kb_articles).
+[env.production]
+name = "gtm-mcp"
+workers_dev = true   # switch to a route/custom domain when mcp.gtm-api.com lands
+
+[env.production.observability]
+enabled = true
+
+[env.production.vars]
+ENV_NAME = "production"
+AUTH_MODE = "jwt"
+# Public base URLs of the backend services as reachable FROM Cloudflare's edge.
+# TODO(deploy): set the real gateway URLs before the first deploy.
+LINKEDIN_BASE_URL = "https://TODO-linkedin-prod-url"
+ID_BASE_URL = "https://TODO-id-prod-url"
+ORCHESTRATION_BASE_URL = "https://TODO-orchestration-prod-url"
+
+[env.production.ai]
+binding = "AI"
+
+[[env.production.vectorize]]
+binding = "VECTORIZE_KB"
+index_name = "gtm-kb"
+
+[[env.production.kv_namespaces]]
+binding = "COMMIT_TOKENS"
+# TODO(deploy): paste the id from `wrangler kv namespace create COMMIT_TOKENS --env production`
+id = "TODO_kv_namespace_id"
