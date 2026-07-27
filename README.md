@@ -35,7 +35,7 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 {
   "mcpServers": {
     "gtm-api": {
-      "url": "{{MCP_URL}}",
+      "url": "https://mcp.gtm-api.com/mcp",
       "headers": { "Authorization": "Bearer YOUR_API_KEY" }
     }
   }
