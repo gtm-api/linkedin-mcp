@@ -192,7 +192,7 @@ binding = "COMMIT_TOKENS"
 # `wrangler kv namespace create COMMIT_TOKENS --env production` (DEPLOY.md step 4).
 # Unfilled it is a WARNING to the worker (it serves reads and every dangerous
 # tool refuses at the confirm step, fail-closed) and a BLOCKER to the preflight.
-id = "TODO_kv_namespace_id"
+id = "b6732a731e8c443b9bf6438d9aeccd26"
 
 # Platform rate limiting. `namespace_id` is ours to choose and only has to be
 # unique per worker; it is NOT a resource to create beforehand, so unlike the KV
