@@ -5,6 +5,12 @@
 // contract in product/deployment/SECRETS_AND_KEYS.md: one public edge,
 // `https://app.gtm-api.com/{service}/v4`, path-routed by the gateway on the id
 // host. There are no per-service subdomains.
+//
+// The public document lists the PRODUCTION server and nothing else. Local
+// Docker ports belong to the dev API, not to the contract we publish: a
+// `http://localhost:...` entry here reaches the reference site and its
+// playground, where it is at best noise and at worst a reader pointing their
+// first call at a port that does not exist on their machine.
 
 import type { ServiceId } from '@gtm/mcp-runtime/types';
 
@@ -31,7 +37,6 @@ export const SERVICE_META: Record<PublicServiceId, ServiceMeta> = {
       'Connected LinkedIn accounts and everything driven through them: account health and smart limits, conversations and messages, the connection graph, outbound posting, scraping, profile and company enrichment, and the antidetect browsers that execute it all.',
     servers: [
       { url: 'https://app.gtm-api.com/linkedin/v4', description: 'Production, through the app.gtm-api.com gateway' },
-      { url: 'http://localhost:8020', description: 'Local Docker (gtm_linkedin_nginx_dev)' },
     ],
   },
   id: {
@@ -40,7 +45,6 @@ export const SERVICE_META: Record<PublicServiceId, ServiceMeta> = {
       'Identity, access and money: users, teams and members, API keys, OAuth clients and authorizations, billing products, subscriptions, transactions and payment methods, the credit ledger, notifications, TLS certificates, observability and support requests.',
     servers: [
       { url: 'https://app.gtm-api.com/id/v4', description: 'Production, through the app.gtm-api.com gateway' },
-      { url: 'http://localhost:8021', description: 'Local Docker (gtm_id_nginx_dev)' },
     ],
   },
   orchestration: {
@@ -49,7 +53,6 @@ export const SERVICE_META: Record<PublicServiceId, ServiceMeta> = {
       'The cross-service execution plane: the platform-wide webhook registry and delivery log, plus mass actions (preview, commit, pace, pause, resume, canary) and their per-item child rows.',
     servers: [
       { url: 'https://app.gtm-api.com/orchestration/v4', description: 'Production, through the app.gtm-api.com gateway' },
-      { url: 'http://localhost:8025', description: 'Local Docker (gtm_orchestration_nginx_dev)' },
     ],
   },
 };
