@@ -6576,8 +6576,8 @@
             "backing": "string",
             "cases": [
                 {
-                    "name": "Getsales",
-                    "value": "getsales"
+                    "name": "Platform",
+                    "value": "platform"
                 },
                 {
                     "name": "Customer",
@@ -8839,13 +8839,13 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "in:\"getsales\",\"customer\",\"mirror_profiles\""
+                        "in:\"platform\",\"customer\",\"mirror_profiles\""
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": [
-                        "getsales",
+                        "platform",
                         "customer",
                         "mirror_profiles"
                     ],

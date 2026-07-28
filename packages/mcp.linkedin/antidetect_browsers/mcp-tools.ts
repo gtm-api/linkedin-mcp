@@ -30,7 +30,7 @@ const ACCESS_KEY = z.string().length(18).startsWith('cb_ak_')
   .describe('Cloud-browser access key (cb_ak_…).');
 
 // Owner + vendor enums mirror the create FormRequest (only `gologin` is wired).
-const BrowserOwner = z.enum(['getsales', 'customer', 'mirror_profiles']);
+const BrowserOwner = z.enum(['platform', 'customer', 'mirror_profiles']);
 const VendorProvider = z.enum(['gologin', 'multilogin', 'adspower', 'dolphin']);
 
 // AntidetectBrowserStatusEnum, in its PHP order. Named once and reused by the
@@ -41,7 +41,7 @@ const AntidetectBrowserStatus = z.enum([
   'error_investigation', 'maintenance', 'shared_out', 'subscription_required',
 ]);
 
-// Customer bring-your-own proxy tuple (forbidden for getsales-owned browsers).
+// Customer bring-your-own proxy tuple (forbidden for platform-owned browsers).
 const CustomProxyConfig = z.object({
   ip: z.string().describe('Proxy host.'),
   port: z.number().int().min(1).max(65535),
@@ -204,7 +204,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     creditable: false,
     inputSchema: z.object({
       browser_owner: BrowserOwner.optional()
-        .describe('Omit to infer: vendor_profile_id present ⇒ customer, absent ⇒ getsales.'),
+        .describe('Omit to infer: vendor_profile_id present ⇒ customer, absent ⇒ platform.'),
       vendor_provider: VendorProvider.optional().describe('Default gologin (the only wired vendor).'),
       vendor_profile_id: z.string().max(128).nullable().optional()
         .describe('Bind an EXISTING vendor profile (BYO). Omit to mint a fresh one.'),
