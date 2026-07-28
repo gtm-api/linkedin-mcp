@@ -1,0 +1,3 @@
+# The image copies only docker/entrypoint.sh; keep the build context tiny.
+*
+!docker/
