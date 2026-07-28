@@ -262,7 +262,8 @@ real blocker; everything else is mechanical.
 ### 11. Fill the secrets layers (Eugene)
 
 In `~/.gtm-secrets`, create `services/orchestration-beta.env` with this host's own
-`APP_KEY`, `DB_USERNAME=gtm_orchestration_beta_dbuser_app`, `DB_PASSWORD`,
+`APP_KEY`, `DB_USERNAME=gtm_orch_beta_dbuser_app` (slug `orch`: MySQL caps user names
+at 32 chars), `DB_PASSWORD`,
 `DB_ROOT_PASSWORD`, `DB_RW_PASSWORD`, `AI_DB_PASSWORD`, `RABBIT_LOGIN`, `RABBIT_PASSWORD`,
 `AWS_*`, `AMPLITUDE_API_KEY`, `BUGSNAG_API_KEY`, `ALLOY_CLOUD_TOKEN`,
 `BITBUCKET_RUNNER_*`. Make sure `common.beta.env` carries `CLUSTER1_LINKEDIN_ACCESS_KEY`,
