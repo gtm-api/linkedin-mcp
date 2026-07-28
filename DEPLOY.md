@@ -1,5 +1,11 @@
 # Deploying gtm.mcp to Cloudflare
 
+> **Maintainer runbook.** Deploying needs the team's Cloudflare account plus the
+> private monorepo that carries the backend services, the ansible repo and the
+> secrets layout; none of that is public. `<monorepo>` in the commands below is
+> the root of that private checkout. The runbook lives in this repository
+> because what it deploys is this repository.
+
 ONE deployable environment.
 
 | Env | Command | Lands on |
@@ -71,7 +77,7 @@ Committed or in the working tree, verified, and needing nothing from Eugene.
 | **`sync-ansible-vault.sh`** | Real bug fixed before it bit: the MAP still emitted the retired flat `vault_linkedin_access_key` / `vault_emails_access_key`. Nothing reads those any more, and an unmapped key is skipped **silently**, so step 12 would have produced a vault with no `vault_cluster1_linkedin_access_key` and the failure would have shown up as `401 bad_access_key` per mass-action item on a live host. |
 | **Permission enforcement** | `enforce` defaults **true** in linkedin and orchestration (`config/permissions.php`, with an empty-string guard so a bare `PERMISSIONS_ENFORCE=` cannot silently disarm it); `undeclared => 'closed'` in all three services; id keeps no `enforce` switch by design. 13 previously ungated id routes declared, 4 new tokens added, `PermissionCatalog` (47 live tokens) is the single source for the owner preset a new team is seeded with, `permissions.refused` logging carries `identity_reason`, and a `PermissionDeclarationScan` test per service fails the build on an undeclared or off-catalog route. Coverage: id 81 routes (78 gated, 3 open by name), linkedin 150, orchestration 21, zero undeclared anywhere. |
 | **Worker deploy tooling** | Custom domain rather than a route, no staging env; `bin/deploy-preflight.mjs` rewritten into three phases with seven new checks; `bin/smoke.sh` written and exercised end to end against a local worker, including the KV commit-token replay, which had never been executed anywhere in this repo. |
-| **Docs** | `RUNBOOK-orchestration.md`, `RUNBOOK-handover.md`, `gtm.deployment.ansible/README.md`, `inventory/beta.ini`, `run.txt` all updated off the real state. |
+| **Docs** | `RUNBOOK-orchestration.md`, `RUNBOOK-handover.md`, `gtm.deployment.ansible/README.md`, `inventory/beta.ini`, `run.txt` all updated off the real state (all in the private monorepo and its deployment repo). |
 
 Nothing has been deployed. No Cloudflare resource exists yet, no ansible has run against a
 host, no `wrangler login` has happened.
@@ -89,7 +95,7 @@ each). The staged deletions in `gtm.service.id` (1) and `gtm.service.email` (67)
 **real**, those files are genuinely gone: do not touch them.
 
 ```bash
-cd /Users/eugene/sites/gtm.ai/product/backend
+cd <monorepo>/product/backend
 for r in gtm.lib.common gtm.service.linkedin gtm.service.orchestration; do
   git -C $r diff --cached --name-only --diff-filter=D | while read f; do
     [ -f "$r/$f" ] && git -C $r add -- "$f"
@@ -119,7 +125,7 @@ commits are invisible to a deploy. As of 2026-07-27 all four were ahead of `orig
 with the work above still uncommitted on top.
 
 ```bash
-cd /Users/eugene/sites/gtm.ai/product/backend
+cd <monorepo>/product/backend
 for r in gtm.lib.common gtm.service.id gtm.service.linkedin gtm.service.orchestration; do
   git -C $r push origin master
 done
@@ -142,7 +148,7 @@ exists on a host running this code.
 ### 3. Deploy gtm.service.id (Eugene)
 
 ```bash
-cd /Users/eugene/sites/gtm.ai/product/deployment/gtm.deployment.ansible
+cd <monorepo>/product/deployment/gtm.deployment.ansible
 ansible-playbook deploy-id.yml -i inventory/beta.ini --limit id-beta \
   --ssh-common-args='-C -o ControlMaster=auto -o ControlPersist=900s -o StrictHostKeyChecking=accept-new' \
   --vault-password-file ~/.gtm-secrets/.vault_pass_gtm
@@ -214,7 +220,7 @@ routed and nothing healthy is behind it. Most of the MCP tool surface dispatches
 linkedin, so this blocks a useful worker deploy on its own, independently of Cloudflare.
 
 ```bash
-cd /Users/eugene/sites/gtm.ai/product/deployment/gtm.deployment.ansible
+cd <monorepo>/product/deployment/gtm.deployment.ansible
 ansible-playbook deploy-linkedin.yml -i inventory/beta.ini --limit linkedin-beta \
   --ssh-common-args='-C -o ControlMaster=auto -o ControlPersist=900s -o StrictHostKeyChecking=accept-new' \
   --vault-password-file ~/.gtm-secrets/.vault_pass_gtm
@@ -277,7 +283,7 @@ different secret means every token id mints is rejected by orchestration.
 ### 12. Render the vault (Eugene)
 
 ```bash
-cd /Users/eugene/sites/gtm.ai
+cd <monorepo>
 product/backend/bin/sync-ansible-vault.sh orchestration-beta
 grep -c vault_cluster1_linkedin_access_key product/deployment/gtm.deployment.ansible/host_vars/orchestration-beta.vault.yml   # 1
 grep -c REPLACE_ME product/deployment/gtm.deployment.ansible/host_vars/orchestration-beta.vault.yml                            # 0
@@ -294,7 +300,7 @@ mass-action item.
 ### 13. Encrypt the vault (Eugene)
 
 ```bash
-cd /Users/eugene/sites/gtm.ai/product/deployment/gtm.deployment.ansible
+cd <monorepo>/product/deployment/gtm.deployment.ansible
 ansible-vault encrypt host_vars/orchestration-beta.vault.yml
 head -1 host_vars/orchestration-beta.vault.yml   # $ANSIBLE_VAULT;1.1;AES256
 ```
@@ -399,7 +405,7 @@ This targets **id-beta**, not the orchestration host, and it loads the id vault,
 still needs the vault password even with `--tags gateway`.
 
 ```bash
-cd /Users/eugene/sites/gtm.ai/product/deployment/gtm.deployment.ansible
+cd <monorepo>/product/deployment/gtm.deployment.ansible
 ansible-playbook provision-id.yml -i inventory/beta.ini --limit id-beta --tags gateway \
   --vault-password-file ~/.gtm-secrets/.vault_pass_gtm
 ```
@@ -518,7 +524,7 @@ published issuer to `AUTH_ISSUER`). Read this so a red preflight is not a surpri
 | Dependency | Why it blocks | State on 2026-07-27 |
 |---|---|---|
 | **gtm.service.id deployed with the explicit issuer claim** | `verifier.ts` does an exact `payload.iss !== AUTH_ISSUER` match. id now mints from `config('jwt.issuer')` (defaults to `APP_URL`) at the claim factory (`App\Auth\IssuerClaimFactory`), so login, refresh, both OAuth grants, `jwt:fake` and job-restored identities all emit it, and `OAuthFlowController::issuer()` reads the same key: token `iss` = RFC 8414 `issuer` = RFC 9728 `authorization_servers[0]`. A host still running the older code mints a per-endpoint `iss` (`https://app.gtm-api.com/auth/login`), and every real token 401s with `issuer mismatch`. | code landed and live-verified against the running id container end to end (a real `/auth/login` token passed the `AUTH_MODE=jwt` edge and `get_credit_balance` returned real data). **The beta host has not been deployed.** |
-| **The `/orchestration/v4` gateway prefix serving** | `/mcp/orchestration/webhooks` and `/mcp/orchestration/mass-actions` are mounted, so `requiredBaseUrlServices()` includes `orchestration` and an unusable `ORCHESTRATION_BASE_URL` is **fatal**: `/health` and every mount answer 503. Not a partial outage, a total one. | route uncommented in `host_vars/id-beta.yml`, **host not provisioned and `provision-id.yml --tags gateway` not re-run**. Measured: `GET https://app.gtm-api.com/orchestration/v4/live` answers **200 with the SPA's index.html**, so the prefix is not published and the front-end catch-all is answering. Sequence: `product/deployment/RUNBOOK-orchestration.md` § 3 |
+| **The `/orchestration/v4` gateway prefix serving** | `/mcp/orchestration/webhooks` and `/mcp/orchestration/mass-actions` are mounted, so `requiredBaseUrlServices()` includes `orchestration` and an unusable `ORCHESTRATION_BASE_URL` is **fatal**: `/health` and every mount answer 503. Not a partial outage, a total one. | route uncommented in `host_vars/id-beta.yml`, **host not provisioned and `provision-id.yml --tags gateway` not re-run**. Measured: `GET https://app.gtm-api.com/orchestration/v4/live` answers **200 with the SPA's index.html**, so the prefix is not published and the front-end catch-all is answering. Sequence: `<monorepo>/product/deployment/RUNBOOK-orchestration.md` § 3 |
 
 Also measured the same day, not a Cloudflare problem either, and worth knowing before
 you deploy: `GET https://app.gtm-api.com/linkedin/v4/live` answers **502**. The linkedin
@@ -604,7 +610,7 @@ curl -s https://app.gtm-api.com/id/v4/.well-known/oauth-authorization-server | j
 #    (base64url-decode the payload, or let step 8 do it: MCP_JWT=… pnpm deploy:preflight)
 
 # b) orchestration: provision + deploy the host, THEN publish the prefix.
-#    product/deployment/RUNBOOK-orchestration.md § 3 is the sequence.
+#    <monorepo>/product/deployment/RUNBOOK-orchestration.md § 3 is the sequence.
 curl -s https://app.gtm-api.com/orchestration/v4/live
 #    expect exactly: {"status":"alive"}
 #    HTML here means the prefix is not published and the SPA catch-all answered
@@ -989,7 +995,7 @@ first production deploy has actually happened.
 | `pnpm e2e` | `RUN_E2E=1` calls every safe read tool through a running worker against live backends with a seeded team. CI has no Docker, no seeded database and no worker on :8788, so it structurally cannot | workstation: [The live e2e arm](#the-live-e2e-arm) below |
 | `pnpm smoke` | needs a DEPLOYED worker and a real token | workstation: steps 9 and 11 |
 | `pnpm lint` | identical work to `pnpm typecheck` (every package's `lint` is the same `tsc --noEmit`) | nowhere, deliberately |
-| the OAS validator | `bin/openapi-public.sh` normally ends with `gtm.openapi.tech/_tools/validate.py`; that validator, its `requirements.txt` and its venv live in a third repo | workstation: `pnpm openapi:public` validates in write mode and refuses to run without it, so the spec is validated whenever it is generated |
+| the OAS validator | `bin/openapi-public.sh` normally ends with `gtm.openapi.tech/_tools/validate.py`; that validator, its `requirements.txt` and its venv live in a third private repo | workstation: `pnpm openapi:public` validates in write mode and refuses to run without it, so the spec is validated whenever it is generated |
 
 The fixture staleness that CI cannot see is the one that hurts most: every contract
 gate reads `fixtures/contract-oracle/*.contract.json`, so a fixture that went stale
@@ -1081,7 +1087,8 @@ because a workstation has gtm.mcp checked out at `<umbrella>/product/mcp/gtm.mcp
 | `../../research` | `tests/research-parity.test.ts` (the design side of every tool) |
 | `../../openapi/gtm.openapi.public` | `tests/openapi-public-drift.test.ts`, `bin/openapi-public.sh` |
 
-Both live in the umbrella repo `gtm-api/gtm.ai`. A CI clone has only gtm.mcp, so
+Both live in the private umbrella repo `gtm-api/gtm.ai` on Bitbucket. A CI
+clone has only gtm.mcp, so
 `ci/fetch-corpus.sh` sparse clones the umbrella and symlinks those two paths into
 the same relative offset (on a workstation it finds them already there and does
 nothing). It needs read access to `gtm.ai`, one of:

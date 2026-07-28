@@ -1,9 +1,9 @@
 # Connecting to the gtm.mcp server (local dev)
 
-> Full local-dev & debugging runbook (Inspector, the dispatch log, the toolkit,
-> daily workflow, modes) lives at the product level:
-> [`../../LOCAL_DEVELOPMENT.md`](../../LOCAL_DEVELOPMENT.md) **§3**. This file is
-> just the client-connection quick reference.
+> This file is the client-connection quick reference. The full local-dev and
+> debugging runbook (Inspector, the dispatch log, daily workflow, modes) and
+> the backend services `pnpm dev` talks to live in the private monorepo, not
+> in this repository.
 
 ## 1. Bring up the server - one command
 
@@ -13,7 +13,7 @@ pnpm dev
 ```
 
 `pnpm dev` runs `bin/mcp-dev.sh`, which:
-1. checks the linkedin backend is up on `:8020` (start it with `./dev up` in `product/backend/gtm.service.linkedin`),
+1. checks the linkedin backend is up on `:8020` (start it with `./dev up` in `product/backend/gtm.service.linkedin`, in the private monorepo),
 2. mints a fresh 24h dev bearer via `./dev artisan jwt:fake` (the seeded dev team `ts_tm_seeddev00001`),
 3. starts `wrangler dev` on `http://localhost:8788` with that token injected as `DEV_BEARER`.
 
@@ -67,4 +67,4 @@ curl -sS -X POST http://localhost:8788/mcp/linkedin/accounts -H 'Content-Type: a
 ## Notes
 
 - The dev header-less bypass is **dev-only** (`AUTH_MODE=dev` + `DEV_BEARER`). Deployed environments still return `401` + `WWW-Authenticate` and require real OAuth.
-- A real OAuth connector (browser "Connect" flow, and claude.ai web support over a public URL) is Stage 4-5 of the plan (DCR + CORS + consent in the id service, `mcp.gtm-api.com` / cloudflared tunnel).
+- A real OAuth connector (browser "Connect" flow, and claude.ai web support over a public URL) is planned: DCR + CORS + consent in the id service, then `mcp.gtm-api.com` / a cloudflared tunnel.

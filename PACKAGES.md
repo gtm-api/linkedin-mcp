@@ -3,7 +3,7 @@
 The registry holds one `mcp.{service}/{entity}` package per entity; a **mount** groups several of
 them behind one URL and is the thing that carries a tool budget. The default budget is **25 tools**;
 a mount may declare its own `maxTools`, and exactly one does today (`/mcp/linkedin/messaging`, 28).
-`research-to-mcp` reads this file to place a new tool, `apps/worker/src/mounts.config.ts` declares
+Tool authoring reads this file to place a new tool, `apps/worker/src/mounts.config.ts` declares
 the mounts, and the coverage gate tracks progress toward full coverage.
 
 Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below are read off the
@@ -44,7 +44,8 @@ parent. Neither existing candidate was honest:
 
 - **`/mcp/linkedin/scraping`** (21 / 25) is the nearest domain and still the wrong home. It does not
   fit at all (21 + 13 = 34, so it would take a budget of 34 and gut the reason the cap exists), and
-  the two surfaces answer different questions - research §9.6 layers them deliberately: scraping is
+  the two surfaces answer different questions - the design research (§9.6, in the private
+  monorepo) layers them deliberately: scraping is
   a run-now, one-page pull with the rows inline in the HTTP response and credits debited per call;
   an auto-scrape is a saved, deduped, multi-page, optionally recurring job with persisted results and
   a new-lead delta. The mount instruction on each now names the other, so the router is explicit.
@@ -92,7 +93,8 @@ orchestration. The 9 parent `mass_actions` tools landed on the same mount later 
 to **0** and emptied its `drift-ledger.json` lists: the service is at full MCP coverage. All four
 parent lifecycle verbs are `massAction: false` / `stepEligible: false` by declaration, not by
 omission: the fan-out this service performs is the RUN, and its control surface is single-target
-(§R4 describes the verb's own request shape, not what the run does).
+(the backend's SERVICE_CONVENTIONS §R4: the flags describe the verb's own request shape, not what
+the run does).
 
 ⚠️ **`create_mass_action` is deliberately `dangerous: false`.** Two different `commit_token`s exist
 and they collide on the JSON key. The BACKEND one is minted by `POST /api/mass-actions/preview` and

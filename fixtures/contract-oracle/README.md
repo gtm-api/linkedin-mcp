@@ -102,34 +102,36 @@ It is the same shape as `pnpm openapi:public:check`, deliberately: regenerate in
 a temp location, diff, fail on drift.
 
 The generator is the `gtm:contract-oracle` artisan command
-(`gtm.lib.common/src/Core/Commands/ContractOracle.php`). It is read-only: no DB
-access, no JWT, no writes other than the `--out` file. The four invocations the
-script wraps, if you would rather run them by hand:
+(`ContractOracle.php` in `gtm.lib.common`, the shared backend library in the
+private monorepo). It is read-only: no DB access, no JWT, no writes other than
+the `--out` file. The four invocations the script wraps, if you would rather
+run them by hand (`<monorepo>` is the private monorepo checkout that carries
+the backends and this repo):
 
 ```bash
 # linkedin
-cd ~/sites/gtm.ai/product/backend/gtm.service.linkedin
+cd <monorepo>/product/backend/gtm.service.linkedin
 ./dev artisan gtm:contract-oracle --service=linkedin --out=storage/app/contract-oracle.json
 mv src/storage/app/contract-oracle.json \
-   ~/sites/gtm.ai/product/mcp/gtm.mcp/fixtures/contract-oracle/linkedin.contract.json
+   <monorepo>/product/mcp/gtm.mcp/fixtures/contract-oracle/linkedin.contract.json
 
 # id
-cd ~/sites/gtm.ai/product/backend/gtm.service.id
+cd <monorepo>/product/backend/gtm.service.id
 ./dev artisan gtm:contract-oracle --service=id --out=storage/app/contract-oracle.json
 mv src/storage/app/contract-oracle.json \
-   ~/sites/gtm.ai/product/mcp/gtm.mcp/fixtures/contract-oracle/id.contract.json
+   <monorepo>/product/mcp/gtm.mcp/fixtures/contract-oracle/id.contract.json
 
 # orchestration
-cd ~/sites/gtm.ai/product/backend/gtm.service.orchestration
+cd <monorepo>/product/backend/gtm.service.orchestration
 ./dev artisan gtm:contract-oracle --service=orchestration --out=storage/app/contract-oracle.json
 mv src/storage/app/contract-oracle.json \
-   ~/sites/gtm.ai/product/mcp/gtm.mcp/fixtures/contract-oracle/orchestration.contract.json
+   <monorepo>/product/mcp/gtm.mcp/fixtures/contract-oracle/orchestration.contract.json
 
 # email
-cd ~/sites/gtm.ai/product/backend/gtm.service.email
+cd <monorepo>/product/backend/gtm.service.email
 ./dev artisan gtm:contract-oracle --service=email --out=storage/app/contract-oracle.json
 mv src/storage/app/contract-oracle.json \
-   ~/sites/gtm.ai/product/mcp/gtm.mcp/fixtures/contract-oracle/email.contract.json
+   <monorepo>/product/mcp/gtm.mcp/fixtures/contract-oracle/email.contract.json
 ```
 
 The dump is deterministic, so an unchanged backend regenerates a byte-identical
@@ -214,7 +216,8 @@ Notes for consumers:
   controller. Filter on `uri.startsWith('api/')` and `!internal` to get the
   public MCP surface: that subset is what both route gates measure against.
 - `mass_action` and `step_eligible` are the two INDEPENDENT bulk facts of
-  SERVICE_CONVENTIONS §R4 and neither implies the other. `mass_action` means the
+  the backend's SERVICE_CONVENTIONS §R4 (a doc in the private monorepo) and
+  neither implies the other. `mass_action` means the
   verb's own request shape takes a set the owning service drains inline;
   `step_eligible` means the orchestration engine may run the verb as a plan step,
   calling it once per item over its `/internal` hop. `api/linkedin-posting/react`
@@ -456,9 +459,10 @@ is a tool bug:
 2. **14 account-share filter operators + 11 scattered filter/include keys.** The
    FormRequest under-declares what the controller then applies through
    `input()`, so the key works and nothing validates it.
-3. **4 `linkedin_tracked_post_sid` inputs.** The research file documents
-   `linkedin_tracked_post_sid` XOR `post`; the backend implements only `post`
-   since the tracked-post entity moved to `gs.service.signals`. Mirroring the
+3. **4 `linkedin_tracked_post_sid` inputs.** The design research in the private
+   monorepo documents `linkedin_tracked_post_sid` XOR `post`; the backend
+   implements only `post` since the tracked-post entity moved to
+   `gs.service.signals`. Mirroring the
    backend here would delete a documented capability, so it is recorded instead.
 
 Nine more `include` params were FIXED rather than recorded, with
