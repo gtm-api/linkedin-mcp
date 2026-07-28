@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "gtm-api": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "GTM_API_KEY", "gtmapi/linkedin-mcp"],
+      "env": { "GTM_API_KEY": "YOUR_API_KEY" }
+    }
+  }
+}

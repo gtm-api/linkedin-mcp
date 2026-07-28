@@ -42,6 +42,20 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 }
 ```
 
+Prefer Docker? The same server as a command, through the [`gtmapi/linkedin-mcp`](https://hub.docker.com/r/gtmapi/linkedin-mcp) launcher image (config in [`examples/`](./examples/claude_desktop_config.docker.json)):
+
+```json
+{
+  "mcpServers": {
+    "gtm-api": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "-e", "GTM_API_KEY", "gtmapi/linkedin-mcp"],
+      "env": { "GTM_API_KEY": "YOUR_API_KEY" }
+    }
+  }
+}
+```
+
 **3. Restart the client and prompt in plain English:**
 
 > "Every morning, accept new connection invitations from founders, reply with a short welcome, and add anyone hiring SDRs to a warm list."
@@ -105,6 +119,7 @@ From $19 per connected account per month, scaling to $5 at volume, with unlimite
 - Get an API key: [app.gtm-api.com](https://app.gtm-api.com/login)
 - How a LinkedIn MCP server works: [gtm-api.com/linkedin-mcp-server](https://gtm-api.com/linkedin-mcp-server/)
 - The safety method in detail: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/)
+- Docker image: [hub.docker.com/r/gtmapi/linkedin-mcp](https://hub.docker.com/r/gtmapi/linkedin-mcp)
 - Model Context Protocol: [modelcontextprotocol.io](https://modelcontextprotocol.io/)
 
 ---
