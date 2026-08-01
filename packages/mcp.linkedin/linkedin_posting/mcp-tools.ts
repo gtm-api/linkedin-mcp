@@ -27,11 +27,21 @@ import { usageMetaField, McpActionResponse } from '@gtm/mcp-shared';
 const ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
   .describe('LinkedIn account sid (ln_ac_…), the authoring account. Identity-bound and non-creditable: REQUIRED, never a pool account.');
 
-// Every verb that targets an existing post addresses it by activity URN. No
-// local row is required or created (LinkedinPostingCommentRequest /
+// Every verb that targets an existing post addresses it by its social-thread urn.
+// No local row is required or created (LinkedinPostingCommentRequest /
 // LinkedinPostingReactRequest: required|string|min:1|max:512).
-const ACTIVITY_URN = z.string().min(1).max(512)
-  .describe('urn:li:activity:<id>, the post handle. The post does NOT need to be tracked or owned by us. Resolve a linkedin.com post URL first with get_activity_urn_by_url.');
+//
+// Two urn families since the plugin widened create-comment / create-reaction
+// (2026-07-28). BREAKING 2026-07-30: the field was `activity_urn` and now carries
+// the wire's own name, because it stopped carrying only activity urns. There is no
+// alias: a call with the old key fails `required`, and a stored mass-action plan
+// whose step args still say `activity_urn` no longer resolves a target.
+//
+// Note this is NOT the same field as the `activity_urn` these tools RETURN
+// (create_linkedin_post's published-post urn, get_activity_urn_by_url's result):
+// those really are activity urns and keep the name.
+const ENTITY_URN = z.string().min(1).max(512)
+  .describe('The post handle: urn:li:activity:<id> for a member post, or urn:li:ugcPost:<id> for a company-page post or a newsletter issue (LinkedIn threads those as ugcPost, not activity). Either form is passed to the wire verbatim. The post does NOT need to be tracked or owned by us. Resolve a linkedin.com post URL first with get_activity_urn_by_url. Renamed from activity_urn on 2026-07-30; the old name is no longer accepted.');
 
 const FORCE_DEDUP = z.boolean().nullable().optional()
   .describe('Accepted for contract compatibility and NOT enforced by this service today: per-post dedup left with the content trio (gs.service.signals). Passing it changes nothing.');
@@ -112,7 +122,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_comment',
     description:
-      'Leave ONE outbound comment on any LinkedIn post, addressed by its activity URN (wire create-comment). Outward and fire-on-success: the post does NOT need to be tracked or owned by us, and nothing is persisted on this service. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the messaging_general bucket, saturation returns 429 with no pool fallback. Reply to an existing comment by passing parent_comment_urn. The comment text comes in text; templates and AI generation are outside this API. Returns the created comment ref plus the activity-log row. To react instead use react_linkedin_post; to read a post\'s existing comments or commenters use the linkedin-scraping get-post-comments / get-post-commenters tools; to resolve a post URL to its activity URN use get_activity_urn_by_url.',
+      'Leave ONE outbound comment on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-comment): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. Outward and fire-on-success: the post does NOT need to be tracked or owned by us, and nothing is persisted on this service. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the messaging_general bucket, saturation returns 429 with no pool fallback. Reply to an existing comment by passing parent_comment_urn. The comment text comes in text; templates and AI generation are outside this API. Returns the created comment ref plus the activity-log row. To react instead use react_linkedin_post; to read a post\'s existing comments or commenters use the linkedin-scraping get-post-comments / get-post-commenters tools; to resolve a post URL to its activity URN use get_activity_urn_by_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/comment' },
     operation: 'action',
@@ -124,7 +134,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      activity_urn: ACTIVITY_URN,
+      entity_urn: ENTITY_URN,
       text: z.string().min(1).max(1250).describe('The comment body (caller-supplied, no templates or AI in-app).'),
       parent_comment_urn: z.string().max(512).nullable().optional()
         .describe('Reply target: the comment URN to reply under. Omit or null for a top-level comment.'),
@@ -138,7 +148,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'react_linkedin_post',
     description:
-      'Leave OUR reaction on any LinkedIn post, addressed by its activity URN (wire create-reaction). The social-selling counterpart of create_linkedin_comment, e.g. warm a prospect up by reacting to their post before a connect. Outward and fire-on-success: the post does NOT need to be tracked, and nothing is persisted on this service. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the messaging_general bucket, saturation returns 429 with no pool fallback. Two different managed accounts reacting to the same post are two independent calls. Returns the activity-log row. To comment use create_linkedin_comment; to read who already reacted use the linkedin-scraping get-post-reactors tool.',
+      'Leave OUR reaction on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-reaction): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. The social-selling counterpart of create_linkedin_comment, e.g. warm a prospect up by reacting to their post before a connect. Outward and fire-on-success: the post does NOT need to be tracked, and nothing is persisted on this service. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the messaging_general bucket, saturation returns 429 with no pool fallback. Two different managed accounts reacting to the same post are two independent calls. Returns the activity-log row. To comment use create_linkedin_comment; to read who already reacted use the linkedin-scraping get-post-reactors tool.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/react' },
     operation: 'action',
@@ -151,7 +161,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      activity_urn: ACTIVITY_URN,
+      entity_urn: ENTITY_URN,
       reaction_type: z.enum(['like', 'celebrate', 'support', 'love', 'insightful', 'funny']).nullable().optional()
         .describe('The reaction to leave, mapped to the plugin wire ReactionType. Defaults to like.'),
       force_dedup: FORCE_DEDUP,

@@ -1823,6 +1823,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "display_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "label",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "inmail_credits",
                         "type": "?int",
                         "nullable": true,
@@ -2015,6 +2027,18 @@
                     },
                     {
                         "name": "avatar_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "display_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "label",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -6770,6 +6794,46 @@
                     "value": "get_my_credits"
                 },
                 {
+                    "name": "GetBasicProfile",
+                    "value": "get_basic_profile"
+                },
+                {
+                    "name": "GetCertifications",
+                    "value": "get_certifications"
+                },
+                {
+                    "name": "GetRecommendations",
+                    "value": "get_recommendations"
+                },
+                {
+                    "name": "GetProfileComments",
+                    "value": "get_profile_comments"
+                },
+                {
+                    "name": "GetLiteCompany",
+                    "value": "get_lite_company"
+                },
+                {
+                    "name": "GetCompanyPublicIdentifier",
+                    "value": "get_company_public_identifier"
+                },
+                {
+                    "name": "GetServicesSearch",
+                    "value": "get_services_search"
+                },
+                {
+                    "name": "GetServicesSearchByUrl",
+                    "value": "get_services_search_by_url"
+                },
+                {
+                    "name": "GetMySsi",
+                    "value": "get_my_ssi"
+                },
+                {
+                    "name": "GetMyAnalytics",
+                    "value": "get_my_analytics"
+                },
+                {
                     "name": "GetPosts",
                     "value": "get_posts"
                 },
@@ -6872,6 +6936,10 @@
                 {
                     "name": "GetPostsSearchByUrl",
                     "value": "get_posts_search_by_url"
+                },
+                {
+                    "name": "EditMyProfile",
+                    "value": "edit_my_profile"
                 },
                 {
                     "name": "SendConnectionRequest",
@@ -7245,6 +7313,10 @@
                     "value": "person_lite_profile"
                 },
                 {
+                    "name": "PersonBasicProfile",
+                    "value": "person_basic_profile"
+                },
+                {
                     "name": "PersonFullProfile",
                     "value": "person_full_profile"
                 },
@@ -7305,6 +7377,14 @@
                     "value": "company_profile"
                 },
                 {
+                    "name": "CompanyLiteProfile",
+                    "value": "company_lite_profile"
+                },
+                {
+                    "name": "CompanyPublicIdentifier",
+                    "value": "company_public_identifier"
+                },
+                {
                     "name": "CompanyPosts",
                     "value": "company_posts"
                 },
@@ -7331,6 +7411,10 @@
                 {
                     "name": "SearchServiceProviders",
                     "value": "search_service_providers"
+                },
+                {
+                    "name": "SearchServiceProvidersByUrl",
+                    "value": "search_service_providers_by_url"
                 },
                 {
                     "name": "SimilarProfiles",
@@ -7424,6 +7508,19 @@
                 {
                     "name": "Rejected",
                     "value": "rejected"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\LinkedinRecommendationDirectionEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Received",
+                    "value": "received"
+                },
+                {
+                    "name": "Given",
+                    "value": "given"
                 }
             ]
         },
@@ -7940,6 +8037,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccount\\Enums\\LinkedinAccountSsiGroupTypeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Industry",
+                    "value": "INDUSTRY"
+                },
+                {
+                    "name": "Network",
+                    "value": "NETWORK"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccount\\Enums\\LinkedinAccountStatusEnum": {
             "backing": "string",
             "cases": [
@@ -8220,6 +8330,14 @@
                 {
                     "name": "GetPostResharers",
                     "value": "get-post-resharers"
+                },
+                {
+                    "name": "SearchServiceProviders",
+                    "value": "search-service-providers"
+                },
+                {
+                    "name": "SearchServiceProvidersByUrl",
+                    "value": "search-service-providers-by-url"
                 },
                 {
                     "name": "SearchCompaniesByUrl",
@@ -12173,6 +12291,61 @@
             "rules_reason": null
         },
         {
+            "method": "PATCH",
+            "uri": "api/linkedin-accounts/{sid}",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "update",
+            "operation": "update",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_update_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountUpdateRequest",
+            "rules": [
+                {
+                    "field": "display_name",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "label",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
             "method": "POST",
             "uri": "api/linkedin-accounts/{sid}/check-premium",
             "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
@@ -12458,8 +12631,44 @@
             ],
             "required_permission": "can_view_linkedin_accounts",
             "internal": false,
-            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
-            "rules": [],
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountGetMyAnalyticsRequest",
+            "rules": [
+                {
+                    "field": "date_from",
+                    "rules": [
+                        "nullable",
+                        "date_format:Y-m-d",
+                        "required_with:date_to",
+                        "before_or_equal:today"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date_format",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "date_to",
+                    "rules": [
+                        "nullable",
+                        "date_format:Y-m-d",
+                        "required_with:date_from",
+                        "after_or_equal:date_from",
+                        "before_or_equal:today"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date_format",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
             "rules_reason": null
         },
         {
@@ -12694,19 +12903,238 @@
                     "between": null
                 },
                 {
-                    "field": "summary",
+                    "field": "additional_name",
                     "rules": [
                         "sometimes",
                         "string",
-                        "min:1",
-                        "max:2600"
+                        "max:100"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
+                    "min": null,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "industry_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "location_geo_id",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
                     "min": 1,
-                    "max": 2600,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sub_location_geo_id",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "city_geo_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "location",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "postal_code",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:20"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 20,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "current_position_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "current_education_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "show_current_position",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "show_education",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "website",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "website_label",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "custom_pronouns",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "summary",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }
@@ -13312,7 +13740,7 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "in:\"search-people-by-url\",\"search-people-by-params\",\"search-sales-nav-people-by-url\",\"search-sales-nav-people-by-params\",\"similar-profiles\",\"company-employees\",\"company-decision-makers\",\"get-post-commenters\",\"get-post-reactors\",\"get-post-resharers\",\"search-companies-by-url\",\"search-companies-by-params\",\"search-sales-nav-companies-by-url\",\"search-sales-nav-companies-by-params\",\"similar-companies\""
+                        "in:\"search-people-by-url\",\"search-people-by-params\",\"search-sales-nav-people-by-url\",\"search-sales-nav-people-by-params\",\"similar-profiles\",\"company-employees\",\"company-decision-makers\",\"get-post-commenters\",\"get-post-reactors\",\"get-post-resharers\",\"search-service-providers\",\"search-service-providers-by-url\",\"search-companies-by-url\",\"search-companies-by-params\",\"search-sales-nav-companies-by-url\",\"search-sales-nav-companies-by-params\",\"similar-companies\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -13328,6 +13756,8 @@
                         "get-post-commenters",
                         "get-post-reactors",
                         "get-post-resharers",
+                        "search-service-providers",
+                        "search-service-providers-by-url",
                         "search-companies-by-url",
                         "search-companies-by-params",
                         "search-sales-nav-companies-by-url",
@@ -16326,6 +16756,78 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-enrichment/company-lite-profile",
+            "controller": "App\\Entities\\DataRequest\\LinkedinEnrichmentController",
+            "action": "companyLiteProfile",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_enrichment",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentCompanyLiteProfileRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "company_url",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-enrichment/company-posts",
             "controller": "App\\Entities\\DataRequest\\LinkedinEnrichmentController",
             "action": "companyPosts",
@@ -16538,6 +17040,78 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-enrichment/company-public-identifier",
+            "controller": "App\\Entities\\DataRequest\\LinkedinEnrichmentController",
+            "action": "companyPublicIdentifier",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_enrichment",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentCompanyPublicIdentifierRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "company_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^\\d+$/",
+                        "max:32"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 32,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-enrichment/get-activity-urn-by-url",
             "controller": "App\\Entities\\DataRequest\\LinkedinEnrichmentController",
             "action": "getActivityUrnByUrl",
@@ -16602,6 +17176,97 @@
                     "in": null,
                     "min": null,
                     "max": 2048,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-enrichment/person-basic-profile",
+            "controller": "App\\Entities\\DataRequest\\LinkedinEnrichmentController",
+            "action": "personBasicProfile",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_enrichment",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinEnrichmentPersonBasicProfileRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "profile_id",
+                    "rules": [
+                        "required_without:public_identifier",
+                        "prohibits:public_identifier",
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without:profile_id",
+                        "prohibits:profile_id",
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
                     "size": null,
                     "between": null
                 }
@@ -17917,6 +18582,25 @@
                     "in": null,
                     "min": null,
                     "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "direction",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"received\",\"given\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "received",
+                        "given"
+                    ],
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }
@@ -19995,7 +20679,7 @@
                     "between": null
                 },
                 {
-                    "field": "activity_urn",
+                    "field": "entity_urn",
                     "rules": [
                         "required",
                         "string",
@@ -20256,7 +20940,7 @@
                     "between": null
                 },
                 {
-                    "field": "activity_urn",
+                    "field": "entity_urn",
                     "rules": [
                         "required",
                         "string",
@@ -22713,7 +23397,7 @@
                     "between": null
                 },
                 {
-                    "field": "filters.geo_ids",
+                    "field": "filters.company_headcounts",
                     "rules": [
                         "nullable",
                         "array",
@@ -22729,85 +23413,556 @@
                     "between": null
                 },
                 {
-                    "field": "filters.geo_ids.*",
+                    "field": "filters.company_headcounts.*",
                     "rules": [
                         "string",
-                        "max:64"
+                        "in:B,C,D,E,F,G,H,I"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
+                    "in": [
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                        "G",
+                        "H",
+                        "I"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.num_of_followers",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:5"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 5,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.num_of_followers.*",
+                    "rules": [
+                        "string",
+                        "in:NFR1,NFR2,NFR3,NFR4,NFR5"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "NFR1",
+                        "NFR2",
+                        "NFR3",
+                        "NFR4",
+                        "NFR5"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.fortune",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:4"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 4,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.fortune.*",
+                    "rules": [
+                        "string",
+                        "in:1,2,3,4"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "1",
+                        "2",
+                        "3",
+                        "4"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_activities",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:2"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 2,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_activities.*",
+                    "rules": [
+                        "string",
+                        "in:SLC,RFE"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "SLC",
+                        "RFE"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.annual_revenue",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.annual_revenue.min",
+                    "rules": [
+                        "required_with:filters.annual_revenue",
+                        "integer",
+                        "min:0",
+                        "max:100000000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 100000000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.annual_revenue.max",
+                    "rules": [
+                        "required_with:filters.annual_revenue",
+                        "integer",
+                        "min:0",
+                        "max:100000000",
+                        "gte:filters.annual_revenue.min"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 100000000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.annual_revenue.currency",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "regex:/^[A-Z]{3}$/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headcount_growth",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headcount_growth.min",
+                    "rules": [
+                        "required_with:filters.company_headcount_growth",
+                        "integer",
+                        "min:-100",
+                        "max:1000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": -100,
+                    "max": 1000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headcount_growth.max",
+                    "rules": [
+                        "required_with:filters.company_headcount_growth",
+                        "integer",
+                        "min:-100",
+                        "max:1000",
+                        "gte:filters.company_headcount_growth.min"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": -100,
+                    "max": 1000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.department_headcount",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.department_headcount.department",
+                    "rules": [
+                        "required_with:filters.department_headcount",
+                        "string",
+                        "in:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "10",
+                        "11",
+                        "12",
+                        "13",
+                        "14",
+                        "15",
+                        "16",
+                        "17",
+                        "18",
+                        "19",
+                        "20",
+                        "21",
+                        "22",
+                        "23",
+                        "24",
+                        "25",
+                        "26"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.department_headcount.min",
+                    "rules": [
+                        "required_with:filters.department_headcount",
+                        "integer",
+                        "min:0",
+                        "max:1000000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 1000000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.department_headcount.max",
+                    "rules": [
+                        "required_with:filters.department_headcount",
+                        "integer",
+                        "min:0",
+                        "max:1000000",
+                        "gte:filters.department_headcount.min"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 1000000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.department_headcount_growth",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.department_headcount_growth.department",
+                    "rules": [
+                        "required_with:filters.department_headcount_growth",
+                        "string",
+                        "in:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "10",
+                        "11",
+                        "12",
+                        "13",
+                        "14",
+                        "15",
+                        "16",
+                        "17",
+                        "18",
+                        "19",
+                        "20",
+                        "21",
+                        "22",
+                        "23",
+                        "24",
+                        "25",
+                        "26"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.department_headcount_growth.min",
+                    "rules": [
+                        "required_with:filters.department_headcount_growth",
+                        "integer",
+                        "min:-100",
+                        "max:1000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": -100,
+                    "max": 1000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.department_headcount_growth.max",
+                    "rules": [
+                        "required_with:filters.department_headcount_growth",
+                        "integer",
+                        "min:-100",
+                        "max:1000",
+                        "gte:filters.department_headcount_growth.min"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": -100,
+                    "max": 1000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.hiring_on_linkedin",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.first_degree_connection",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.saved_accounts_only",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.geo_ids",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
                 {
                     "field": "filters.industry_ids",
                     "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.industry_ids.*",
-                    "rules": [
-                        "string",
-                        "max:64"
+                        "prohibited"
                     ],
                     "required": false,
                     "nullable": false,
-                    "type": "string",
+                    "type": null,
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
                 {
                     "field": "filters.headcounts",
                     "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.headcounts.*",
-                    "rules": [
-                        "string",
-                        "max:64"
+                        "prohibited"
                     ],
                     "required": false,
                     "nullable": false,
-                    "type": "string",
+                    "type": null,
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
                 {
                     "field": "filters.annual_revenues",
                     "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.headcount_growth_min",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headquarters",
+                    "rules": [
                         "nullable",
                         "array",
                         "max:10"
@@ -22822,34 +23977,223 @@
                     "between": null
                 },
                 {
-                    "field": "filters.annual_revenues.*",
+                    "field": "filters.company_headquarters.*",
                     "rules": [
-                        "string",
-                        "max:64"
+                        "array"
                     ],
                     "required": false,
                     "nullable": false,
-                    "type": "string",
+                    "type": "array",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
                 {
-                    "field": "filters.headcount_growth_min",
+                    "field": "filters.company_headquarters.*.id",
                     "rules": [
                         "nullable",
-                        "integer",
-                        "min:-100",
-                        "max:1000"
+                        "string",
+                        "max:128",
+                        "required_without:filters.company_headquarters.*.text"
                     ],
                     "required": false,
                     "nullable": true,
-                    "type": "integer",
+                    "type": "string",
                     "in": null,
-                    "min": -100,
-                    "max": 1000,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headquarters.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.company_headquarters.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headquarters.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.industries.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.industries.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_lists",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_lists.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_lists.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.account_lists.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_lists.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.account_lists.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.account_lists.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }
@@ -23046,18 +24390,34 @@
                     "between": null
                 },
                 {
-                    "field": "filters.title",
+                    "field": "filters.first_name",
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256"
+                        "max:100"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 256,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.last_name",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
                     "size": null,
                     "between": null
                 },
@@ -23081,14 +24441,25 @@
                     "field": "filters.seniority_levels.*",
                     "rules": [
                         "string",
-                        "max:64"
+                        "in:100,110,120,130,200,210,220,300,310,320"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
-                    "in": null,
+                    "in": [
+                        "100",
+                        "110",
+                        "120",
+                        "130",
+                        "200",
+                        "210",
+                        "220",
+                        "300",
+                        "310",
+                        "320"
+                    ],
                     "min": null,
-                    "max": 64,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -23112,138 +24483,41 @@
                     "field": "filters.functions.*",
                     "rules": [
                         "string",
-                        "max:64"
+                        "in:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.geo_ids",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
+                    "in": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9",
+                        "10",
+                        "11",
+                        "12",
+                        "13",
+                        "14",
+                        "15",
+                        "16",
+                        "17",
+                        "18",
+                        "19",
+                        "20",
+                        "21",
+                        "22",
+                        "23",
+                        "24",
+                        "25",
+                        "26"
                     ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
                     "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.geo_ids.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.industry_ids",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.industry_ids.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.current_company_ids",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.current_company_ids.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.company_headcounts",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.company_headcounts.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -23267,6 +24541,288 @@
                     "field": "filters.years_in_current_company.*",
                     "rules": [
                         "string",
+                        "in:1,2,3,4,5"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.years_in_current_position",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:5"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 5,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.years_in_current_position.*",
+                    "rules": [
+                        "string",
+                        "in:1,2,3,4,5"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.years_of_experience",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:5"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 5,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.years_of_experience.*",
+                    "rules": [
+                        "string",
+                        "in:1,2,3,4,5"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headcounts",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headcounts.*",
+                    "rules": [
+                        "string",
+                        "in:A,B,C,D,E,F,G,H,I"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "A",
+                        "B",
+                        "C",
+                        "D",
+                        "E",
+                        "F",
+                        "G",
+                        "H",
+                        "I"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_types",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_types.*",
+                    "rules": [
+                        "string",
+                        "in:C,P,N,D,S,E,O,G"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "C",
+                        "P",
+                        "N",
+                        "D",
+                        "S",
+                        "E",
+                        "O",
+                        "G"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.profile_languages",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.profile_languages.*",
+                    "rules": [
+                        "string",
+                        "in:ar,en,es,pt,zh,fr,it,ru,de,nl,tr,tl,pl,ko,ja,ms,no,da,ro,sv,in,cs"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ar",
+                        "en",
+                        "es",
+                        "pt",
+                        "zh",
+                        "fr",
+                        "it",
+                        "ru",
+                        "de",
+                        "nl",
+                        "tr",
+                        "tl",
+                        "pl",
+                        "ko",
+                        "ja",
+                        "ms",
+                        "no",
+                        "da",
+                        "ro",
+                        "sv",
+                        "in",
+                        "cs"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.network",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:4"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 4,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.network.*",
+                    "rules": [
+                        "string",
+                        "in:F,S,A,O"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "F",
+                        "S",
+                        "A",
+                        "O"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.connections_of",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.connections_of.*",
+                    "rules": [
+                        "string",
                         "max:64"
                     ],
                     "required": false,
@@ -23275,6 +24831,773 @@
                     "in": null,
                     "min": null,
                     "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.title",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.geo_ids",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industry_ids",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_company_ids",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_titles",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_titles.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_titles.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.current_titles.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_titles.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.current_titles.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_titles.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_titles",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_titles.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_titles.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.past_titles.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_titles.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.past_titles.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_titles.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.locations",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.locations.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.locations.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.locations.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.locations.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.locations.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.locations.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headquarters",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headquarters.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headquarters.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.company_headquarters.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headquarters.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.company_headquarters.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_headquarters.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.industries.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.industries.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industries.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_companies",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_companies.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_companies.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.current_companies.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_companies.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.current_companies.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.current_companies.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_companies",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_companies.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_companies.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.past_companies.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_companies.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.past_companies.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.past_companies.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.groups",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.groups.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.groups.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.groups.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.groups.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.groups.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.groups.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.schools",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.schools.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.schools.*.id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "required_without:filters.schools.*.text"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.schools.*.text",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "required_without:filters.schools.*.id"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.schools.*.exclude",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }
@@ -23455,37 +25778,6 @@
                     "between": null
                 },
                 {
-                    "field": "filters.service_ids",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.service_ids.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "filters.keywords",
                     "rules": [
                         "nullable",
@@ -23502,7 +25794,7 @@
                     "between": null
                 },
                 {
-                    "field": "filters.geo_ids",
+                    "field": "filters.locations",
                     "rules": [
                         "nullable",
                         "array",
@@ -23518,9 +25810,10 @@
                     "between": null
                 },
                 {
-                    "field": "filters.geo_ids.*",
+                    "field": "filters.locations.*",
                     "rules": [
                         "string",
+                        "regex:/^\\d+$/",
                         "max:64"
                     ],
                     "required": false,
@@ -23529,6 +25822,155 @@
                     "in": null,
                     "min": null,
                     "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.service_categories",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.service_categories.*",
+                    "rules": [
+                        "string",
+                        "regex:/^\\d+$/",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.service_ids",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.geo_ids",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-scraping/search-service-providers-by-url",
+            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
+            "action": "searchServiceProvidersByUrl",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_searches",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchServiceProvidersByUrlRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "url",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/search/results/services/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
                     "size": null,
                     "between": null
                 }
@@ -24125,6 +26567,595 @@
             "internal": false,
             "request_class": "App\\Entities\\CloudBrowser\\Requests\\ExternalCloudBrowserRunRequest",
             "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/antidetect-browsers",
+            "controller": "App\\Entities\\AntidetectBrowser\\InternalAntidetectBrowserStepController",
+            "action": "create",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\InternalAntidetectBrowserCreateRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "browser_owner",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"platform\",\"customer\",\"mirror_profiles\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "platform",
+                        "customer",
+                        "mirror_profiles"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "vendor_provider",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"gologin\",\"multilogin\",\"adspower\",\"dolphin\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "gologin",
+                        "multilogin",
+                        "adspower",
+                        "dolphin"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "vendor_profile_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "os",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"win\",\"mac\",\"lin\",\"android\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "win",
+                        "mac",
+                        "lin",
+                        "android"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "antidetect_browser_proxy_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ab_px_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "proxy_country_code",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "size:2"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 2,
+                    "between": null
+                },
+                {
+                    "field": "custom_proxy_config",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "custom_proxy_config.ip",
+                    "rules": [
+                        "required_with:custom_proxy_config",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "custom_proxy_config.port",
+                    "rules": [
+                        "required_with:custom_proxy_config",
+                        "integer",
+                        "between:1,65535"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1,
+                        65535
+                    ]
+                },
+                {
+                    "field": "custom_proxy_config.mode",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"http\",\"socks4\",\"socks5\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "http",
+                        "socks4",
+                        "socks5"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/antidetect-browsers/delete",
+            "controller": "App\\Entities\\AntidetectBrowser\\InternalAntidetectBrowserStepController",
+            "action": "delete",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\InternalAntidetectBrowserDeleteRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/antidetect-browsers/generate-cloud-browser-access-key",
+            "controller": "App\\Entities\\AntidetectBrowser\\InternalAntidetectBrowserStepController",
+            "action": "generateCloudBrowserAccessKey",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\InternalAntidetectBrowserGenerateCloudBrowserAccessKeyRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "ttl_hours",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:8760"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 8760,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "max_connects",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allowed_ips",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allowed_ips.*",
+                    "rules": [
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allowed_countries",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allowed_countries.*",
+                    "rules": [
+                        "string",
+                        "size:2"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 2,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/antidetect-browsers/revoke-cloud-browser-access-key",
+            "controller": "App\\Entities\\AntidetectBrowser\\InternalAntidetectBrowserStepController",
+            "action": "revokeCloudBrowserAccessKey",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\InternalAntidetectBrowserRevokeCloudBrowserAccessKeyRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:cb_ak_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/antidetect-browsers/run",
+            "controller": "App\\Entities\\AntidetectBrowser\\InternalAntidetectBrowserStepController",
+            "action": "run",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\InternalAntidetectBrowserRunRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/antidetect-browsers/stop",
+            "controller": "App\\Entities\\AntidetectBrowser\\InternalAntidetectBrowserStepController",
+            "action": "stop",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\InternalAntidetectBrowserStopRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "now",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
             "rules_reason": null
         },
         {
@@ -25348,6 +28379,188 @@
         },
         {
             "method": "POST",
+            "uri": "internal/linkedin-account-smart-limits/reset-hold",
+            "controller": "App\\Entities\\LinkedinAccountSmartLimit\\InternalLinkedinAccountSmartLimitStepController",
+            "action": "resetHold",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinAccountSmartLimit\\Requests\\InternalLinkedinAccountSmartLimitResetHoldRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_sm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/linkedin-account-smart-limits/update",
+            "controller": "App\\Entities\\LinkedinAccountSmartLimit\\InternalLinkedinAccountSmartLimitStepController",
+            "action": "update",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinAccountSmartLimit\\Requests\\InternalLinkedinAccountSmartLimitUpdateRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_sm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "daily_limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:1000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 1000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target_limit",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:1000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 1000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "delay_in_seconds",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:3600"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3600,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "smart_limits_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "reset_hold",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/linkedin-accounts",
             "controller": "App\\Entities\\LinkedinAccount\\InternalLinkedinAccountController",
             "action": "create",
@@ -25542,6 +28755,190 @@
         },
         {
             "method": "POST",
+            "uri": "internal/linkedin-accounts/update-sync-config",
+            "controller": "App\\Entities\\LinkedinAccount\\InternalLinkedinAccountStepController",
+            "action": "updateSyncConfig",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\InternalLinkedinAccountUpdateSyncConfigRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sync_config",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sync_config.timezone",
+                    "rules": [
+                        "required",
+                        "string",
+                        "timezone"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sync_config.window",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sync_config.window.*.day_of_week",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "between:1,7"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1,
+                        7
+                    ]
+                },
+                {
+                    "field": "sync_config.window.*.start_minute",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "between:0,1439"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        0,
+                        1439
+                    ]
+                },
+                {
+                    "field": "sync_config.window.*.end_minute",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "between:1,1440"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1,
+                        1440
+                    ]
+                },
+                {
+                    "field": "sync_config.entries",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sync_config.entries.*.interval_minutes",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:5"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 5,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/linkedin-connection-requests/send",
             "controller": "App\\Entities\\LinkedinConnectionRequest\\InternalLinkedinConnectionRequestController",
             "action": "send",
@@ -25668,7 +29065,7 @@
                     "between": null
                 },
                 {
-                    "field": "activity_urn",
+                    "field": "entity_urn",
                     "rules": [
                         "required",
                         "string",

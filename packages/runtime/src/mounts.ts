@@ -12,7 +12,7 @@ export interface MountConfig {
   path: string;
   /** MCP server name reported in `initialize`. */
   name: string;
-  /** Thin (<2.4KB) server instructions. */
+  /** Thin (<2.4KB) domain instructions; server-factory appends the global REPLY_STYLE rule. */
   instructions?: string;
   selectors: ToolSelector[];
   /** Hard cap; default 25. Facade mounts are exempt for their backing set. */

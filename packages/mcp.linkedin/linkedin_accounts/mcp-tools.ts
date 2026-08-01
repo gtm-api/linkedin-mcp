@@ -18,6 +18,7 @@ import {
   McpGetResponse,
   McpSearchRequestSchema,
   McpSearchResponse,
+  McpUpdateResponse,
 } from '@gtm/mcp-shared';
 
 const SID = z.string().length(18).startsWith('ln_ac_')
@@ -72,6 +73,10 @@ const LinkedinAccount = z.object({
   // Display essentials
   full_name: z.string().nullable(),
   avatar_url: z.string().nullable(),
+
+  // Operator display fields - team-authored, never synced from LinkedIn.
+  display_name: z.string().nullable(),
+  label: z.string().nullable(),
 
   // Premium / Sales-Navigator flags
   has_premium: z.boolean(),
@@ -195,6 +200,55 @@ const LinkedinAccountFilter = z.object({
   deleted_at: filterOp(z.string(), ['is_null', 'gte', 'lte']).optional()
     .describe('Default scope is { is_null: true } (live accounts).'),
 }).partial();
+
+// ─── Self-read insight projections (rows 40 / 41, LIVE since 2026-07-30) ───
+//
+// Both are transient: the account row is the envelope item, these are the action
+// `result` payloads and nothing is persisted.
+//
+// Scores are z.number(), never z.number().int(). A live SSI read is 53.496 with
+// pillars 11.546 / 7.2 / 9.75 / 25. The research file's "0-100" and "each 0-25"
+// describe the RANGE, and reading them as an integer type truncates a real
+// measurement. Note that a whole-number score still encodes as `25` in JSON, so
+// consumers must accept both forms of number.
+const LinkedinAccountSsiResult = z.object({
+  status: z.string().describe('Plugin dispatch status for this read.'),
+  ssi: z.object({
+    active_seat: z.boolean()
+      .describe('Whether the account holds a live Sales Navigator seat. False does NOT mean the scores are absent.'),
+    overall: z.number().describe('0-100, the sum of the four pillars. Fractional.'),
+    pillars: z.object({
+      professional_brand: z.number(),
+      find_right_people: z.number(),
+      insight_engagement: z.number(),
+      strong_relationship: z.number(),
+    }).describe('The four SSI components, each 0-25 and fractional.'),
+    group_ranks: z.array(z.object({
+      group_type: z.string().describe('INDUSTRY or NETWORK. Open string: a group LinkedIn adds must surface, not vanish.'),
+      rank: z.number().int().describe('Percentile standing inside the group, lower is better.'),
+      group_size: z.number().int(),
+      industry: z.string().nullable().optional().describe('Present on the INDUSTRY group only.'),
+      overall: z.number().describe('SSI recomputed within this comparison group.'),
+    })).describe('Peer-group standings. Empty when the read failed.'),
+  }),
+}).passthrough();
+
+const LinkedinAccountAnalyticsResult = z.object({
+  status: z.string().describe('Plugin dispatch status for this read.'),
+  analytics: z.object({
+    date_from: z.string().describe('Window start actually reported on, YYYY-MM-DD.'),
+    date_to: z.string(),
+    metrics: z.record(z.object({
+      total: z.number().int().describe('Period total, equal to the sum of the daily series.'),
+      change_percent: z.number().nullable()
+        .describe('Magnitude of the change vs the prior period. UNSIGNED: pair it with change_direction, and when that is null the direction is genuinely unknown.'),
+      change_direction: z.enum(['up', 'down']).nullable()
+        .describe('Often null in practice, including when change_percent is present. Treat null as unknown, never as flat or as up.'),
+      daily: z.array(z.object({ date: z.string(), value: z.number().int() }))
+        .describe('One point per day in the window, UTC dates.'),
+    })).describe('Keyed by wire metric name (impressions, engagements today). An OPEN map: new dashboard cards appear as new keys.'),
+  }),
+}).passthrough();
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
@@ -437,60 +491,84 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'get_linkedin_account_my_ssi',
-    description: '⛔ NOT SHIPPED YET: returns the Social Selling Index. Contract locked, capability not built; calling it returns not_implemented.',
+    description: "Read the connected account's Social Selling Index: the overall score, the four pillars it is the sum of (professional brand, finding the right people, engaging with insights, building relationships), and where the account stands inside its industry and its own network. Answers WITHOUT a Sales Navigator seat, reporting that as active_seat: false with the scores still filled in, so it is a health signal for any account rather than a premium-only read. Non-creditable and identity-bound: the sid names the account whose own dashboard is read; there is no way to read someone else's SSI. Every score is FRACTIONAL (a real reading is 53.496, not 53), so do not round before comparing runs, the week-over-week movement is usually under a point.",
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-ssi', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: false,
     creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
-    outputSchema: McpActionResponse(LinkedinAccount),
-    annotations: { title: 'Get my SSI (not shipped)', ...RO },
+    outputSchema: McpActionResponse(LinkedinAccount, LinkedinAccountSsiResult),
+    annotations: { title: 'Get my SSI', ...RO },
   },
   {
     ...base,
     name: 'get_linkedin_account_my_analytics',
-    description: '⛔ NOT SHIPPED YET: returns creator/profile analytics. Contract locked, capability not built; calling it returns not_implemented.',
+    description: "Read the connected account's creator content analytics over a date window: per metric (impressions, engagements) the daily series, the period total, and the percentage change against the prior period. Omit both dates to get the trailing 28 days, which is what the LinkedIn dashboard itself opens on. Supplying one date without the other is refused rather than half-defaulted, and a window running into the future is refused too (LinkedIn has no data there and would answer with zeroes that read like a collapse in reach). Non-creditable and identity-bound: this is the account's own dashboard, not a competitor read. The metrics map is open: new cards LinkedIn adds show up as extra keys. The 'Discovery' card (in-network vs out-of-network reach) is a separate component and is NOT included.",
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-analytics', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: false,
     creditable: false,
     massAction: false,
     scheduleRequired: false,
-    inputSchema: z.object({ sid: SID, ...usageMetaField }),
-    outputSchema: McpActionResponse(LinkedinAccount),
-    annotations: { title: 'Get my analytics (not shipped)', ...RO },
+    inputSchema: z.object({
+      sid: SID,
+      date_from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional()
+        .describe('Window start, YYYY-MM-DD. Omit BOTH dates for the trailing 28 days; supplying only one is a 422.'),
+      date_to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional()
+        .describe('Window end, YYYY-MM-DD. Must not precede date_from and must not be in the future.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, LinkedinAccountAnalyticsResult),
+    annotations: { title: 'Get my analytics', ...RO },
   },
   {
     ...base,
     name: 'edit_linkedin_account_my_profile',
-    description: '⛔ NOT SHIPPED YET: edits the connected account\'s own profile (name/headline/summary). Contract locked, capability not built; calling it returns not_implemented.',
+    description: "Edit the connected account's OWN LinkedIn profile intro card: name, headline, additional name, industry, location, the current position/education pins and their visibility, website, and pronouns. Send only what changes; the backend reads the current card first and submits the complete form, because the LinkedIn form is a REPLACE and anything omitted would be blanked. The About section is NOT editable here (LinkedIn uses a separate form), so passing summary is rejected rather than ignored. Industry, city, position and education take LinkedIn's own numeric ids, which this API does not resolve: omit them and their current values are kept. Spends the tight edit_profile budget (10/day, 600 s apart), because rapid profile churn is a bot signal. LinkedIn returns no confirmation of what it saved, so updated_fields reflects what was ASKED for; read the profile back to confirm.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'PATCH', pathTemplate: '/api/linkedin-accounts/{sid}/my-profile', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: true,
     creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      first_name: z.string().optional(),
-      last_name: z.string().optional(),
-      headline: z.string().optional(),
-      summary: z.string().optional(),
+      first_name: z.string().min(1).max(100).optional(),
+      last_name: z.string().min(1).max(100).optional(),
+      headline: z.string().min(1).max(220).optional().describe("LinkedIn's own cap is 220 characters."),
+      additional_name: z.string().max(100).optional(),
+      industry_id: z.string().regex(/^\d+$/).optional().describe("LinkedIn industry id, e.g. '96'."),
+      location_geo_id: z.number().int().min(1).optional(),
+      sub_location_geo_id: z.number().int().min(1).optional(),
+      city_geo_id: z.string().regex(/^\d+$/).optional(),
+      location: z.string().max(200).optional().describe('Display text for the location, e.g. Buenos Aires.'),
+      postal_code: z.string().max(20).optional(),
+      current_position_id: z.string().regex(/^\d+$/).optional(),
+      current_education_id: z.string().regex(/^\d+$/).optional(),
+      show_current_position: z.boolean().optional(),
+      show_education: z.boolean().optional(),
+      website: z.string().max(2048).optional(),
+      website_label: z.string().max(100).optional(),
+      custom_pronouns: z.string().max(50).optional(),
       ...usageMetaField,
     }),
-    outputSchema: McpActionResponse(LinkedinAccount),
-    annotations: { title: 'Edit my profile (not shipped)', ...DANGER },
+    outputSchema: McpActionResponse(LinkedinAccount, z.object({
+      activity_log: z.object({}).passthrough().describe('The dispatch row (linkedin-account-activity-log), action_type edit_my_profile.'),
+      updated_fields: z.array(z.string())
+        .describe('The fields the caller asked to change. NOT a confirmation: LinkedIn answers with a bare ok and does not echo the saved profile.'),
+    }).passthrough()),
+    annotations: { title: 'Edit my profile', ...DANGER },
   },
   {
     ...base,
@@ -597,5 +675,28 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(LinkedinAccount),
     annotations: { title: 'Update account sync config', ...ACT },
+  },
+  {
+    ...base,
+    name: 'update_linkedin_account',
+    description:
+      "Set the account's operator display fields: display_name and label. These are team-authored (never synced from LinkedIn) and are the only editable fields on the account row - sync cadence has its own tool (update_linkedin_account_sync_config), premium flags have their checks, and lifecycle is driven by the browser. Send only the fields to change; an explicit null clears a field. Returns the updated account. To edit these across many accounts at once, author a mass action with the linkedin-accounts.update step instead.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'PATCH', pathTemplate: '/api/linkedin-accounts/{sid}', sidParam: 'sid' },
+    operation: 'update',
+    envelope: 'update',
+    availability: 'ga',
+    dangerous: false,
+    creditable: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      display_name: z.string().max(255).nullable().optional().describe('Team-facing display name for the account; null clears it.'),
+      label: z.string().max(255).nullable().optional().describe('Free-form label/tag for the account (e.g. a pod or campaign name); null clears it.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpUpdateResponse(LinkedinAccount),
+    annotations: { title: 'Update account display fields', ...ACT },
   },
 ];

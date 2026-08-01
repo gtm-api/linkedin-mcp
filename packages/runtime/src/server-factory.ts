@@ -12,6 +12,17 @@ import { toolDescription } from './tool-description';
 
 export type ServerFactory = (mount: ResolvedMount, catalog?: ResolvedMount[]) => McpServer;
 
+// Appended to every mount's server instructions (facade included), here at the
+// single SDK seam so no mount can opt out: whatever the surface, the client
+// agent answers its user with the minimum, not with prose around the data.
+export const REPLY_STYLE =
+  'Reply style: keep every answer as simple and short as the request allows, for support answers and plain context alike. Give the minimum that answers the ask or supplies the needed context, then stop. No filler, no padding, no unrequested detail.';
+
+/** Mount instructions + the global reply-style rule; the rule alone when a mount has none. */
+export function composeInstructions(mountInstructions?: string): string {
+  return mountInstructions ? `${mountInstructions}\n\n${REPLY_STYLE}` : REPLY_STYLE;
+}
+
 // Build a factory that returns a fresh McpServer per request (stateless,
 // server-instance-per-request). The generic dispatch is wrapped once with the
 // middleware chain; each tool handler reads its AuthScope from AsyncLocalStorage
@@ -28,7 +39,7 @@ export function createServerFactory(
   return (mount: ResolvedMount, catalog: ResolvedMount[] = []): McpServer => {
     const server = new McpServer(
       { name: mount.config.name, version: deps.config.version },
-      mount.config.instructions ? { instructions: mount.config.instructions } : undefined,
+      { instructions: composeInstructions(mount.config.instructions) },
     );
 
     if (mount.config.facade === 'toolsets') {

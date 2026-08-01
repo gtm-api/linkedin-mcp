@@ -77,6 +77,21 @@ const MassActionStepToolCanonical = z.enum([
   'linkedin-connection-requests.send-linkedin-connection-request',
   'linkedin-posting.react',
   'email-messages.send',
+  // Antidetect-browser fleet (accounts-page mass bar + "provision N browsers").
+  // 'antidetect-browsers.create' is the generate-scope anchor (mints the row).
+  'antidetect-browsers.run',
+  'antidetect-browsers.stop',
+  'antidetect-browsers.delete',
+  'antidetect-browsers.create',
+  'antidetect-browsers.generate-cloud-browser-access-key',
+  'antidetect-browsers.revoke-cloud-browser-access-key',
+  // Linkedin-account mass-edit. Only update-sync-config is a mass operation;
+  // display-field `update` and `reset-sync` are single-account (public verbs +
+  // update_linkedin_account / reset_linkedin_account_sync tools), not mass steps.
+  'linkedin-accounts.update-sync-config',
+  // Smart-limit mass-edit.
+  'linkedin-account-smart-limits.update',
+  'linkedin-account-smart-limits.reset-hold',
 ]);
 
 // The connect verb answers to two wire spellings for ONE executor arm: the

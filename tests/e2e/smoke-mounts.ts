@@ -49,8 +49,12 @@ export const ACCOUNTS_MOUNT: SmokeMount = {
   name: 'gtm-linkedin-accounts',
   search: 'search_linkedin_accounts',
   searchArgs: { page_size: 5 },
-  stub: 'get_linkedin_account_my_ssi',
-  stubArgs: { sid: 'ln_ac_000000000000' },
+  // No `stub` on purpose: as of 2026-07-30 the accounts mount has no §5.9 stub
+  // left. get_linkedin_account_my_ssi, get_linkedin_account_my_analytics and
+  // edit_linkedin_account_my_profile all went GA when the plugin shipped their
+  // verbs. `stub` is optional and every use site guards on it, so this row simply
+  // skips the short-circuit check. Re-add it if a future accounts tool lands
+  // contract-first.
 };
 
 // The dangerous tool both the accounts suite and the facade suite drive to the

@@ -54,17 +54,61 @@ const PeopleSearchFilters = z.object({
   open_to_volunteer: z.boolean().nullable().optional(),
 }).describe('Regular people-search filters. At least one member must be non-empty. Members are LinkedIn-ready wire values (passed through untranslated); facet-id members resolve via param-id-lookup.');
 
+// One selected chip in an SN typeahead facet - the node FilterValue verbatim.
+// id comes from scrape_linkedin_sales_nav_param_id_lookup (the member's describe
+// names the lookup type); text is a free-text label SN matches server-side (no
+// id needed); exclude flips the chip to a negative filter.
+const SnFacetValue = z.object({
+  id: z.string().max(128).nullable().optional().describe('Opaque SN facet id, VERBATIM from scrape_linkedin_sales_nav_param_id_lookup.'),
+  text: z.string().max(256).nullable().optional().describe('Free-text label - SN matches it server-side; use when no id is at hand.'),
+  exclude: z.boolean().nullable().optional().describe('true → EXCLUDED (negative filter); omitted/false → INCLUDED.'),
+}).describe('One facet value: at least one of id / text.');
+
+const snFacet = (desc: string) => z.array(SnFacetValue).max(10).nullable().optional().describe(desc);
+
+const TENURE_LEGEND = "'1' <1 year, '2' 1-2, '3' 3-5, '4' 6-10, '5' 10+ years";
+const TENURE_IDS = ['1', '2', '3', '4', '5'] as const;
+const SN_FUNCTION_IDS = Array.from({ length: 26 }, (_, i) => String(i + 1)) as [string, ...string[]];
+const SN_FUNCTION_LEGEND =
+  "'1' Accounting, '2' Administrative, '3' Arts and Design, '4' Business Development, '5' Community and Social Services, "
+  + "'6' Consulting, '7' Education, '8' Engineering, '9' Entrepreneurship, '10' Finance, '11' Healthcare Services, "
+  + "'12' Human Resources, '13' Information Technology, '14' Legal, '15' Marketing, '16' Media and Communication, "
+  + "'17' Military and Protective Services, '18' Operations, '19' Product Management, '20' Program and Project Management, "
+  + "'21' Purchasing, '22' Quality Assurance, '23' Real Estate, '24' Research, '25' Sales, '26' Customer Success and Support";
+
 const SalesNavPeopleSearchFilters = z.object({
   keywords: z.string().max(256).nullable().optional(),
-  title: z.string().max(256).nullable().optional().describe('Current title.'),
-  seniority_levels: z.array(z.string()).max(10).nullable().optional().describe('SN seniority facet ids.'),
-  functions: z.array(z.string()).max(10).nullable().optional().describe('SN function facet ids.'),
-  geo_ids: z.array(z.string()).max(10).nullable().optional(),
-  industry_ids: z.array(z.string()).max(10).nullable().optional(),
-  current_company_ids: z.array(z.string()).max(10).nullable().optional(),
-  company_headcounts: z.array(z.string()).max(10).nullable().optional().describe('SN headcount bucket ids.'),
-  years_in_current_company: z.array(z.string()).max(5).nullable().optional().describe('SN tenure bucket ids.'),
-}).describe('Sales Navigator people-search filters. At least one member must be non-empty.');
+  first_name: z.string().max(100).nullable().optional().describe('Text-only wire facet (no id space).'),
+  last_name: z.string().max(100).nullable().optional().describe('Text-only wire facet (no id space).'),
+  // Typeahead facets - [{id, text, exclude}] values; lookup type named per member.
+  current_titles: snFacet('Current job titles. Ids via lookup(type: "TITLE") (numeric, e.g. "5" Director) - or just free text: [{text: "VP Marketing"}].'),
+  past_titles: snFacet('Past job titles. Ids via lookup(type: "TITLE") or free text.'),
+  locations: snFacet('Person geography. Ids via lookup(type: "BING_GEO") (e.g. "103644278" United States); regions like DACH/EMEA exist too.'),
+  company_headquarters: snFacet('CURRENT COMPANY HQ region (not the person’s own location). Ids via lookup(type: "BING_GEO").'),
+  industries: snFacet('Industries. Ids via lookup(type: "INDUSTRY") (numeric).'),
+  current_companies: snFacet('Current employer. Ids via lookup(type: "COMPANY_WITH_LIST") - id shape urn:li:organization:N. exclude: true is the classic "not my customers" move.'),
+  past_companies: snFacet('Past employer. Ids via lookup(type: "COMPANY_WITH_LIST").'),
+  groups: snFacet('LinkedIn group membership. Ids via lookup(type: "GROUP").'),
+  schools: snFacet('Schools attended. Ids via lookup(type: "SCHOOL") or free text.'),
+  // Static closed-enum facets - full id sets inline, NO lookup call needed. A negative
+  // selection is expressed by including the complement (the sets are closed).
+  seniority_levels: z.array(z.enum(['100', '110', '120', '130', '200', '210', '220', '300', '310', '320'])).max(10).nullable().optional()
+    .describe("SENIORITY_V2: '100' In Training, '110' Entry Level, '120' Senior, '130' Strategic, '200' Entry Level Manager, '210' Experienced Manager, '220' Director, '300' Vice President, '310' CXO, '320' Owner/Partner."),
+  functions: z.array(z.enum(SN_FUNCTION_IDS)).max(10).nullable().optional().describe(`Job function: ${SN_FUNCTION_LEGEND}.`),
+  years_in_current_company: z.array(z.enum(TENURE_IDS)).max(5).nullable().optional().describe(`Tenure at current company: ${TENURE_LEGEND}.`),
+  years_in_current_position: z.array(z.enum(TENURE_IDS)).max(5).nullable().optional().describe(`Tenure in current position: ${TENURE_LEGEND}.`),
+  years_of_experience: z.array(z.enum(TENURE_IDS)).max(5).nullable().optional().describe(`Total career length: ${TENURE_LEGEND}.`),
+  company_headcounts: z.array(z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'])).max(10).nullable().optional()
+    .describe("Company size: 'A' Self-employed, 'B' 1-10, 'C' 11-50, 'D' 51-200, 'E' 201-500, 'F' 501-1000, 'G' 1001-5000, 'H' 5001-10000, 'I' 10001+."),
+  company_types: z.array(z.enum(['C', 'P', 'N', 'D', 'S', 'E', 'O', 'G'])).max(10).nullable().optional()
+    .describe("Company type: 'C' Public, 'P' Privately Held, 'N' Non-profit, 'D' Educational, 'S' Partnership, 'E' Self-Employed, 'O' Self-Owned, 'G' Government."),
+  profile_languages: z.array(z.enum(['ar', 'en', 'es', 'pt', 'zh', 'fr', 'it', 'ru', 'de', 'nl', 'tr', 'tl', 'pl', 'ko', 'ja', 'ms', 'no', 'da', 'ro', 'sv', 'in', 'cs'])).max(10).nullable().optional()
+    .describe('Profile language, ISO 639-1.'),
+  network: z.array(z.enum(['F', 'S', 'A', 'O'])).max(4).nullable().optional()
+    .describe("Relationship degree: 'F' 1st, 'S' 2nd, 'A' group members, 'O' 3rd+."),
+  connections_of: z.array(z.string().max(64)).max(10).nullable().optional()
+    .describe('People connected to these members. Tokens (ACwA…) via lookup(type: "CONNECTION_OF").'),
+}).describe('Sales Navigator people-search filters - the COMPLETE SN facet vocabulary. At least one member must be non-empty. lookup = scrape_linkedin_sales_nav_param_id_lookup.');
 
 const CompanySearchFilters = z.object({
   keywords: z.string().max(256).nullable().optional(),
@@ -73,14 +117,49 @@ const CompanySearchFilters = z.object({
   company_sizes: z.array(z.string()).max(10).nullable().optional().describe('LinkedIn size-bucket ids ("B"=1-10 … "I"=10001+).'),
 }).describe('Regular company-search filters. At least one member must be non-empty.');
 
+const SN_DEPARTMENT_FIELD = z.enum(SN_FUNCTION_IDS)
+  .describe('Numeric SN department id - the same taxonomy as the people-search functions facet (see its legend, or lookup(type: "FUNCTION")).');
+
 const SalesNavCompanySearchFilters = z.object({
   keywords: z.string().max(256).nullable().optional(),
-  geo_ids: z.array(z.string()).max(10).nullable().optional(),
-  industry_ids: z.array(z.string()).max(10).nullable().optional(),
-  headcounts: z.array(z.string()).max(10).nullable().optional().describe('SN headcount bucket ids.'),
-  annual_revenues: z.array(z.string()).max(10).nullable().optional().describe('SN revenue bucket ids.'),
-  headcount_growth_min: z.number().int().min(-100).max(1000).nullable().optional().describe('Department/company headcount-growth floor (int percent).'),
-}).describe('Sales Navigator account-search filters. At least one member must be non-empty.');
+  // Typeahead facets - [{id, text, exclude}] values.
+  company_headquarters: snFacet('HQ region. Ids via lookup(type: "BING_GEO"); exclude supported (e.g. exclude APAC).'),
+  industries: snFacet('Industries. Ids via lookup(type: "INDUSTRY").'),
+  account_lists: snFacet('Your SN account lists. Ids via lookup(type: "ACCOUNT_LIST") - numeric list ids or the "ALL" sentinel; exclude: true skips a list (e.g. current book of business).'),
+  // Static closed-enum facets - full id sets inline, NO lookup call needed.
+  company_headcounts: z.array(z.enum(['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'])).max(10).nullable().optional()
+    .describe("Company size: 'B' 1-10, 'C' 11-50, 'D' 51-200, 'E' 201-500, 'F' 501-1000, 'G' 1001-5000, 'H' 5001-10000, 'I' 10001+ (account search has no 'A')."),
+  num_of_followers: z.array(z.enum(['NFR1', 'NFR2', 'NFR3', 'NFR4', 'NFR5'])).max(5).nullable().optional()
+    .describe('LinkedIn page followers: NFR1 1-50, NFR2 51-100, NFR3 101-1000, NFR4 1001-5000, NFR5 5001+.'),
+  fortune: z.array(z.enum(['1', '2', '3', '4'])).max(4).nullable().optional()
+    .describe("Fortune 500 tier: '1' Fortune 50, '2' 51-100, '3' 101-250, '4' 251-500."),
+  account_activities: z.array(z.enum(['SLC', 'RFE'])).max(2).nullable().optional()
+    .describe("Buying signals: 'SLC' senior-leadership changes in the last 3 months, 'RFE' funding event in the past 12 months."),
+  // Range facets (ints, min ≤ max).
+  annual_revenue: z.object({
+    min: z.number().int().min(0).max(100000000),
+    max: z.number().int().min(0).max(100000000),
+    currency: z.string().regex(/^[A-Z]{3}$/).nullable().optional().describe('ISO-4217 code; default USD.'),
+  }).nullable().optional().describe('Annual revenue range in MILLIONS (e.g. {min: 10, max: 100} = $10M-$100M).'),
+  company_headcount_growth: z.object({
+    min: z.number().int().min(-100).max(1000),
+    max: z.number().int().min(-100).max(1000),
+  }).nullable().optional().describe('Company-wide headcount growth range, percent (negative = shrinking).'),
+  department_headcount: z.object({
+    department: SN_DEPARTMENT_FIELD,
+    min: z.number().int().min(0).max(1000000),
+    max: z.number().int().min(0).max(1000000),
+  }).nullable().optional().describe('Headcount of ONE department (e.g. department "25" Sales, {min: 20, max: 99999}).'),
+  department_headcount_growth: z.object({
+    department: SN_DEPARTMENT_FIELD,
+    min: z.number().int().min(-100).max(1000),
+    max: z.number().int().min(-100).max(1000),
+  }).nullable().optional().describe('Growth of ONE department, percent - e.g. engineering team growing 10%+.'),
+  // Single-chip toggles (true dispatches the chip; false dispatches nothing).
+  hiring_on_linkedin: z.boolean().nullable().optional().describe('true → only accounts currently hiring on LinkedIn.'),
+  first_degree_connection: z.boolean().nullable().optional().describe('true → only accounts where you have a 1st-degree connection.'),
+  saved_accounts_only: z.boolean().nullable().optional().describe('true → only your saved SN accounts.'),
+}).describe('Sales Navigator account-search filters - the COMPLETE SN vocabulary. At least one member must be non-empty (a false toggle counts as empty). lookup = scrape_linkedin_sales_nav_param_id_lookup.');
 
 const PostSearchFilters = z.object({
   keywords: z.string().max(256).describe('REQUIRED: content search needs a query.'),
@@ -97,11 +176,18 @@ const PostSearchFilters = z.object({
   mentions_organization: z.array(z.string()).max(10).nullable().optional().describe('Posts mentioning these organizations (facet ids/urns).'),
 }).describe('Content-search filters; keywords required.');
 
+// Wire member names, verbatim. The pre-landing sketch called these service_ids
+// and geo_ids; the node has always called them service_categories and
+// locations. Both old names are `prohibited` backend-side rather than mapped:
+// a filter that lands in a param the node ignores comes back as an empty result
+// set, which reads like "nobody matches" instead of like a mistake.
 const ServiceProviderSearchFilters = z.object({
-  service_ids: z.array(z.string()).max(10).nullable().optional().describe('service facet ids from param-id-lookup("service").'),
   keywords: z.string().max(256).nullable().optional(),
-  geo_ids: z.array(z.string()).max(10).nullable().optional(),
-}).describe('Service-provider marketplace filters. At least one member must be non-empty.');
+  service_categories: z.array(z.string().regex(/^\d+$/)).max(10).nullable().optional()
+    .describe("LinkedIn's own numeric service-category ids. Not resolvable through this API: read them off a services-search URL, or use the by-url tool."),
+  locations: z.array(z.string().regex(/^\d+$/)).max(10).nullable().optional()
+    .describe('Numeric LinkedIn geo ids.'),
+}).describe('Service-provider marketplace filters. At least one member must be non-empty. Anything these three cannot express is reachable by pasting the UI URL into scrape_linkedin_search_service_providers_by_url.');
 
 const ProfileTarget = z.object({
   ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…).'),
@@ -171,11 +257,11 @@ const LinkedinPersonPreview = z.object({
   connection_degree: z.string().nullable(),
 }).passthrough();
 
-const LinkedinServiceProviderPreview = LinkedinPersonPreview.extend({
-  services: z.array(z.string()).nullable(),
-  rating: z.number().nullable(),
-  reviews_count: z.number().int().nullable(),
-}).passthrough();
+// The services screen answers with the SAME card shape as the people search,
+// so a provider preview IS a person preview. It used to be declared with
+// `services`, `rating` and `reviews_count` on top; none of those are on the
+// wire, and promising them made the tool describe data it could never return.
+const LinkedinServiceProviderPreview = LinkedinPersonPreview;
 
 const LinkedinCompanyPreview = z.object({
   company_ln_id: z.string().nullable(),
@@ -376,7 +462,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_sales_nav_people_by_params',
     description:
-      `Structured-filter form of the SN people search (SN facet vocabulary: seniority, function, headcount, tenure). Same engine and cost (2 credits) as the by-url variant; SN-capable executor required.`,
+      'Structured-filter form of the SN people search, carrying the COMPLETE Sales Navigator facet vocabulary (22 members): titles (current/past), seniority, function, tenure (company/position/career), geography, company HQ, current/past employers, company size and type, industries, groups, schools, profile languages, relationship degree, connections-of, first/last name. HOW TO BUILD A SEARCH: (1) typeahead facets take [{id, text, exclude}] values - resolve ids with scrape_linkedin_sales_nav_param_id_lookup (each member description names its lookup type), or skip the lookup and pass {text: "..."} free text; (2) static-enum members list their FULL id sets inline - never call the lookup for those; (3) exclude: true on a value negates it (closed enums negate by including the complement). Same engine and cost (2 credits) as the by-url variant; SN-capable executor required.',
     toolClass: 'typical',
     route: rt('search-sales-nav-people-by-params'),
     operation: 'action',
@@ -399,12 +485,12 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_service_providers',
     description:
-      `${STUB} Search LinkedIn’s service-provider marketplace (freelancers / agencies). Returns people previews extended with service labels and marketplace rating. Cost 2 credits.`,
+      "Search LinkedIn's service-provider marketplace (freelancers and agencies) by filters. Returns the same person previews as the people search: the services screen carries no ratings or service labels in its results, only provider profiles. 2 credits per page. Filters are keywords plus LinkedIn's own numeric service-category and geo ids; anything else on that screen is reachable by pasting the UI URL into the by-url twin.",
     toolClass: 'typical',
     route: rt('search-service-providers'),
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: false,
     creditable: true,
     massAction: false,
@@ -416,7 +502,30 @@ export const linkedinScrapingTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), runResult(LinkedinServiceProviderPreview, PageNumberPaging)),
-    annotations: { title: 'Scrape service providers (not shipped)', ...SCRAPE },
+    annotations: { title: 'Scrape service providers', ...SCRAPE },
+  },
+  {
+    ...base,
+    name: 'scrape_linkedin_search_service_providers_by_url',
+    description:
+      "Run ONE page of a pasted LinkedIn services-search URL. Use this when the marketplace facets you need are not in the by-filters tool: build the search in LinkedIn's own UI, copy the /search/results/services/ URL, and page through it here. A URL from any other search screen is refused, because it would silently scrape the wrong thing. 2 credits per page, same person-preview rows as the by-filters tool.",
+    toolClass: 'typical',
+    route: rt('search-service-providers-by-url'),
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    creditable: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      ...requestBase,
+      url: z.string().max(2048).describe('Must start with https://www.linkedin.com/search/results/services/'),
+      page: z.number().int().min(1).max(100).optional().describe('Default 1.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), runResult(LinkedinServiceProviderPreview, PageNumberPaging)),
+    annotations: { title: 'Scrape service providers by URL', ...SCRAPE },
   },
   {
     ...base,
@@ -514,7 +623,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_sales_nav_companies_by_params',
     description:
-      `Structured-filter form of the SN account search, the one engine that filters on revenue and headcount growth. SN-capable executor required. Cost 2 credits.`,
+      'Structured-filter form of the SN account search, carrying the COMPLETE node vocabulary (15 members) - the one engine that filters on annual revenue (range, in millions), company AND per-department headcount growth (ranges, percent), department headcount, follower buckets, Fortune tier, buying signals (leadership changes / funding events), hiring status, 1st-degree relationship, saved accounts and account lists. Typeahead facet ids come from scrape_linkedin_sales_nav_param_id_lookup (type named per member); static-enum members carry their full id sets inline; exclude: true negates a typeahead value. SN-capable executor required. Cost 2 credits.',
     toolClass: 'typical',
     route: rt('search-sales-nav-companies-by-params'),
     operation: 'action',
@@ -788,7 +897,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_sales_nav_param_id_lookup',
     description:
-      'Sales Navigator facet-id typeahead: resolve one SN filter facet (type) into the opaque ids the SN people search-by-params needs. type is a node salesApiFacetTypeahead kind passed through verbatim; the seven text facets (COMPANY_WITH_LIST/BING_GEO/INDUSTRY/TITLE/GROUP/SCHOOL/CONNECTION_OF) resolve query, the rest return their fixed / account-scoped list. SN executor required. Cost 1 credit.',
+      'Sales Navigator facet-id typeahead: resolve one SN facet (type) into the opaque ids the SN search-by-params filters need. type is a node salesApiFacetTypeahead kind passed through verbatim; the seven text facets resolve query, the rest return their fixed / account-scoped list. Type → target filter member: TITLE → current_titles/past_titles; BING_GEO → locations/company_headquarters; INDUSTRY → industries; COMPANY_WITH_LIST → current_companies/past_companies; GROUP → groups; SCHOOL → schools; CONNECTION_OF → connections_of; ACCOUNT_LIST → account_lists (company search). Skip it for the static kinds (COMPANY_SIZE/FUNCTION/SENIORITY_V2/RELATIONSHIP/COMPANY_TYPE/TENURE/PROFILE_LANGUAGE): their full id sets are inlined in the search filter schemas. PERSONA/LEAD_LIST/LEAD_INTERACTIONS/SAVED_LEADS_AND_ACCOUNTS have no by-params member yet. SN executor required. Cost 1 credit.',
     toolClass: 'trivial',
     route: rt('sales-nav-param-id-lookup'),
     operation: 'action',

@@ -1367,6 +1367,42 @@
                 {
                     "name": "SendEmailMessage",
                     "value": "email-messages.send"
+                },
+                {
+                    "name": "RunAntidetectBrowser",
+                    "value": "antidetect-browsers.run"
+                },
+                {
+                    "name": "StopAntidetectBrowser",
+                    "value": "antidetect-browsers.stop"
+                },
+                {
+                    "name": "DeleteAntidetectBrowser",
+                    "value": "antidetect-browsers.delete"
+                },
+                {
+                    "name": "CreateAntidetectBrowser",
+                    "value": "antidetect-browsers.create"
+                },
+                {
+                    "name": "GenerateCloudBrowserAccessKey",
+                    "value": "antidetect-browsers.generate-cloud-browser-access-key"
+                },
+                {
+                    "name": "RevokeCloudBrowserAccessKey",
+                    "value": "antidetect-browsers.revoke-cloud-browser-access-key"
+                },
+                {
+                    "name": "UpdateLinkedinAccountSyncConfig",
+                    "value": "linkedin-accounts.update-sync-config"
+                },
+                {
+                    "name": "UpdateLinkedinAccountSmartLimit",
+                    "value": "linkedin-account-smart-limits.update"
+                },
+                {
+                    "name": "ResetLinkedinAccountSmartLimitHold",
+                    "value": "linkedin-account-smart-limits.reset-hold"
                 }
             ]
         },

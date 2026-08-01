@@ -61,6 +61,11 @@ const SourceMethod = z.enum([
   'get-post-commenters',
   'get-post-reactors',
   'get-post-resharers',
+  // The services marketplace joined the eligible set on 2026-07-30 with its verbs
+  // going live: paginated, person-returning, and the by-url form is detected from a
+  // pasted /search/results/services/ URL like the other by-url sources.
+  'search-service-providers',
+  'search-service-providers-by-url',
   // Company-returning (result_kind = company)
   'search-companies-by-url',
   'search-companies-by-params',
@@ -255,7 +260,7 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
       source_method: SourceMethod.optional()
         .describe('The paginated verb to replay. Required (with source_input) for every non-search source.'),
       source_input: z.record(z.unknown()).optional()
-        .describe("The verb's own arguments. One key is mandatory per family: url, filters, anchor_company_ln_id, anchor_nickname (similar-profiles takes the vanity slug, never a URN), or activity_urn."),
+        .describe("The verb's own arguments. One key is mandatory per family: url, filters, anchor_company_ln_id, anchor_nickname (similar-profiles takes the vanity slug, never a URN), or activity_urn. filters takes the SAME schema as the matching scrape_linkedin_search_*_by_params tool (see it for the facet vocabulary and typeahead workflow)."),
       replay_frequency: ReplayFrequency.nullable().optional()
         .describe('Cadence: hourly | daily | weekly | monthly. Omit or null for a one-shot job that runs once.'),
       mass_action_sid: MASS_ACTION_SID.nullable().optional()

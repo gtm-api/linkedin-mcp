@@ -29,17 +29,17 @@ const DataRequestExecutedOn = z.enum(['own_account', 'infra_pool']);
 // 40 matrix methods (one value per owned scraping/enrichment method).
 const DataRequestMethod = z.enum([
   // enrich (18)
-  'person_lite_profile', 'person_full_profile', 'person_experience',
+  'person_lite_profile', 'person_basic_profile', 'person_full_profile', 'person_experience',
   'person_skills', 'person_education', 'person_posts', 'person_featured',
   'person_contact_info', 'person_languages', 'person_certifications',
   'person_recommendations', 'person_comment_activity', 'person_reaction_activity',
   'person_interests', 'person_services',
-  'company_profile', 'company_posts',
+  'company_profile', 'company_lite_profile', 'company_public_identifier', 'company_posts',
   'post_details',
   // scrape (22)
   'search_people_by_url', 'search_people_by_params',
   'search_sales_nav_people_by_url', 'search_sales_nav_people_by_params',
-  'search_service_providers', 'similar_profiles',
+  'search_service_providers', 'search_service_providers_by_url', 'similar_profiles',
   'search_companies_by_url', 'search_companies_by_params',
   'search_sales_nav_companies_by_url', 'search_sales_nav_companies_by_params',
   'similar_companies', 'company_employees', 'company_decision_makers',

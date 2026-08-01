@@ -194,7 +194,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'create_antidetect_browser',
     description:
-      'Provision an antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source (antidetect_browser_proxy_sid | proxy_country_code | custom_proxy_config). Bind an existing vendor_profile_id for the customer bring-your-own path (no proxy source then). DANGEROUS: creates real vendor + proxy infrastructure.',
+      'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source (antidetect_browser_proxy_sid | proxy_country_code | custom_proxy_config). Bind an existing vendor_profile_id for the customer bring-your-own path (no proxy source then). DANGEROUS: creates real vendor + proxy infrastructure. To provision SEVERAL browsers under a SINGLE approval (e.g. "create 3 browsers with connect links"), do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key). One preview/confirm covers the whole batch and returns a ma_ sid you monitor in the background; the connect links are read back from each browser row when it finishes.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers' },
     operation: 'create',
@@ -316,7 +316,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'delete_antidetect_browser',
     description:
-      'Decommission (soft-delete) a single antidetect browser by sid: outward, destructive, one-way through MCP. Variant B cascade: the bound linkedin-account is soft-deleted and pending plugin tasks transition to failed; the cascade block reports the counts. The vendor profile is left intact.',
+      'Decommission (soft-delete) a single antidetect browser by sid: outward, destructive, one-way through MCP. Variant B cascade: the bound linkedin-account is soft-deleted and pending plugin tasks transition to failed; the cascade block reports the counts. A platform-minted GoLogin profile is reclaimed (deleted) at the vendor unless another live browser row still holds it; customer BYO vendor profiles are left intact.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'DELETE', pathTemplate: '/api/antidetect-browsers/{sid}', sidParam: 'sid' },
     operation: 'delete',
