@@ -10,8 +10,9 @@
 // DataRequestExecutionService (501 before any ledger insert). 18 of the 21
 // methods are GA today; the remaining 3 ship as 501 stubs until their plugin
 // verbs land (search-service-providers, get-post-comments, param-id-lookup).
-// Every verb is creditable (§9.5 flagless: own scraping bucket free,
-// pool fallback debits credits); the credits block attaches at runtime.
+// Every verb is creditable (§9.5 v5.2 explicit contract: a pinned own
+// account runs free or refuses 429; the pool debits credits only with an
+// explicit use_credits: true); the credits block attaches at runtime.
 // Envelope is always 'action' (synchronous mcpAction; no async on this
 // surface). Nothing is dangerous: scraping reads data (dangerous:false).
 
@@ -25,7 +26,9 @@ import { usageMetaField, McpActionResponse } from '@gtm/mcp-shared';
 
 const requestBase = {
   linkedin_account_sid: z.string().length(18).startsWith('ln_ac_').nullable().optional()
-    .describe('Preferred executor account (ln_ac_…). OPTIONAL everywhere on this surface: omitted → platform pool + credits (reason infra_pool); given with scraping-bucket budget → own account, charged 0; given but the bucket is saturated/held → automatic pool fallback (reason limit_fallback), never a 429 (§9.5).'),
+    .describe('Executor account (ln_ac_...). OPTIONAL everywhere on this surface. Given: the call runs on that account ONLY; scraping bucket budget means charged 0, and a saturated or held bucket refuses 429 bucket_saturated (with retry_after), never a silent pool charge (§9.5 v5.2). To pay instead, omit this and pass use_credits: true.'),
+  use_credits: z.boolean().optional()
+    .describe('Explicit pool opt-in (§9.5 v5.2). true with NO linkedin_account_sid: run on the platform pool and debit the method credit cost (reason infra_pool). Neither field: 422 executor_required. Both together: 422 (contradictory).'),
   idempotency_key: z.string().max(128).nullable().optional()
     .describe('Ledger replay guard: a repeat call with the same (team, key) returns the stored outcome; no re-execution, no double charge. Recommended on every paid call.'),
 } as const;

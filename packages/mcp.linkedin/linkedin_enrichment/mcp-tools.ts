@@ -5,8 +5,9 @@
 // surface: one-shot, credit-metered pulls of ONE known target's OWN data.
 //
 // Stateless surface over the DataRequest ledger (kind='enrich'): every accepted
-// call is a thin pass through DataRequestExecutionService (§9.5 flagless executor
-// resolution, credits, cache, idempotency, §5.9 stub guard) and lands as one
+// call is a thin pass through DataRequestExecutionService (§9.5 v5.2 explicit
+// executor resolution: pinned account only, or the pool via use_credits;
+// credits, cache, idempotency, §5.9 stub guard) and lands as one
 // ledger row, embedded in the response as `result.data_request`. Execution is
 // SYNC inline (≤120 s, §9.6); every response is a sync action envelope
 // (`async: true` never appears here: the controller uses mcpAction for all 19).
@@ -22,11 +23,14 @@ import { usageMetaField, McpActionResponse } from '@gtm/mcp-shared';
 
 // ─── Shared input fragments ────────────────────────────────────────────────
 
-// Executor + replay controls, shared by all 19 methods (creditable, §9.5).
-// There is NO use_credit flag: resolution is automatic (§9.5).
+// Executor + replay controls, shared by all 19 methods (creditable, §9.5 v5.2).
+// Explicit contract (2026-08-02): a pinned account never silently charges;
+// the pool requires the explicit use_credits opt-in.
 const executorFields = {
   linkedin_account_sid: z.string().length(18).startsWith('ln_ac_').nullable().optional()
-    .describe('Preferred executor account (ln_ac_…). OPTIONAL: given + enrichment bucket budget → own account, charged 0; given + bucket saturated → pool + credits; omitted → pool + credits. There is no use_credit flag: §9.5 resolution is automatic.'),
+    .describe('Executor account (ln_ac_...). Given: the call runs on that account ONLY. Enrichment bucket budget means charged 0; a saturated or held bucket refuses 429 bucket_saturated (with retry_after), never a silent pool charge. To pay instead, omit this and pass use_credits: true.'),
+  use_credits: z.boolean().optional()
+    .describe('Explicit pool opt-in (§9.5 v5.2). true with NO linkedin_account_sid: run on the platform pool and debit the method credit cost (reason infra_pool). Neither field: 422 executor_required. Both together: 422 (contradictory).'),
   idempotency_key: z.string().max(128).nullable().optional()
     .describe('Replay guard (team_sid, idempotency_key). A repeat with the same key returns the stored ledger outcome: no re-execution, no double charge.'),
 };
