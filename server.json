@@ -8,11 +8,31 @@
     "url": "https://github.com/gtm-api/linkedin-mcp",
     "source": "github"
   },
-  "version": "1.0.0",
+  "version": "1.1.0",
   "remotes": [
     {
       "type": "streamable-http",
       "url": "https://mcp.gtm-api.com/mcp"
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@gtm-api/linkedin-mcp",
+      "version": "1.1.0",
+      "runtimeHint": "npx",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "GTM_API_KEY",
+          "description": "API key from app.gtm-api.com (7-day trial). The launcher sends it as the Authorization Bearer to the hosted endpoint.",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
     }
   ]
 }

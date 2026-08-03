@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "gtm-api": {
+      "command": "npx",
+      "args": ["-y", "@gtm-api/linkedin-mcp"],
+      "env": { "GTM_API_KEY": "YOUR_API_KEY" }
+    }
+  }
+}

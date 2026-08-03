@@ -34,7 +34,7 @@ export function registerFacadeTools(
     'list_toolsets',
     {
       description:
-        'List the available toolsets (domains) on this server. Each toolset groups related tools (e.g. linkedin.messaging, id.billing). Start here, then get_toolset_tools to inspect one, then call_tool to run a tool.',
+        'List the available toolsets (domains) on this server. Each toolset groups related tools (e.g. linkedin.messaging, id.billing). Start here, then get_toolset_tools to inspect one, then call_tool to run a tool. Requires a GTM API key (Bearer).',
       inputSchema: { _meta: UsageMetaSchema.optional() },
       annotations: { title: 'List toolsets', ...RO },
     },
@@ -92,7 +92,7 @@ export function registerFacadeTools(
     'call_tool',
     {
       description:
-        'Execute any tool by name (discovered via get_toolset_tools) with its arguments object. Behaves exactly like calling the tool on its domain mount. Dangerous tools still require the two-step preview→confirm (pass commit_token inside arguments on the confirm call).',
+        'Invoke a tool by name (discovered via get_toolset_tools) with its arguments object. Behaves exactly like calling the tool on its domain mount. Dangerous tools still require the two-step preview→confirm (pass commit_token inside arguments on the confirm call).',
       inputSchema: {
         name: z.string().describe('Exact tool name.'),
         arguments: z.record(z.unknown()).optional().describe("The tool's arguments object."),

@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](./LICENSE)
 [![Smithery](https://smithery.ai/badge/gtm-api/linkedin-mcp)](https://smithery.ai/servers/gtm-api/linkedin-mcp)
 
-GTM API is a managed LinkedIn MCP server. It gives an AI agent one key and 160+ typed LinkedIn tools over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
+GTM API is a managed LinkedIn MCP server. It gives an AI agent one key, three MCP tools and 160+ typed LinkedIn actions over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
 
 This repository holds the public interface: what the server exposes, how to connect a client, and how the safety layer works.
 
@@ -43,7 +43,23 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 }
 ```
 
-Prefer Docker? The same server as a command, through the [`gtmapi/linkedin-mcp`](https://hub.docker.com/r/gtmapi/linkedin-mcp) launcher image (config in [`examples/`](./examples/claude_desktop_config.docker.json)):
+Prefer a command instead of a URL? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
+
+```json
+{
+  "mcpServers": {
+    "gtm-api": {
+      "command": "npx",
+      "args": ["-y", "@gtm-api/linkedin-mcp"],
+      "env": { "GTM_API_KEY": "YOUR_API_KEY" }
+    }
+  }
+}
+```
+
+For Claude Code it is one line: `claude mcp add gtm-api -e GTM_API_KEY=YOUR_API_KEY -- npx -y @gtm-api/linkedin-mcp`.
+
+The same launcher also ships as a Docker image, [`gtmapi/linkedin-mcp`](https://hub.docker.com/r/gtmapi/linkedin-mcp) (config in [`examples/`](./examples/claude_desktop_config.docker.json)):
 
 ```json
 {
@@ -61,16 +77,56 @@ Prefer Docker? The same server as a command, through the [`gtmapi/linkedin-mcp`]
 
 > "Every morning, accept new connection invitations from founders, reply with a short welcome, and add anyone hiring SDRs to a warm list."
 
-The agent discovers the tools and chains them: `get_my_latest_linkedin_connection_invitations` then `accept_linkedin_connection_invitation` then `send_linkedin_message`. Every outward action runs a preview-then-confirm step and a server-side daily-limit check before it reaches LinkedIn.
+The agent discovers the actions and chains them: fetch the latest connection invitations, accept the ones that match, send each new contact a short message. Every outward action runs a preview-then-confirm step and a server-side daily-limit check before it reaches LinkedIn.
+
+## MCP tools
+
+The server exposes exactly three MCP tools. Discovery is progressive: an agent lists the toolsets, inspects one, then invokes an action. The 160+ LinkedIn actions never load into the model's context at once, so the schema footprint stays around 400 tokens.
+
+```json
+[
+  {
+    "name": "list_toolsets",
+    "description": "List the available toolsets (domains) on this server. Each toolset groups related tools (e.g. linkedin.messaging, id.billing). Start here, then get_toolset_tools to inspect one, then call_tool to run a tool. Requires a GTM API key (Bearer).",
+    "input_schema": { "type": "object", "properties": {} }
+  },
+  {
+    "name": "get_toolset_tools",
+    "description": "List the tools in a toolset. Default (lite) returns name + title + one-line summary; pass verbose:true for full descriptions, safety flags, and parameter names. Run one via call_tool.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "toolset": { "type": "string", "description": "Toolset id from list_toolsets, e.g. \"linkedin.messaging\"." },
+        "verbose": { "type": "boolean", "description": "Include full descriptions + parameter names." }
+      },
+      "required": ["toolset"]
+    }
+  },
+  {
+    "name": "call_tool",
+    "description": "Invoke a tool by name (discovered via get_toolset_tools) with its arguments object. Behaves exactly like calling the tool on its domain mount. Dangerous tools still require the two-step preview→confirm (pass commit_token inside arguments on the confirm call).",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Exact tool name." },
+        "arguments": { "type": "object", "description": "The tool's arguments object." }
+      },
+      "required": ["name"]
+    }
+  }
+]
+```
+
+`call_tool` validates arguments against the target action's own input schema, so preview-then-confirm, rate limits and typed errors apply exactly as if the action were mounted directly.
 
 ## What the agent can do
 
-160+ typed tools across 10 LinkedIn toolsets, grouped here into seven areas:
+160+ typed actions across 10 LinkedIn toolsets, grouped here into seven areas:
 
-| Toolset | Representative tools |
+| Toolset | What it covers |
 |---|---|
-| **Messaging** | `send_linkedin_message`, `send_linkedin_voice_message`, `send_linkedin_inmail`, `send_linkedin_sales_nav_message`, inbox search and sync |
-| **Network** | `send_linkedin_connection_request`, `accept_linkedin_connection_invitation`, withdraw and ignore, connections and followers |
+| **Messaging** | member messages, voice notes, InMail, Sales Navigator chats, inbox search and sync |
+| **Network** | connection requests, accept or ignore invitations, withdraw, connections and followers |
 | **Content** | track posts and metrics, comment, react, get engagers and commenters |
 | **Enrichment** | lite and full profile, experience, skills, education, company data |
 | **Search** | people, company and post search, similar profiles, employees, decision-makers, saved searches |
@@ -120,6 +176,7 @@ From $19 per connected account per month, scaling to $5 at volume, with unlimite
 - Get an API key: [app.gtm-api.com](https://app.gtm-api.com/login)
 - How a LinkedIn MCP server works: [gtm-api.com/linkedin-mcp-server](https://gtm-api.com/linkedin-mcp-server/)
 - The safety method in detail: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/)
+- npm launcher: [npmjs.com/package/@gtm-api/linkedin-mcp](https://www.npmjs.com/package/@gtm-api/linkedin-mcp)
 - Docker image: [hub.docker.com/r/gtmapi/linkedin-mcp](https://hub.docker.com/r/gtmapi/linkedin-mcp)
 - Model Context Protocol: [modelcontextprotocol.io](https://modelcontextprotocol.io/)
 
