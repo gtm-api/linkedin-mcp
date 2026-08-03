@@ -1,7 +1,8 @@
 {
   "name": "@gtm-api/linkedin-mcp",
   "version": "1.1.0",
-  "description": "LinkedIn MCP server launcher for GTM API: bridges stdio MCP clients (Claude Desktop, Cursor) to the hosted endpoint with 160+ typed LinkedIn actions behind three MCP tools.",
+  "description": "Managed LinkedIn MCP server for AI agents. Stdio launcher for the hosted GTM API endpoint: search, connect, message and enrich on LinkedIn accounts you own. 160+ typed actions behind three MCP tools.",
+  "author": "GTM API (https://gtm-api.com/)",
   "mcpName": "com.gtm-api/linkedin-mcp",
   "bin": {
     "gtm-api-linkedin-mcp": "bin/cli.js"
@@ -25,6 +26,7 @@
   "keywords": [
     "mcp",
     "mcp-server",
+    "linkedin-mcp-server",
     "model-context-protocol",
     "linkedin",
     "linkedin-api",

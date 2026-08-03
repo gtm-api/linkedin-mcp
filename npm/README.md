@@ -1,6 +1,6 @@
 # @gtm-api/linkedin-mcp
 
-Launcher for the [GTM API LinkedIn MCP server](https://github.com/gtm-api/linkedin-mcp). It bridges a stdio MCP client (Claude Desktop, Cursor, anything that spawns a command) to the hosted streamable-http endpoint at `https://mcp.gtm-api.com/mcp` via [mcp-remote](https://www.npmjs.com/package/mcp-remote). No server logic runs locally; every tool executes on the hosted server, where account safety (warm-up, daily limits, preview-then-confirm) is enforced.
+Launcher for [GTM API: LinkedIn MCP Server](https://github.com/gtm-api/linkedin-mcp), the managed LinkedIn MCP server for AI agents. It bridges a stdio MCP client (Claude Desktop, Cursor, anything that spawns a command) to the hosted streamable-http endpoint at `https://mcp.gtm-api.com/mcp` via [mcp-remote](https://www.npmjs.com/package/mcp-remote). No server logic runs locally; every tool executes on the hosted server, where account safety is enforced: warm-up, server-side daily limits, preview-then-confirm on outward actions. GTM API reports 20,000+ LinkedIn accounts running at under 1% monthly ban; the method is written up at [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
 
 The server exposes three MCP tools (`list_toolsets`, `get_toolset_tools`, `call_tool`) that give an agent progressive access to 160+ typed LinkedIn actions: messaging, connection requests, content, enrichment, search, account health and infrastructure.
 
