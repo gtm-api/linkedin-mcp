@@ -1071,6 +1071,10 @@
                 {
                     "name": "SYSTEM",
                     "value": "system"
+                },
+                {
+                    "name": "AGENT",
+                    "value": "agent"
                 }
             ]
         },
@@ -1489,6 +1493,10 @@
                     "value": "linkedin-accounts.sync-reset"
                 },
                 {
+                    "name": "LinkedinAccountsSyncConfigUpdated",
+                    "value": "linkedin-accounts.sync-config-updated"
+                },
+                {
                     "name": "LinkedinAccountsPremiumChanged",
                     "value": "linkedin-accounts.premium-changed"
                 },
@@ -1862,6 +1870,7 @@
             "operation": "action",
             "mass_action": true,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -1916,6 +1925,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2017,6 +2027,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2318,6 +2329,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2354,6 +2366,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2640,6 +2653,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2741,6 +2755,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2761,6 +2776,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2781,6 +2797,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2819,6 +2836,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2840,6 +2858,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2861,6 +2880,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -2964,6 +2984,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3137,6 +3158,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3182,6 +3204,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3227,6 +3250,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3290,7 +3314,7 @@
                     "field": "events.*",
                     "rules": [
                         "string",
-                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -3302,6 +3326,7 @@
                         "linkedin-accounts.initial-sync-started",
                         "linkedin-accounts.initial-sync-done",
                         "linkedin-accounts.sync-reset",
+                        "linkedin-accounts.sync-config-updated",
                         "linkedin-accounts.premium-changed",
                         "linkedin-accounts.login-succeeded",
                         "linkedin-accounts.login-failed",
@@ -3434,6 +3459,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3606,6 +3632,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3626,6 +3653,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3679,6 +3707,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3742,7 +3771,7 @@
                     "field": "events.*",
                     "rules": [
                         "string",
-                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -3754,6 +3783,7 @@
                         "linkedin-accounts.initial-sync-started",
                         "linkedin-accounts.initial-sync-done",
                         "linkedin-accounts.sync-reset",
+                        "linkedin-accounts.sync-config-updated",
                         "linkedin-accounts.premium-changed",
                         "linkedin-accounts.login-succeeded",
                         "linkedin-accounts.login-failed",
@@ -3919,6 +3949,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3956,6 +3987,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -4005,6 +4037,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -4070,6 +4103,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -4119,6 +4153,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -4182,6 +4217,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -4209,7 +4245,7 @@
                     "rules": [
                         "required",
                         "string",
-                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
                     ],
                     "required": true,
                     "nullable": false,
@@ -4221,6 +4257,7 @@
                         "linkedin-accounts.initial-sync-started",
                         "linkedin-accounts.initial-sync-done",
                         "linkedin-accounts.sync-reset",
+                        "linkedin-accounts.sync-config-updated",
                         "linkedin-accounts.premium-changed",
                         "linkedin-accounts.login-succeeded",
                         "linkedin-accounts.login-failed",
@@ -4416,6 +4453,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -4432,6 +4470,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -4448,6 +4487,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -4464,6 +4504,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,

@@ -423,6 +423,7 @@ export const AccessIdentityValueActorTypeEnum = z.enum([
   'support',
   'api_key',
   'system',
+  'agent',
 ]);
 
 // Core\Enums\HandoverRoleEnum. Which side of a share or transfer a row sits on.

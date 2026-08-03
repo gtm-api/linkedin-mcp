@@ -21,10 +21,14 @@ import { fileURLToPath } from 'node:url';
 // What is checked, all of it derivable from the dumps:
 //   1. a step-eligible route is a public /api ACTION (the flag is a no-op
 //      anywhere else, and an internal route cannot be a plan step's target verb);
-//   2. it has its internal twin `internal/{path}` in the SAME dump, marked
-//      #[InternalMethod] - without it the run dies per item on the hop;
-//   3. the step-tool name it implies is unique across services, since a plan
-//      names one string and exactly one verb may answer to it.
+//   2. it has its internal twin in the SAME dump, marked #[InternalMethod] -
+//      without it the run dies per item on the hop. The hop is flat
+//      `internal/{group}/{verb}`, spelled like the vocabulary name, which the
+//      public REST path is NOT once it carries a sid or drops the verb: so the
+//      spelling comes from the dumped `step_tool` and falls back to the path
+//      only for the flat verbs where the two coincide;
+//   3. the step-tool name is unique across services, since a plan names one
+//      string and exactly one verb may answer to it.
 //
 // NOT checked here, deliberately, because no dump carries it: that the executor
 // actually has an arm for the verb. That half is pinned in the backend, twice -
@@ -44,6 +48,7 @@ type OracleRoute = {
   operation: string | null;
   mass_action: boolean;
   step_eligible: boolean;
+  step_tool: string | null;
   schedule_required: boolean;
   internal: boolean;
 };
@@ -57,8 +62,14 @@ const contracts: Contract[] = readdirSync(FIXTURE_DIR)
   .map((file) => JSON.parse(readFileSync(FIXTURE_DIR + file, 'utf8')) as Contract);
 
 const routeKey = (route: OracleRoute) => `${route.method} ${route.uri}`;
-/** 'api/email-messages/send' -> 'email-messages.send' (the plan step's `tool`). */
-const stepToolName = (uri: string) => uri.slice('api/'.length).replace(/\//g, '.');
+/**
+ * The plan step's `tool`. Declared (`stepTool:`) wherever the public path is not
+ * already the spelling - which is every sid-scoped or create-shaped verb, since
+ * the hop is flat `{group}/{verb}` and REST is not. The path fallback covers the
+ * flat verbs, e.g. 'api/email-messages/send' -> 'email-messages.send'.
+ */
+const stepToolName = (route: OracleRoute) =>
+  route.step_tool ?? route.uri.slice('api/'.length).replace(/\//g, '.');
 
 describe('cross-service step-eligibility', () => {
   it('reads every committed contract fixture', () => {
@@ -104,7 +115,7 @@ describe('cross-service step-eligibility', () => {
 
     for (const { service, route } of declared) {
       const contract = contracts.find((candidate) => candidate.service === service)!;
-      const twinKey = `${route.method} internal/${route.uri.slice('api/'.length)}`;
+      const twinKey = `${route.method} internal/${stepToolName(route).replace(/\./g, '/')}`;
       const twin = contract.routes.find((candidate) => routeKey(candidate) === twinKey);
 
       if (!twin) {
@@ -123,7 +134,7 @@ describe('cross-service step-eligibility', () => {
   it('no two services claim the same step-tool name', () => {
     const owners = new Map<string, string[]>();
     for (const { service, route } of declared) {
-      const tool = stepToolName(route.uri);
+      const tool = stepToolName(route);
       owners.set(tool, [...(owners.get(tool) ?? []), service]);
     }
 

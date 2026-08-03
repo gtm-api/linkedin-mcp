@@ -1,7 +1,7 @@
 // Entity: Antidetect Browser (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/antidetect_browsers.md
 // Format: registry v2, where each tool carries route metadata so the generic
-// dispatcher can drive it. 8 tools (the antidetect-browsers route group),
+// dispatcher can drive it. 10 tools (the antidetect-browsers route group),
 // mounted on linkedin.browsers alongside proxies / logs / cloud-browsers /
 // cloud-browser-sessions.
 
@@ -49,6 +49,16 @@ const CustomProxyConfig = z.object({
   password: z.string().optional(),
   mode: z.enum(['http', 'socks4', 'socks5']).optional().describe('Default http.'),
 }).describe('Custom proxy connection tuple (customer BYO path).');
+
+// envelope.result of update-proxy / replace-proxy. `restarted` is the field that matters to
+// an agent: the swap powers a live browser off and back on, so a sender that was running is
+// briefly down, and `restart_error` means it did not come back and needs an explicit run.
+const ProxySwapResult = z.object({
+  previous_antidetect_browser_proxy_sid: z.string().nullable()
+    .describe('The pooled proxy the browser was on before the swap, or null if it had none.'),
+  restarted: z.boolean().describe('True when the browser was running and was started again on the new proxy.'),
+  restart_error: z.string().nullable().describe('Set when the swap committed but the browser could not be restarted.'),
+}).passthrough();
 
 // Tight item projection: every AntidetectBrowserDomain field (research §Domain),
 // correct type + nullability. passthrough tolerates future additions.
@@ -311,6 +321,56 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(AntidetectBrowser),
     annotations: { title: 'Revoke cloud-browser access key', ...DANGER },
+  },
+  // envelope.result of both proxy swaps. A running browser is powered off and back on
+  // around the swap (the proxy is baked into the Chromium spawn and the node has no verb to
+  // re-point it), so an agent must read `restarted` before assuming the sender is still up.
+  {
+    ...base,
+    name: 'update_antidetect_browser_proxy',
+    description:
+      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid pins a pooled proxy, proxy_country_code takes the least-loaded active one there, custom_proxy_config moves the browser to a customer-supplied upstream. Pooled arms need browser_owner=platform (422 managed_proxy_forbidden_for_owner); custom_proxy_config is the reverse, forbidden on platform (422 custom_proxy_forbidden_for_owner). Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty. The vendor profile is updated before the row is re-bound, so a vendor failure (503 vendor_proxy_update_failed) changes nothing. DANGEROUS twice over: the country may change, and a location flip mid-campaign can trip a LinkedIn risk check; and a running browser is stopped and started again, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
+    toolClass: 'complex',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/update-proxy' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    creditable: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      antidetect_browser_proxy_sid: PROXY_SID.optional().describe('Pin a specific pooled proxy.'),
+      proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy.'),
+      custom_proxy_config: CustomProxyConfig.optional(),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(AntidetectBrowser, ProxySwapResult),
+    annotations: { title: 'Change antidetect browser proxy', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'replace_antidetect_browser_proxy',
+    description:
+      'Rotate an antidetect browser onto another MANAGED proxy of the SAME country. Geo-binding is preserved, so this is the safe way to drop a flagged IP. Omit antidetect_browser_proxy_sid to take the least-loaded active proxy of that country, or pin one (a pin from another country is refused, 422 proxy_country_mismatch). Platform-owned browsers only, 422 managed_proxy_forbidden_for_owner; a platform row that never got a proxy is 422 proxy_not_managed; a country with no other active proxy is 422 proxy_replacement_unavailable. A running browser is stopped and started again so the new IP takes effect; result.restarted reports whether it came back.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/replace-proxy' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    creditable: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      antidetect_browser_proxy_sid: PROXY_SID.nullable().optional()
+        .describe('Pin a specific same-country replacement; omit for the least-loaded one.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(AntidetectBrowser, ProxySwapResult),
+    annotations: { title: 'Rotate antidetect browser proxy', ...DANGER },
   },
   {
     ...base,

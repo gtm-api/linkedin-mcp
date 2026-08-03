@@ -44,6 +44,7 @@ const WebhookEventType = z.enum([
   'linkedin-accounts.initial-sync-started',
   'linkedin-accounts.initial-sync-done',
   'linkedin-accounts.sync-reset',
+  'linkedin-accounts.sync-config-updated',
   'linkedin-accounts.premium-changed',
   'linkedin-accounts.login-succeeded',
   'linkedin-accounts.login-failed',

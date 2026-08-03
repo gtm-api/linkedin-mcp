@@ -21,7 +21,7 @@ import {
 } from '@gtm/mcp-shared';
 
 const NotificationStatus = z.enum(['pending', 'delivered', 'failed']);
-const NotificationChannel = z.enum(['email']);
+const NotificationChannel = z.enum(['email', 'in_app']);
 
 // Loose item / counts / metrics schemas: the full field set is tightened by the
 // Stage-1 contract tests against live envelopes; passthrough keeps live responses
@@ -101,7 +101,7 @@ export const notificationsTools: ToolDefinition[] = [
     ...base,
     name: 'search_notifications',
     description:
-      'List email notifications for the team/user with filtering, sorting and cursor pagination: the user inbox ("what was sent to me?"), admin audit ("what did the system email Jane about?"), or failure triage (status:failed in the last 24h). No full-text search. Returns a counts block of predicate tallies (by status / event_name / channel). Email bodies are omitted from list rows; call get_notification for the rendered body.',
+      'List notifications (email and in_app channels) for the team/user with filtering, sorting and cursor pagination: the user inbox ("what was sent to me?"), admin audit ("what did the system email Jane about?"), or failure triage (status:failed in the last 24h). No full-text search. Returns a counts block of predicate tallies (by status / event_name / channel). Bodies are omitted from list rows; call get_notification for the rendered body.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/notifications/search' },
     operation: 'search',
@@ -120,7 +120,7 @@ export const notificationsTools: ToolDefinition[] = [
     ...base,
     name: 'get_notifications_metrics',
     description:
-      'Period-bound delivery-health aggregates over a filtered notification set: how many emails were delivered, failed, and rate-limited in the window. Requires period {from,to}. Optional filter and a single group_by axis (event_name / status / channel).',
+      'Period-bound delivery-health aggregates over a filtered notification set: how many notifications were delivered, failed, and rate-limited in the window. Requires period {from,to}. Optional filter and a single group_by axis (event_name / status / channel).',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/notifications/metrics' },
     operation: 'metrics',

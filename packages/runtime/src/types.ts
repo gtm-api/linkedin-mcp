@@ -119,7 +119,7 @@ export interface AuthScope {
    * mints, and `mcp_agent` never was one (AccessIdentityValue::validate()
    * rejects it).
    */
-  actor: { type: 'user' | 'support' | 'api_key' | 'system'; sid: string | null };
+  actor: { type: 'user' | 'support' | 'api_key' | 'system' | 'agent'; sid: string | null };
   permissions: string[];
   /** uuid - propagated to the backend as X-Trace-Id. */
   traceId: string;

@@ -2026,6 +2026,10 @@
                 {
                     "name": "SYSTEM",
                     "value": "system"
+                },
+                {
+                    "name": "AGENT",
+                    "value": "agent"
                 }
             ]
         },
@@ -2766,6 +2770,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3116,6 +3121,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3349,6 +3355,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -3661,6 +3668,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4014,6 +4022,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4066,6 +4075,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4180,6 +4190,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4285,6 +4296,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4681,6 +4693,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4700,6 +4713,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4719,6 +4733,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4896,6 +4911,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4916,6 +4932,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -4936,6 +4953,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -5171,6 +5189,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -5223,6 +5242,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -5243,6 +5263,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -5428,6 +5449,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -5709,6 +5731,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -5907,6 +5930,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -6171,6 +6195,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -6423,6 +6448,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -6541,6 +6567,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7036,6 +7063,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": true,
+            "step_tool": null,
             "schedule_required": true,
             "declared_arguments": [
                 "description",
@@ -7463,6 +7491,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7482,6 +7511,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7501,6 +7531,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7599,6 +7630,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7651,6 +7683,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7703,6 +7736,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7968,6 +8002,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7987,6 +8022,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8007,6 +8043,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8108,6 +8145,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8291,6 +8329,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8529,6 +8568,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8548,6 +8588,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8661,6 +8702,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9002,6 +9044,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9070,6 +9113,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9090,6 +9134,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9142,6 +9187,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9377,6 +9423,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9396,6 +9443,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9416,6 +9464,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9432,6 +9481,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9448,6 +9498,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9464,6 +9515,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9480,6 +9532,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9496,6 +9549,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9560,6 +9614,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9813,6 +9868,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9829,6 +9885,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9845,6 +9902,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9861,6 +9919,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9877,6 +9936,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9893,6 +9953,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -9909,6 +9970,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,

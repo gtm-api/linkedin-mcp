@@ -2334,6 +2334,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "read_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "failed_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2465,6 +2471,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "read_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "failed_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2502,6 +2514,7 @@
                     "channel",
                     "scheduled_at",
                     "delivered_at",
+                    "read_at",
                     "failed_at",
                     "created_at",
                     "deleted_at"
@@ -2721,6 +2734,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "actor_kind",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2810,6 +2829,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "actor_kind",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2839,6 +2864,7 @@
                     "status",
                     "is_confidential",
                     "registration_kind",
+                    "actor_kind",
                     "created_at",
                     "deleted_at"
                 ]
@@ -4421,6 +4447,209 @@
                     "deleted_at"
                 ]
             }
+        },
+        "Whitelabel": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\WhitelabelDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "domain",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "logo_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "icon_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "login_image_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "palette",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Values\\WhitelabelPaletteValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_from_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_reply_to",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Responses\\WhitelabelResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "domain",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "logo_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "icon_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "login_image_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "palette",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Values\\WhitelabelPaletteValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_from_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_reply_to",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\WhitelabelFilter",
+                "fields": [
+                    "sid",
+                    "domain",
+                    "name",
+                    "status",
+                    "created_at",
+                    "deleted_at"
+                ]
+            }
         }
     },
     "enums": {
@@ -4472,6 +4701,10 @@
                 {
                     "name": "SYSTEM",
                     "value": "system"
+                },
+                {
+                    "name": "AGENT",
+                    "value": "agent"
                 }
             ]
         },
@@ -5157,6 +5390,10 @@
                 {
                     "name": "Refund",
                     "value": "refund"
+                },
+                {
+                    "name": "PartnerDelegated",
+                    "value": "partner_delegated"
                 }
             ]
         },
@@ -5259,6 +5496,10 @@
                 {
                     "name": "Email",
                     "value": "email"
+                },
+                {
+                    "name": "InApp",
+                    "value": "in_app"
                 }
             ]
         },
@@ -5526,6 +5767,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\OauthClient\\Enums\\OauthClientActorKindEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Agent",
+                    "value": "agent"
+                },
+                {
+                    "name": "Integration",
+                    "value": "integration"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\OauthClient\\Enums\\OauthClientGroupableFieldsEnum": {
             "backing": "string",
             "cases": [
@@ -5536,6 +5790,10 @@
                 {
                     "name": "RegistrationKind",
                     "value": "registration_kind"
+                },
+                {
+                    "name": "ActorKind",
+                    "value": "actor_kind"
                 },
                 {
                     "name": "IsConfidential",
@@ -6039,6 +6297,23 @@
                     "value": "unqualified"
                 }
             ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Enums\\WhitelabelStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "PendingDomain",
+                    "value": "pending_domain"
+                },
+                {
+                    "name": "Active",
+                    "value": "active"
+                },
+                {
+                    "name": "Disabled",
+                    "value": "disabled"
+                }
+            ]
         }
     },
     "routes": [
@@ -6050,6 +6325,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -6066,6 +6342,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -6082,6 +6359,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -6098,6 +6376,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -6222,6 +6501,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -6718,6 +6998,7 @@
             "operation": "action",
             "mass_action": true,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -6804,6 +7085,7 @@
             "operation": "action",
             "mass_action": true,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -6890,6 +7172,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -7385,6 +7668,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -7489,6 +7773,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -7828,6 +8113,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -8167,6 +8453,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -8183,6 +8470,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8267,6 +8555,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8479,6 +8768,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8717,6 +9007,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8737,6 +9028,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8757,6 +9049,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8825,6 +9118,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8864,6 +9158,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8884,6 +9179,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8905,6 +9201,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8925,6 +9222,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9224,6 +9522,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9245,6 +9544,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9616,6 +9916,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9636,6 +9937,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9657,6 +9959,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9678,6 +9981,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9699,6 +10003,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9720,6 +10025,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9741,6 +10047,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9762,6 +10069,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9783,6 +10091,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9804,6 +10113,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9825,6 +10135,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9846,6 +10157,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10096,6 +10408,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10437,6 +10750,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10457,6 +10771,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10478,6 +10793,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10518,6 +10834,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10746,6 +11063,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10818,6 +11136,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11083,6 +11402,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11353,6 +11673,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11660,6 +11981,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11680,6 +12002,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11700,6 +12023,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11937,6 +12261,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12038,6 +12363,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12059,6 +12385,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12184,6 +12511,25 @@
                     "between": null
                 },
                 {
+                    "field": "actor_kind",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"agent\",\"integration\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "agent",
+                        "integration"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "platform",
                     "rules": [
                         "sometimes",
@@ -12209,6 +12555,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12505,6 +12852,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12525,6 +12873,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12545,6 +12894,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12670,6 +13020,25 @@
                     "between": null
                 },
                 {
+                    "field": "actor_kind",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"agent\",\"integration\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "agent",
+                        "integration"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "status",
                     "rules": [
                         "sometimes",
@@ -12699,6 +13068,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12736,6 +13106,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12773,6 +13144,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13038,6 +13410,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13059,6 +13432,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13096,6 +13470,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13319,6 +13694,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13339,6 +13715,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13359,6 +13736,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13379,6 +13757,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13400,6 +13779,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13421,6 +13801,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13513,6 +13894,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13778,6 +14160,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13798,6 +14181,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13897,6 +14281,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13936,6 +14321,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14207,6 +14593,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14227,6 +14614,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14310,6 +14698,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14331,6 +14720,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14400,6 +14790,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14703,6 +15094,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14757,6 +15149,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14777,6 +15170,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14848,6 +15242,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14887,6 +15282,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14941,6 +15337,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15159,6 +15556,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15175,6 +15573,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15191,6 +15590,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15225,6 +15625,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15257,6 +15658,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15308,6 +15710,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15324,6 +15727,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15340,6 +15744,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15356,6 +15761,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15405,6 +15811,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15421,6 +15828,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15455,6 +15863,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15505,6 +15914,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15537,6 +15947,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15732,6 +16143,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15748,6 +16160,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15764,6 +16177,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15780,6 +16194,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15796,6 +16211,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15812,6 +16228,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15828,6 +16245,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15844,6 +16262,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15860,6 +16279,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15876,6 +16296,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15892,6 +16313,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15908,6 +16330,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -15924,6 +16347,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16044,6 +16468,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16060,6 +16485,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16076,6 +16502,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16092,6 +16519,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16108,6 +16536,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16124,6 +16553,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16140,6 +16570,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16156,6 +16587,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16172,6 +16604,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16188,6 +16621,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16204,6 +16638,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16220,6 +16655,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16236,6 +16672,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16252,6 +16689,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16268,6 +16706,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16284,6 +16723,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16300,6 +16740,58 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "partner/teams",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "provisionTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "partner/token",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "mintToken",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "partner/users",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "provisionUser",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16316,6 +16808,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -16332,6 +16825,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,

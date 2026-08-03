@@ -3560,6 +3560,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "archived_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_by",
                         "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
                         "nullable": true,
@@ -3697,6 +3703,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "archived_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_by",
                         "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
                         "nullable": true,
@@ -3730,6 +3742,7 @@
                     "wait_reason",
                     "started_at",
                     "finished_at",
+                    "archived_at",
                     "created_at"
                 ]
             }
@@ -6290,6 +6303,10 @@
                 {
                     "name": "SYSTEM",
                     "value": "system"
+                },
+                {
+                    "name": "AGENT",
+                    "value": "agent"
                 }
             ]
         },
@@ -8600,6 +8617,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8733,6 +8751,7 @@
             "operation": "action",
             "mass_action": true,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8787,6 +8806,7 @@
             "operation": "action",
             "mass_action": true,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8841,6 +8861,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -8942,6 +8963,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9144,6 +9166,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9273,12 +9296,71 @@
         },
         {
             "method": "POST",
+            "uri": "api/antidetect-browsers/replace-proxy",
+            "controller": "App\\Entities\\AntidetectBrowser\\AntidetectBrowserController",
+            "action": "replaceProxy",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_change_proxy",
+            "internal": false,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserReplaceProxyRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "antidetect_browser_proxy_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ab_px_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/antidetect-browsers/revoke-cloud-browser-access-key",
             "controller": "App\\Entities\\AntidetectBrowser\\AntidetectBrowserController",
             "action": "revokeCloudBrowserAccessKey",
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9336,6 +9418,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9390,6 +9473,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9569,6 +9653,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9616,6 +9701,180 @@
             "rules_reason": null
         },
         {
+            "method": "POST",
+            "uri": "api/antidetect-browsers/update-proxy",
+            "controller": "App\\Entities\\AntidetectBrowser\\AntidetectBrowserController",
+            "action": "updateProxy",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_change_proxy",
+            "internal": false,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserUpdateProxyRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "antidetect_browser_proxy_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ab_px_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "proxy_country_code",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "size:2"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 2,
+                    "between": null
+                },
+                {
+                    "field": "custom_proxy_config",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "custom_proxy_config.ip",
+                    "rules": [
+                        "required_with:custom_proxy_config",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "custom_proxy_config.port",
+                    "rules": [
+                        "required_with:custom_proxy_config",
+                        "integer",
+                        "between:1,65535"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1,
+                        65535
+                    ]
+                },
+                {
+                    "field": "custom_proxy_config.mode",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"http\",\"socks4\",\"socks5\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "http",
+                        "socks4",
+                        "socks5"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "custom_proxy_config.username",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "custom_proxy_config.password",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
             "method": "DELETE",
             "uri": "api/antidetect-browsers/{sid}",
             "controller": "App\\Entities\\AntidetectBrowser\\AntidetectBrowserController",
@@ -9623,6 +9882,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9643,6 +9903,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9822,6 +10083,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -9928,6 +10190,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10029,6 +10292,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10050,6 +10314,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10151,6 +10416,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10171,6 +10437,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10301,6 +10568,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10662,6 +10930,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10797,6 +11066,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10898,6 +11168,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -10999,6 +11270,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11102,6 +11374,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11123,6 +11396,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11224,6 +11498,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11325,6 +11600,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11505,6 +11781,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.archived_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.created_at",
                     "rules": [
                         "nullable"
@@ -11648,6 +11938,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -11668,6 +11959,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12237,6 +12529,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12298,6 +12591,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12353,6 +12647,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12374,6 +12669,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12395,6 +12691,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12416,6 +12713,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12516,6 +12814,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12622,6 +12921,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12679,6 +12979,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12700,6 +13001,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12756,6 +13058,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12777,6 +13080,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12798,6 +13102,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12819,6 +13124,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -12840,6 +13146,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13149,6 +13456,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13207,13 +13515,16 @@
             "action": "updateSyncConfig",
             "operation": "action",
             "mass_action": false,
-            "step_eligible": false,
+            "step_eligible": true,
+            "step_tool": "linkedin-accounts.update-sync-config",
             "schedule_required": false,
             "declared_arguments": [
                 "description",
                 "massAction",
                 "operation",
-                "requiredPermission"
+                "requiredPermission",
+                "stepEligible",
+                "stepTool"
             ],
             "required_permission": "can_edit_schedule",
             "internal": false,
@@ -13364,6 +13675,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13452,6 +13764,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13553,6 +13866,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13654,6 +13968,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13674,6 +13989,7 @@
             "operation": "create",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13835,6 +14151,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13936,6 +14253,7 @@
             "operation": "delete",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13956,6 +14274,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -13976,6 +14295,7 @@
             "operation": "update",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14036,6 +14356,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14057,6 +14378,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14078,6 +14400,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14099,6 +14422,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14138,6 +14462,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14159,6 +14484,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14180,6 +14506,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14253,6 +14580,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14350,6 +14678,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14466,6 +14795,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14505,6 +14835,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14526,6 +14857,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14547,6 +14879,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14620,6 +14953,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -14717,6 +15051,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15024,6 +15359,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": true,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15109,6 +15445,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15147,6 +15484,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15168,6 +15506,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15273,6 +15612,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15346,6 +15686,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15449,6 +15790,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15815,6 +16157,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15853,6 +16196,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15891,6 +16235,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -15964,6 +16309,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16037,6 +16383,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16153,6 +16500,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16269,6 +16617,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16308,6 +16657,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16347,6 +16697,7 @@
             "operation": "get",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16383,6 +16734,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16438,6 +16790,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16459,6 +16812,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16480,6 +16834,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16517,6 +16872,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16572,6 +16928,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16611,6 +16968,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16762,6 +17120,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16788,6 +17147,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -16834,6 +17208,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -16860,6 +17235,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -16974,6 +17364,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17000,6 +17391,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17046,6 +17452,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17072,6 +17479,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17118,6 +17540,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17144,6 +17567,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17190,6 +17628,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17216,6 +17655,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17281,6 +17735,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17307,6 +17762,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17372,6 +17842,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17398,6 +17869,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17496,6 +17982,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17522,6 +18009,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17587,6 +18089,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17613,6 +18116,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17678,6 +18196,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17704,6 +18223,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17802,6 +18336,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17828,6 +18363,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17893,6 +18443,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -17919,6 +18470,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -17984,6 +18550,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18010,6 +18577,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18075,6 +18657,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18101,6 +18684,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18166,6 +18764,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18192,6 +18791,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18257,6 +18871,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18283,6 +18898,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18381,6 +19011,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18407,6 +19038,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18505,6 +19151,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18531,6 +19178,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18615,6 +19277,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18641,6 +19304,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18706,6 +19384,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18732,6 +19411,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18830,6 +19524,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18856,6 +19551,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -18922,6 +19632,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -18992,6 +19703,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -19092,6 +19804,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -19400,6 +20113,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -19484,6 +20198,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -19553,6 +20268,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -19626,6 +20342,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -19699,6 +20416,7 @@
             "operation": "metrics",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -19819,6 +20537,7 @@
             "operation": "search",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -19935,6 +20654,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -20058,6 +20778,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -20180,6 +20901,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -20303,6 +21025,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -20443,6 +21166,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -20596,6 +21320,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -20650,6 +21375,7 @@
             "operation": "action",
             "mass_action": true,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -20754,6 +21480,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -20910,6 +21637,7 @@
             "operation": "action",
             "mass_action": true,
             "step_eligible": true,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21005,6 +21733,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21031,6 +21760,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -21129,6 +21873,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21155,6 +21900,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -21253,6 +22013,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21279,6 +22040,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -21357,6 +22133,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21383,6 +22160,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -21461,6 +22253,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21487,6 +22280,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -21565,6 +22373,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21591,6 +22400,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -21669,6 +22493,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21695,6 +22520,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -21782,6 +22622,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21808,6 +22649,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -21907,6 +22763,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -21933,6 +22790,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -22103,6 +22975,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -22129,6 +23002,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -22192,6 +23080,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -22218,6 +23107,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -22678,6 +23582,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -22704,6 +23609,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -22767,6 +23687,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -22793,6 +23714,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -23199,6 +24135,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -23225,6 +24162,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -23304,6 +24256,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -23330,6 +24283,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -24208,6 +25176,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -24234,6 +25203,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -24297,6 +25281,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -24323,6 +25308,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -25612,6 +26612,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -25638,6 +26639,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -25701,6 +26717,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -25727,6 +26744,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -25896,6 +26928,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -25922,6 +26955,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -25985,6 +27033,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -26011,6 +27060,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -26109,6 +27173,7 @@
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
@@ -26135,6 +27200,21 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -26247,6 +27327,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26378,6 +27459,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26394,6 +27476,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26410,6 +27493,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26426,6 +27510,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26442,6 +27527,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26496,6 +27582,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26561,6 +27648,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26577,6 +27665,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26791,6 +27880,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26841,6 +27931,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -26984,6 +28075,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27051,6 +28143,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27101,6 +28194,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27160,12 +28254,148 @@
         },
         {
             "method": "POST",
+            "uri": "internal/antidetect-browsers/{sid}/linkedin-event",
+            "controller": "App\\Entities\\LinkedinMessage\\InternalLinkedinMessagePushController",
+            "action": "receive",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinMessage\\Requests\\InternalLinkedinMessagePushRequest",
+            "rules": [
+                {
+                    "field": "type",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"LINKEDIN_MESSAGE_RECEIVED\",\"LINKEDIN_MESSAGE_TYPING\",\"LINKEDIN_MESSAGE_READ\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "LINKEDIN_MESSAGE_RECEIVED",
+                        "LINKEDIN_MESSAGE_TYPING",
+                        "LINKEDIN_MESSAGE_READ"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "payload",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "payload.conversation_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "payload.message_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "payload.profile_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "payload.member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "payload.sent_at",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/antidetect-browsers/{sid}/log-error",
             "controller": "App\\Entities\\AntidetectBrowser\\InternalAntidetectBrowserController",
             "action": "logError",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27236,6 +28466,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27289,6 +28520,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27488,6 +28720,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27623,6 +28856,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27728,6 +28962,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27849,6 +29084,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -27952,6 +29188,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -28056,6 +29293,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -28177,6 +29415,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -28281,6 +29520,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -28385,6 +29625,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -28435,6 +29676,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -28567,6 +29809,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -28761,6 +30004,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -28945,6 +30189,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -29026,6 +30271,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -29114,6 +30360,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -29130,6 +30377,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,
@@ -29146,6 +30394,7 @@
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
+            "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [],
             "required_permission": null,

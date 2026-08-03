@@ -642,7 +642,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'update_linkedin_account_sync_config',
     description:
-      "Set the account's weekly sync schedule: the timezone, the allowed per-weekday time windows, and per-track cadence entries. Replaces the stored sync_config wholesale (send the full desired config, not a delta). Returns the updated account.",
+      "Set the account's weekly sync schedule: the timezone, the allowed per-weekday time windows, and per-track cadence entries. Replaces the stored sync_config wholesale (send the full desired config, not a delta). Returns the updated account. SINGLE account: to reschedule a fleet, author a mass action on /mcp/orchestration/mass-actions with the step `linkedin-accounts.update-sync-config` (scope objects) so the whole change rides ONE approval.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/update-sync-config', sidParam: 'sid' },
     operation: 'action',
@@ -650,6 +650,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     creditable: false,
+    stepEligible: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
