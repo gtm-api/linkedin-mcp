@@ -1,0 +1,22 @@
+{
+    "title": "GTM API LinkedIn MCP Server",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+        "gtmApiKey": {
+            "title": "GTM API key",
+            "type": "string",
+            "description": "API key from <a href='https://app.gtm-api.com/login'>app.gtm-api.com</a> (7-day trial, no card). Sent to the hosted endpoint as an Authorization bearer. Callers can also pass a key per request via the x-gtm-api-key header or the gtm_api_key query parameter.",
+            "editor": "textfield",
+            "isSecret": true
+        },
+        "upstreamUrl": {
+            "title": "Upstream MCP endpoint",
+            "type": "string",
+            "description": "Hosted streamable-http endpoint this Actor bridges to. Leave the default unless GTM API support tells you otherwise.",
+            "default": "https://mcp.gtm-api.com/mcp",
+            "editor": "textfield"
+        }
+    },
+    "required": []
+}
