@@ -19,7 +19,10 @@ const UPSTREAM = String(
 const INPUT_KEY = String(input.gtmApiKey || process.env.GTM_API_KEY || '');
 
 const PORT = Number(process.env.ACTOR_WEB_SERVER_PORT || process.env.APIFY_CONTAINER_PORT || 3000);
-const STANDBY = process.env.APIFY_META_ORIGIN === 'STANDBY' || Boolean(process.env.ACTOR_STANDBY_URL);
+// ACTOR_STANDBY_URL is set on every run of a standby-enabled Actor, so the
+// meta origin is the only signal that separates a Standby request from a
+// manual Run (which should self-check and exit).
+const STANDBY = process.env.APIFY_META_ORIGIN === 'STANDBY';
 const READINESS_HEADER = 'x-apify-container-server-readiness-probe';
 
 const KEY_HELP = 'GTM API key missing. Set gtmApiKey in the Actor input, or send an '
