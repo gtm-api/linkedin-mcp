@@ -1,0 +1,43 @@
+{
+  "identifier": "gtm-api-linkedin-mcp",
+  "name": "GTM API: LinkedIn MCP Server",
+  "version": "1.1.0",
+  "author": "GTM API",
+  "authorUrl": "https://github.com/gtm-api",
+  "cloudEndpoint": "https://mcp.gtm-api.com/mcp",
+  "homepage": "https://gtm-api.com/linkedin-mcp-server/",
+  "icon": "https://gtm-api.com/wp-content/themes/gtm-api/assets/img/icon-512.png",
+  "description": "The LinkedIn API and MCP server for AI agents: search, connect, message and enrich on accounts you own, with safety enforced server-side. One key exposes 250+ typed actions behind 3 meta-tools; outward actions support preview and confirm. GTM API reports 20,000+ connected accounts at under a 1% ban rate.",
+  "tags": ["linkedin", "outreach", "sales", "automation", "enrichment", "api"],
+  "tools": [
+    {
+      "name": "list_toolsets",
+      "description": "List the available toolsets (domains) on this server. Each toolset groups related tools (e.g. linkedin.messaging, id.billing). Start here, then get_toolset_tools to inspect one, then call_tool to run a tool. Requires a GTM API key (Bearer).",
+      "inputSchema": { "type": "object", "properties": {} }
+    },
+    {
+      "name": "get_toolset_tools",
+      "description": "List the tools in a toolset. Default (lite) returns name + title + one-line summary; pass verbose:true for full descriptions, safety flags, and parameter names. Run one via call_tool.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "toolset": { "type": "string", "description": "Toolset id from list_toolsets, e.g. \"linkedin.messaging\"." },
+          "verbose": { "type": "boolean", "description": "Include full descriptions + parameter names." }
+        },
+        "required": ["toolset"]
+      }
+    },
+    {
+      "name": "call_tool",
+      "description": "Invoke a tool by name (discovered via get_toolset_tools) with its arguments object. Behaves exactly like calling the tool on its domain mount. Dangerous tools still require the two-step preview-confirm (pass commit_token inside arguments on the confirm call).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string", "description": "Exact tool name." },
+          "arguments": { "type": "object", "description": "The tool's arguments object." }
+        },
+        "required": ["name"]
+      }
+    }
+  ]
+}
