@@ -1,6 +1,6 @@
 # Security
 
-To report a security issue in this MCP server or the GTM API platform, email
+To report a security issue in this MCP server or the gtm-api platform, email
 [es@gtm-api.com](mailto:es@gtm-api.com). Do not open a public issue for
 vulnerabilities. We confirm receipt within three business days.
 

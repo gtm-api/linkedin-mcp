@@ -1,7 +1,7 @@
 {
     "actorSpecification": 1,
     "name": "linkedin-mcp",
-    "title": "GTM API LinkedIn MCP Server",
+    "title": "gtm-api LinkedIn MCP Server",
     "description": "Managed LinkedIn MCP server for AI agents: search, connect, message and enrich on LinkedIn accounts you own, with safety enforced server-side.",
     "version": "0.1",
     "buildTag": "latest",

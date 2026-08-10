@@ -1,9 +1,9 @@
-// Apify Actor wrapper for the hosted GTM API LinkedIn MCP server.
+// Apify Actor wrapper for the hosted gtm-api LinkedIn MCP server.
 //
 // No server logic lives here, same contract as npm/bin/cli.js and
 // docker/entrypoint.sh in the repo root: every tool executes on the hosted
 // streamable-http endpoint (default https://mcp.gtm-api.com/mcp). In Standby
-// mode this Actor is a thin HTTP bridge that injects the caller's GTM API key
+// mode this Actor is a thin HTTP bridge that injects the caller's gtm-api key
 // as an Authorization bearer; in a normal run it performs a connectivity
 // self-check against the endpoint and exits.
 
@@ -25,7 +25,7 @@ const PORT = Number(process.env.ACTOR_WEB_SERVER_PORT || process.env.APIFY_CONTA
 const STANDBY = process.env.APIFY_META_ORIGIN === 'STANDBY';
 const READINESS_HEADER = 'x-apify-container-server-readiness-probe';
 
-const KEY_HELP = 'GTM API key missing. Set gtmApiKey in the Actor input, or send an '
+const KEY_HELP = 'gtm-api key missing. Set gtmApiKey in the Actor input, or send an '
     + 'x-gtm-api-key header, or append ?gtm_api_key=... to the URL. '
     + 'Keys: https://app.gtm-api.com/login (7-day trial).';
 
@@ -94,7 +94,7 @@ if (STANDBY) {
             }
             res.writeHead(200, { 'content-type': 'application/json' });
             return res.end(JSON.stringify({
-                name: 'GTM API LinkedIn MCP Server',
+                name: 'gtm-api LinkedIn MCP Server',
                 mcpPath: '/mcp',
                 transport: 'streamable-http',
                 upstream: UPSTREAM,

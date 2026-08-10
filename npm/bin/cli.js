@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 
-// Thin stdio launcher for the hosted GTM API LinkedIn MCP server.
+// Thin stdio launcher for the hosted gtm-api LinkedIn MCP server.
 //
 // No server logic lives here. The bin bridges a stdio MCP client (Claude
 // Desktop, Cursor, anything that spawns a command) to the remote

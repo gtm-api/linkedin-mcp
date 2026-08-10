@@ -1,6 +1,6 @@
-# GTM API LinkedIn MCP Server
+# gtm-api LinkedIn MCP Server
 
-Managed LinkedIn MCP server for AI agents, running as an Apify Actor. It bridges MCP clients to the hosted streamable-http endpoint at `https://mcp.gtm-api.com/mcp`; no server logic runs inside the Actor. Every tool executes on the hosted server, where account safety is enforced: warm-up ramps for fresh accounts, server-side daily limits, preview-then-confirm on outward actions. GTM API reports 20,000+ LinkedIn accounts running at under 1% monthly ban; the method is written up at [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
+Managed LinkedIn MCP server for AI agents, running as an Apify Actor. It bridges MCP clients to the hosted streamable-http endpoint at `https://mcp.gtm-api.com/mcp`; no server logic runs inside the Actor. Every tool executes on the hosted server, where account safety is enforced: warm-up ramps for fresh accounts, server-side daily limits, preview-then-confirm on outward actions. gtm-api reports 20,000+ LinkedIn accounts running at under 1% monthly ban; the method is written up at [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
 
 The server exposes three MCP tools (`list_toolsets`, `get_toolset_tools`, `call_tool`) that give an agent progressive access to 160+ typed LinkedIn actions: messaging, connection requests, content, enrichment, search, account health and infrastructure.
 

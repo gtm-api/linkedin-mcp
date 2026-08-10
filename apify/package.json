@@ -2,7 +2,7 @@
     "name": "@gtm-api/linkedin-mcp-apify",
     "private": true,
     "version": "0.1.0",
-    "description": "Apify Actor wrapper for the hosted GTM API LinkedIn MCP server.",
+    "description": "Apify Actor wrapper for the hosted gtm-api LinkedIn MCP server.",
     "type": "module",
     "engines": { "node": ">=20" },
     "scripts": {
