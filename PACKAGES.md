@@ -11,7 +11,7 @@ Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below 
 a plan. Every row below is ✅ shipped: three services are at full MCP coverage and the only remaining
 gap is `gtm.service.email`, which has no package and therefore no row.
 
-## mcp.linkedin: 11 mounts / 150 tools
+## mcp.linkedin: 11 mounts / 159 tools
 
 > 2026-07-24 service split: `linkedin-tracked-posts` / `-comments` / `-engagements` / `-searches` /
 > `-search-results` left this backend for `gs.service.signals`, and the outbound authoring verbs
@@ -22,16 +22,16 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| accounts | `/mcp/linkedin/accounts` | linkedin_accounts (18), linkedin_account_smart_limits (3) | 21 | ✅ |
+| accounts | `/mcp/linkedin/accounts` | linkedin_accounts (24), linkedin_account_smart_limits (3) | 27 | ✅ |
 | account_monitor | `/mcp/linkedin/account-monitor` | linkedin_account_snapshots (1), linkedin_benchmarks (1), linkedin_account_quota_hits (1), linkedin_account_block_log (1), linkedin_account_activity_log (2), linkedin_account_sync_runs (3) | 9 | ✅ |
 | messaging | `/mcp/linkedin/messaging` | linkedin_conversations (13), linkedin_messages (12) | 25 | ✅ (budget **28**, 3 free) |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (6), linkedin_connection_invitations (6), linkedin_followers (3) | 21 | ✅ |
 | content | `/mcp/linkedin/content` | linkedin_posting (3: create-post, comment, react) | 3 | ✅ |
-| scraping | `/mcp/linkedin/scraping` | linkedin_scraping (21) | 21 | ✅ |
+| scraping | `/mcp/linkedin/scraping` | linkedin_scraping (21) | 21 | ✅ (budget 25, 4 free) |
 | auto_scrapes | `/mcp/linkedin/auto-scrapes` | linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2), linkedin_auto_scrape_results (1) | 13 | ✅ |
-| enrichment | `/mcp/linkedin/enrichment` | linkedin_enrichment (19) | 19 | ✅ |
+| enrichment | `/mcp/linkedin/enrichment` | linkedin_enrichment (22) | 22 | ✅ |
 | data | `/mcp/linkedin/data` | data_requests (2) | 2 | ✅ |
-| browsers | `/mcp/linkedin/browsers` | antidetect_browsers (8), antidetect_browser_proxies (3), antidetect_browser_logs (1), cloud_browsers (1), cloud_browser_sessions (2) | 15 | ✅ |
+| browsers | `/mcp/linkedin/browsers` | antidetect_browsers (10), antidetect_browser_proxies (3), antidetect_browser_logs (1), cloud_browsers (1), cloud_browser_sessions (2) | 17 | ✅ |
 | platform | `/mcp/linkedin/platform` | linkedin_custom_requests (1, admin-gated escape hatch) | 1 | ✅ |
 
 `/mcp/linkedin/auto-scrapes` shipped 2026-07-27 and is a **new mount, not a tenant of an existing
@@ -178,8 +178,8 @@ production), so the 1:1 `/api` rule does not apply here.
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **250 tools**
-(linkedin 150 + id 77 + orchestration 21 + support 2).
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **259 tools**
+(linkedin 159 + id 77 + orchestration 21 + support 2).
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
 service". That was wrong twice over. `support` is a `ServiceId` like the other three, and the
@@ -194,8 +194,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a bundled index instead of a backend service is a dispatch detail (`localHandler`), not a
 reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **49 registry packages / 250 tools**, served over **19 mounts + 1 facade**. By service:
-linkedin 150 (27 packages), id 77 (17), orchestration 21 (4), support 2 (1). Every number in this
+Totals: **49 registry packages / 259 tools**, served over **19 mounts + 1 facade**. By service:
+linkedin 159 (27 packages), id 77 (17), orchestration 21 (4), support 2 (1). Every number in this
 file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
 `MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
 run, so re-run it rather than editing a count by hand.

@@ -7,7 +7,10 @@ import { mintDevToken } from './token';
 // Live smoke for the wave-2 domain mounts (account-monitor / content /
 // auto-scrapes / browsers / data / platform / orchestration / support-kb).
 // Opt-in (RUN_E2E=1). Deterministic + side-effect-free: mount loads, tool
-// counts, a read search, and (content) a stub call.
+// counts, and a read search where the mount has one. No row here carries a stub
+// any more (content lost its last one when create_linkedin_post went GA on
+// 2026-08-06), so the stub arm below is the generic handler for the table's
+// optional `stub` field, kept in step with the wave-1 suite that still uses it.
 
 const RUN = process.env.RUN_E2E === '1';
 const BASE = process.env.MCP_URL ?? 'http://localhost:8788';
@@ -61,10 +64,10 @@ suite('e2e wave-2 domain mounts (live worker + backend)', () => {
         expect(r.result.isError).toBe(true);
         const parsed = McpErrorResponse.parse(r.result.structuredContent);
         expect(parsed.error.code).toBe('not_implemented');
-        // create_linkedin_post is `dangerous`, so without the stub gate this
-        // call would come back as a PREVIEW with a minted commit token and a KV
-        // write behind it. `source: 'mcp_runtime'` plus the absence of a
-        // preview is what says the gate ran first.
+        // A stub that is also `dangerous` would, without the stub gate, come
+        // back as a PREVIEW with a minted commit token and a KV write behind it.
+        // `source: 'mcp_runtime'` plus the absence of a preview is what says the
+        // gate ran first.
         expect(parsed.error.context?.['source']).toBe('mcp_runtime');
         expect(r.result.structuredContent.preview).toBeUndefined();
       });

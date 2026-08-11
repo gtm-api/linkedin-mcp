@@ -10,3 +10,7 @@ coverage/
 .env.local
 bin/.vectorize-manifest.json
 tests/.e2e-coverage.json
+
+# local agent config and scraper run output
+.claude/
+apify/storage/

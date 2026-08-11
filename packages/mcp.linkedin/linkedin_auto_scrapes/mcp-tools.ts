@@ -14,12 +14,15 @@
 // /mcp/orchestration/mass-actions mount. set_linkedin_auto_scrape_mass_action is
 // the wire between the two.
 //
-// Two things this file deliberately does NOT advertise:
-//   1. include[] relations. The research designs linkedin_account / mass_action /
-//      last_run / recent_runs, but the controller answers `included: []` on both
-//      get and search, so naming them here would promise a join the backend does
-//      not perform. Chain by sid instead (that is what the descriptions say).
-//   2. a metrics tool. There is no metrics route on this group at all.
+// include[] carries the two relations the controller actually joins:
+// linkedin_account (the executor) and last_run (the newest run of the job, which
+// is where a run in flight becomes visible; the parent's next_run_at is null for
+// a one-shot too). mass_action and recent_runs are still NOT advertised: the
+// mass-action lives in another service and would cost an HTTP hop per page, and
+// recent_runs is search_linkedin_auto_scrape_runs. Chain by sid for those.
+//
+// One thing this file deliberately does NOT advertise: a metrics tool. There is
+// no metrics route on this group at all.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -150,6 +153,9 @@ const LinkedinAutoScrapeFilter = z.object({
     .describe('Omit for live jobs only; send any operator to bring deleted collectors into scope.'),
 }).partial();
 
+// Pinned by the contract-parity gate against LinkedinAutoScrapeIncludedBuilder::available().
+const LinkedinAutoScrapeInclude = z.enum(['linkedin_account', 'last_run']);
+
 const LinkedinAutoScrapeSortable = z.enum([
   'created_at',
   'updated_at',
@@ -204,7 +210,7 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
       "List the team's collectors: saved jobs that paginate one LinkedIn or Sales Navigator list surface on a cadence and file deduped leads. "
       + 'Use for: which collectors are live or paused and why (status, paused_reason), what a given account collects (linkedin_account_sid), which ones feed outreach (mass_action_sid, is_null:true = collect-only), what runs next (sort next_run_at asc), and which produce (total_new_results). '
       + 'NOT for the leads themselves (search_linkedin_auto_scrape_results) or for one execution (search_linkedin_auto_scrape_runs). '
-      + 'No q, and no include[] is served. Sort: created_at (default desc) | updated_at | next_run_at | last_run_at | total_new_results. page_size:0 returns the count alone.',
+      + 'No q. include: linkedin_account (the executor row) and last_run (the newest run, the only place an in-flight run shows up). Sort: created_at (default desc) | updated_at | next_run_at | last_run_at | total_new_results. page_size:0 returns the count alone.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-auto-scrapes/search' },
     operation: 'search',
@@ -212,7 +218,7 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     creditable: false,
-    inputSchema: McpSearchRequestSchema(LinkedinAutoScrapeFilter, undefined, LinkedinAutoScrapeSortable, 200),
+    inputSchema: McpSearchRequestSchema(LinkedinAutoScrapeFilter, LinkedinAutoScrapeInclude, LinkedinAutoScrapeSortable, 200),
     outputSchema: McpSearchResponse(LinkedinAutoScrape, undefined, LinkedinAutoScrapeCounts),
     annotations: { title: 'Search LinkedIn auto-scrapes', ...RO },
   },
@@ -221,6 +227,7 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
     name: 'get_linkedin_auto_scrape',
     description:
       'Fetch one collector by sid: status and paused_reason, next_run_at and last_run_at, runs_count and total_new_results, and mass_action_sid (null = collect-only). '
+      + 'include: linkedin_account (the executor row), last_run (the newest run, null when the job has never run). '
       + 'Executions and leads are separate reads: search_linkedin_auto_scrape_runs and search_linkedin_auto_scrape_results.',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'GET', pathTemplate: '/api/linkedin-auto-scrapes/{sid}', sidParam: 'sid' },
@@ -229,7 +236,7 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     creditable: false,
-    inputSchema: McpGetRequestSchema('ln_as_'),
+    inputSchema: McpGetRequestSchema('ln_as_', LinkedinAutoScrapeInclude),
     outputSchema: McpGetResponse(LinkedinAutoScrape),
     annotations: { title: 'Get LinkedIn auto-scrape', ...RO },
   },
@@ -260,7 +267,7 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
       source_method: SourceMethod.optional()
         .describe('The paginated verb to replay. Required (with source_input) for every non-search source.'),
       source_input: z.record(z.unknown()).optional()
-        .describe("The verb's own arguments. One key is mandatory per family: url, filters, anchor_company_ln_id, anchor_nickname (similar-profiles takes the vanity slug, never a URN), or activity_urn. filters takes the SAME schema as the matching scrape_linkedin_search_*_by_params tool (see it for the facet vocabulary and typeahead workflow)."),
+        .describe("The verb's own arguments. One key is mandatory per family: url, filters, anchor_company_ln_id, anchor_nickname (similar-profiles takes the vanity slug, never a URN), or activity_urn. filters takes the SAME schema as the matching scrape_linkedin_search_* (the merged tools; the old _by_params names are gone) tool (see it for the facet vocabulary and typeahead workflow)."),
       replay_frequency: ReplayFrequency.nullable().optional()
         .describe('Cadence: hourly | daily | weekly | monthly. Omit or null for a one-shot job that runs once.'),
       mass_action_sid: MASS_ACTION_SID.nullable().optional()

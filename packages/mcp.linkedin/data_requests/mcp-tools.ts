@@ -26,9 +26,9 @@ const DataRequestKind = z.enum(['enrich', 'scrape']);
 const DataRequestStatus = z.enum(['pending', 'running', 'completed', 'rejected', 'failed']);
 const DataRequestExecutedOn = z.enum(['own_account', 'infra_pool']);
 
-// 40 matrix methods (one value per owned scraping/enrichment method).
+// One value per owned scraping/enrichment method, the whole matrix.
 const DataRequestMethod = z.enum([
-  // enrich (18)
+  // enrich (22)
   'person_lite_profile', 'person_basic_profile', 'person_full_profile', 'person_experience',
   'person_skills', 'person_education', 'person_posts', 'person_featured',
   'person_contact_info', 'person_languages', 'person_certifications',
@@ -36,16 +36,56 @@ const DataRequestMethod = z.enum([
   'person_interests', 'person_services',
   'company_profile', 'company_lite_profile', 'company_public_identifier', 'company_posts',
   'post_details',
-  // scrape (22)
+  // ⚠️ Sits with the enrich values because that is its `kind()`, not because it
+  // reads a person: it resolves one post URL into an activity urn, which is a
+  // cached single-object lookup rather than a live list. It was grouped under
+  // the scrape comment until 2026-08-09, which is why the two block counts
+  // disagreed with the PHP enum by one in each direction while set equality -
+  // the only thing enum-parity checks - stayed green.
+  'get_activity_urn_by_url',
+  // scrape (33)
+  //
+  // 🛑 STILL TWO CASES PER SEARCH VERTICAL, on purpose. The public surface
+  // merged each by-url / by-params PAIR into one route and one tool on
+  // 2026-08-08 (`url` XOR `filters`), and the ledger deliberately did NOT
+  // follow: the controller picks the …ByUrl or the …ByParams case from which
+  // field the caller filled, so a row still records which wire verb ran, the
+  // activity log still distinguishes them, and every stored
+  // linkedin_auto_scrapes.source_method value still resolves. This list mirrors
+  // the PHP DataRequestMethodEnum case for case (enum-parity asserts set
+  // equality in BOTH directions), so it tracks the ledger taxonomy and never
+  // the route list, which is now strictly coarser.
   'search_people_by_url', 'search_people_by_params',
   'search_sales_nav_people_by_url', 'search_sales_nav_people_by_params',
   'search_service_providers', 'search_service_providers_by_url', 'similar_profiles',
+  // The jobs, events and groups verticals, whose rows are job postings, events
+  // and groups rather than people or companies: the ledger records the call the
+  // same way regardless of what came back.
+  'search_jobs', 'search_jobs_by_url',
+  'search_events', 'search_events_by_url',
+  'search_groups', 'search_groups_by_url',
+  // LinkedIn LEARNING, landed 2026-08-08, and the taxonomy says `courses` while
+  // the screen it opens is `/search/results/learning/`. Rows are catalogue
+  // courses keyed by a slug, a sixth kind after person, company, job posting,
+  // event and group, and the ledger still records only which verb ran.
+  'search_courses', 'search_courses_by_url',
+  // The products catalogue, landed 2026-08-09. A seventh row kind, keyed by a
+  // slug like courses - the wire calls that field `product_id`, the projected
+  // row calls it `product_slug`, and the difference matters because this is the
+  // one search whose FILTERS carry real numeric ids.
+  'search_products', 'search_products_by_url',
+  // Schools, landed 2026-08-09 and the last node vertical to be mirrored. An
+  // eighth row kind, keyed by a slug like courses and products - the wire calls
+  // that field `school_id`, the projected row calls it `school_slug`, because
+  // param-id-lookup has a `school` type returning REAL school ids that this
+  // engine cannot take.
+  'search_schools', 'search_schools_by_url',
   'search_companies_by_url', 'search_companies_by_params',
   'search_sales_nav_companies_by_url', 'search_sales_nav_companies_by_params',
   'similar_companies', 'company_employees', 'company_decision_makers',
   'search_posts', 'search_posts_by_url', 'get_post_commenters', 'get_post_reactors',
-  'get_post_resharers', 'get_post_comments', 'search_param_id_lookup',
-  'search_sales_nav_param_id_lookup', 'get_activity_urn_by_url',
+  'get_post_resharers', 'search_param_id_lookup',
+  'search_sales_nav_param_id_lookup',
 ]);
 
 // Item projection: every field of DataRequestDomain (research §Domain). Base

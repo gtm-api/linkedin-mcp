@@ -46,13 +46,26 @@ const ENTITY_URN = z.string().min(1).max(512)
 const FORCE_DEDUP = z.boolean().nullable().optional()
   .describe('Accepted for contract compatibility and NOT enforced by this service today: per-post dedup left with the content trio (gs.service.signals). Passing it changes nothing.');
 
-const LinkedinPostingVisibility = z.enum(['anyone', 'connections_only']);
+// BREAKING, 2026-08-06: create-post went live and its reserved contract was
+// rewritten to the node's express-validator chain, which disagreed with it in
+// five ways (§ CONTRACT AUTHORITY: the wire is the contract, our reserved shape
+// was a guess). `media` (up to 9 items, content_base64 XOR url) is gone with no
+// alias: the wire member is `images`, at most ONE, base64 only, and there is no
+// url arm anywhere on it. `visibility` moved from lowercase to the wire's own
+// uppercase vocabulary. `allowed_commenters_scope` and `images[].alt_text` were
+// missing and are now taken. `text` may be EMPTY when an image is attached.
+const LinkedinPostingVisibility = z.enum(['ANYONE', 'CONNECTIONS_ONLY']);
 
-const LinkedinPostingMediaValue = z.object({
-  file_name: z.string().min(1).max(255),
-  content_base64: z.string().nullable().optional().describe('base64 payload, XOR with url.'),
-  url: z.string().url().max(2048).nullable().optional().describe('Fetchable media URL, XOR with content_base64.'),
-}).describe('Exactly one of content_base64 / url, else 422 invalid_input.');
+const LinkedinPostingAllowedCommentersScope = z.enum(['ALL', 'CONNECTIONS_ONLY', 'NONE']);
+
+const LinkedinPostingImageValue = z.object({
+  file_base64: z.string().min(1)
+    .describe('The image bytes: a data:<mime>;base64,<...> URL or bare base64. The only way to attach an image; there is no fetch-by-url arm.'),
+  file_byte_size: z.number().int().min(1).nullable().optional(),
+  file_name: z.string().min(1).max(255).nullable().optional(),
+  file_type: z.string().min(1).max(255).nullable().optional(),
+  alt_text: z.string().nullable().optional().describe('Accessibility alt text; may be empty.'),
+});
 
 // The §4.12a dispatch row (linkedin-account-activity-log). Kept open rather than
 // re-declaring LinkedinAccountActivityLogDomain here: that Domain is owned by
@@ -61,8 +74,11 @@ const ACTIVITY_LOG = z.object({}).passthrough()
   .describe('Full dispatch row (linkedin-account-activity-log) per §4.12a. Poll it there by sid for the terminal outcome.');
 
 const CreatePostResult = z.object({
-  activity_urn: z.string().nullable()
-    .describe('The published post URN. Always null while the §5.9 stub is active.'),
+  activity_urn: z.string().nullable().describe('The published post as an activity urn.'),
+  post_urn: z.string().nullable().describe('The same post as urn:li:share:<id>.'),
+  url: z.string().nullable().describe('Public post URL, query string already stripped.'),
+  created_at: z.string().nullable().describe('Publication time, ISO 8601.'),
+  text: z.string().describe('The body LinkedIn actually published, read back off the wire. Empty for an image-only post.'),
   activity_log: ACTIVITY_LOG,
 }).passthrough();
 
@@ -96,27 +112,30 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_post',
     description:
-      'NOT SHIPPED YET: publish a LinkedIn post (text plus optional media) from one of the team\'s accounts. The browser-plugin create-post verb is not built, so every valid call returns not_implemented (context.reason=blocked_on_plugin). Do not retry. The request contract is final and validated in full BEFORE the 501 (text ≤ 3000, media ≤ 9 items each content_base64 XOR url, visibility in the enum), so integrations can be built and tested against it today. Once live it is identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the posting bucket (5/day, 1200 s delay, the tightest write limit), saturation returns 429 with no pool fallback. Nothing is stored here; the response carries the published activity URN plus the activity-log row.',
+      'Publish ONE feed post under the account\'s own identity (wire create-post). Public and irreversible through this API: there is no delete verb here. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the posting bucket (the tightest write limit, 1200 s between posts), saturation returns 429 with no pool fallback. text is REQUIRED as a key but may be an EMPTY string when an image is attached; a call with neither non-blank text nor an image is a 422. At most ONE image, base64 only, no fetch-by-url. Body and alt text are published byte for byte, blank lines included. Nothing is stored here: the response carries the published post (urn, url, time, the body LinkedIn kept) plus the activity-log row.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/create-post' },
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: true,
     creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      text: z.string().min(1).max(3000).describe('Post body (LinkedIn hard cap 3000).'),
-      media: z.array(LinkedinPostingMediaValue).max(9).optional()
-        .describe('Up to 9 images / documents, each item exactly one of content_base64 / url.'),
+      text: z.string().max(3000)
+        .describe('Post body, always present. Empty is legal ONLY alongside an image. 3000 is LinkedIn\'s own cap, refused here rather than burning a posting slot.'),
+      images: z.array(LinkedinPostingImageValue).max(1).optional()
+        .describe('At most one image. The wire refuses a second, so a longer array is a 422 here instead of a spent browser dispatch.'),
       visibility: LinkedinPostingVisibility.optional()
-        .describe('anyone (public, the default) or connections_only.'),
+        .describe('ANYONE (the node default) or CONNECTIONS_ONLY. Omit to let the node apply its own default.'),
+      allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional()
+        .describe('Who may comment: ALL (the node default), CONNECTIONS_ONLY, or NONE to disable comments.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), CreatePostResult),
-    annotations: { title: 'Create LinkedIn post (not shipped)', ...DANGER },
+    annotations: { title: 'Create LinkedIn post', ...DANGER },
   },
   {
     ...base,

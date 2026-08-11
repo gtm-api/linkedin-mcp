@@ -64,9 +64,16 @@ export const PREVIEW_SMOKE_TOOL = 'reset_linkedin_account_sync';
 export const WAVE1_MOUNTS: SmokeMount[] = [
   { path: '/mcp/linkedin/messaging', name: 'gtm-linkedin-messaging', search: 'search_linkedin_conversations' },
   { path: '/mcp/linkedin/network', name: 'gtm-linkedin-network', search: 'search_linkedin_connections' },
-  // The stub, not a GA scrape: the row used to name
-  // scrape_linkedin_similar_profiles, which is GA and creditable.
-  { path: '/mcp/linkedin/scraping', name: 'gtm-linkedin-scraping', stub: 'scrape_linkedin_get_post_comments' },
+  // No `stub` since 2026-08-09: the scraping mount has no §5.9 stub left. This row
+  // named scrape_linkedin_get_post_comments, which was RETIRED rather than shipped -
+  // it was a second tool over a verb we already dispatch (it and
+  // scrape_linkedin_get_post_commenters both resolved to slug `get-comments`), so its
+  // comment-side fields moved into the commenters projection. Before that the row
+  // named scrape_linkedin_similar_profiles, which is GA and creditable and was
+  // reaching the live backend on every run. `stub` is optional and every use site
+  // guards on it, so this row simply skips the short-circuit check. Re-add it if a
+  // future scraping tool lands contract-first.
+  { path: '/mcp/linkedin/scraping', name: 'gtm-linkedin-scraping' },
   // Same correction: enrich_linkedin_person_contact_info is GA and creditable,
   // and that row was reaching the live backend on every run.
   { path: '/mcp/linkedin/enrichment', name: 'gtm-linkedin-enrichment', stub: 'enrich_linkedin_person_languages' },
@@ -75,16 +82,16 @@ export const WAVE1_MOUNTS: SmokeMount[] = [
 export const WAVE2_MOUNTS: SmokeMount[] = [
   { path: '/mcp/linkedin/account-monitor', name: 'gtm-linkedin-account-monitor', search: 'search_linkedin_account_snapshots' },
   // content carries no read tool: it is the stateless authoring surface (post /
-  // comment / react), so the stub is the whole smoke. create_linkedin_post is
-  // also `dangerous`, which makes it the best stub in the table: the gate has to
-  // beat the preview gate, so a pass here proves no commit token was minted and
-  // no KV write happened either.
-  {
-    path: '/mcp/linkedin/content',
-    name: 'gtm-linkedin-content',
-    stub: 'create_linkedin_post',
-    stubArgs: { linkedin_account_sid: 'ln_ac_000000000000', text: 'e2e stub probe, never sent' },
-  },
+  // comment / react). It used to carry the best stub row in the table, because
+  // create_linkedin_post was `stub_501` AND `dangerous`, so a not_implemented
+  // answer proved the stub gate beat the preview gate (no commit token minted,
+  // no KV write). As of 2026-08-06 that tool is GA: the plugin shipped the
+  // create-post verb (matrix row 72), and comment / react were already GA, so
+  // the mount has no stub_501 tool left and nothing on it is safe to call from
+  // here. All three verbs publish to LinkedIn for real. The row stays for the
+  // initialize + tools/list smoke, the same shape /mcp/linkedin/platform has;
+  // re-add a stub if a future content tool lands contract-first.
+  { path: '/mcp/linkedin/content', name: 'gtm-linkedin-content' },
   { path: '/mcp/linkedin/auto-scrapes', name: 'gtm-linkedin-auto-scrapes', search: 'search_linkedin_auto_scrapes' },
   { path: '/mcp/linkedin/browsers', name: 'gtm-linkedin-browsers', search: 'search_antidetect_browsers' },
   { path: '/mcp/linkedin/data', name: 'gtm-linkedin-data', search: 'search_data_requests' },

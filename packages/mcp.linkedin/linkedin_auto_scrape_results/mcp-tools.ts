@@ -88,6 +88,11 @@ const LinkedinAutoScrapeResultFilter = z.object({
   deleted_at: filterOp(z.string(), ['is_null', 'gte', 'lte']).optional(),
 }).partial();
 
+// Pinned by the contract-parity gate against
+// LinkedinAutoScrapeResultIncludedBuilder::available(). Both keys resolve against
+// the runs table: the row stores run sids, and every reader wants the run NUMBER.
+const LinkedinAutoScrapeResultInclude = z.enum(['first_seen_run', 'last_seen_run']);
+
 const LinkedinAutoScrapeResultSortable = z.enum([
   'created_at',
   'updated_at',
@@ -111,7 +116,7 @@ export const linkedinAutoScrapeResultsTools: ToolDefinition[] = [
       + 'Use for: the whole registry of a job (filter linkedin_auto_scrape_sid), the fresh delta of one run (first_seen_run_sid, the ingest path once a run completes), is this person already collected (parent sid plus ln_member_id or company_ln_id), and which leads keep re-appearing (seen_runs_count gte 3). '
       + 'page_size 0 returns counts.total_count, which IS the unique-lead count because dedup is built into the row. '
       + 'NOT for how a run went (search_linkedin_auto_scrape_runs), NOT for managing the job (search_linkedin_auto_scrapes), and NOT for outreach state: this registry records who was collected, never what was done to them. '
-      + 'No q, no include[]; nickname is exact match; dedup_key needs its parent partner. Sort: created_at (default desc) | updated_at | seen_runs_count.',
+      + 'No q; include first_seen_run / last_seen_run for the run number behind the sid; nickname is exact match; dedup_key needs its parent partner. Sort: created_at (default desc) | updated_at | seen_runs_count.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-auto-scrape-results/search' },
     operation: 'search',
@@ -119,10 +124,7 @@ export const linkedinAutoScrapeResultsTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     creditable: false,
-    inputSchema: McpSearchRequestSchema(LinkedinAutoScrapeResultFilter, undefined, LinkedinAutoScrapeResultSortable, 200)
-      // The SearchRequest declares no include rule and the controller builds no
-      // included block, so advertising the param would be a silent no-op.
-      .omit({ include: true }),
+    inputSchema: McpSearchRequestSchema(LinkedinAutoScrapeResultFilter, LinkedinAutoScrapeResultInclude, LinkedinAutoScrapeResultSortable, 200),
     outputSchema: McpSearchResponse(LinkedinAutoScrapeResult, undefined, LinkedinAutoScrapeResultCounts),
     annotations: { title: 'Search LinkedIn auto-scrape results', ...RO },
   },

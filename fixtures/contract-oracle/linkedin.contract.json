@@ -6827,6 +6827,18 @@
                     "value": "get_profile_comments"
                 },
                 {
+                    "name": "GetProfileReactions",
+                    "value": "get_profile_reactions"
+                },
+                {
+                    "name": "GetInterests",
+                    "value": "get_interests"
+                },
+                {
+                    "name": "GetProfileServices",
+                    "value": "get_profile_services"
+                },
+                {
                     "name": "GetLiteCompany",
                     "value": "get_lite_company"
                 },
@@ -6907,8 +6919,24 @@
                     "value": "get_my_following"
                 },
                 {
+                    "name": "GetMyProfileViews",
+                    "value": "get_my_profile_views"
+                },
+                {
+                    "name": "GetMyCatchUp",
+                    "value": "get_my_catch_up"
+                },
+                {
+                    "name": "GetMySalesNavNotifications",
+                    "value": "get_my_sales_nav_notifications"
+                },
+                {
                     "name": "GetTypeaheadSalesNav",
                     "value": "get_typeahead_sales_nav"
+                },
+                {
+                    "name": "GetTypeaheadLinkedin",
+                    "value": "get_typeahead_linkedin"
                 },
                 {
                     "name": "GetSimilarProfiles",
@@ -6955,6 +6983,54 @@
                     "value": "get_posts_search_by_url"
                 },
                 {
+                    "name": "GetJobsSearch",
+                    "value": "get_jobs_search"
+                },
+                {
+                    "name": "GetJobsSearchByUrl",
+                    "value": "get_jobs_search_by_url"
+                },
+                {
+                    "name": "GetEventsSearch",
+                    "value": "get_events_search"
+                },
+                {
+                    "name": "GetEventsSearchByUrl",
+                    "value": "get_events_search_by_url"
+                },
+                {
+                    "name": "GetGroupsSearch",
+                    "value": "get_groups_search"
+                },
+                {
+                    "name": "GetGroupsSearchByUrl",
+                    "value": "get_groups_search_by_url"
+                },
+                {
+                    "name": "GetCoursesSearch",
+                    "value": "get_courses_search"
+                },
+                {
+                    "name": "GetCoursesSearchByUrl",
+                    "value": "get_courses_search_by_url"
+                },
+                {
+                    "name": "GetProductsSearch",
+                    "value": "get_products_search"
+                },
+                {
+                    "name": "GetProductsSearchByUrl",
+                    "value": "get_products_search_by_url"
+                },
+                {
+                    "name": "GetSchoolsSearch",
+                    "value": "get_schools_search"
+                },
+                {
+                    "name": "GetSchoolsSearchByUrl",
+                    "value": "get_schools_search_by_url"
+                },
+                {
                     "name": "EditMyProfile",
                     "value": "edit_my_profile"
                 },
@@ -6999,6 +7075,14 @@
                     "value": "remove_connection"
                 },
                 {
+                    "name": "FollowProfile",
+                    "value": "follow_profile"
+                },
+                {
+                    "name": "UnfollowProfile",
+                    "value": "unfollow_profile"
+                },
+                {
                     "name": "EndorseSkills",
                     "value": "endorse_skills"
                 },
@@ -7009,6 +7093,10 @@
                 {
                     "name": "CommentPost",
                     "value": "comment_post"
+                },
+                {
+                    "name": "CreatePost",
+                    "value": "create_post"
                 },
                 {
                     "name": "MarkConversationAsRead",
@@ -7466,6 +7554,54 @@
                     "value": "company_decision_makers"
                 },
                 {
+                    "name": "SearchJobs",
+                    "value": "search_jobs"
+                },
+                {
+                    "name": "SearchJobsByUrl",
+                    "value": "search_jobs_by_url"
+                },
+                {
+                    "name": "SearchEvents",
+                    "value": "search_events"
+                },
+                {
+                    "name": "SearchEventsByUrl",
+                    "value": "search_events_by_url"
+                },
+                {
+                    "name": "SearchGroups",
+                    "value": "search_groups"
+                },
+                {
+                    "name": "SearchGroupsByUrl",
+                    "value": "search_groups_by_url"
+                },
+                {
+                    "name": "SearchCourses",
+                    "value": "search_courses"
+                },
+                {
+                    "name": "SearchCoursesByUrl",
+                    "value": "search_courses_by_url"
+                },
+                {
+                    "name": "SearchProducts",
+                    "value": "search_products"
+                },
+                {
+                    "name": "SearchProductsByUrl",
+                    "value": "search_products_by_url"
+                },
+                {
+                    "name": "SearchSchools",
+                    "value": "search_schools"
+                },
+                {
+                    "name": "SearchSchoolsByUrl",
+                    "value": "search_schools_by_url"
+                },
+                {
                     "name": "SearchPosts",
                     "value": "search_posts"
                 },
@@ -7488,10 +7624,6 @@
                 {
                     "name": "GetPostResharers",
                     "value": "get_post_resharers"
-                },
-                {
-                    "name": "GetPostComments",
-                    "value": "get_post_comments"
                 },
                 {
                     "name": "SearchParamIdLookup",
@@ -7541,36 +7673,111 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\LinkedinScrapingJobEmploymentTypeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "PartTime",
+                    "value": "part_time"
+                },
+                {
+                    "name": "Contract",
+                    "value": "contract"
+                },
+                {
+                    "name": "Internship",
+                    "value": "internship"
+                },
+                {
+                    "name": "FullTime",
+                    "value": "full_time"
+                },
+                {
+                    "name": "Volunteer",
+                    "value": "volunteer"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\LinkedinScrapingJobExperienceLevelEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Entry",
+                    "value": "entry"
+                },
+                {
+                    "name": "Senior",
+                    "value": "senior"
+                },
+                {
+                    "name": "Manager",
+                    "value": "manager"
+                },
+                {
+                    "name": "Director",
+                    "value": "director"
+                },
+                {
+                    "name": "Executive",
+                    "value": "executive"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\LinkedinScrapingJobTimePostedEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Past24h",
+                    "value": "past_24h"
+                },
+                {
+                    "name": "PastWeek",
+                    "value": "past_week"
+                },
+                {
+                    "name": "PastMonth",
+                    "value": "past_month"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\LinkedinScrapingLookupFacetEnum": {
             "backing": "string",
             "cases": [
                 {
-                    "name": "Geo",
-                    "value": "geo"
+                    "name": "People",
+                    "value": "people"
                 },
                 {
-                    "name": "Industry",
-                    "value": "industry"
+                    "name": "Connections",
+                    "value": "connections"
+                },
+                {
+                    "name": "Location",
+                    "value": "location"
                 },
                 {
                     "name": "Company",
                     "value": "company"
                 },
                 {
-                    "name": "PastCompany",
-                    "value": "past_company"
-                },
-                {
                     "name": "School",
                     "value": "school"
                 },
                 {
-                    "name": "Title",
-                    "value": "title"
+                    "name": "Industry",
+                    "value": "industry"
                 },
                 {
-                    "name": "Service",
-                    "value": "service"
+                    "name": "ServiceCategory",
+                    "value": "service_category"
+                },
+                {
+                    "name": "ProductCategory",
+                    "value": "product_category"
+                },
+                {
+                    "name": "JobLocation",
+                    "value": "job_location"
                 }
             ]
         },
@@ -12384,7 +12591,7 @@
                     "field": "include.*",
                     "rules": [
                         "string",
-                        "in:\"antidetect_browser\",\"linkedin_account_smart_limits\",\"linkedin_account_snapshot\",\"linkedin_account_quota_hits\",\"linkedin_account_block_log\",\"linkedin_account_block_log_counts\",\"linkedin_connections_counts\",\"linkedin_connection_requests_counts\",\"linkedin_connection_invitations_counts\""
+                        "in:\"antidetect_browser\",\"linkedin_account_smart_limits\",\"linkedin_account_snapshot\",\"linkedin_account_quota_hits\",\"linkedin_account_block_log\",\"linkedin_account_block_log_counts\",\"linkedin_connections_counts\",\"linkedin_connection_requests_counts\",\"linkedin_connection_invitations_counts\",\"linkedin_conversations_counts\",\"linkedin_followers_counts\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -12398,7 +12605,9 @@
                         "linkedin_account_block_log_counts",
                         "linkedin_connections_counts",
                         "linkedin_connection_requests_counts",
-                        "linkedin_connection_invitations_counts"
+                        "linkedin_connection_invitations_counts",
+                        "linkedin_conversations_counts",
+                        "linkedin_followers_counts"
                     ],
                     "min": null,
                     "max": null,
@@ -12559,7 +12768,7 @@
                     "field": "include.*",
                     "rules": [
                         "string",
-                        "in:\"antidetect_browser\",\"linkedin_account_smart_limits\",\"linkedin_account_snapshot\",\"linkedin_account_quota_hits\",\"linkedin_account_block_log\",\"linkedin_account_block_log_counts\",\"linkedin_connections_counts\",\"linkedin_connection_requests_counts\",\"linkedin_connection_invitations_counts\""
+                        "in:\"antidetect_browser\",\"linkedin_account_smart_limits\",\"linkedin_account_snapshot\",\"linkedin_account_quota_hits\",\"linkedin_account_block_log\",\"linkedin_account_block_log_counts\",\"linkedin_connections_counts\",\"linkedin_connection_requests_counts\",\"linkedin_connection_invitations_counts\",\"linkedin_conversations_counts\",\"linkedin_followers_counts\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -12573,7 +12782,9 @@
                         "linkedin_account_block_log_counts",
                         "linkedin_connections_counts",
                         "linkedin_connection_requests_counts",
-                        "linkedin_connection_invitations_counts"
+                        "linkedin_connection_invitations_counts",
+                        "linkedin_conversations_counts",
+                        "linkedin_followers_counts"
                     ],
                     "min": null,
                     "max": null,
@@ -12658,51 +12869,45 @@
             "required_permission": "can_view_linkedin_accounts",
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountCheckPremiumSubscriptionRequest",
-            "rules": [],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/linkedin-accounts/{sid}/check-recruiter",
-            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
-            "action": "checkRecruiterAccess",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
+            "rules": [
+                {
+                    "field": "checks",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:4"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 4,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "checks.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:premium,sales_nav,recruiter,inmail_credits"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "premium",
+                        "sales_nav",
+                        "recruiter",
+                        "inmail_credits"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
             ],
-            "required_permission": "can_view_linkedin_accounts",
-            "internal": false,
-            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
-            "rules": [],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/linkedin-accounts/{sid}/check-sales-nav",
-            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
-            "action": "checkSalesNavAccess",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_view_linkedin_accounts",
-            "internal": false,
-            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
-            "rules": [],
             "rules_reason": null
         },
         {
@@ -12973,6 +13178,59 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/get-my-catch-up",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "getMyCatchUp",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountGetMyCatchUpRequest",
+            "rules": [
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-accounts/{sid}/get-my-credits",
             "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
             "action": "getMyCredits",
@@ -13092,6 +13350,120 @@
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/get-my-profile-views",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "getMyProfileViews",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountGetMyProfileViewsRequest",
+            "rules": [
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/get-my-sales-nav-notifications",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "getMySalesNavNotifications",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountGetMySalesNavNotificationsRequest",
+            "rules": [
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
             "rules_reason": null
         },
         {
@@ -13854,6 +14226,39 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"first_seen_run\",\"last_seen_run\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "first_seen_run",
+                        "last_seen_run"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -14241,6 +14646,39 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"linkedin_account\",\"last_run\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin_account",
+                        "last_run"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -14283,9 +14721,43 @@
             ],
             "required_permission": "can_view_linkedin_searches",
             "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\LinkedinAutoScrape\\Requests\\LinkedinAutoScrapeGetRequest",
+            "rules": [
+                {
+                    "field": "include",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"linkedin_account\",\"last_run\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin_account",
+                        "last_run"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "PATCH",
@@ -17181,6 +17653,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "company_url",
                     "rules": [
                         "required",
@@ -17265,6 +17754,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -17425,6 +17931,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "company_url",
                     "rules": [
                         "required",
@@ -17509,6 +18032,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -17601,6 +18141,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "url",
                     "rules": [
                         "required",
@@ -17685,6 +18242,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -17796,6 +18370,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -17899,6 +18490,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -18043,6 +18651,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -18150,6 +18775,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -18253,6 +18895,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -18397,6 +19056,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -18500,6 +19176,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -18611,6 +19304,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -18643,6 +19353,61 @@
                     "in": null,
                     "min": null,
                     "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:1024"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 1024,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "tab",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"top_voices\",\"companies\",\"groups\",\"newsletters\",\"schools\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "top_voices",
+                        "companies",
+                        "groups",
+                        "newsletters",
+                        "schools"
+                    ],
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }
@@ -18714,6 +19479,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -18825,6 +19607,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -18928,6 +19727,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -19072,6 +19888,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -19212,6 +20045,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -19338,6 +20188,23 @@
                     "between": null
                 },
                 {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "profile_id",
                     "rules": [
                         "required_without:public_identifier",
@@ -19441,6 +20308,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -19581,6 +20465,23 @@
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trust_cache_max_age_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 3650,
                     "size": null,
                     "between": null
                 },
@@ -20099,6 +21000,218 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-followings/follow",
+            "controller": "App\\Entities\\LinkedinFollowing\\LinkedinFollowingController",
+            "action": "followMember",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinFollowing\\Requests\\LinkedinFollowingFollowRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "target",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-followings/unfollow",
+            "controller": "App\\Entities\\LinkedinFollowing\\LinkedinFollowingController",
+            "action": "unfollowMember",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinFollowing\\Requests\\LinkedinFollowingUnfollowRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "target",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
                     "size": null,
                     "between": null
                 }
@@ -21512,38 +22625,76 @@
                 {
                     "field": "text",
                     "rules": [
-                        "required",
+                        "present",
                         "string",
-                        "min:1",
                         "max:3000"
                     ],
-                    "required": true,
+                    "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
-                    "min": 1,
+                    "min": null,
                     "max": 3000,
                     "size": null,
                     "between": null
                 },
                 {
-                    "field": "media",
+                    "field": "visibility",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"ANYONE\",\"CONNECTIONS_ONLY\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ANYONE",
+                        "CONNECTIONS_ONLY"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allowed_commenters_scope",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"ALL\",\"CONNECTIONS_ONLY\",\"NONE\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ALL",
+                        "CONNECTIONS_ONLY",
+                        "NONE"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "images",
                     "rules": [
                         "sometimes",
                         "array",
-                        "max:9"
+                        "max:1"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "array",
                     "in": null,
                     "min": null,
-                    "max": 9,
+                    "max": 1,
                     "size": null,
                     "between": null
                 },
                 {
-                    "field": "media.*",
+                    "field": "images.*",
                     "rules": [
                         "array"
                     ],
@@ -21557,70 +22708,79 @@
                     "between": null
                 },
                 {
-                    "field": "media.*.file_name",
+                    "field": "images.*.file_base64",
                     "rules": [
                         "required",
                         "string",
-                        "min:1",
-                        "max:255"
+                        "min:1"
                     ],
                     "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": 1,
-                    "max": 255,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "media.*.content_base64",
-                    "rules": [
-                        "sometimes",
-                        "nullable",
-                        "string"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
                     "max": null,
                     "size": null,
                     "between": null
                 },
                 {
-                    "field": "media.*.url",
+                    "field": "images.*.file_byte_size",
                     "rules": [
                         "sometimes",
-                        "nullable",
-                        "string",
-                        "url",
-                        "max:2048"
+                        "integer",
+                        "min:1"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "string",
+                    "nullable": false,
+                    "type": "integer",
                     "in": null,
-                    "min": null,
-                    "max": 2048,
+                    "min": 1,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
                 {
-                    "field": "visibility",
+                    "field": "images.*.file_name",
                     "rules": [
                         "sometimes",
                         "string",
-                        "in:\"anyone\",\"connections_only\""
+                        "min:1"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
-                    "in": [
-                        "anyone",
-                        "connections_only"
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "images.*.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
                     ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "images.*.alt_text",
+                    "rules": [
+                        "sometimes",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
                     "min": null,
                     "max": null,
                     "size": null,
@@ -22127,126 +23287,6 @@
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-scraping/get-post-comments",
-            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "getPostComments",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_act_linkedin_searches",
-            "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetPostCommentsRequest",
-            "rules": [
-                {
-                    "field": "linkedin_account_sid",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "starts_with:ln_ac_",
-                        "size:18"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "idempotency_key",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "max:128"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "post",
-                    "rules": [
-                        "required",
-                        "string",
-                        "max:512"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 512,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "page_size",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:1",
-                        "max:100"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 100,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "cursor",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "max:1024"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 1024,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
             "uri": "api/linkedin-scraping/get-post-reactors",
             "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
             "action": "getPostReactors",
@@ -22554,23 +23594,25 @@
                     "between": null
                 },
                 {
-                    "field": "facet",
+                    "field": "type",
                     "rules": [
                         "required",
                         "string",
-                        "in:\"geo\",\"industry\",\"company\",\"past_company\",\"school\",\"title\",\"service\""
+                        "in:\"people\",\"connections\",\"location\",\"company\",\"school\",\"industry\",\"service_category\",\"product_category\",\"job_location\""
                     ],
                     "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
-                        "geo",
-                        "industry",
+                        "people",
+                        "connections",
+                        "location",
                         "company",
-                        "past_company",
                         "school",
-                        "title",
-                        "service"
+                        "industry",
+                        "service_category",
+                        "product_category",
+                        "job_location"
                     ],
                     "min": null,
                     "max": null,
@@ -22591,23 +23633,6 @@
                     "in": null,
                     "min": 1,
                     "max": 100,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "limit",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:1",
-                        "max:25"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 25,
                     "size": null,
                     "between": null
                 }
@@ -22757,9 +23782,9 @@
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-scraping/search-companies-by-params",
+            "uri": "api/linkedin-scraping/search-companies",
             "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchCompaniesByParams",
+            "action": "searchCompanies",
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
@@ -22773,219 +23798,7 @@
             ],
             "required_permission": "can_act_linkedin_searches",
             "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchCompaniesByParamsRequest",
-            "rules": [
-                {
-                    "field": "linkedin_account_sid",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "starts_with:ln_ac_",
-                        "size:18"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "idempotency_key",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "max:128"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters",
-                    "rules": [
-                        "required",
-                        "array"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "page",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:1",
-                        "max:100"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 100,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.keywords",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "max:256"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 256,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.geo_ids",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.geo_ids.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.industry_ids",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.industry_ids.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.company_sizes",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.company_sizes.*",
-                    "rules": [
-                        "string",
-                        "max:8"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 8,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/linkedin-scraping/search-companies-by-url",
-            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchCompaniesByUrl",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_act_linkedin_searches",
-            "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchCompaniesByUrlRequest",
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchCompaniesRequest",
             "rules": [
                 {
                     "field": "linkedin_account_sid",
@@ -23038,17 +23851,36 @@
                 {
                     "field": "url",
                     "rules": [
-                        "required",
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
                         "string",
                         "max:2048",
                         "starts_with:https://www.linkedin.com/search/results/companies/"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
                     "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters",
+                    "rules": [
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -23068,15 +23900,139 @@
                     "max": 100,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "filters.keywords",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:256",
+                        "not_regex:/\"/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.geo_ids",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.geo_ids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industry_ids",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.industry_ids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_sizes",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:8"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 8,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_sizes.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"1_to_10\",\"11_to_50\",\"51_to_200\",\"201_to_500\",\"501_to_1000\",\"1001_to_5000\",\"5001_to_10000\",\"10001_plus\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "1_to_10",
+                        "11_to_50",
+                        "51_to_200",
+                        "201_to_500",
+                        "501_to_1000",
+                        "1001_to_5000",
+                        "5001_to_10000",
+                        "10001_plus"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-scraping/search-people-by-params",
+            "uri": "api/linkedin-scraping/search-courses",
             "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchPeopleByParams",
+            "action": "searchCourses",
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
@@ -23090,7 +24046,7 @@
             ],
             "required_permission": "can_act_linkedin_searches",
             "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchPeopleByParamsRequest",
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchCoursesRequest",
             "rules": [
                 {
                     "field": "linkedin_account_sid",
@@ -23141,13 +24097,874 @@
                     "between": null
                 },
                 {
+                    "field": "url",
+                    "rules": [
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/search/results/learning/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filters",
                     "rules": [
-                        "required",
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
                         "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.keywords",
+                    "rules": [
+                        "required_with:filters",
+                        "string",
+                        "max:256"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.difficulty",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:3"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 3,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.difficulty.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"beginner\",\"intermediate\",\"advanced\""
                     ],
                     "required": true,
                     "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "beginner",
+                        "intermediate",
+                        "advanced"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.time_to_complete",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:6"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 6,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.time_to_complete.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"under_10_mins\",\"10_to_30_mins\",\"30_to_60_mins\",\"1_to_2_hours\",\"2_to_3_hours\",\"3_plus_hours\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "under_10_mins",
+                        "10_to_30_mins",
+                        "30_to_60_mins",
+                        "1_to_2_hours",
+                        "2_to_3_hours",
+                        "3_plus_hours"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-scraping/search-events",
+            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
+            "action": "searchEvents",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_searches",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchEventsRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "url",
+                    "rules": [
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/search/results/events/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters",
+                    "rules": [
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.keywords",
+                    "rules": [
+                        "required_with:filters",
+                        "string",
+                        "max:256"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-scraping/search-groups",
+            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
+            "action": "searchGroups",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_searches",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchGroupsRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "url",
+                    "rules": [
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/search/results/groups/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters",
+                    "rules": [
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.keywords",
+                    "rules": [
+                        "required_with:filters",
+                        "string",
+                        "max:256"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-scraping/search-jobs",
+            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
+            "action": "searchJobs",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_searches",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchJobsRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "url",
+                    "rules": [
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/jobs/search-results/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters",
+                    "rules": [
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.keywords",
+                    "rules": [
+                        "required_with:filters",
+                        "string",
+                        "max:256"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.geo_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.time_posted",
+                    "rules": [
+                        "nullable",
+                        "in:\"past_24h\",\"past_week\",\"past_month\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": [
+                        "past_24h",
+                        "past_week",
+                        "past_month"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_ids",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.company_ids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.experience_level",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:5"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 5,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.experience_level.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"entry\",\"senior\",\"manager\",\"director\",\"executive\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "entry",
+                        "senior",
+                        "manager",
+                        "director",
+                        "executive"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.employment_type",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:5"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 5,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.employment_type.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"part_time\",\"contract\",\"internship\",\"full_time\",\"volunteer\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "part_time",
+                        "contract",
+                        "internship",
+                        "full_time",
+                        "volunteer"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.easy_apply",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.remote",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.early_applicant",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.in_your_network",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-scraping/search-people",
+            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
+            "action": "searchPeople",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_searches",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchPeopleRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "use_credits",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "url",
+                    "rules": [
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/search/results/people/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters",
+                    "rules": [
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,
@@ -23293,15 +25110,16 @@
                 {
                     "field": "filters.network.*",
                     "rules": [
-                        "in:\"F\",\"S\",\"O\""
+                        "required",
+                        "in:\"1st\",\"2nd\",\"3rd_plus\""
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": null,
                     "in": [
-                        "F",
-                        "S",
-                        "O"
+                        "1st",
+                        "2nd",
+                        "3rd_plus"
                     ],
                     "min": null,
                     "max": null,
@@ -23327,15 +25145,17 @@
                 {
                     "field": "filters.locations.*",
                     "rules": [
+                        "required",
                         "string",
+                        "max:64",
                         "regex:/^\\d+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -23358,15 +25178,17 @@
                 {
                     "field": "filters.current_companies.*",
                     "rules": [
+                        "required",
                         "string",
+                        "max:64",
                         "regex:/^\\d+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -23389,15 +25211,17 @@
                 {
                     "field": "filters.past_companies.*",
                     "rules": [
+                        "required",
                         "string",
+                        "max:64",
                         "regex:/^\\d+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -23420,15 +25244,17 @@
                 {
                     "field": "filters.industries.*",
                     "rules": [
+                        "required",
                         "string",
+                        "max:64",
                         "regex:/^\\d+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -23451,15 +25277,17 @@
                 {
                     "field": "filters.service_categories.*",
                     "rules": [
+                        "required",
                         "string",
+                        "max:64",
                         "regex:/^\\d+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -23482,10 +25310,12 @@
                 {
                     "field": "filters.connections_of.*",
                     "rules": [
+                        "required",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "regex:/^[\\w-]+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -23513,10 +25343,12 @@
                 {
                     "field": "filters.followers_of.*",
                     "rules": [
+                        "required",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "regex:/^[\\w-]+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -23544,10 +25376,11 @@
                 {
                     "field": "filters.profile_languages.*",
                     "rules": [
+                        "required",
                         "string",
                         "regex:/^[a-z]{2}$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -23568,111 +25401,6 @@
                     "in": null,
                     "min": null,
                     "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/linkedin-scraping/search-people-by-url",
-            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchPeopleByUrl",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_act_linkedin_searches",
-            "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchPeopleByUrlRequest",
-            "rules": [
-                {
-                    "field": "linkedin_account_sid",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "starts_with:ln_ac_",
-                        "size:18"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "idempotency_key",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "max:128"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "url",
-                    "rules": [
-                        "required",
-                        "string",
-                        "max:2048",
-                        "starts_with:https://www.linkedin.com/search/results/people/"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "page",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:1",
-                        "max:100"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 100,
                     "size": null,
                     "between": null
                 }
@@ -23748,13 +25476,34 @@
                     "between": null
                 },
                 {
+                    "field": "url",
+                    "rules": [
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/search/results/content/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filters",
                     "rules": [
-                        "required",
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
                         "array"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,
@@ -23763,13 +25512,46 @@
                     "between": null
                 },
                 {
+                    "field": "page_size",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:2048"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filters.keywords",
                     "rules": [
-                        "required",
+                        "required_with:filters",
                         "string",
                         "max:256"
                     ],
-                    "required": true,
+                    "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -23820,34 +25602,33 @@
                     "rules": [
                         "nullable",
                         "array",
-                        "max:10"
+                        "max:5"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,
-                    "max": 10,
+                    "max": 5,
                     "size": null,
                     "between": null
                 },
                 {
                     "field": "filters.content_type.*",
                     "rules": [
+                        "required",
                         "string",
-                        "in:\"videos\",\"images\",\"photos\",\"liveVideos\",\"collaborativeArticles\",\"documents\",\"jobPosts\""
+                        "in:\"videos\",\"photos\",\"jobs\",\"liveVideos\",\"documents\""
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
                         "videos",
-                        "images",
                         "photos",
+                        "jobs",
                         "liveVideos",
-                        "collaborativeArticles",
-                        "documents",
-                        "jobPosts"
+                        "documents"
                     ],
                     "min": null,
                     "max": null,
@@ -23873,10 +25654,11 @@
                 {
                     "field": "filters.posted_by.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:\"following\",\"me\",\"first\""
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -23924,103 +25706,12 @@
                 {
                     "field": "filters.from_member.*",
                     "rules": [
+                        "required",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "regex:/^[\\w-]+$/"
                     ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.from_organization",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.from_organization.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.author_company",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.author_company.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.author_industry",
-                    "rules": [
-                        "nullable",
-                        "array",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": 10,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filters.author_industry.*",
-                    "rules": [
-                        "string",
-                        "max:64"
-                    ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -24048,10 +25739,111 @@
                 {
                     "field": "filters.mentions_member.*",
                     "rules": [
+                        "required",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "regex:/^[\\w-]+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.from_organization",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
                     ],
                     "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.from_organization.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.author_company",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.author_company.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.author_industry",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.author_industry.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -24079,48 +25871,17 @@
                 {
                     "field": "filters.mentions_organization.*",
                     "rules": [
+                        "required",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "regex:/^\\d+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
                     "max": 64,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "page_size",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:1",
-                        "max:100"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 100,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "cursor",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "max:2048"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -24129,9 +25890,9 @@
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-scraping/search-posts-by-url",
+            "uri": "api/linkedin-scraping/search-products",
             "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchPostsByUrl",
+            "action": "searchProducts",
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
@@ -24145,7 +25906,7 @@
             ],
             "required_permission": "can_act_linkedin_searches",
             "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchPostsByUrlRequest",
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchProductsRequest",
             "rules": [
                 {
                     "field": "linkedin_account_sid",
@@ -24198,13 +25959,15 @@
                 {
                     "field": "url",
                     "rules": [
-                        "required",
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
                         "string",
                         "max:2048",
-                        "starts_with:https://www.linkedin.com/search/results/content/"
+                        "starts_with:https://www.linkedin.com/search/results/products/"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -24213,7 +25976,24 @@
                     "between": null
                 },
                 {
-                    "field": "page_size",
+                    "field": "filters",
+                    "rules": [
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
                     "rules": [
                         "nullable",
                         "integer",
@@ -24230,18 +26010,99 @@
                     "between": null
                 },
                 {
-                    "field": "cursor",
+                    "field": "filters.keywords",
                     "rules": [
-                        "nullable",
+                        "required_with:filters",
                         "string",
-                        "max:2048"
+                        "max:256"
                     ],
                     "required": false,
-                    "nullable": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": 256,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.free_version",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.product_category",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.product_category.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.product_company",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.product_company.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 }
@@ -24250,9 +26111,9 @@
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-scraping/search-sales-nav-companies-by-params",
+            "uri": "api/linkedin-scraping/search-sales-nav-companies",
             "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchSalesNavCompaniesByParams",
+            "action": "searchSalesNavCompanies",
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
@@ -24266,7 +26127,7 @@
             ],
             "required_permission": "can_act_linkedin_searches",
             "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavCompaniesByParamsRequest",
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavCompaniesRequest",
             "rules": [
                 {
                     "field": "linkedin_account_sid",
@@ -24317,13 +26178,34 @@
                     "between": null
                 },
                 {
+                    "field": "url",
+                    "rules": [
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/sales/search/company"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filters",
                     "rules": [
-                        "required",
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
                         "array"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,
@@ -24383,10 +26265,11 @@
                 {
                     "field": "filters.company_headcounts.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:B,C,D,E,F,G,H,I"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -24423,10 +26306,11 @@
                 {
                     "field": "filters.num_of_followers.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:NFR1,NFR2,NFR3,NFR4,NFR5"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -24460,10 +26344,11 @@
                 {
                     "field": "filters.fortune.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:1,2,3,4"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -24496,10 +26381,11 @@
                 {
                     "field": "filters.account_activities.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:SLC,RFE"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25170,9 +27056,9 @@
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-scraping/search-sales-nav-companies-by-url",
+            "uri": "api/linkedin-scraping/search-sales-nav-people",
             "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchSalesNavCompaniesByUrl",
+            "action": "searchSalesNavPeople",
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
@@ -25186,7 +27072,7 @@
             ],
             "required_permission": "can_act_linkedin_searches",
             "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavCompaniesByUrlRequest",
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavPeopleRequest",
             "rules": [
                 {
                     "field": "linkedin_account_sid",
@@ -25239,13 +27125,15 @@
                 {
                     "field": "url",
                     "rules": [
-                        "required",
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
                         "string",
                         "max:2048",
-                        "starts_with:https://www.linkedin.com/sales/search/company"
+                        "starts_with:https://www.linkedin.com/sales/search/people"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -25254,101 +27142,15 @@
                     "between": null
                 },
                 {
-                    "field": "page",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:1",
-                        "max:100"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 100,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/linkedin-scraping/search-sales-nav-people-by-params",
-            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchSalesNavPeopleByParams",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_act_linkedin_searches",
-            "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavPeopleByParamsRequest",
-            "rules": [
-                {
-                    "field": "linkedin_account_sid",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "starts_with:ln_ac_",
-                        "size:18"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "idempotency_key",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "max:128"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "filters",
                     "rules": [
-                        "required",
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
                         "array"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,
@@ -25440,10 +27242,11 @@
                 {
                     "field": "filters.seniority_levels.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:100,110,120,130,200,210,220,300,310,320"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25482,10 +27285,11 @@
                 {
                     "field": "filters.functions.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25540,10 +27344,11 @@
                 {
                     "field": "filters.years_in_current_company.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:1,2,3,4,5"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25577,10 +27382,11 @@
                 {
                     "field": "filters.years_in_current_position.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:1,2,3,4,5"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25614,10 +27420,11 @@
                 {
                     "field": "filters.years_of_experience.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:1,2,3,4,5"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25651,10 +27458,11 @@
                 {
                     "field": "filters.company_headcounts.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:A,B,C,D,E,F,G,H,I"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25692,10 +27500,11 @@
                 {
                     "field": "filters.company_types.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:C,P,N,D,S,E,O,G"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25732,10 +27541,11 @@
                 {
                     "field": "filters.profile_languages.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:ar,en,es,pt,zh,fr,it,ru,de,nl,tr,tl,pl,ko,ja,ms,no,da,ro,sv,in,cs"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25786,10 +27596,11 @@
                 {
                     "field": "filters.network.*",
                     "rules": [
+                        "required",
                         "string",
                         "in:F,S,A,O"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
@@ -25822,10 +27633,11 @@
                 {
                     "field": "filters.connections_of.*",
                     "rules": [
+                        "required",
                         "string",
                         "max:64"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -26606,9 +28418,9 @@
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-scraping/search-sales-nav-people-by-url",
+            "uri": "api/linkedin-scraping/search-schools",
             "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchSalesNavPeopleByUrl",
+            "action": "searchSchools",
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
@@ -26622,7 +28434,7 @@
             ],
             "required_permission": "can_act_linkedin_searches",
             "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSalesNavPeopleByUrlRequest",
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchSchoolsRequest",
             "rules": [
                 {
                     "field": "linkedin_account_sid",
@@ -26675,17 +28487,36 @@
                 {
                     "field": "url",
                     "rules": [
-                        "required",
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
                         "string",
                         "max:2048",
-                        "starts_with:https://www.linkedin.com/sales/search/people"
+                        "starts_with:https://www.linkedin.com/search/results/schools/"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
                     "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters",
+                    "rules": [
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -26703,6 +28534,22 @@
                     "in": null,
                     "min": 1,
                     "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.keywords",
+                    "rules": [
+                        "required_with:filters",
+                        "string",
+                        "max:256"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 256,
                     "size": null,
                     "between": null
                 }
@@ -26778,13 +28625,34 @@
                     "between": null
                 },
                 {
+                    "field": "url",
+                    "rules": [
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/search/results/services/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filters",
                     "rules": [
-                        "required",
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
                         "array"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,
@@ -26814,7 +28682,8 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256"
+                        "max:256",
+                        "not_regex:/\"/"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26844,11 +28713,12 @@
                 {
                     "field": "filters.locations.*",
                     "rules": [
+                        "required",
                         "string",
-                        "regex:/^\\d+$/",
-                        "max:64"
+                        "max:64",
+                        "regex:/^\\d+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -26876,16 +28746,84 @@
                 {
                     "field": "filters.service_categories.*",
                     "rules": [
+                        "required",
                         "string",
-                        "regex:/^\\d+$/",
-                        "max:64"
+                        "max:64",
+                        "regex:/^\\d+$/"
                     ],
-                    "required": false,
+                    "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
                     "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.network",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:3"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 3,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.network.*",
+                    "rules": [
+                        "required",
+                        "in:\"1st\",\"2nd\",\"3rd_plus\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": null,
+                    "in": [
+                        "1st",
+                        "2nd",
+                        "3rd_plus"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.profile_languages",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filters.profile_languages.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^[a-z]{2}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -26914,111 +28852,6 @@
                     "in": null,
                     "min": null,
                     "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/linkedin-scraping/search-service-providers-by-url",
-            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "searchServiceProvidersByUrl",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_act_linkedin_searches",
-            "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingSearchServiceProvidersByUrlRequest",
-            "rules": [
-                {
-                    "field": "linkedin_account_sid",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "starts_with:ln_ac_",
-                        "size:18"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "idempotency_key",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "max:128"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "url",
-                    "rules": [
-                        "required",
-                        "string",
-                        "max:2048",
-                        "starts_with:https://www.linkedin.com/search/results/services/"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "page",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:1",
-                        "max:100"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 100,
                     "size": null,
                     "between": null
                 }
@@ -30344,6 +32177,56 @@
                         "insightful",
                         "funny"
                     ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/slots/reconcile",
+            "controller": "App\\Entities\\LinkedinAccount\\InternalLinkedinAccountController",
+            "action": "reconcileSlots",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\InternalLinkedinAccountSlotReconcileRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "allow_park",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
                     "min": null,
                     "max": null,
                     "size": null,

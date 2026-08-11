@@ -1,7 +1,7 @@
 // Entity: LinkedIn Enrichment (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/linkedin_enrichment.md
 // Format: registry v2, where each tool carries route metadata so the generic
-// dispatcher can drive it. 19 verb-only tools on the /api/linkedin-enrichment/*
+// dispatcher can drive it. 22 verb-only tools on the /api/linkedin-enrichment/*
 // surface: one-shot, credit-metered pulls of ONE known target's OWN data.
 //
 // Stateless surface over the DataRequest ledger (kind='enrich'): every accepted
@@ -10,12 +10,21 @@
 // credits, cache, idempotency, §5.9 stub guard) and lands as one
 // ledger row, embedded in the response as `result.data_request`. Execution is
 // SYNC inline (≤120 s, §9.6); every response is a sync action envelope
-// (`async: true` never appears here: the controller uses mcpAction for all 19).
+// (`async: true` never appears here: the controller uses mcpAction for all 22).
 //
-// 11 methods are live (GA); 8 ship as §5.9 blocked-on-plugin 501 stubs
-// (route + full validation, contract locked), availability: 'stub_501'. The
-// stub 501 is raised by DataRequestExecutionService when the method enum's
-// wireGetter() is null (DataRequestMethodEnum::isImplemented()).
+// 20 methods are live (GA); 2 still ship as §5.9 blocked-on-plugin 501 stubs
+// (route + full validation, contract locked), availability: 'stub_501': person
+// languages and post details. The stub 501 is raised by
+// DataRequestExecutionService when the method enum's wireGetter() is null
+// (DataRequestMethodEnum::isImplemented()).
+//
+// 2026-08-06, rows 60 / 61 / 62 (reaction-activity, interests, services) went
+// live and their reserved shapes were rewritten to the node's own, per the
+// § CONTRACT AUTHORITY rule: the wire is the contract, so an invented field
+// goes (`post_text_preview`), a renamed one takes the wire's name back
+// (followers_number to followers_count, services/services_page_url to the
+// ProfileServices object) and the tab that selects WHICH interests list is read
+// became a real request member instead of an aggregate we cannot ask for.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -93,6 +102,16 @@ const PagedList = (item: z.ZodTypeAny) => z.object({
   elements: z.array(item),
   paging: z.object({}).passthrough(),
 }).passthrough();
+
+// The cursor paging block the three SDUI-paged methods (comment-activity,
+// reaction-activity, interests) all answer with, verbatim and identical. One
+// definition, because three copies would be three places to drift.
+const CursorPaging = z.object({
+  page_size: z.number().int().nullable(),
+  page_cursor: z.string().nullable(),
+  next_page_cursor: z.string().nullable()
+    .describe('Pass back as `cursor` for the next page. NULL means the feed is over. There is deliberately no total.'),
+});
 
 // Canonical identifier quad (KNOWLEDGE §3) returned by person-addressed methods.
 const PersonRef = z.object({
@@ -269,29 +288,53 @@ const CommentActivityItem = z.object({
   created_at: z.string().nullable(),
 }).passthrough();
 
-// person-reaction-activity item (row 60 stub; reserved shape).
+// person-reaction-activity item (row 60), mirroring the node's `ProfileReaction`
+// (linkedinApiSdk reactions/types.ts) as the backend projects it.
+//
+// The reserved shape declared a `post_text_preview` that exists on no wire, put
+// the reaction time under `created_at`, and typed reaction_type non-nullable.
+// All three are corrected here: LinkedIn ships NO structured member-reaction
+// field, so the node derives the type from the element header phrase and
+// degrades to null on an unmapped phrase, and the parent post comes back WHOLE
+// rather than as a preview string.
 const ReactionActivityItem = z.object({
-  reaction_type: z.string(),
-  activity_urn: z.string(),
+  reaction_type: z.string().nullable()
+    .describe('LIKE / PRAISE / EMPATHY / INTEREST / APPRECIATION / ENTERTAINMENT / MAYBE, or null when the header phrase did not map. Null is the wire being honest, not a parse failure.'),
+  reacted_at: z.string().nullable()
+    .describe('ISO 8601 with milliseconds: when the TARGET reacted, which is not the post\'s own time (post.created_at, kept in wire epoch-ms).'),
+  activity_urn: z.string().nullable(),
   post_url: z.string().nullable(),
   post_author: PostAuthorRef.nullable(),
-  post_text_preview: z.string().nullable(),
-  created_at: z.string().nullable(),
+  post: LooseItem.nullable()
+    .describe('The parent post passed through whole, so you can read what they reacted to without a second call.'),
 }).passthrough();
 
-// person-interests item + grouped result (row 61 stub; reserved shape).
+// person-interests card (row 61), the node's `ProfileInterest` field for field.
+// The reserved item carried name / url / followers_number only; six of the nine
+// wire fields were dropped and the follower count was renamed. Widened here.
 const InterestItem = z.object({
+  type: z.string().nullable(),
+  urn: z.string().nullable(),
   name: z.string(),
+  subtitle: z.string().nullable(),
   url: z.string().nullable(),
-  followers_number: z.number().nullable(),
+  public_identifier: z.string().nullable(),
+  image_url: z.string().nullable()
+    .describe('LinkedIn CDN link, wire passthrough: it carries LinkedIn\'s own expiry (roughly 30 days).'),
+  followers_text: z.string().nullable(),
+  followers_count: z.number().nullable()
+    .describe('Null on a group card by design: a group renders a members line, a different metric that is not laundered into the followers fields.'),
 }).passthrough();
 
-const InterestsResult = z.object({
-  influencers: z.array(InterestItem),
-  companies: z.array(InterestItem),
-  groups: z.array(InterestItem),
-  newsletters: z.array(InterestItem),
-  schools: z.array(InterestItem),
+// person-services result (row 62): the node's `ProfileServices`, or NULL.
+const ProfileServicesResult = z.object({
+  page_id: z.string().nullable(),
+  page_url: z.string().nullable(),
+  business_name: z.string().nullable(),
+  provider_name: z.string().nullable(),
+  provider_public_identifier: z.string().nullable(),
+  pricing_text: z.string().nullable(),
+  services_provided: z.array(z.string()),
 }).passthrough();
 
 // company-profile result (row 70 stub; reserved shape).
@@ -594,7 +637,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_certifications',
     description:
-      'Licenses and certifications from the target profile: issuing authority, license number, validity window. A qualification and compliance signal for recruiting and technical ICP fit. 1 credit, cached 7d. Most profiles have NONE, so an empty list is a real answer about the person rather than a failed read. license_number and url are frequently null even on real entries (LinkedIn own certifications carry neither). This screen needs BOTH the vanity slug and the member urn: pass profile_id AND public_identifier together to save a resolve round trip, otherwise the backend resolves the missing half for you at no credit cost.',
+      'Licenses and certifications from the target profile: issuing authority, license number, validity window. A qualification and compliance signal for recruiting and technical ICP fit. 1 credit, cached 7d. Most profiles have NONE, so an empty list is a real answer about the person rather than a failed read. license_number and url are frequently null even on real entries (LinkedIn own certifications carry neither). Address by profile_id XOR public_identifier, the same exactly-one-of rule as every other person read: passing both is a 422, they prohibit each other. The screen behind this one is the exception that needs the vanity slug AND the member urn at once, so the backend resolves whichever half you did not send, and that resolve costs no credit. Addressing by public_identifier makes it free outright once this team has enriched the person before, because the urn is then already on an earlier ledger row.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-certifications' },
     operation: 'action',
@@ -612,7 +655,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_recommendations',
     description:
-      "Recommendations on the target profile: who vouches for them and in what words. `direction` picks received (the default, what LinkedIn opens on) or given; these are two SEPARATE reads of the same screen, so asking for both spends the method twice. 2 credits, cached 7d. The counterpart carries a nickname, name, headline and network distance but NO ln_id: LinkedIn does not put the member urn in this payload, so enrich the nickname separately if you need the urn. created_at is parsed out of the free-text context line and is null when that line has no date. Needs BOTH the vanity slug and the member urn: pass profile_id AND public_identifier together to skip the resolve round trip.",
+      "Recommendations on the target profile: who vouches for them and in what words. `direction` picks received (the default, what LinkedIn opens on) or given; these are two SEPARATE reads of the same screen, so asking for both spends the method twice. 2 credits, cached 7d. The counterpart carries a nickname, name, headline and network distance but NO ln_id: LinkedIn does not put the member urn in this payload, so enrich the nickname separately if you need the urn. created_at is parsed out of the free-text context line and is null when that line has no date. Address by profile_id XOR public_identifier, the same exactly-one-of rule as every other person read: passing both is a 422, they prohibit each other. The screen behind this one is the exception that needs the vanity slug AND the member urn at once, so the backend resolves whichever half you did not send, and that resolve costs no credit.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-recommendations' },
     operation: 'action',
@@ -649,12 +692,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     inputSchema: z.object({ ...personTargetFields, ...pageFields, ...executorFields, ...usageMetaField }),
     outputSchema: McpActionResponse(NullItem, z.object({
       comments: z.array(CommentActivityItem),
-      paging: z.object({
-        page_size: z.number().int().nullable(),
-        page_cursor: z.string().nullable(),
-        next_page_cursor: z.string().nullable()
-          .describe('Pass back as `cursor` for the next page. NULL means the feed is over. There is deliberately no total.'),
-      }),
+      paging: CursorPaging,
       data_request: DataRequestRow,
     }).passthrough()),
     annotations: { title: 'Enrich person comment activity', ...PAID },
@@ -663,55 +701,71 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_reaction_activity',
     description:
-      STUB + "The target's recent reactions on OTHER people's posts (activity feed → Reactions): topical interest signal, cheaper to act on than comments. 3 credits/page, cached 7d, paginated. The reactors OF a post are scraping (get-post-reactors).",
+      "The target's recent reactions on OTHER people's posts (activity feed, Reactions tab): topical interest signal, cheaper to act on than comments. Each item carries the reaction type, when they reacted, and the PARENT POST whole. 3 credits/page, cached 7d, paginated. Addressed by profile_id alone. PAGING: the end of the feed is a MISSING paging.next_page_cursor, never an empty page; there is no total, LinkedIn reports 0 for this feed whatever is in it. reaction_type is null when the header phrase did not map, which is normal. The reactors OF a post are scraping (get-post-reactors).",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-reaction-activity' },
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: false,
     creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ ...personTargetFields, ...pageFields, ...executorFields, ...usageMetaField }),
-    outputSchema: McpActionResponse(NullItem, z.object({ reactions: PagedList(ReactionActivityItem), data_request: DataRequestRow }).passthrough()),
-    annotations: { title: 'Enrich person reaction activity (not shipped)', ...PAID },
+    outputSchema: McpActionResponse(NullItem, z.object({
+      reactions: z.array(ReactionActivityItem),
+      paging: CursorPaging,
+      data_request: DataRequestRow,
+    }).passthrough()),
+    annotations: { title: 'Enrich person reaction activity', ...PAID },
   },
   {
     ...base,
     name: 'enrich_linkedin_person_interests',
     description:
-      STUB + 'The Interests section: followed influencers, companies, groups, newsletters, schools. Cheap ICP-fit and conversation-hook signal. 1 credit, cached 7d.',
+      'ONE tab of the Interests section per call: top_voices (the default), companies, groups, newsletters or schools. Cheap ICP-fit and conversation-hook signal. 1 credit/page, cached 7d, paginated. The wire pages a single tab, so reading all five spends the method five times; the requested tab is echoed at result.tab so a caller looping the vocabulary can tell the responses apart. Addressed by public_identifier ONLY: a urn-only call is ledgered and then refused not_dispatchable, so run person-lite-profile first if all you have is the urn.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-interests' },
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: false,
     creditable: true,
     massAction: false,
     scheduleRequired: false,
-    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
-    outputSchema: McpActionResponse(NullItem, z.object({ interests: InterestsResult, data_request: DataRequestRow }).passthrough()),
-    annotations: { title: 'Enrich person interests (not shipped)', ...PAID },
+    inputSchema: z.object({
+      ...personTargetFields,
+      tab: z.enum(['top_voices', 'companies', 'groups', 'newsletters', 'schools']).nullable().optional()
+        .describe('Which interests tab to read; top_voices when omitted. One tab per call, each its own read and its own credit.'),
+      ...pageFields,
+      ...executorFields,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(NullItem, z.object({
+      tab: z.string().describe('The tab this response is for, echoed back from the request.'),
+      interests: z.array(InterestItem),
+      paging: CursorPaging,
+      data_request: DataRequestRow,
+    }).passthrough()),
+    annotations: { title: 'Enrich person interests', ...PAID },
   },
   {
     ...base,
     name: 'enrich_linkedin_person_services',
     description:
-      STUB + 'The "Providing services" card (service-provider profiles): offered service categories. Complements scraping-side search-service-providers (that discovers providers, this reads one provider\'s own card). 1 credit, cached 7d.',
+      'The "Providing services" marketplace page of one service-provider profile: business name, pricing line, page URL and the standardized services they list. Complements scraping-side search-service-providers (that discovers providers, this reads one provider\'s own page). 1 credit, cached 7d, no pagination. result.services is NULL when the member sells no services at all, which is a different fact from a page whose services_provided is empty, and both are a normal completed charged read.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-services' },
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: false,
     creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
-    outputSchema: McpActionResponse(NullItem, z.object({ services: z.array(z.string()), services_page_url: z.string().nullable(), data_request: DataRequestRow }).passthrough()),
-    annotations: { title: 'Enrich person services (not shipped)', ...PAID },
+    outputSchema: McpActionResponse(NullItem, z.object({ services: ProfileServicesResult.nullable(), data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person services', ...PAID },
   },
   {
     ...base,

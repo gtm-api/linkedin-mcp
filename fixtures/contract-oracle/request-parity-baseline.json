@@ -56,11 +56,6 @@
         "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
       },
       {
-        "tool": "scrape_linkedin_get_post_comments",
-        "path": "linkedin_tracked_post_sid",
-        "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
-      },
-      {
         "tool": "scrape_linkedin_get_post_reactors",
         "path": "linkedin_tracked_post_sid",
         "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
@@ -87,11 +82,6 @@
       },
       {
         "tool": "search_linkedin_auto_scrape_runs",
-        "path": "include",
-        "reason": "the controller reads input(include) and builds the included block, but the SearchRequest declares no include rule: backend under-declaration, the param works"
-      },
-      {
-        "tool": "search_linkedin_auto_scrapes",
         "path": "include",
         "reason": "the controller reads input(include) and builds the included block, but the SearchRequest declares no include rule: backend under-declaration, the param works"
       },

@@ -204,7 +204,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'create_antidetect_browser',
     description:
-      'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source (antidetect_browser_proxy_sid | proxy_country_code | custom_proxy_config). Bind an existing vendor_profile_id for the customer bring-your-own path (no proxy source then). DANGEROUS: creates real vendor + proxy infrastructure. To provision SEVERAL browsers under a SINGLE approval (e.g. "create 3 browsers with connect links"), do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key). One preview/confirm covers the whole batch and returns a ma_ sid you monitor in the background; the connect links are read back from each browser row when it finishes.',
+      'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code is the default, the others cover a caller-supplied upstream or an already-resolved pooled proxy. Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the customer bring-your-own path (no proxy source then). DANGEROUS: creates real vendor + proxy infrastructure. To provision SEVERAL browsers under a SINGLE approval (e.g. "create 3 browsers with connect links"), do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key). One preview/confirm covers the whole batch and returns a ma_ sid you monitor in the background; the connect links are read back from each browser row when it finishes.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers' },
     operation: 'create',
@@ -219,8 +219,9 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
       vendor_profile_id: z.string().max(128).nullable().optional()
         .describe('Bind an EXISTING vendor profile (BYO). Omit to mint a fresh one.'),
       os: z.enum(['win', 'mac', 'lin', 'android']).optional().describe('OS for a freshly-minted profile (default win).'),
-      antidetect_browser_proxy_sid: PROXY_SID.optional().describe('Assign an existing pooled proxy.'),
-      proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy.'),
+      antidetect_browser_proxy_sid: PROXY_SID.optional()
+        .describe('Assign an already-chosen pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
+      proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy. The default way to pick a proxy.'),
       custom_proxy_config: CustomProxyConfig.optional(),
       ...usageMetaField,
     }),
@@ -341,8 +342,9 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      antidetect_browser_proxy_sid: PROXY_SID.optional().describe('Pin a specific pooled proxy.'),
-      proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy.'),
+      antidetect_browser_proxy_sid: PROXY_SID.optional()
+        .describe('Pin a specific pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
+      proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy. The default way to pick a proxy.'),
       custom_proxy_config: CustomProxyConfig.optional(),
       ...usageMetaField,
     }),

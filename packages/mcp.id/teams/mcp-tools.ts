@@ -49,7 +49,6 @@ const Team = z.object({
   trial_ends_at: z.string().nullable(),
   limits: z.object({                        // TeamLimitsValue (cache snapshot, NOT NULL)
     accounts: z.number(),
-    signals: z.number(),
     cloud_browser: z.number(),
     webhooks: z.number(),
     enrichment: z.number(),

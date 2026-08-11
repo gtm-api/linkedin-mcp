@@ -27,7 +27,6 @@ const BillingProduct = z.object({
   type: BillingProductTypeEnum,
   limits: z.object({
     accounts: z.number(),
-    signals: z.number(),
     cloud_browser: z.number(),
     webhooks: z.number(),
     enrichment: z.number(),

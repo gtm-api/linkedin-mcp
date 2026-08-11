@@ -15,7 +15,42 @@ export const MOUNTS: MountConfig[] = [
     instructions:
       'GTM LinkedIn account management & pacing. Find an account sid with search_linkedin_accounts, then call account-scoped tools by sid (checks, self-profile reads, endorse/visit, reset-sync, smart-limits). "NOT SHIPPED YET" tools return not_implemented, so do not retry.',
     selectors: [p('linkedin_accounts'), p('linkedin_account_smart_limits')],
-    maxTools: 25,
+    // 27, not the default 25. The three self-account feeds added on 2026-08-07
+    // (profile views, catch-up cards, Sales Navigator alerts) took this mount
+    // from 24 to 27, and resolveMounts throws at module scope, so the worker
+    // would not boot at 25.
+    //
+    // NO maxTools: the platform default of 25 applies, and the mount sits exactly
+    // on it.
+    //
+    // This mount carried an UNSIGNED `maxTools: 27` from 2026-08-07, taken when the
+    // three self-account feeds (profile views, catch-up cards, Sales Navigator
+    // alerts) pushed it from 24 to 27 and resolveMounts, which throws at module
+    // scope, would have kept the worker from booting at 25.
+    //
+    // RESOLVED on 2026-08-09 by REMOVING TOOLS, not by signing the number. The three
+    // self-capability probes were one action addressed three ways - same input, same
+    // operation, same `creditable: false`, same outputSchema, differing only in which
+    // backend path they POSTed to - so they collapsed into a `checks` member on
+    // `check_linkedin_account_premium_subscription` (product/KNOWLEDGE.md §4.10), and
+    // the `/check-recruiter` and `/check-sales-nav` ROUTES were deleted with them.
+    // 27 -> 25, raise gone.
+    //
+    // 🛑 It beat the two alternatives the earlier note had rejected because it moves
+    // nothing between URLs. Splitting the mount, or pushing follow / unfollow to
+    // /mcp/linkedin/network, relocates live tools and breaks every mounted client.
+    //
+    // ⚠️ The first attempt at the merge kept three backend routes and gave the tool a
+    // templated `/check-{capability}` path, which `route.pathParams` can fill from an
+    // input field at dispatch. Six gates (coverage, contract-parity x2,
+    // oracle-freshness, enum-parity, research-parity) key a tool by its LITERAL
+    // pathTemplate against the oracle's route list, each with its own copy of
+    // `toolKey`, so all six went red. Widening six safety gates to fit one tool was
+    // the wrong trade; moving the selection into the BODY of one real route was the
+    // right one. Do not re-attempt the templated-path version.
+    //
+    // The mount is on the default with no headroom bought, so the next tool trips the
+    // gate and somebody has to think rather than inherit slack nobody argued for.
     facade: 'none',
   },
   {
@@ -76,9 +111,27 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/scraping',
     name: 'gtm-linkedin-scraping',
     instructions:
-      'GTM LinkedIn creditable people / company / post scraping (search by URL or params, similar, employees, decision-makers, post engagers). Every call debits credits; check the balance first with get_credit_balance. These are run-now, one-page pulls that return the rows inline. For a saved job over the same sources that repeats on a schedule, dedupes across runs and feeds new leads to a mass action, use /mcp/linkedin/auto-scrapes instead.',
+      'GTM LinkedIn creditable scraping of people, companies, posts, job postings, events, groups, LinkedIn Learning courses, products and schools, plus lookalikes, company employees, decision-makers, post engagers and the two facet-id typeaheads. Every search verb is ONE tool per vertical taking either a structured filter object or a pasted LinkedIn search URL, never both; every call debits credits, so check the balance first with get_credit_balance. These are run-now, one-page pulls that return the rows inline. For a saved job over the same sources that repeats on a schedule, dedupes across runs and feeds new leads to a mass action, use /mcp/linkedin/auto-scrapes instead (people and companies only: posts, job postings, events, groups, courses, products and schools are not saveable sources).',
     selectors: [p('linkedin_scraping')],
-    maxTools: 25,
+    // NO maxTools, so the platform default of 25 applies again.
+    //
+    // This mount carried an UNSIGNED `maxTools: 26` from 2026-08-08, taken when
+    // the events pair pushed it from 24 to 26 and resolveMounts (which throws at
+    // module scope) would have killed the worker at 25. That raise is RESOLVED,
+    // and deliberately not by a second raise: on the same day the eight
+    // by-url / by-params tool PAIRS collapsed into eight single tools that take
+    // `url` XOR `filters`, which is product/KNOWLEDGE.md §4.10 applied to this
+    // surface. 26 became 18, groups landed as the ninth vertical, courses as the
+    // tenth, products as the eleventh and schools as the twelfth, and the mount
+    // now sat at 22 against the default 25, and at 21 since 2026-08-09, when
+    // get-post-comments retired into get-post-commenters: the two had ALWAYS
+    // dispatched the same node verb (`get-comments`, one page, one paid call), so
+    // the comment-side fields moved into the commenters projection instead.
+    //
+    // 🛑 Schools was the LAST node search vertical we did not mirror, so the queue
+    // that justified the free slots is empty. The 3 remaining are headroom for a
+    // vertical LinkedIn has not shipped yet, not budget to spend: a new search
+    // arrives as ONE tool, the same way the last four did.
     facade: 'none',
   },
   {

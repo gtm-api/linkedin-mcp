@@ -169,7 +169,11 @@ const MANUAL_BRIDGE: BridgeEntry[] = [
   // linkedin_scraping is a VERB package with no Domain of its own, so there is
   // no entity name to build a candidate from; both enums live with the subject
   // they describe.
-  { service: 'linkedin', entity: 'linkedin_scraping', at: 'facet', enumClass: 'LinkedinScrapingLookupFacetEnum' },
+  // The flagship lookup's `type` INPUT is pinned by the oracle's own Rule::in, so
+  // the site that still needs a bridge is the echoed `type` on each result row.
+  // Path-qualified on purpose: a bare `type` would also swallow the Sales
+  // Navigator twin, which lives in this same package over a different vocabulary.
+  { service: 'linkedin', entity: 'linkedin_scraping', at: 'result.rows.*.type', enumClass: 'LinkedinScrapingLookupFacetEnum' },
   { service: 'linkedin', entity: 'linkedin_scraping', at: 'reaction_type', enumClass: 'LinkedinPostingReactionTypeEnum' },
   // run-now MINTS A RUN and reports it, so the status in its result block is the
   // run's 4-case vocabulary, not the scrape's 2-case active/paused. Pinned by
