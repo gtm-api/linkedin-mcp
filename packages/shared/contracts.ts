@@ -392,7 +392,58 @@ export const McpCascadeDeleteRequestSchema = <
 export type FilterOpKey =
   | 'eq' | 'ne' | 'in' | 'nin' | 'gte' | 'lte' | 'gt' | 'lt' | 'is_null';
 
+// Structurally identical filterOp() results are memoized to ONE shared Zod
+// instance. Semantics are unchanged (same shape, same parsing); what changes
+// is the advertised JSON schema: zod-to-json-schema deduplicates by instance,
+// so the 14 timestamp fields of a search filter serialize as one full object
+// plus 13 `$ref`s instead of 14 identical inline blocks. Measured on
+// search_linkedin_accounts this is ~20% of the tool's wire size; ToolSearch
+// loads these schemas into the copilot's context, so wire bytes are tokens.
+// The key covers the value schema's type, checks, enum values and description;
+// anything it cannot represent gets a unique key and stays unshared (the
+// pre-memo behavior). Bump FILTER_OP_KEY_REV when the key shape changes.
+const FILTER_OP_CACHE = new Map<string, z.ZodTypeAny>();
+let filterOpNonce = 0;
+
+function filterOpKey(value: z.ZodTypeAny, allowed: ReadonlyArray<FilterOpKey>): string {
+  const def = value._def as {
+    typeName?: string;
+    checks?: unknown;
+    values?: unknown;
+    description?: string;
+  };
+  if (!def.typeName) return `nonce:${filterOpNonce++}`;
+  // Wrapped types (optional/nullable/effects) hide their inner structure from
+  // this key; give them unique keys rather than guessing.
+  if (['ZodOptional', 'ZodNullable', 'ZodEffects', 'ZodLazy', 'ZodUnion'].includes(def.typeName)) {
+    return `nonce:${filterOpNonce++}`;
+  }
+  try {
+    return JSON.stringify({
+      t: def.typeName,
+      c: def.checks ?? null,
+      v: def.values ?? null,
+      d: def.description ?? null,
+      ops: allowed,
+    });
+  } catch {
+    return `nonce:${filterOpNonce++}`;
+  }
+}
+
 export function filterOp<V extends z.ZodTypeAny>(
+  value: V,
+  allowed: ReadonlyArray<FilterOpKey>,
+) {
+  const key = filterOpKey(value, allowed);
+  const cached = FILTER_OP_CACHE.get(key);
+  if (cached) return cached as ReturnType<typeof buildFilterOp<V>>;
+  const built = buildFilterOp(value, allowed);
+  FILTER_OP_CACHE.set(key, built);
+  return built;
+}
+
+function buildFilterOp<V extends z.ZodTypeAny>(
   value: V,
   allowed: ReadonlyArray<FilterOpKey>,
 ) {
