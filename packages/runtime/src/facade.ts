@@ -34,7 +34,7 @@ export function registerFacadeTools(
     'list_toolsets',
     {
       description:
-        'List the available toolsets (domains) on this server. Each toolset groups related tools (e.g. linkedin.messaging, id.billing). Start here, then get_toolset_tools to inspect one, then call_tool to run a tool. Requires a gtm-api key (Bearer).',
+        'List the available toolsets (domains) on this server. Each toolset groups related tools (e.g. linkedin.messaging, id.billing). Start here, then get_toolset_tools to inspect one, then call_tool to run a tool. Requires OAuth authorization (Bearer token).',
       inputSchema: { _meta: UsageMetaSchema.optional() },
       annotations: { title: 'List toolsets', ...RO },
     },

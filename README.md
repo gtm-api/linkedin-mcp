@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](./LICENSE)
 [![Smithery](https://smithery.ai/badge/gtm-api/linkedin-mcp)](https://smithery.ai/servers/gtm-api/linkedin-mcp)
 
-gtm-api is a managed LinkedIn MCP server. It gives an AI agent one key, three MCP tools and 160+ typed LinkedIn actions over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
+gtm-api is a managed LinkedIn MCP server. It gives an AI agent one endpoint, three MCP tools and 160+ typed LinkedIn actions over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
 
 This repository holds the public interface: what the server exposes, how to connect a client, and how the safety layer works.
 
@@ -28,7 +28,7 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 
 ## Quickstart
 
-**1. Get an API key.** Sign up at [app.gtm-api.com](https://app.gtm-api.com/login) (7-day trial, no card) and connect a LinkedIn account. It opens in a dedicated anti-detect cloud browser with its own proxy.
+**1. Sign up.** Create an account at [app.gtm-api.com](https://app.gtm-api.com/login) (7-day trial, no card) and connect a LinkedIn account. It opens in a dedicated anti-detect cloud browser with its own proxy.
 
 **2. Add the server to your MCP client.** For Claude Desktop, edit `claude_desktop_config.json` (example in [`examples/`](./examples/claude_desktop_config.json)):
 
@@ -36,38 +36,37 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 {
   "mcpServers": {
     "gtm-api": {
-      "url": "https://mcp.gtm-api.com/mcp",
-      "headers": { "Authorization": "Bearer YOUR_API_KEY" }
+      "url": "https://mcp.gtm-api.com/mcp"
     }
   }
 }
 ```
 
-Prefer a command instead of a URL? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
+There is no key to paste. The endpoint authenticates with OAuth: your client gets a `WWW-Authenticate` challenge on the first call, registers itself with the authorization server (dynamic client registration), and opens a consent page in your browser. An API key (`gtm_live_...`) authenticates the [REST API](https://docs.gtm-api.com/api-reference/overview) instead, and answers `401 invalid_token` here.
+
+Client can only spawn a command, not open a URL? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint and runs the same OAuth flow (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
 
 ```json
 {
   "mcpServers": {
     "gtm-api": {
       "command": "npx",
-      "args": ["-y", "@gtm-api/linkedin-mcp"],
-      "env": { "GTM_API_KEY": "YOUR_API_KEY" }
+      "args": ["-y", "@gtm-api/linkedin-mcp"]
     }
   }
 }
 ```
 
-For Claude Code it is one line: `claude mcp add gtm-api -e GTM_API_KEY=YOUR_API_KEY -- npx -y @gtm-api/linkedin-mcp`.
+For Claude Code it is one line: `claude mcp add --transport http gtm-api https://mcp.gtm-api.com/mcp`.
 
-The same launcher also ships as a Docker image, [`gtmapi/linkedin-mcp`](https://hub.docker.com/r/gtmapi/linkedin-mcp) (config in [`examples/`](./examples/claude_desktop_config.docker.json)):
+The same launcher also ships as a Docker image, [`gtmapi/linkedin-mcp`](https://hub.docker.com/r/gtmapi/linkedin-mcp) (config in [`examples/`](./examples/claude_desktop_config.docker.json)). Mount a volume on the token cache so the consent step runs once rather than on every container:
 
 ```json
 {
   "mcpServers": {
     "gtm-api": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "-e", "GTM_API_KEY", "gtmapi/linkedin-mcp"],
-      "env": { "GTM_API_KEY": "YOUR_API_KEY" }
+      "args": ["run", "-i", "--rm", "-v", "gtm-mcp-auth:/home/node/.mcp-auth", "gtmapi/linkedin-mcp"]
     }
   }
 }
@@ -87,7 +86,7 @@ The server exposes exactly three MCP tools. Discovery is progressive: an agent l
 [
   {
     "name": "list_toolsets",
-    "description": "List the available toolsets (domains) on this server. Each toolset groups related tools (e.g. linkedin.messaging, id.billing). Start here, then get_toolset_tools to inspect one, then call_tool to run a tool. Requires a gtm-api key (Bearer).",
+    "description": "List the available toolsets (domains) on this server. Each toolset groups related tools (e.g. linkedin.messaging, id.billing). Start here, then get_toolset_tools to inspect one, then call_tool to run a tool. Requires OAuth authorization (Bearer token).",
     "input_schema": { "type": "object", "properties": {} }
   },
   {
@@ -173,7 +172,8 @@ From $19 per connected account per month, scaling to $5 at volume, with unlimite
 
 ## Links
 
-- Get an API key: [app.gtm-api.com](https://app.gtm-api.com/login)
+- Sign up (7-day trial): [app.gtm-api.com](https://app.gtm-api.com/login)
+- Connecting any client, step by step: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect)
 - How a LinkedIn MCP server works: [gtm-api.com/linkedin-mcp-server](https://gtm-api.com/linkedin-mcp-server/)
 - The safety method in detail: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/)
 - npm launcher: [npmjs.com/package/@gtm-api/linkedin-mcp](https://www.npmjs.com/package/@gtm-api/linkedin-mcp)
