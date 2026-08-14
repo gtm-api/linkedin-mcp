@@ -978,6 +978,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     dangerous: true,
     creditable: false,
     massAction: false,
+    stepEligible: true,
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: FOLLOWING_ACCOUNT_SID,

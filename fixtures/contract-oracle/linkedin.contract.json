@@ -365,6 +365,7 @@
                     "logout_count",
                     "antidetect_browser_proxy_sid",
                     "proxy_country_code",
+                    "max_safety",
                     "last_fail_at",
                     "last_logout_at",
                     "last_start_at",
@@ -2669,6 +2670,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "limit_type",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "linkedin_account_snapshot_sid",
                         "type": "?string",
                         "nullable": true,
@@ -2758,6 +2765,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "limit_type",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "linkedin_account_snapshot_sid",
                         "type": "?string",
                         "nullable": true,
@@ -2783,6 +2796,7 @@
                     "sid",
                     "linkedin_account_sid",
                     "reason",
+                    "limit_type",
                     "daily_count",
                     "seven_days_count",
                     "thirty_days_count",
@@ -2875,6 +2889,42 @@
                         "name": "target_limit",
                         "type": "?int",
                         "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "learned_ceiling",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "learned_ceiling_source",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "learned_ceiling_updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "clean_saturation_streak",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "probe_not_before",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "learning_enabled",
+                        "type": "bool",
+                        "nullable": false,
                         "has_default": true
                     },
                     {
@@ -2997,6 +3047,42 @@
                         "has_default": true
                     },
                     {
+                        "name": "learned_ceiling",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "learned_ceiling_source",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "learned_ceiling_updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "clean_saturation_streak",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "probe_not_before",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "learning_enabled",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
                         "name": "hold_till",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -3043,10 +3129,16 @@
                     "daily_limit",
                     "smart_limit",
                     "target_limit",
+                    "learned_ceiling",
+                    "learned_ceiling_source",
+                    "learned_ceiling_updated_at",
+                    "clean_saturation_streak",
+                    "probe_not_before",
                     "delay_in_seconds",
                     "done_today_count",
                     "last_reset_at",
                     "smart_limits_enabled",
+                    "learning_enabled",
                     "status",
                     "hold_till",
                     "linkedin_quota_hit_till",
@@ -5428,6 +5520,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "unread_count",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "last_activity_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -5541,6 +5639,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "unread_count",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "last_activity_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -5591,6 +5695,7 @@
                     "sn_id",
                     "nickname",
                     "is_muted",
+                    "unread_count",
                     "event_count",
                     "last_activity_at",
                     "last_stored_message_at",
@@ -7952,6 +8057,19 @@
                 {
                     "name": "Inmail",
                     "value": "inmail"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccountSmartLimit\\Enums\\LinkedinAccountSmartLimitLearnedCeilingSourceEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Probe",
+                    "value": "probe"
+                },
+                {
+                    "name": "Backoff",
+                    "value": "backoff"
                 }
             ]
         },
@@ -11655,6 +11773,21 @@
                 },
                 {
                     "field": "smart_limits_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "learning_enabled",
                     "rules": [
                         "sometimes",
                         "boolean"
@@ -21166,14 +21299,15 @@
             "action": "followMember",
             "operation": "action",
             "mass_action": false,
-            "step_eligible": false,
+            "step_eligible": true,
             "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
                 "massAction",
                 "operation",
-                "requiredPermission"
+                "requiredPermission",
+                "stepEligible"
             ],
             "required_permission": "can_act_linkedin_engagements",
             "internal": false,
@@ -21919,14 +22053,15 @@
             "action": "sendLinkedinMessage",
             "operation": "action",
             "mass_action": false,
-            "step_eligible": false,
+            "step_eligible": true,
             "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
                 "massAction",
                 "operation",
-                "requiredPermission"
+                "requiredPermission",
+                "stepEligible"
             ],
             "required_permission": "can_act_linkedin_messages",
             "internal": false,
@@ -22029,6 +22164,104 @@
                     "type": "array",
                     "in": null,
                     "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*",
+                    "rules": [
+                        "array",
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_base64",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_url",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048",
+                        "url"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
                     "max": null,
                     "size": null,
                     "between": null
@@ -22155,6 +22388,104 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "attachments.*",
+                    "rules": [
+                        "array",
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_base64",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_url",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048",
+                        "url"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -22276,6 +22607,104 @@
                     "type": "array",
                     "in": null,
                     "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*",
+                    "rules": [
+                        "array",
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_base64",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_url",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048",
+                        "url"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
                     "max": null,
                     "size": null,
                     "between": null
@@ -22574,6 +23003,104 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "attachments.*",
+                    "rules": [
+                        "array",
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_base64",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_url",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048",
+                        "url"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -22640,14 +23167,15 @@
             "action": "comment",
             "operation": "action",
             "mass_action": true,
-            "step_eligible": false,
+            "step_eligible": true,
             "step_tool": null,
             "schedule_required": false,
             "declared_arguments": [
                 "description",
                 "massAction",
                 "operation",
-                "requiredPermission"
+                "requiredPermission",
+                "stepEligible"
             ],
             "required_permission": "can_act_linkedin_engagements",
             "internal": false,
@@ -31770,6 +32298,21 @@
                     "between": null
                 },
                 {
+                    "field": "learning_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "reset_hold",
                     "rules": [
                         "sometimes",
@@ -32243,6 +32786,336 @@
                     "in": null,
                     "min": null,
                     "max": 300,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/linkedin-followings/follow",
+            "controller": "App\\Entities\\LinkedinFollowing\\InternalLinkedinFollowingController",
+            "action": "follow",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinFollowing\\Requests\\InternalLinkedinFollowingFollowRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "target",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/linkedin-messages/send",
+            "controller": "App\\Entities\\LinkedinMessage\\InternalLinkedinMessageStepController",
+            "action": "send",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinMessage\\Requests\\InternalLinkedinMessageSendRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_conversation_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "ln_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sn_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "text",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/linkedin-posting/comment",
+            "controller": "App\\Entities\\LinkedinPosting\\InternalLinkedinPostingController",
+            "action": "comment",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\InternalLinkedinPostingCommentRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "entity_urn",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "text",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:1250"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 1250,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "parent_comment_urn",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
                     "size": null,
                     "between": null
                 }

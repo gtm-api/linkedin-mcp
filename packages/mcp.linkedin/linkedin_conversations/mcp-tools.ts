@@ -60,6 +60,8 @@ const LinkedinConversation = z.object({
   // basic get-conversations wire and optimistically mirrored by the mute verb. NULL = unknown /
   // never synced (Sales Navigator threads never carry it).
   is_muted: z.boolean().nullable(),
+  unread_count: z.number().int().nullable()
+    .describe('LinkedIn\'s own unread counter for the thread, synced from both messenger wires. A LEVEL, not a high-water mark: reading the thread elsewhere lowers it. null = never synced, which is not the same as a synced 0. mark-read / mark-unread mirror it immediately (read sets 0; unread sets a floor of 1, because after the verb all we truly know is "more than zero").'),
   event_count: z.number(),
   last_activity_at: z.string().nullable(),
   last_stored_message_at: z.string().nullable(),
@@ -97,6 +99,8 @@ const LinkedinConversationFilter = z.object({
   sn_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']),
   is_muted: filterOp(z.boolean(), ['eq', 'ne', 'is_null']),
+  unread_count: filterOp(z.number().int(), ['eq', 'ne', 'gt', 'gte', 'lt', 'lte', 'is_null'])
+    .describe('The unread-only inbox view is unread_count gt 0. is_null:true finds threads that have never synced the counter.'),
   event_count: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt']),
   last_activity_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']),
   last_stored_message_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']),

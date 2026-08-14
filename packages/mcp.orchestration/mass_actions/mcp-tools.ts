@@ -76,6 +76,23 @@ const MassActionCanaryMode = z.enum(['none', 'first_item']);
 const MassActionStepToolCanonical = z.enum([
   'linkedin-connection-requests.send-linkedin-connection-request',
   'linkedin-posting.react',
+  // Added 2026-08-13. Spends comment_posts (30/day at a 360 s floor), a much tighter
+  // budget than the reaction above: size a run accordingly. Takes `text` from the step
+  // args, and replies in-thread when the item payload carries a parent comment urn,
+  // which a get-post-commenters row does.
+  'linkedin-posting.comment',
+  // Added 2026-08-13. Send-class, so a plan containing it requires a schedule.
+  // Spends send_messages (50/day at a 480 s floor). Takes `text` from the step args
+  // and the recipient from the item payload: an existing thread if the item has one,
+  // otherwise the member id to open one with. A cold first touch to a non-connection
+  // is refused by the owning service, so put a connect step earlier if you need one.
+  'linkedin-messages.send',
+  // Added 2026-08-13. The cheapest, lowest-risk engagement LinkedIn offers: needs no
+  // connection and is idempotent, so a retried step is safe and it is the natural
+  // warm-up leg of a follow, wait, connect sequence. Spends networking_general
+  // (40/day at a 180 s floor), shared with accept / ignore / withdraw / remove.
+  // `linkedin-followings.unfollow` is deliberately NOT authorable.
+  'linkedin-followings.follow',
   'email-messages.send',
   // Antidetect-browser fleet (accounts-page mass bar + "provision N browsers").
   // 'antidetect-browsers.create' is the generate-scope anchor (mints the row).

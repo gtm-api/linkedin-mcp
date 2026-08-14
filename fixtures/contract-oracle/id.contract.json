@@ -5503,6 +5503,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\BillingSubscription\\Enums\\BillingSubscriptionProrationModeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "ProratedImmediately",
+                    "value": "prorated_immediately"
+                },
+                {
+                    "name": "ProratedNextBillingPeriod",
+                    "value": "prorated_next_billing_period"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\BillingSubscription\\Enums\\BillingSubscriptionScheduledChangeActionEnum": {
             "backing": "string",
             "cases": [
@@ -5749,6 +5762,23 @@
                 {
                     "name": "Operation",
                     "value": "operation"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\CreditTransaction\\Enums\\CreditTransactionSeriesBucketEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Day",
+                    "value": "day"
+                },
+                {
+                    "name": "Week",
+                    "value": "week"
+                },
+                {
+                    "name": "Month",
+                    "value": "month"
                 }
             ]
         },
@@ -10073,9 +10103,142 @@
             ],
             "required_permission": "can_manage_billing",
             "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\BillingSubscription\\Requests\\BillingSubscriptionCreateCheckoutRequest",
+            "rules": [
+                {
+                    "field": "price_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:bl_pc_",
+                        "size:18",
+                        "exists:billing_prices,sid,is_active,\"1\",deleted_at,\"NULL\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "quantity",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "addons",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "addons.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "addons.*.price_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:bl_pc_",
+                        "size:18",
+                        "exists:billing_prices,sid,is_active,\"1\",deleted_at,\"NULL\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "addons.*.quantity",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -10488,9 +10651,43 @@
             ],
             "required_permission": "can_manage_billing",
             "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\BillingSubscription\\Requests\\BillingSubscriptionAddAddonRequest",
+            "rules": [
+                {
+                    "field": "price_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:bl_pc_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "quantity",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -10554,9 +10751,43 @@
             ],
             "required_permission": "can_manage_billing",
             "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\BillingSubscription\\Requests\\BillingSubscriptionChangeRequest",
+            "rules": [
+                {
+                    "field": "quantity",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "price_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:bl_pc_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -10620,9 +10851,43 @@
             ],
             "required_permission": "can_manage_billing",
             "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\BillingSubscription\\Requests\\BillingSubscriptionChangeRequest",
+            "rules": [
+                {
+                    "field": "quantity",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "price_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:bl_pc_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -10642,9 +10907,27 @@
             ],
             "required_permission": "can_manage_billing",
             "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\BillingSubscription\\Requests\\BillingSubscriptionRemoveAddonRequest",
+            "rules": [
+                {
+                    "field": "price_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:bl_pc_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -11837,6 +12120,26 @@
                         "type",
                         "status",
                         "operation"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "bucket",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"day\",\"week\",\"month\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "day",
+                        "week",
+                        "month"
                     ],
                     "min": null,
                     "max": null,
@@ -17213,6 +17516,42 @@
             "internal": false,
             "request_class": "App\\Http\\Requests\\Auth\\ResendVerificationRequest",
             "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "auth/set-password",
+            "controller": "App\\Http\\Controllers\\AuthController",
+            "action": "setPassword",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\SetPasswordRequest",
+            "rules": [
+                {
+                    "field": "password",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:8",
+                        "max:255",
+                        "confirmed"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 8,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
             "rules_reason": null
         },
         {

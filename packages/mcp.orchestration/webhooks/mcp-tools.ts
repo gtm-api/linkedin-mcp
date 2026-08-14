@@ -66,6 +66,10 @@ const WebhookEventType = z.enum([
   'linkedin-account-smart-limits.limit-reached',
   'linkedin-account-smart-limits.limit-released',
   'linkedin-account-smart-limits.smart-limit-recomputed',
+  // Mirrors a case the adaptive-smart-limits work added to the PHP enum while this
+  // change was in flight. Carried here only because the contract-oracle refresh is
+  // per service and picks up the whole catalog; the feature itself is not mine.
+  'linkedin-account-smart-limits.ceiling-learned',
   'linkedin-connection-requests.sent',
   'linkedin-connection-requests.accepted',
   'linkedin-connection-requests.withdrawn',
@@ -174,7 +178,15 @@ const WebhookFilters = z.object({
       + 'Example, routing one hosted connect link to one tenant: '
       + '{"where":{"and":[{"field":"payload.antidetect_browser_sid","op":"eq","value":"ab_br_X"}]}}'
     ),
-}).passthrough();
+});
+// CLOSED on purpose, and the .passthrough() that used to be here is gone. It existed
+// only because `where` was undeclared and had to survive somehow; now that both members
+// are typed, the sole thing passthrough still admitted was a MISSPELLING. That is not a
+// harmless no-op on this object: the backend stores the typo verbatim and then matches
+// subscriptions on the JSON path `filters->account_sid`, which the misspelling leaves
+// NULL, so the row falls into the "no narrowing" branch and receives every event for the
+// team. The backend now answers 422 `filter_key_unknown` (ValidatesClosedValueObject);
+// this keeps the tool schema saying the same thing.
 
 // Item schema: full WebhookDomain field set (webhooks.md #### Domain).
 // passthrough keeps forward-compat if the backend adds fields. `secret` is

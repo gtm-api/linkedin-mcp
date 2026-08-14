@@ -35,8 +35,11 @@
     "   were fixed instead, with .omit({ include: true }), where the tool named no relation at all.",
     "3. 4 linkedin_tracked_post_sid inputs. The research file documents the XOR with post; the backend",
     "   implements only post since the tracked-post entity moved to gs.service.signals.",
-    "4. 4 singles: the antidetect BYO-proxy credential pair, one api-keys filter axis and one",
-    "   connection-requests filter axis."
+    "4. 5 singles: the antidetect BYO-proxy credential pair, one api-keys filter axis, one",
+    "   connection-requests filter axis, and the add-addon idempotency token. That last one is the",
+    "   only entry here that is a PROMISE rather than a missing validation, and it sits on a verb",
+    "   that charges a card: pay it off by implementing the replay or by dropping the field, not by",
+    "   leaving it."
   ],
   "unknown_keys": {
     "linkedin": [
@@ -92,6 +95,11 @@
       }
     ],
     "id": [
+      {
+        "tool": "add_billing_subscription_addon",
+        "path": "request_id",
+        "reason": "BillingSubscriptionAddAddonRequest deliberately does NOT declare it (found 2026-08-13, recorded in research/gtm.service.id/entities/billing_subscriptions.md): the service implements no replay, so accepting the key would validate a promise the code does not keep. The tool still advertises 'a retry with the same token does not re-charge' on a verb that charges a card, so this line is live debt: implement the replay in BillingSubscriptionService::addAddon, or drop request_id from the tool"
+      },
       {
         "tool": "list_received_account_shares",
         "path": "filter.channel.in",

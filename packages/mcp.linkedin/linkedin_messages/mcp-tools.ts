@@ -31,12 +31,35 @@ const LinkedinMessageDirection = z.enum(['inbox', 'outbox'])
 const LinkedinMessageAutomation = z.enum(['auto', 'manual', 'connect', 'synced'])
   .describe('Writer provenance.');
 
-// Outbound attachment element: each .path must be an https:// URL.
+// BREAKING, 2026-08-13: the outbound attachment element is the WIRE's shape now.
+// It used to be published as {name, path(https), size} with a promise that the
+// plugin downloaded from `path`. No wire has ever taken that: the node reads
+// file_base64 / file_byte_size / file_name / file_type, its RPC map declares all
+// four non-optional, and the plugin hands them straight to media.uploadFile. So a
+// caller who followed this schema did not lose the attachment, they lost the SEND:
+// the upload dereferenced the missing members and threw before createMessage ran.
+// No alias was kept, because the old shape could never have worked.
+//
+// `file_url` is OUR addition on top of an unchanged wire, the same arrangement
+// send_linkedin_voice_message already has: the backend fetches the URL
+// server-side (streamed, hard byte cap), base64s it, and fills in the members the
+// caller left out. Prefer it over inlining base64 in JSON.
 const Attachment = z.object({
-  name: z.string().max(255).describe('Display filename shown to the recipient.'),
-  path: z.string().max(2048).describe('https:// URL the browser plugin downloads from.'),
-  size: z.number().int().nonnegative().describe('Bytes (advisory telemetry only).'),
-});
+  file_base64: z.string().min(1).optional()
+    .describe('The file itself: a data:<mime>;base64,<...> URL or bare base64. Exactly one of file_base64 / file_url.'),
+  file_url: z.string().max(2048).url().optional()
+    .describe('https:// URL the BACKEND downloads server-side and encodes for you. Exactly one of file_base64 / file_url.'),
+  file_name: z.string().min(1).max(255).optional()
+    .describe('Display filename shown to the recipient. Derived from the URL path when omitted on the file_url arm.'),
+  file_type: z.string().min(1).max(255).optional()
+    .describe('MIME type. Read off the data: prefix or the fetched Content-Type when omitted.'),
+  file_byte_size: z.number().int().min(1).optional()
+    .describe('Advisory only: the backend measures the real size and sends that.'),
+}).describe(
+  'Exactly one of file_base64 / file_url per item. Decoded bytes across ALL attachments of one send '
+  + 'may not exceed 35 MB, derived from the node\'s own 50 MB body limit and base64\'s 4/3 inflation; '
+  + 'over it the send is refused with attachments_too_large before a browser dispatch is spent.',
+);
 
 // What the two download verbs return. They are pass-through reads: the
 // controller sends item:null and puts the plugin body verbatim in `result`
@@ -289,6 +312,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     dangerous: true,
     creditable: false,
     massAction: false,
+    stepEligible: true,
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
@@ -296,7 +320,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…) for a new thread.'),
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (ACwAA…); interchangeable with ln_id.'),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars.'),
-      attachments: z.array(Attachment).optional().describe('Each .path must be an https:// URL.'),
+      attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -350,7 +374,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
       subject: z.string().min(1).max(200).describe('REQUIRED InMail subject; 1..200 chars.'),
       text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars.'),
-      attachments: z.array(Attachment).optional().describe('Each .path must be an https:// URL.'),
+      attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -376,7 +400,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN for a new SN thread.'),
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (preferred on the SN surface); interchangeable with ln_id.'),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars.'),
-      attachments: z.array(Attachment).optional().describe('Each .path must be an https:// URL.'),
+      attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -476,7 +500,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       text: z.string().min(1).max(8000).describe('Opening message; 1..8000 chars.'),
       conversation_title: z.string().max(100).nullable().optional()
         .describe('Optional group name, max 100 chars; omitted leaves the thread unnamed.'),
-      attachments: z.array(Attachment).optional().describe('Each .path must be an https:// URL.'),
+      attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),

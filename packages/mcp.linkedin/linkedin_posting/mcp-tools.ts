@@ -141,7 +141,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_comment',
     description:
-      'Leave ONE outbound comment on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-comment): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. Outward and fire-on-success: the post does NOT need to be tracked or owned by us, and nothing is persisted on this service. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the messaging_general bucket, saturation returns 429 with no pool fallback. Reply to an existing comment by passing parent_comment_urn. The comment text comes in text; templates and AI generation are outside this API. Returns the created comment ref plus the activity-log row. To react instead use react_linkedin_post; to read a post\'s existing comments or commenters use the linkedin-scraping get-post-comments / get-post-commenters tools; to resolve a post URL to its activity URN use get_activity_urn_by_url.',
+      'Leave ONE outbound comment on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-comment): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. Outward and fire-on-success: the post does NOT need to be tracked or owned by us, and nothing is persisted on this service. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the comment_posts bucket (30/day at a 360 s floor), saturation returns 429 with no pool fallback. Reply to an existing comment by passing parent_comment_urn. The comment text comes in text; templates and AI generation are outside this API. Returns the created comment ref plus the activity-log row. To react instead use react_linkedin_post; to read a post\'s existing comments or commenters use the linkedin-scraping get-post-comments / get-post-commenters tools; to resolve a post URL to its activity URN use get_activity_urn_by_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/comment' },
     operation: 'action',
@@ -150,6 +150,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     dangerous: true,
     creditable: false,
     massAction: true,
+    stepEligible: true,
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
@@ -167,7 +168,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'react_linkedin_post',
     description:
-      'Leave OUR reaction on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-reaction): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. The social-selling counterpart of create_linkedin_comment, e.g. warm a prospect up by reacting to their post before a connect. Outward and fire-on-success: the post does NOT need to be tracked, and nothing is persisted on this service. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the messaging_general bucket, saturation returns 429 with no pool fallback. Two different managed accounts reacting to the same post are two independent calls. Returns the activity-log row. To comment use create_linkedin_comment; to read who already reacted use the linkedin-scraping get-post-reactors tool.',
+      'Leave OUR reaction on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-reaction): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. The social-selling counterpart of create_linkedin_comment, e.g. warm a prospect up by reacting to their post before a connect. Outward and fire-on-success: the post does NOT need to be tracked, and nothing is persisted on this service. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, spends the react_posts bucket (30/day at a 360 s floor), saturation returns 429 with no pool fallback. Two different managed accounts reacting to the same post are two independent calls. Returns the activity-log row. To comment use create_linkedin_comment; to read who already reacted use the linkedin-scraping get-post-reactors tool.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/react' },
     operation: 'action',
