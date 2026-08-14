@@ -76,6 +76,31 @@ describe('searchKbMintlify', () => {
   });
 });
 
+describe('chunk cap', () => {
+  it('truncates an oversized chunk at a line boundary and says where the rest is', async () => {
+    const line = 'a'.repeat(99) + '\n';
+    const big = '## Heading\n' + line.repeat(40); // ~4KB
+    const hits = await searchKbMintlify(
+      { ...EXT, fetchImpl: fakeFetch(200, [{ path: 'kb/big', content: big }]) },
+      'q',
+      5,
+    );
+    expect(hits[0]!.content.length).toBeLessThan(1500);
+    expect(hits[0]!.content).toContain('[truncated: fetch the full page with get_kb_article]');
+    // still opens with the heading, so the section label survives the cut
+    expect(hits[0]!.section).toBe('Heading');
+  });
+
+  it('leaves small chunks alone', async () => {
+    const hits = await searchKbMintlify(
+      { ...EXT, fetchImpl: fakeFetch(200, [{ path: 'kb/small', content: '## S\nshort body' }]) },
+      'q',
+      5,
+    );
+    expect(hits[0]!.content).toBe('## S\nshort body');
+  });
+});
+
 describe('fetchArticleMd', () => {
   it('fetches the .md variant and lifts the H1 as the title', async () => {
     const page = await fetchArticleMd(

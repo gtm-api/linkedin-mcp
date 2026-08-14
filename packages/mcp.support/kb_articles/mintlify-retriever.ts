@@ -71,6 +71,19 @@ function sectionOf(content: string): string {
   return heading ? heading[1]!.trim() : 'Intro';
 }
 
+// The discovery API returns whole sections, and five of them once weighed in
+// at 8.5KB for a one-line question: at ~3 chars per token that is real money
+// on every search. Cap each chunk at a line boundary; the agent has
+// get_kb_article for the full page, and the cut says so.
+const CHUNK_CHAR_CAP = 1400;
+
+function capChunk(content: string): string {
+  if (content.length <= CHUNK_CHAR_CAP) return content;
+  const cut = content.lastIndexOf('\n', CHUNK_CHAR_CAP);
+  const head = content.slice(0, cut > 200 ? cut : CHUNK_CHAR_CAP);
+  return `${head}\n[truncated: fetch the full page with get_kb_article]`;
+}
+
 export async function searchKbMintlify(
   ext: MintlifySearchExtension,
   query: string,
@@ -105,7 +118,7 @@ export async function searchKbMintlify(
       article_id: path,
       article_title: metaTitle ?? titleFromPath(path),
       section: sectionOf(content),
-      content,
+      content: capChunk(content),
       // The API returns relevance order without scores; encode the rank so
       // downstream consumers keep a monotone axis.
       score: 1 / (rank + 1),
