@@ -237,12 +237,24 @@ export default {
       logger,
       commitTokens: env.COMMIT_TOKENS ? kvCommitTokenStore(env.COMMIT_TOKENS) : undefined,
       rateLimiters: { calls: env.RATE_LIMIT_CALLS, writes: env.RATE_LIMIT_WRITES },
-      // Support-KB vector search: present only where the env binds AI+Vectorize
-      // (production). Absent → the KB tools fall back to the bundled BM25 index.
-      extensions:
-        env.AI && env.VECTORIZE_KB
+      // Support-KB retrieval backends, in the order the tools try them:
+      // mintlifySearch (the discovery index over the published docs site,
+      // secret-gated) first, then the AI+Vectorize pair, then the bundled
+      // BM25 index that is always compiled in. Absent bindings simply narrow
+      // the ladder; nothing here is required for the worker to boot.
+      extensions: {
+        ...(env.MINTLIFY_ASSISTANT_KEY
+          ? {
+              mintlifySearch: {
+                key: env.MINTLIFY_ASSISTANT_KEY,
+                domain: env.MINTLIFY_DOCS_DOMAIN ?? 'docs.gtm-api.com',
+              },
+            }
+          : {}),
+        ...(env.AI && env.VECTORIZE_KB
           ? { supportKb: { ai: env.AI, vectorize: env.VECTORIZE_KB } }
-          : undefined,
+          : {}),
+      },
     };
     // Chain order, outermost first, and every position is load-bearing:
     //

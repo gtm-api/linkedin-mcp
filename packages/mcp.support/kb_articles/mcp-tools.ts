@@ -10,6 +10,7 @@ import { usageMetaField, McpSearchResponse, McpGetResponse } from '@gtm/mcp-shar
 import { KB_INDEX } from './kb-index';
 import { getKbArticle, searchKb } from './retriever';
 import { asSupportKbExtension, fuseHits, searchKbVector } from './vector-retriever';
+import { asMintlifyExtension, fetchArticleMd, searchKbMintlify } from './mintlify-retriever';
 
 const KbHitSchema = z.object({
   article_id: z.string(),
@@ -85,9 +86,37 @@ const searchKnowledge: ToolDefinition = {
     const query = String(ctx.args['query'] ?? '');
     const topK = typeof ctx.args['top_k'] === 'number' ? (ctx.args['top_k'] as number) : 5;
 
-    // Hybrid retrieval: BM25 over the bundled index always runs; when the env
-    // binds Vectorize+AI (production), semantic hits are fused in via RRF.
-    // Any vector-path failure degrades to BM25 and never fails the tool.
+    // Primary retrieval: the Mintlify discovery index over the whole published
+    // docs site (KB + guides + API reference), one source of truth. Measured
+    // against the staged BM25+Vectorize pair on 2026-08-13: 10/10 vs 4/10 on
+    // the coverage set. Any failure degrades to the bundled paths below and
+    // never fails the tool.
+    const mintlify = asMintlifyExtension(ctx.deps.extensions?.['mintlifySearch']);
+    if (mintlify) {
+      try {
+        const hits = await searchKbMintlify(mintlify, query, topK);
+        if (hits.length > 0) {
+          return {
+            success: true,
+            operation: 'search',
+            items: hits.map((hit) => ({ item: hit, included: {} })),
+            pagination: { next_cursor: null, has_more: false, total_count: hits.length },
+            applied_filters: [],
+            includes: [],
+            meta: envelopeMeta(ctx, startedAt),
+          };
+        }
+      } catch (err) {
+        ctx.deps.logger.error({
+          event: 'support_kb_mintlify_fallback',
+          detail: String((err as { message?: string })?.message ?? err),
+        });
+      }
+    }
+
+    // Fallback: BM25 over the bundled index; when the env binds Vectorize+AI,
+    // semantic hits are fused in via RRF. The bundled corpus is narrower and
+    // staler than the docs site, but it answers offline and keeps dev working.
     const bm25Hits = searchKb(KB_INDEX, query, topK);
     let hits = bm25Hits;
     const ext = asSupportKbExtension(ctx.deps.extensions?.['supportKb']);
@@ -146,6 +175,33 @@ const getArticle: ToolDefinition = {
   localHandler: async (ctx) => {
     const startedAt = Date.now();
     const id = String(ctx.args['id'] ?? '');
+
+    // Ids from the Mintlify-backed search are docs paths ("kb/enrichment",
+    // "guides/receive-webhooks"); every published page serves a .md variant,
+    // so the fetch works for any of them, API reference included. Bundled
+    // lookup stays for old ids and for offline dev.
+    const mintlify = asMintlifyExtension(ctx.deps.extensions?.['mintlifySearch']);
+    if (mintlify) {
+      try {
+        const page = await fetchArticleMd(mintlify, id);
+        if (page) {
+          return {
+            success: true,
+            operation: 'get',
+            item: { ...page, tags: [], updated_at: null },
+            included: {},
+            includes: [],
+            meta: envelopeMeta(ctx, startedAt),
+          };
+        }
+      } catch (err) {
+        ctx.deps.logger.error({
+          event: 'support_kb_mintlify_get_fallback',
+          detail: String((err as { message?: string })?.message ?? err),
+        });
+      }
+    }
+
     const article = getKbArticle(KB_INDEX, id);
     if (!article) {
       throw new Error(`KB article '${id}' not found; ids come from search_knowledge results.`);

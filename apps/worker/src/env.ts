@@ -46,6 +46,14 @@ export interface Env {
   AI?: Ai;
   /** Vectorize index with the embedded support KB (prod env only). */
   VECTORIZE_KB?: VectorizeIndex;
+  /**
+   * Mintlify assistant API key (secret, prod only). When present, KB search
+   * runs on the Mintlify discovery index over the whole published docs site;
+   * absent, the tools fall back to the bundled BM25 (+Vectorize) paths.
+   */
+  MINTLIFY_ASSISTANT_KEY?: string;
+  /** Docs domain the discovery index serves; defaults to docs.gtm-api.com. */
+  MINTLIFY_DOCS_DOMAIN?: string;
 }
 
 // Every value below is read through config.ts, which is also what /health
