@@ -173,13 +173,7 @@
         "reason": "the controller reads input(include) and builds the included block, but the SearchRequest declares no include rule: backend under-declaration, the param works"
       }
     ],
-    "orchestration": [
-      {
-        "tool": "search_mass_actions",
-        "path": "include",
-        "reason": "the controller reads input(include) and builds the included block, but the SearchRequest declares no include rule: backend under-declaration, the param works"
-      }
-    ],
+    "orchestration": [],
     "email": []
   }
 }

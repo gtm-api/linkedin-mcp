@@ -623,6 +623,211 @@
                 ]
             }
         },
+        "AgentRegistration": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\AgentRegistration\\AgentRegistrationDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "email",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "oauth_client_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "redirect_uri",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "code_challenge",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "code_challenge_method",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "scope",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "expires_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "user_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "oauth_authorization_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "verified_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_code_issued_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\AgentRegistration\\Responses\\AgentRegistrationResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "email",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "oauth_client_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "redirect_uri",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "code_challenge",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "code_challenge_method",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "scope",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "expires_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "user_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "oauth_authorization_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "verified_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_code_issued_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": null
+        },
         "ApiKey": {
             "domain": {
                 "class": "Gtm\\Lib\\Common\\Microservices\\Id\\ApiKey\\ApiKeyDomain",
@@ -1086,6 +1291,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "limits",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\BillingPrice\\Values\\BillingPriceLimitsOverrideValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -1169,6 +1380,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "limits",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\BillingPrice\\Values\\BillingPriceLimitsOverrideValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -1243,6 +1460,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "visibility",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -1309,6 +1532,12 @@
                     },
                     {
                         "name": "paddle_product_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "visibility",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -2019,7 +2248,19 @@
                     }
                 ]
             },
-            "filter": null
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\CreditLot\\CreditLotFilter",
+                "fields": [
+                    "sid",
+                    "kind",
+                    "source",
+                    "status",
+                    "source_item_sid",
+                    "granted_at",
+                    "expires_at",
+                    "created_at"
+                ]
+            }
         },
         "CreditTransaction": {
             "domain": {
@@ -3900,6 +4141,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "plan",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "trial_ends_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -3990,6 +4237,12 @@
                     },
                     {
                         "name": "subscription_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "plan",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -5006,6 +5259,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\AgentRegistration\\Enums\\AgentRegistrationStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pending",
+                    "value": "pending"
+                },
+                {
+                    "name": "Verified",
+                    "value": "verified"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\ApiKey\\Enums\\ApiKeyGroupableFieldsEnum": {
             "backing": "string",
             "cases": [
@@ -5178,6 +5444,19 @@
                 {
                     "name": "CreditsPack",
                     "value": "credits_pack"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\BillingProduct\\Enums\\BillingProductVisibilityEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Public",
+                    "value": "public"
+                },
+                {
+                    "name": "Private",
+                    "value": "private"
                 }
             ]
         },
@@ -5373,6 +5652,48 @@
                 {
                     "name": "Enrichment",
                     "value": "enrichment"
+                },
+                {
+                    "name": "Platform",
+                    "value": "platform"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\CreditLot\\Enums\\CreditLotGroupableFieldsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Kind",
+                    "value": "kind"
+                },
+                {
+                    "name": "Source",
+                    "value": "source"
+                },
+                {
+                    "name": "Status",
+                    "value": "status"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\CreditLot\\Enums\\CreditLotSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "ExpiresAt",
+                    "value": "expires_at"
+                },
+                {
+                    "name": "GrantedAt",
+                    "value": "granted_at"
+                },
+                {
+                    "name": "AmountRemaining",
+                    "value": "amount_remaining"
+                },
+                {
+                    "name": "AmountGranted",
+                    "value": "amount_granted"
                 }
             ]
         },
@@ -5676,6 +5997,10 @@
                 {
                     "name": "SslCertificateFailed",
                     "value": "ssl_certificate_failed"
+                },
+                {
+                    "name": "AgentSignup",
+                    "value": "agent_signup"
                 },
                 {
                     "name": "LinkedinSyncFailed",
@@ -6032,6 +6357,31 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\SslCertificate\\Enums\\SslCertificateSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CreatedAt",
+                    "value": "created_at"
+                },
+                {
+                    "name": "ExpiresAt",
+                    "value": "expires_at"
+                },
+                {
+                    "name": "IssuedAt",
+                    "value": "issued_at"
+                },
+                {
+                    "name": "Domain",
+                    "value": "domain"
+                },
+                {
+                    "name": "Status",
+                    "value": "status"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\SslCertificate\\Enums\\SslCertificateStatusEnum": {
             "backing": "string",
             "cases": [
@@ -6212,6 +6562,31 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Team\\Enums\\TeamPlanEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "None",
+                    "value": "none"
+                },
+                {
+                    "name": "Trial",
+                    "value": "trial"
+                },
+                {
+                    "name": "Free",
+                    "value": "free"
+                },
+                {
+                    "name": "Paid",
+                    "value": "paid"
+                },
+                {
+                    "name": "Partner",
+                    "value": "partner"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\Team\\Enums\\TeamSortableFieldEnum": {
             "backing": "string",
             "cases": [
@@ -6295,6 +6670,40 @@
                 {
                     "name": "Unqualified",
                     "value": "unqualified"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Enums\\WhitelabelActivationReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CertificateUnavailableForDomain",
+                    "value": "certificate_unavailable_for_domain"
+                },
+                {
+                    "name": "CertificateIssuanceDeferred",
+                    "value": "certificate_issuance_deferred"
+                },
+                {
+                    "name": "DomainNotProvenInTime",
+                    "value": "domain_not_proven_in_time"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Enums\\WhitelabelSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CreatedAt",
+                    "value": "created_at"
+                },
+                {
+                    "name": "Name",
+                    "value": "name"
+                },
+                {
+                    "name": "Domain",
+                    "value": "domain"
                 }
             ]
         },
@@ -6862,6 +7271,39 @@
                     "nullable": true,
                     "type": null,
                     "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"counterparty_team\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "counterparty_team"
+                    ],
                     "min": null,
                     "max": null,
                     "size": null,
@@ -7538,6 +7980,39 @@
                     "between": null
                 },
                 {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"counterparty_team\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "counterparty_team"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "sort",
                     "rules": [
                         "sometimes",
@@ -8001,6 +8476,39 @@
                     "between": null
                 },
                 {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"counterparty_team\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "counterparty_team"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "sort",
                     "rules": [
                         "sometimes",
@@ -8335,6 +8843,39 @@
                     "nullable": true,
                     "type": null,
                     "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"counterparty_team\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "counterparty_team"
+                    ],
                     "min": null,
                     "max": null,
                     "size": null,
@@ -10787,6 +11328,255 @@
         },
         {
             "method": "POST",
+            "uri": "api/credit-lots/search",
+            "controller": "App\\Entities\\CreditLot\\CreditLotController",
+            "action": "search",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\CreditLot\\Requests\\CreditLotSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.kind",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.source",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.status",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.source_item_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.granted_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.expires_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.created_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.field",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"expires_at\",\"granted_at\",\"amount_remaining\",\"amount_granted\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "expires_at",
+                        "granted_at",
+                        "amount_remaining",
+                        "amount_granted"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.direction",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"asc\",\"desc\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "limit",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/credit-transactions/get-balance",
             "controller": "App\\Entities\\CreditTransaction\\CreditTransactionController",
             "action": "getBalance",
@@ -10810,13 +11600,14 @@
                     "rules": [
                         "required",
                         "string",
-                        "in:\"enrichment\""
+                        "in:\"enrichment\",\"platform\""
                     ],
                     "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
-                        "enrichment"
+                        "enrichment",
+                        "platform"
                     ],
                     "min": null,
                     "max": null,
@@ -11080,13 +11871,14 @@
                     "rules": [
                         "required",
                         "string",
-                        "in:\"enrichment\""
+                        "in:\"enrichment\",\"platform\""
                     ],
                     "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": [
-                        "enrichment"
+                        "enrichment",
+                        "platform"
                     ],
                     "min": null,
                     "max": null,
@@ -15550,6 +16342,40 @@
         },
         {
             "method": "GET",
+            "uri": "auth/agent-signup-context",
+            "controller": "\\App\\Http\\Controllers\\AgentRegistrationController",
+            "action": "context",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\AgentSignupContextRequest",
+            "rules": [
+                {
+                    "field": "rt",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:64"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 64,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
             "uri": "auth/cancel-erasure",
             "controller": "App\\Http\\Controllers\\AuthController",
             "action": "cancelErasure",
@@ -16137,6 +16963,243 @@
         },
         {
             "method": "POST",
+            "uri": "auth/register-agent",
+            "controller": "\\App\\Http\\Controllers\\AgentRegistrationController",
+            "action": "register",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\AgentRegisterRequest",
+            "rules": [
+                {
+                    "field": "email",
+                    "rules": [
+                        "required",
+                        "string",
+                        "email",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_id",
+                    "rules": [
+                        "required",
+                        "string"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "redirect_uri",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:2000"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "code_challenge",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:43",
+                        "max:128"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 43,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "code_challenge_method",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"S256\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "S256"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2000,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "auth/register-agent/complete",
+            "controller": "\\App\\Http\\Controllers\\AgentRegistrationController",
+            "action": "complete",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\AgentRegisterCompleteRequest",
+            "rules": [
+                {
+                    "field": "verify_token",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:64"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 64,
+                    "between": null
+                },
+                {
+                    "field": "name",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "password",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:8",
+                        "max:255",
+                        "confirmed"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 8,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "auth/register-agent/poll",
+            "controller": "\\App\\Http\\Controllers\\AgentRegistrationController",
+            "action": "poll",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\AgentRegisterPollRequest",
+            "rules": [
+                {
+                    "field": "registration_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18",
+                        "starts_with:id_ar_"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "poll_secret",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:64"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 64,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "auth/resend-verification",
             "controller": "App\\Http\\Controllers\\AuthController",
             "action": "resendVerification",
@@ -16150,6 +17213,41 @@
             "internal": false,
             "request_class": "App\\Http\\Requests\\Auth\\ResendVerificationRequest",
             "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "auth/switch-team",
+            "controller": "App\\Http\\Controllers\\AuthController",
+            "action": "switchTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\SwitchTeamRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
             "rules_reason": null
         },
         {

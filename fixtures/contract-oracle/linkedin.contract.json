@@ -132,6 +132,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "max_safety",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
                         "name": "cloud_browser_access",
                         "type": "?array",
                         "nullable": true,
@@ -296,6 +302,12 @@
                         "name": "proxy_country_code",
                         "type": "?string",
                         "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "max_safety",
+                        "type": "bool",
+                        "nullable": false,
                         "has_default": true
                     },
                     {
@@ -7394,6 +7406,10 @@
                 {
                     "name": "Params",
                     "value": "params"
+                },
+                {
+                    "name": "Domain",
+                    "value": "domain"
                 }
             ]
         },
@@ -9361,6 +9377,21 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "max_safety",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -10047,6 +10078,21 @@
                     "between": null
                 },
                 {
+                    "field": "max_safety",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "custom_proxy_config.username",
                     "rules": [
                         "sometimes",
@@ -10611,6 +10657,39 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "include",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"linkedin_account\",\"cached_from\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin_account",
+                        "cached_from"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -10632,9 +10711,43 @@
             ],
             "required_permission": "can_view_linkedin_enrichment",
             "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action takes no request object"
+            "request_class": "App\\Entities\\DataRequest\\Requests\\DataRequestGetRequest",
+            "rules": [
+                {
+                    "field": "include",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include.*",
+                    "rules": [
+                        "string",
+                        "in:\"linkedin_account\",\"cached_from\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin_account",
+                        "cached_from"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -17672,17 +17785,37 @@
                 {
                     "field": "company_url",
                     "rules": [
-                        "required",
+                        "required_without:domain",
+                        "prohibits:domain",
+                        "nullable",
                         "string",
                         "max:2048",
                         "starts_with:https://www.linkedin.com/"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
                     "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "domain",
+                    "rules": [
+                        "required_without:company_url",
+                        "prohibits:company_url",
+                        "nullable",
+                        "string",
+                        "max:191"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 191,
                     "size": null,
                     "between": null
                 }
@@ -17950,17 +18083,37 @@
                 {
                     "field": "company_url",
                     "rules": [
-                        "required",
+                        "required_without:domain",
+                        "prohibits:domain",
+                        "nullable",
                         "string",
                         "max:2048",
                         "starts_with:https://www.linkedin.com/"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
                     "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "domain",
+                    "rules": [
+                        "required_without:company_url",
+                        "prohibits:company_url",
+                        "nullable",
+                        "string",
+                        "max:191"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 191,
                     "size": null,
                     "between": null
                 }

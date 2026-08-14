@@ -238,10 +238,25 @@ const MassActionFilter = z.object({
     .describe('Omit for live runs only; send any operator to bring stopped (soft-deleted) runs into scope.'),
 }).partial();
 
-// Only `metrics` is served, and only by get: the search controller emits an empty
-// included block for every row, so publishing items / failed_items / cancelled_items
-// there would promise a join the backend does not perform.
+// The two actions take DIFFERENT include vocabularies, and they are two
+// mechanisms rather than one list split in half.
+//
+// `get` serves `metrics`, assembled inline by the controller from
+// MassActionMetricsService: the full breakdown for ONE run. It has no
+// FormRequest, so no Rule::in describes it and the parity gate cannot see it.
+//
+// `search` serves `item_counts` through MassActionIncludedBuilder, one grouped
+// count per row, and MassActionSearchRequest validates it with
+// Rule::in(MassActionIncludedBuilder::available()). The full `metrics` shape is
+// deliberately NOT an include there: it scans every item of every row on the page.
+//
+// This block previously said search emitted an empty included block for every row
+// and that only `metrics` was served anywhere. Both halves stopped being true when
+// item_counts landed, and the stale contract-oracle fixture kept the parity gate
+// green over it until 2026-08-13.
 const MassActionInclude = z.enum(['metrics']);
+
+const MassActionSearchInclude = z.enum(['item_counts']);
 
 const MassActionSortable = z.enum(['created_at', 'updated_at', 'settled_at', 'total_count']);
 
@@ -269,7 +284,7 @@ export const massActionsTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     creditable: false,
-    inputSchema: McpSearchRequestSchema(MassActionFilter, undefined, MassActionSortable, 200),
+    inputSchema: McpSearchRequestSchema(MassActionFilter, MassActionSearchInclude, MassActionSortable, 200),
     outputSchema: McpSearchResponse(MassAction),
     annotations: { title: 'Search mass-actions', ...RO },
   },

@@ -34,9 +34,17 @@ const SID = z.string().length(18).startsWith('wh_hk_')
 const WebhookStatus = z.enum(['on', 'off', 'failed']);
 
 // The subscribable event vocabulary, verbatim from the create/update rules()
-// (WebhookEventTypeEnum, 89 values). It has to be a closed set on this side:
+// (WebhookEventTypeEnum, 94 values). It has to be a closed set on this side:
 // an in: rule 422s with "invalid", never with the list, and an agent cannot
 // subscribe to an event it has to guess the name of.
+//
+// The count above was 89 while the array held 90 and PHP held 94, so the header
+// disagreed with its own list and with the catalog at the same time. The four
+// values that were missing are the two subscription-hold pairs, added below:
+// they are emitted and subscribable over REST, so they were unreachable through
+// MCP only. Diffed case-for-case against the PHP enum on 2026-08-13.
+// Keep this list sorted the way the PHP enum is: additions go next to their
+// service block, not at the end.
 const WebhookEventType = z.enum([
   'linkedin-accounts.created',
   'linkedin-accounts.restored',
@@ -50,6 +58,8 @@ const WebhookEventType = z.enum([
   'linkedin-accounts.login-failed',
   'linkedin-accounts.logged-out',
   'linkedin-accounts.heartbeat-stale',
+  'linkedin-accounts.subscription-hold-applied',
+  'linkedin-accounts.subscription-hold-released',
   'linkedin-account-block-log.recorded',
   'linkedin-account-snapshot.captured',
   'linkedin-account-quota-hits.recorded',
@@ -106,6 +116,8 @@ const WebhookEventType = z.enum([
   'email-accounts.disconnected',
   'email-accounts.deleted',
   'email-accounts.sync-completed',
+  'email-accounts.subscription-hold-applied',
+  'email-accounts.subscription-hold-released',
   'email-messages.received',
   'email-messages.sent',
   'email-messages.bounced',
@@ -128,6 +140,11 @@ const WebhookEventType = z.enum([
   'mass-actions.paused',
   'mass-actions.resumed',
   'mass-actions.settled',
+  // The all-events wildcard, stored as exactly ["*"]. It is a STANDING
+  // subscription, not a snapshot of today's catalog: event types added later
+  // start arriving on their own. It may not be mixed into an explicit list, a
+  // half-wildcard is refused by the backend (WebhookCreateRequest::eventsWildcardRule).
+  '*',
 ]);
 
 
@@ -135,9 +152,28 @@ const WebhookEventType = z.enum([
 // account_sid is deliberately prefix-agnostic (WebhookFiltersValue): the
 // registry is platform-wide, so the same key narrows a LinkedIn account, an
 // email account, or any future channel sender.
+//
+// `where` was accepted by the backend and undeclared here until 2026-08-13: it
+// rode the .passthrough() below, so the one mechanism that scopes a subscription
+// to a single end user was invisible to every agent reading this schema. It is
+// typed as a free-form object rather than a recursive Zod tree on purpose: the
+// grammar is genuinely recursive and z.lazy would emit a cyclic $ref into the
+// generated public spec. The description carries the whole contract instead.
 const WebhookFilters = z.object({
   account_sid: z.string().length(18).optional()
     .describe('char(18) account sid (ln_ac_… / em_ac_…): only deliver events for this account.'),
+  where: z.record(z.unknown()).nullable().optional()
+    .describe(
+      'Payload delivery gate: a FilterAst node tree evaluated against the delivery envelope, '
+      + 'so leaves address payload.* plus the envelope fields type and occurred_at. null or absent = no gate. '
+      + 'Grammar is strict: unknown keys and atoms are rejected, nesting depth is capped at 5, and a subscription '
+      + 'may spend at most 20 leaves (a leaf is one {field, op} node; group / not / any wrappers are free, so a '
+      + 'scoped condition like or[not type in [...], leaf] costs two). Use is_null rather than eq: null, which is refused. '
+      + 'Errors: filter_grammar_invalid, filter_leaves_limit_exceeded. '
+      + 'A filtered-out event is SKIPPED before any webhook_logs row exists, so a gated delivery leaves no trace in the log. '
+      + 'Example, routing one hosted connect link to one tenant: '
+      + '{"where":{"and":[{"field":"payload.antidetect_browser_sid","op":"eq","value":"ab_br_X"}]}}'
+    ),
 }).passthrough();
 
 // Item schema: full WebhookDomain field set (webhooks.md #### Domain).
@@ -201,7 +237,13 @@ const WebhookFilter = z.object({
   deleted: z.boolean().optional().describe('true = include soft-deleted rows; default excludes them.'),
 }).partial();
 
-const WebhookInclude = z.enum(['latest_webhook_logs']);
+const WebhookInclude = z.enum([
+  'latest_webhook_logs',
+  // {deliveries_24h, last_delivery_at, last_response_code}: the 24h column and
+  // the "last delivery 38m ago \u00b7 200" cell. Only EXECUTED attempts move the
+  // last_* pair, so a pending row leaves them where they were.
+  'delivery_stats',
+]);
 
 const WebhookSortable = z.enum(['created_at', 'updated_at', 'name']);
 

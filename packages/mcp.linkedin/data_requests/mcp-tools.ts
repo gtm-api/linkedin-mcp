@@ -20,6 +20,9 @@ import {
 
 // Ledger row sid prefix: the legacy `er_rq_` is kept deliberately (billing
 // references it as CreditTransaction.referenceSid); see research Decisions.
+// Backend GET restricts include.* to exactly these two relations.
+const DataRequestInclude = z.enum(['linkedin_account', 'cached_from']);
+
 // Bound to {sid} via the get tool's McpGetRequestSchema('er_rq_').
 
 const DataRequestKind = z.enum(['enrich', 'scrape']);
@@ -103,7 +106,7 @@ const DataRequest = z.object({
   status: DataRequestStatus,
 
   // Input (as supplied by the surface call)
-  input_kind: z.enum(['ln_id', 'sn_id', 'nickname', 'ln_member_id', 'url', 'activity_urn', 'params']),
+  input_kind: z.enum(['ln_id', 'sn_id', 'nickname', 'ln_member_id', 'url', 'activity_urn', 'params', 'domain']),
   input_value: z.string(),
 
   // Resolved person identity (NULL on scrape / company- / post-addressed methods)
@@ -202,7 +205,7 @@ export const dataRequestsTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     creditable: false,
-    inputSchema: McpGetRequestSchema('er_rq_'),
+    inputSchema: McpGetRequestSchema('er_rq_', DataRequestInclude),
     outputSchema: McpGetResponse(DataRequest),
     annotations: { title: 'Get data request', ...RO },
   },

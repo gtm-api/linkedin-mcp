@@ -20,7 +20,10 @@ import {
 } from '@gtm/mcp-shared';
 
 // Consumable family. Shared enum OWNED in ./credit_lots.md; MVP single value.
-const CreditKind = z.enum(['enrichment']);
+// Mirrors CreditKindEnum: `platform` rows are minted by gs-native operations
+// only, never by gtm-side code, but they appear on reads and the agent must
+// be able to parse and filter them.
+const CreditKind = z.enum(['enrichment', 'platform']);
 
 const CreditTransactionType = z.enum(['allocation', 'debit', 'refund', 'expiry']);
 const CreditTransactionStatus = z.enum(['pending', 'confirmed', 'released', 'expired']);
@@ -175,7 +178,7 @@ export const creditTransactionsTools: ToolDefinition[] = [
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
-      kind: CreditKind.describe('Consumable family: MVP "enrichment".'),
+      kind: CreditKind.describe('Consumable family. gtm mints "enrichment"; "platform" rows come from gs-native operations.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), CreditBalanceResult),
@@ -196,7 +199,7 @@ export const creditTransactionsTools: ToolDefinition[] = [
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
-      kind: CreditKind.describe('Consumable family: MVP "enrichment".'),
+      kind: CreditKind.describe('Consumable family. gtm mints "enrichment"; "platform" rows come from gs-native operations.'),
       amount: z.number().int().min(1).describe('Credits to buy.'),
       request_id: z.string().max(64)
         .describe('Idempotency key; MUST be stable across retries. A new key = a second charge.'),
