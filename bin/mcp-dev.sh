@@ -42,9 +42,21 @@ fi
 # plain JSON with no ANSI colour - grep/jq-friendly.
 LOG_FILE="${MCP_LOG_FILE:-$ROOT/worker.log}"
 
+# The KB tools have exactly one retrieval backend (the Mintlify discovery
+# index) and no fallback, so dev needs the assistant key too. Rendered from
+# the local vault per the secrets convention; absent, the worker still boots
+# and the two KB tools error clearly while everything else works.
+MINTLIFY_KEY="$(grep -E '^MINTLIFY_ASSISTANT_KEY=' "$HOME/.gtm-secrets/common.env" 2>/dev/null | cut -d= -f2- || true)"
+MINTLIFY_ARGS=()
+if [ -n "$MINTLIFY_KEY" ]; then
+  MINTLIFY_ARGS=(--var "MINTLIFY_ASSISTANT_KEY:$MINTLIFY_KEY")
+else
+  echo "  (no MINTLIFY_ASSISTANT_KEY in ~/.gtm-secrets/common.env: KB tools will error by design)"
+fi
+
 echo "→ Starting MCP worker on http://localhost:${PORT}"
 echo "  mount:  http://localhost:${PORT}/mcp/linkedin/accounts"
 echo "  health: http://localhost:${PORT}/health"
 echo "  log:    $LOG_FILE  (dispatch log - tail -f it, or: grep <trace_id> | jq)"
 cd "$ROOT/apps/worker"
-pnpm exec wrangler dev --port "$PORT" --ip 127.0.0.1 --var "DEV_BEARER:$TOKEN" 2>&1 | tee "$LOG_FILE"
+pnpm exec wrangler dev --port "$PORT" --ip 127.0.0.1 --var "DEV_BEARER:$TOKEN" "${MINTLIFY_ARGS[@]}" 2>&1 | tee "$LOG_FILE"
