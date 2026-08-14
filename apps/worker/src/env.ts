@@ -34,7 +34,7 @@ export interface Env {
   RATE_LIMIT_WRITES_PER_WINDOW?: string;
   /**
    * Cloudflare rate-limit bindings ([[ratelimits]]). Present in production
-   * only, exactly like AI/VECTORIZE_KB: their absence under `wrangler dev` is
+   * only: their absence under `wrangler dev` is
    * what keeps local dev fully offline, and the gate falls back to an
    * isolate-local counter that says so in the error it returns.
    */
@@ -42,14 +42,10 @@ export interface Env {
   RATE_LIMIT_WRITES?: RateLimit;
   /** KV namespace for single-use commit tokens. */
   COMMIT_TOKENS?: KVNamespace;
-  /** Workers AI binding - query-time embeddings for the support KB (prod env only). */
-  AI?: Ai;
-  /** Vectorize index with the embedded support KB (prod env only). */
-  VECTORIZE_KB?: VectorizeIndex;
   /**
-   * Mintlify assistant API key (secret, prod only). When present, KB search
-   * runs on the Mintlify discovery index over the whole published docs site;
-   * absent, the tools fall back to the bundled BM25 (+Vectorize) paths.
+   * Mintlify assistant API key (secret). The ONLY retrieval backend of the two
+   * KB tools; when it is absent or the API is down they error clearly instead
+   * of serving a stale local index (decision 2026-08-14, no silent fallback).
    */
   MINTLIFY_ASSISTANT_KEY?: string;
   /** Docs domain the discovery index serves; defaults to docs.gtm-api.com. */

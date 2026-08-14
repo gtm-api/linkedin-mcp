@@ -237,24 +237,20 @@ export default {
       logger,
       commitTokens: env.COMMIT_TOKENS ? kvCommitTokenStore(env.COMMIT_TOKENS) : undefined,
       rateLimiters: { calls: env.RATE_LIMIT_CALLS, writes: env.RATE_LIMIT_WRITES },
-      // Support-KB retrieval backends, in the order the tools try them:
-      // mintlifySearch (the discovery index over the published docs site,
-      // secret-gated) first, then the AI+Vectorize pair, then the bundled
-      // BM25 index that is always compiled in. Absent bindings simply narrow
-      // the ladder; nothing here is required for the worker to boot.
-      extensions: {
-        ...(env.MINTLIFY_ASSISTANT_KEY
-          ? {
-              mintlifySearch: {
-                key: env.MINTLIFY_ASSISTANT_KEY,
-                domain: env.MINTLIFY_DOCS_DOMAIN ?? 'docs.gtm-api.com',
-              },
-            }
-          : {}),
-        ...(env.AI && env.VECTORIZE_KB
-          ? { supportKb: { ai: env.AI, vectorize: env.VECTORIZE_KB } }
-          : {}),
-      },
+      // The knowledge tools have exactly one retrieval backend: the Mintlify
+      // discovery index over the published docs site. No fallback by decision
+      // (2026-08-14): a stale local index answering silently is invisible
+      // quality damage, so an unconfigured or unreachable backend surfaces as
+      // an error instead. The worker boots fine without the secret; the two
+      // KB tools then error clearly and everything else is unaffected.
+      extensions: env.MINTLIFY_ASSISTANT_KEY
+        ? {
+            mintlifySearch: {
+              key: env.MINTLIFY_ASSISTANT_KEY,
+              domain: env.MINTLIFY_DOCS_DOMAIN ?? 'docs.gtm-api.com',
+            },
+          }
+        : undefined,
     };
     // Chain order, outermost first, and every position is load-bearing:
     //

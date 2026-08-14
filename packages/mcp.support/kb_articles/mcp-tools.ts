@@ -1,15 +1,12 @@
 // Entity: KB Article (support knowledge base, in-worker, no backend service)
 // Source of truth: gtm.ai/product/research/gtm.agent.copilot/SUPPORT_AGENT_PLAN.md §3.2
-// Format: registry v2 with `localHandler`. The bundled BM25 index answers
-// directly in the worker; `route` is inert metadata. 2 read-only tools,
-// mounted on /mcp/support/knowledge.
+// Format: registry v2 with `localHandler`. The handlers call the Mintlify
+// discovery index over the published docs site; `route` is inert metadata.
+// 2 read-only tools, mounted on /mcp/support/knowledge.
 
 import { z } from 'zod';
 import type { DispatchContext, ToolDefinition, ToolPackage } from '@gtm/mcp-runtime/types';
 import { usageMetaField, McpSearchResponse, McpGetResponse } from '@gtm/mcp-shared';
-import { KB_INDEX } from './kb-index';
-import { getKbArticle, searchKb } from './retriever';
-import { asSupportKbExtension, fuseHits, searchKbVector } from './vector-retriever';
 import { asMintlifyExtension, fetchArticleMd, searchKbMintlify } from './mintlify-retriever';
 
 const KbHitSchema = z.object({
@@ -86,50 +83,32 @@ const searchKnowledge: ToolDefinition = {
     const query = String(ctx.args['query'] ?? '');
     const topK = typeof ctx.args['top_k'] === 'number' ? (ctx.args['top_k'] as number) : 5;
 
-    // Primary retrieval: the Mintlify discovery index over the whole published
-    // docs site (KB + guides + API reference), one source of truth. Measured
-    // against the staged BM25+Vectorize pair on 2026-08-13: 10/10 vs 4/10 on
-    // the coverage set. Any failure degrades to the bundled paths below and
-    // never fails the tool.
+    // The Mintlify discovery index over the published docs site (KB + guides
+    // + API reference) is the ONLY retrieval backend, by decision (Eugene,
+    // 2026-08-14): a silent fallback to a stale local index would degrade
+    // answer quality invisibly, which costs more debugging than an honest
+    // failure. Down means down, and the error says which dependency.
     const mintlify = asMintlifyExtension(ctx.deps.extensions?.['mintlifySearch']);
-    if (mintlify) {
-      try {
-        const hits = await searchKbMintlify(mintlify, query, topK);
-        if (hits.length > 0) {
-          return {
-            success: true,
-            operation: 'search',
-            items: hits.map((hit) => ({ item: hit, included: {} })),
-            pagination: { next_cursor: null, has_more: false, total_count: hits.length },
-            applied_filters: [],
-            includes: [],
-            meta: envelopeMeta(ctx, startedAt),
-          };
-        }
-      } catch (err) {
-        ctx.deps.logger.error({
-          event: 'support_kb_mintlify_fallback',
-          detail: String((err as { message?: string })?.message ?? err),
-        });
-      }
+    if (!mintlify) {
+      throw new Error(
+        'Knowledge search backend is not configured on this deployment '
+        + '(MINTLIFY_ASSISTANT_KEY). Retrieval is intentionally not served '
+        + 'from a local index.',
+      );
     }
-
-    // Fallback: BM25 over the bundled index; when the env binds Vectorize+AI,
-    // semantic hits are fused in via RRF. The bundled corpus is narrower and
-    // staler than the docs site, but it answers offline and keeps dev working.
-    const bm25Hits = searchKb(KB_INDEX, query, topK);
-    let hits = bm25Hits;
-    const ext = asSupportKbExtension(ctx.deps.extensions?.['supportKb']);
-    if (ext) {
-      try {
-        const vectorHits = await searchKbVector(ext, query, topK);
-        hits = fuseHits(vectorHits, bm25Hits, topK);
-      } catch (err) {
-        ctx.deps.logger.error({
-          event: 'support_kb_vector_fallback',
-          detail: String((err as { message?: string })?.message ?? err),
-        });
-      }
+    let hits;
+    try {
+      hits = await searchKbMintlify(mintlify, query, topK);
+    } catch (err) {
+      ctx.deps.logger.error({
+        event: 'support_kb_search_unavailable',
+        detail: String((err as { message?: string })?.message ?? err),
+      });
+      throw new Error(
+        'Knowledge search is temporarily unavailable (the docs search '
+        + 'backend did not answer). Retry shortly; account data tools are '
+        + 'unaffected.',
+      );
     }
 
     return {
@@ -176,40 +155,25 @@ const getArticle: ToolDefinition = {
     const startedAt = Date.now();
     const id = String(ctx.args['id'] ?? '');
 
-    // Ids from the Mintlify-backed search are docs paths ("kb/enrichment",
-    // "guides/receive-webhooks"); every published page serves a .md variant,
-    // so the fetch works for any of them, API reference included. Bundled
-    // lookup stays for old ids and for offline dev.
+    // Ids are docs paths ("kb/enrichment", "guides/receive-webhooks"); every
+    // published page serves a .md variant, API reference included. Same
+    // no-fallback rule as the search: an unreachable docs site is an error,
+    // not an excuse to serve a stale bundled copy.
     const mintlify = asMintlifyExtension(ctx.deps.extensions?.['mintlifySearch']);
-    if (mintlify) {
-      try {
-        const page = await fetchArticleMd(mintlify, id);
-        if (page) {
-          return {
-            success: true,
-            operation: 'get',
-            item: { ...page, tags: [], updated_at: null },
-            included: {},
-            includes: [],
-            meta: envelopeMeta(ctx, startedAt),
-          };
-        }
-      } catch (err) {
-        ctx.deps.logger.error({
-          event: 'support_kb_mintlify_get_fallback',
-          detail: String((err as { message?: string })?.message ?? err),
-        });
-      }
+    if (!mintlify) {
+      throw new Error(
+        'Knowledge base is not configured on this deployment '
+        + '(MINTLIFY_ASSISTANT_KEY).',
+      );
     }
-
-    const article = getKbArticle(KB_INDEX, id);
-    if (!article) {
+    const page = await fetchArticleMd(mintlify, id);
+    if (!page) {
       throw new Error(`KB article '${id}' not found; ids come from search_knowledge results.`);
     }
     return {
       success: true,
       operation: 'get',
-      item: article,
+      item: { ...page, tags: [], updated_at: null },
       included: {},
       includes: [],
       meta: envelopeMeta(ctx, startedAt),

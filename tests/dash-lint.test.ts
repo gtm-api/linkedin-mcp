@@ -119,13 +119,13 @@ describe('no em/en dash anywhere in the tree', () => {
   it('scans the whole tree, not just .ts under packages/ and apps/', () => {
     expect(files.length).toBeGreaterThan(100);
     for (const rel of [
-      'bin/build-kb-index.mjs',
-      'bin/lib/kb-corpus.mjs',
+      'bin/schema-weight.mjs',
+      'bin/lib/register-ts.mjs',
       'bin/mcp-dev.sh',
       'apps/worker/wrangler.toml',
       'PACKAGES.md',
       'tests/dash-lint.test.ts',
-      'packages/mcp.support/kb_articles/kb-index.ts',
+      'packages/mcp.support/kb_articles/mintlify-retriever.ts',
       'fixtures/research-parity/baseline.json',
     ]) {
       expect(scanned.has(rel), `${rel} is no longer scanned by the dash gate`).toBe(true);

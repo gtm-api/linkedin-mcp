@@ -7,11 +7,19 @@
 // 2026-08-13 on a 10-question set: bundled BM25 answered 4, this answered 10,
 // and it surfaces the matching API-reference page next to the KB article.
 //
-// The bundled BM25 index stays as the fallback: dev has no key, and a search
-// that fails over the network must degrade rather than fail the tool. Same
-// resilience contract the Vectorize path had.
+// There is NO fallback backend, by decision (Eugene, 2026-08-14): a stale
+// local index answering silently is a quality regression nobody can see.
+// When this path fails, the tool fails with an error naming the dependency.
 
-import type { KbHit } from './retriever';
+/** The row shape search_knowledge returns; article_id is a docs path. */
+export interface KbHit {
+  article_id: string;
+  article_title: string;
+  section: string;
+  content: string;
+  score: number;
+  help_url: string | null;
+}
 
 // The package compiles without DOM/workers libs on purpose (same constraint the
 // vector retriever works under), so the fetch surface is declared structurally:

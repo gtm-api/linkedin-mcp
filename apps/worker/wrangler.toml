@@ -178,13 +178,6 @@ RATE_LIMIT_WRITES_PER_WINDOW = "120"
 RATE_LIMIT_WINDOW_SECONDS = "60"
 MAX_BATCH_SIZE = "16"
 
-[env.production.ai]
-binding = "AI"
-
-[[env.production.vectorize]]
-binding = "VECTORIZE_KB"
-index_name = "gtm-kb"
-
 [[env.production.kv_namespaces]]
 binding = "COMMIT_TOKENS"
 # An account-scoped resource id that only exists once someone creates it.
