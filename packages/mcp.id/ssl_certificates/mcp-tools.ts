@@ -112,7 +112,6 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(SslCertificateFilter, undefined, SslCertificateSortable)
       // The SearchRequest declares no include rule and the controller builds no
       // included block, so advertising the param would be a silent no-op.
@@ -131,7 +130,6 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('id_sc_'),
     outputSchema: McpGetResponse(SslCertificate),
     annotations: { title: 'Get SSL certificate', ...RO },
@@ -147,7 +145,6 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({
       domain: z.string().max(253)
         .describe('FQDN, e.g. "track.client.com"; lowercased server-side; unique among live rows.'),
@@ -167,7 +164,6 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
     outputSchema: McpUpdateResponse(SslCertificate),
     annotations: { title: 'Update SSL certificate', ...DANGER_IDEM },
@@ -183,7 +179,6 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: McpSimpleDeleteRequestSchema('id_sc_'),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Delete SSL certificate', ...DANGER_IDEM },
@@ -199,7 +194,6 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -217,7 +211,6 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),

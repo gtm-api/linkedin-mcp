@@ -84,7 +84,6 @@ export const oauthAuthorizationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(OauthAuthorizationFilter, OauthAuthorizationInclude, OauthAuthorizationSortable),
     outputSchema: McpSearchResponse(OauthAuthorization, undefined, OauthAuthorizationCounts),
     annotations: { title: 'Search connected apps', ...RO },
@@ -100,7 +99,6 @@ export const oauthAuthorizationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -118,7 +116,6 @@ export const oauthAuthorizationsTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       team_scope_mode: OauthTeamScopeMode.optional(),

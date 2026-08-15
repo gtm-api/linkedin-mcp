@@ -8,8 +8,7 @@ function tool(over: Partial<ToolDefinition> = {}): ToolDefinition {
     name: 'send_thing', description: 'Send a thing.', service: 'linkedin', entity: 'e', mount: 'm',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/things/{sid}/send' },
     operation: 'action', envelope: 'action', availability: 'ga',
-    dangerous: false, creditable: false,
-    inputSchema: z.object({ _meta: z.any().optional() }), outputSchema: z.any(),
+    dangerous: false,    inputSchema: z.object({ _meta: z.any().optional() }), outputSchema: z.any(),
     annotations: { title: 't', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
     ...over,
   };

@@ -51,7 +51,6 @@ const Team = z.object({
     accounts: z.number(),
     cloud_browser: z.number(),
     webhooks: z.number(),
-    enrichment: z.number(),
   }).passthrough(),                         // limit keys mirror billing-product limits (extensible)
   config: TeamConfig.nullable(),            // TeamConfigValue | null (Value schema above)
   created_by: AccessIdentityValue,
@@ -105,7 +104,6 @@ export const teamsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(TeamFilter, TeamInclude, TeamSortable),
     outputSchema: McpSearchResponse(Team, undefined, TeamCounts),
     annotations: { title: 'Search teams', ...RO },
@@ -120,7 +118,6 @@ export const teamsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('ts_tm_', TeamInclude),
     outputSchema: McpGetResponse(Team),
     annotations: { title: 'Get team', ...RO },
@@ -136,7 +133,6 @@ export const teamsTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       name: z.string().min(1).max(255),
       config: TeamConfig.nullable().optional().describe('Optional workspace settings; default null.'),
@@ -156,7 +152,6 @@ export const teamsTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       name: z.string().min(1).max(255).optional(),
@@ -177,7 +172,6 @@ export const teamsTools: ToolDefinition[] = [
     envelope: 'delete_cascade',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: McpCascadeDeleteRequestSchema('ts_tm_', z.enum(['revoke_keys', 'remove_members'])),
     outputSchema: McpCascadeDeleteResponse,
     annotations: { title: 'Delete team', ...DANGER },
@@ -193,7 +187,6 @@ export const teamsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

@@ -49,8 +49,8 @@ const MassActionItemWaitReason = z.enum(['task_pending']);
 //
 // The backend writes entries as plain arrays and MassActionItemDomain rebuilds
 // each one through MassActionItemStepLogEntryValue, whose toArray() is
-// get_object_vars(): all ten keys are present on the wire, absent ones as null.
-// Hence nullable (not optional) on the nine that can be empty. passthrough keeps
+// get_object_vars(): all nine keys are present on the wire, absent ones as null.
+// Hence nullable (not optional) on the six that can be empty. passthrough keeps
 // a future key from failing the contract test.
 const MassActionItemStepLogEntry = z.object({
   step_id: z.number().int()
@@ -68,8 +68,6 @@ const MassActionItemStepLogEntry = z.object({
     .describe('creates-steps: entity family of the object this step minted.'),
   created_object_sid: z.string().nullable()
     .describe('creates-steps: sid of the minted object. Survives a later failure, so it is the cleanup surface.'),
-  credits_charged: z.number().int().nullable()
-    .describe('Creditable steps: credits actually debited for this step; null otherwise.'),
   error_message: z.string().nullable()
     .describe("Step-local failure cause. The item-level error_message repeats it behind a 'step {k} {tool}:' prefix."),
 }).passthrough();
@@ -108,7 +106,7 @@ const MassActionItem = z.object({
     .describe("Why the item is deferred mid-cascade. Null when it is not waiting; a parent-level pause leaves this null."),
   // Current-attempt state
   error_message: z.string().nullable()
-    .describe("Failure text with a machine-readable prefix: 'step {k} {tool}:', 'insufficient_credits:', or 'item_timeout:' (reaper force-fail, outcome unknown)."),
+    .describe("Failure text with a machine-readable prefix: 'step {k} {tool}:' or 'item_timeout:' (reaper force-fail, outcome unknown)."),
   // Per-attempt timing (per-step timing lives in step_log)
   started_at: z.string().nullable(),
   finished_at: z.string().nullable(),
@@ -177,13 +175,12 @@ export const massActionItemsTools: ToolDefinition[] = [
     // is the only channel the step_log semantics have, and it needs the room.
     toolClass: 'complex',
     description:
-      'Per-target drill-down of a mass action: one row per target with current_step, the object cursor (object_type / object_sid, on a generative run what the row created) and step_log[], one entry per plan step with status (running / deferred / succeeded / failed / skipped), executor_ref for async steps, created_object_sid for steps that minted one, credits_charged and error_message. The last step_log entry says what failed and why, earlier ones what completed: a failed item keeps the effects of its finished steps (fail-forward), created_object_sid is the cleanup surface. Filter by mass_action_sid, then narrow by status / current_step / wait_reason; object_sid is parent-scoped, so always pair it with mass_action_sid (unpaired it degrades to a full team scan). Sort defaults to position asc (insertion order; position 1 is the canary); page_size 0 returns pagination.total_count alone. No include[] and no counts block; run-level aggregation lives on the parent, mass-actions metrics.',
+      'Per-target drill-down of a mass action: one row per target with current_step, the object cursor (object_type / object_sid, on a generative run what the row created) and step_log[], one entry per plan step with status (running / deferred / succeeded / failed / skipped), executor_ref for async steps, created_object_sid for steps that minted one, and error_message. The last step_log entry says what failed and why, earlier ones what completed: a failed item keeps the effects of its finished steps (fail-forward), created_object_sid is the cleanup surface. Filter by mass_action_sid, then narrow by status / current_step / wait_reason; object_sid is parent-scoped, so always pair it with mass_action_sid (unpaired it degrades to a full team scan). Sort defaults to position asc (insertion order; position 1 is the canary); page_size 0 returns pagination.total_count alone. No include[] and no counts block; run-level aggregation lives on the parent, mass-actions metrics.',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-action-items/search' },
     operation: 'search',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     // The backend FormRequest declares no `include` rule and the controller never
     // builds an included block, so advertising the param would be a silent no-op.
     inputSchema: McpSearchRequestSchema(MassActionItemFilter, undefined, MassActionItemSortable, 200)
@@ -202,7 +199,6 @@ export const massActionItemsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     // Oracle: mass_action true, step_eligible false, schedule_required false.
     // The filter arm fans one call out over every matching item, cross-parent;
     // no arm of CrossServiceStepExecutor calls this verb, so it is not a plan step.

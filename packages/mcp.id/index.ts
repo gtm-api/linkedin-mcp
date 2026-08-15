@@ -3,7 +3,6 @@ import { usersTools } from './users/mcp-tools';
 import { teamsTools } from './teams/mcp-tools';
 import { teamMembersTools } from './team_members/mcp-tools';
 import { sessionsTools } from './sessions/mcp-tools';
-import { creditTransactionsTools } from './credit_transactions/mcp-tools';
 import { apiKeysTools } from './api_keys/mcp-tools';
 import { oauthClientsTools } from './oauth_clients/mcp-tools';
 import { oauthAuthorizationsTools } from './oauth_authorizations/mcp-tools';
@@ -29,7 +28,6 @@ export const idPackages: ToolPackage[] = [
   pkg('teams', teamsTools),
   pkg('team_members', teamMembersTools),
   pkg('sessions', sessionsTools),
-  pkg('credit_transactions', creditTransactionsTools),
   pkg('api_keys', apiKeysTools),
   pkg('oauth_clients', oauthClientsTools),
   pkg('oauth_authorizations', oauthAuthorizationsTools),

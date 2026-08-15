@@ -189,10 +189,6 @@ const MANUAL_BRIDGE: BridgeEntry[] = [
   { service: 'id', entity: 'billing_transactions', at: 'collection_mode', enumClass: 'BillingSubscriptionCollectionModeEnum' },
   // Line items on a transaction are products, and the class names the product.
   { service: 'id', entity: 'billing_transactions', at: 'items.*.product_type', enumClass: 'BillingProductTypeEnum' },
-  // The credit vocabulary is CreditKindEnum on every credit surface (the ledger
-  // row, the balance block and the purchase result alike); the entity name
-  // credit_transactions does not reach it.
-  { service: 'id', entity: 'credit_transactions', at: 'kind', enumClass: 'CreditKindEnum' },
   // The observability tree is spans, not requests: a SPAN status has a third
   // case (unset) the request status does not, and name resolution would silently
   // pick ObservabilityRequestStatusEnum for both.

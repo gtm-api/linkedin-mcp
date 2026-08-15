@@ -322,7 +322,6 @@ describe('size-budget middleware', () => {
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({ _meta: z.any().optional() }),
     outputSchema: z.any(),
     annotations: { title: 't', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },

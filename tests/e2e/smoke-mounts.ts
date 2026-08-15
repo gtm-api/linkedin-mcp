@@ -119,7 +119,6 @@ export const ID_MOUNTS: SmokeMount[] = [
   { path: '/mcp/id/identity', name: 'gtm-id-identity', search: 'search_teams' },
   { path: '/mcp/id/access', name: 'gtm-id-access', search: 'search_api_keys' },
   { path: '/mcp/id/billing', name: 'gtm-id-billing', search: 'search_billing_products' },
-  { path: '/mcp/id/credits', name: 'gtm-id-credits', search: 'search_credit_transactions' },
   { path: '/mcp/id/platform', name: 'gtm-id-platform', search: 'search_notifications' },
 ];
 

@@ -5,7 +5,6 @@
 //   - Traits/McpResponds.php     (response envelopes)
 //   - Http/McpFormRequest.php    (request params: page_size, filter, sort, ...)
 //   - Enums/McpErrorCode.php     (16-code error taxonomy)
-//   - Values/CreditsSpentValue.php
 // When the backend contract evolves, update this file in lockstep and let the
 // coverage/contract tests catch drift.
 
@@ -197,14 +196,9 @@ export const McpGroupByResponse = z.object({
 // 3. Action envelopes + credits (§9.5) + async pending refs (§10)
 // ═══════════════════════════════════════════════════════════════════════
 
-export const CreditsSpent = z.object({
-  charged: z.number().int().nonnegative()
-    .describe('Credits debited for THIS call (0 on own-account / cache hit).'),
-  reason: z.enum(['infra_pool', 'limit_fallback']).nullable(),
-  executed_on: z.enum(['own_account', 'infra_pool']),
-  balance_after: z.number().int().nonnegative().nullable()
-    .describe('Team balance after the debit; null when the ledger was untouched.'),
-});
+// The wire still carries a partner-internal `credits` block on DataRequest
+// responses (the GetSales integration meters on it); it is deliberately NOT
+// declared here: public schemas stopped describing credits on 2026-08-14.
 
 // pending[] ref emitted by mcpAsyncAction. The backend contract is
 // {activity_log_sid, expected_completion_seconds, webhook_events[]}; kept
@@ -227,7 +221,6 @@ export const McpActionResponse = <
     item: ((itemSchema ?? z.record(z.unknown())) as I).nullable(),
     result: (resultSchema ?? z.record(z.unknown())) as R,
     meta: McpEnvelopeMeta,
-    credits: CreditsSpent.optional(),
   });
 
 export const McpAsyncActionResponse = <
@@ -243,7 +236,6 @@ export const McpAsyncActionResponse = <
     pending: z.array(PendingRef),
     result: (resultSchema ?? z.record(z.unknown())) as R,
     meta: McpEnvelopeMeta,
-    credits: CreditsSpent.optional(),
   });
 
 // ═══════════════════════════════════════════════════════════════════════

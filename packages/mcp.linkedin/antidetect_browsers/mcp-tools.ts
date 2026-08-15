@@ -180,7 +180,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(AntidetectBrowserFilter, AntidetectBrowserInclude, AntidetectBrowserSortable),
     outputSchema: McpSearchResponse(AntidetectBrowser, undefined, AntidetectBrowserCounts),
     annotations: { title: 'Search antidetect browsers', ...RO },
@@ -195,7 +194,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('ab_br_', AntidetectBrowserInclude),
     outputSchema: McpGetResponse(AntidetectBrowser),
     annotations: { title: 'Get antidetect browser', ...RO },
@@ -211,7 +209,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({
       browser_owner: BrowserOwner.optional()
         .describe('Omit to infer: vendor_profile_id present ⇒ customer, absent ⇒ platform.'),
@@ -239,7 +236,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -257,7 +253,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -279,7 +274,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -312,7 +306,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -337,7 +330,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -362,7 +354,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -385,7 +376,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     envelope: 'delete_cascade',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: McpCascadeDeleteRequestSchema('ab_br_'),
     outputSchema: McpCascadeDeleteResponse,
     annotations: { title: 'Delete antidetect browser', ...DANGER },

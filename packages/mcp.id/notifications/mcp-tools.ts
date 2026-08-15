@@ -108,7 +108,6 @@ export const notificationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(NotificationFilter, undefined, NotificationSortable)
       // The SearchRequest declares no include rule and the controller builds no
       // included block, so advertising the param would be a silent no-op.
@@ -127,7 +126,6 @@ export const notificationsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(NotificationFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -149,7 +147,6 @@ export const notificationsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('id_nt_'),
     outputSchema: McpGetResponse(Notification),
     annotations: { title: 'Get notification', ...RO },
@@ -165,7 +162,6 @@ export const notificationsTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: McpSimpleDeleteRequestSchema('id_nt_'),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Dismiss notification', ...DANGER },

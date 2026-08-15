@@ -120,7 +120,6 @@ export const cloudBrowserSessionsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(CloudBrowserSessionFilter, undefined, undefined, 200)
       // The SearchRequest declares no include rule and the controller builds no
       // included block, so advertising the param would be a silent no-op.
@@ -139,7 +138,6 @@ export const cloudBrowserSessionsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(CloudBrowserSessionFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),

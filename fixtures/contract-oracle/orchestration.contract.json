@@ -48,12 +48,6 @@
                         "has_default": false
                     },
                     {
-                        "name": "credits_spent",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
                         "name": "title",
                         "type": "?string",
                         "nullable": true,
@@ -168,12 +162,6 @@
                     },
                     {
                         "name": "total_count",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "credits_spent",
                         "type": "int",
                         "nullable": false,
                         "has_default": false
@@ -1670,6 +1658,10 @@
                     "value": "antidetect-browsers.logged-in"
                 },
                 {
+                    "name": "AntidetectBrowsersLoginFailed",
+                    "value": "antidetect-browsers.login-failed"
+                },
+                {
                     "name": "AntidetectBrowsersLoggedOut",
                     "value": "antidetect-browsers.logged-out"
                 },
@@ -2860,6 +2852,61 @@
         },
         {
             "method": "POST",
+            "uri": "api/mass-actions/{sid}/append-items",
+            "controller": "App\\Entities\\MassAction\\MassActionController",
+            "action": "appendItems",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_mass_actions",
+            "internal": false,
+            "request_class": "App\\Entities\\MassAction\\Requests\\MassActionAppendItemsRequest",
+            "rules": [
+                {
+                    "field": "identities",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*",
+                    "rules": [
+                        "array",
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/mass-actions/{sid}/pause",
             "controller": "App\\Entities\\MassAction\\MassActionController",
             "action": "pause",
@@ -3384,7 +3431,7 @@
                     "field": "events.*",
                     "rules": [
                         "string",
-                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-accounts.subscription-hold-applied\",\"linkedin-accounts.subscription-hold-released\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-account-smart-limits.ceiling-learned\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-accounts.subscription-hold-applied\",\"email-accounts.subscription-hold-released\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\",\"*\""
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-accounts.subscription-hold-applied\",\"linkedin-accounts.subscription-hold-released\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-account-smart-limits.ceiling-learned\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.login-failed\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-accounts.subscription-hold-applied\",\"email-accounts.subscription-hold-released\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\",\"*\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -3437,6 +3484,7 @@
                         "linkedin-auto-scrape-runs.failed",
                         "linkedin-auto-scrapes.paused",
                         "antidetect-browsers.logged-in",
+                        "antidetect-browsers.login-failed",
                         "antidetect-browsers.logged-out",
                         "antidetect-browsers.started",
                         "antidetect-browsers.stopped",
@@ -3867,7 +3915,7 @@
                     "field": "events.*",
                     "rules": [
                         "string",
-                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-accounts.subscription-hold-applied\",\"linkedin-accounts.subscription-hold-released\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-account-smart-limits.ceiling-learned\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-accounts.subscription-hold-applied\",\"email-accounts.subscription-hold-released\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\",\"*\""
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-accounts.subscription-hold-applied\",\"linkedin-accounts.subscription-hold-released\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-account-smart-limits.ceiling-learned\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.login-failed\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-accounts.subscription-hold-applied\",\"email-accounts.subscription-hold-released\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\",\"*\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -3920,6 +3968,7 @@
                         "linkedin-auto-scrape-runs.failed",
                         "linkedin-auto-scrapes.paused",
                         "antidetect-browsers.logged-in",
+                        "antidetect-browsers.login-failed",
                         "antidetect-browsers.logged-out",
                         "antidetect-browsers.started",
                         "antidetect-browsers.stopped",
@@ -4364,7 +4413,7 @@
                     "rules": [
                         "required",
                         "string",
-                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-accounts.subscription-hold-applied\",\"linkedin-accounts.subscription-hold-released\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-account-smart-limits.ceiling-learned\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-accounts.subscription-hold-applied\",\"email-accounts.subscription-hold-released\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
+                        "in:\"linkedin-accounts.created\",\"linkedin-accounts.restored\",\"linkedin-accounts.deleted\",\"linkedin-accounts.initial-sync-started\",\"linkedin-accounts.initial-sync-done\",\"linkedin-accounts.sync-reset\",\"linkedin-accounts.sync-config-updated\",\"linkedin-accounts.premium-changed\",\"linkedin-accounts.login-succeeded\",\"linkedin-accounts.login-failed\",\"linkedin-accounts.logged-out\",\"linkedin-accounts.heartbeat-stale\",\"linkedin-accounts.subscription-hold-applied\",\"linkedin-accounts.subscription-hold-released\",\"linkedin-account-block-log.recorded\",\"linkedin-account-snapshot.captured\",\"linkedin-account-quota-hits.recorded\",\"linkedin-account-smart-limits.limit-reached\",\"linkedin-account-smart-limits.limit-released\",\"linkedin-account-smart-limits.smart-limit-recomputed\",\"linkedin-account-smart-limits.ceiling-learned\",\"linkedin-connection-requests.sent\",\"linkedin-connection-requests.accepted\",\"linkedin-connection-requests.withdrawn\",\"linkedin-connection-requests.expired-detected\",\"linkedin-connection-requests.resend-available\",\"linkedin-connection-requests.sync-completed\",\"linkedin-connection-invitations.received\",\"linkedin-connection-invitations.accepted\",\"linkedin-connection-invitations.ignored\",\"linkedin-connection-invitations.expired-detected\",\"linkedin-connection-invitations.sync-completed\",\"linkedin-connections.added\",\"linkedin-connections.removed\",\"linkedin-connections.sync-completed\",\"linkedin-followers.added\",\"linkedin-messages.received\",\"linkedin-messages.sent\",\"linkedin-messages.send-failed\",\"linkedin-conversations.created\",\"linkedin-conversations.sync-completed\",\"data-requests.completed\",\"data-requests.failed\",\"linkedin-auto-scrape-runs.completed\",\"linkedin-auto-scrape-runs.failed\",\"linkedin-auto-scrapes.paused\",\"antidetect-browsers.logged-in\",\"antidetect-browsers.login-failed\",\"antidetect-browsers.logged-out\",\"antidetect-browsers.started\",\"antidetect-browsers.stopped\",\"antidetect-browsers.start-failed\",\"antidetect-browsers.running-issue\",\"antidetect-browsers.error-investigation\",\"antidetect-browsers.maintenance\",\"antidetect-browsers.proxy-issue\",\"antidetect-browsers.proxy-back-alive\",\"antidetect-browsers.idle\",\"account-shares.created\",\"account-shares.returned\",\"account-shares.recalled\",\"account-shares.failed\",\"account-transfers.completed\",\"account-transfers.failed\",\"webhooks.failed\",\"email-accounts.connected\",\"email-accounts.reconnect-required\",\"email-accounts.sending-paused\",\"email-accounts.sending-resumed\",\"email-accounts.disconnected\",\"email-accounts.deleted\",\"email-accounts.sync-completed\",\"email-accounts.subscription-hold-applied\",\"email-accounts.subscription-hold-released\",\"email-messages.received\",\"email-messages.sent\",\"email-messages.bounced\",\"email-messages.complained\",\"email-messages.failed\",\"email-messages.deleted\",\"email-threads.updated\",\"email-engagements.opened\",\"email-engagements.clicked\",\"email-engagements.unsubscribed\",\"email-account-health.snapshot-captured\",\"email-account-health.score-critical\",\"email-suppressions.created\",\"email-suppressions.deleted\",\"email-tracking-domains.verified\",\"email-tracking-domains.failed\",\"email-sending-domains.verified\",\"email-sending-domains.failed\",\"mass-actions.created\",\"mass-actions.paused\",\"mass-actions.resumed\",\"mass-actions.settled\""
                     ],
                     "required": true,
                     "nullable": false,
@@ -4417,6 +4466,7 @@
                         "linkedin-auto-scrape-runs.failed",
                         "linkedin-auto-scrapes.paused",
                         "antidetect-browsers.logged-in",
+                        "antidetect-browsers.login-failed",
                         "antidetect-browsers.logged-out",
                         "antidetect-browsers.started",
                         "antidetect-browsers.stopped",

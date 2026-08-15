@@ -108,7 +108,6 @@ export const linkedinFollowersTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinFollowerFilter, LinkedinFollowerInclude, LinkedinFollowerSortable, 200),
     outputSchema: McpSearchResponse(LinkedinFollower, undefined, LinkedinFollowerCounts),
     annotations: { title: 'Search LinkedIn followers', ...RO },
@@ -124,7 +123,6 @@ export const linkedinFollowersTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(LinkedinFollowerFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -139,14 +137,13 @@ export const linkedinFollowersTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_followers',
     description:
-      'Always-fresh head read of the followers list: refresh the newest from LinkedIn in-request (§5.8), then return the last N (created_at DESC) with a counts block. The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped, non-creditable.',
+      'Always-fresh head read of the followers list: refresh the newest from LinkedIn in-request (§5.8), then return the last N (created_at DESC) with a counts block. The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-followers/get-my-latest' },
     operation: 'search',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       page_size: z.number().int().min(1).max(100).optional()

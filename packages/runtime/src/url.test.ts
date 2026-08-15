@@ -18,8 +18,7 @@ function tool(over: Partial<ToolDefinition>): ToolDefinition {
     name: 't', description: 'd', service: 'linkedin', entity: 'e', mount: 'm',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/x/search' },
     operation: 'search', envelope: 'search', availability: 'ga',
-    dangerous: false, creditable: false,
-    inputSchema: z.object({ _meta: z.any().optional() }), outputSchema: z.any(),
+    dangerous: false,    inputSchema: z.object({ _meta: z.any().optional() }), outputSchema: z.any(),
     annotations: { title: 't', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
     ...over,
   };

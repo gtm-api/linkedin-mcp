@@ -139,7 +139,6 @@ export const observabilityTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       trace_id: z.string().describe('The request trace_id (UUID v7, 36 chars).'),
       ...usageMetaField,
@@ -158,7 +157,6 @@ export const observabilityTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       agent_session_id: z.string().describe('The agent session id (UUID v7, 36 chars).'),
       ...usageMetaField,

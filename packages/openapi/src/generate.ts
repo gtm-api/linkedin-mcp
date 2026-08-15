@@ -112,9 +112,6 @@ const flagSentences = (tool: ToolDefinition): string[] => {
       'dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API',
     );
   }
-  if (tool.creditable) {
-    flags.push('creditable: the response carries a `credits` block and the call can debit the team ledger');
-  }
   if (tool.massAction) {
     flags.push(
       "mass action: this verb's own request accepts a filter or targets[] set, which the owning service drains",
@@ -154,7 +151,6 @@ const extensions = (tool: ToolDefinition): JsonSchema => {
     'x-gtm-envelope': tool.envelope,
     'x-gtm-availability': tool.availability,
     'x-gtm-dangerous': tool.dangerous,
-    'x-gtm-creditable': tool.creditable,
     'x-gtm-mass-action': tool.massAction === true,
     'x-gtm-step-eligible': tool.stepEligible === true,
     'x-gtm-schedule-required': tool.scheduleRequired === true,

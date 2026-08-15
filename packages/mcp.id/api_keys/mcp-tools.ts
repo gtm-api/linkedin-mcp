@@ -111,7 +111,6 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(ApiKeyFilter, ApiKeyInclude, ApiKeySortable),
     outputSchema: McpSearchResponse(ApiKey, undefined, ApiKeyCounts),
     annotations: { title: 'Search API keys', ...RO },
@@ -127,7 +126,6 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('id_ak_', ApiKeyInclude),
     outputSchema: McpGetResponse(ApiKey),
     annotations: { title: 'Get API key', ...RO },
@@ -143,7 +141,6 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     allowSecretFields: ['plaintext_token'],
     inputSchema: z.object({
       name: z.string().min(1).max(255).describe('Human-readable key name; unique among the team\'s non-revoked keys.'),
@@ -167,7 +164,6 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       name: z.string().min(1).max(255).optional(),
@@ -189,7 +185,6 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: McpSimpleDeleteRequestSchema('id_ak_'),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Revoke API key', ...DANGER },
@@ -205,7 +200,6 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(ApiKeyFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -226,7 +220,6 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     allowSecretFields: ['plaintext_token'],

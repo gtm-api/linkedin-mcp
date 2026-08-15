@@ -53,8 +53,6 @@ export interface ToolDefinition {
   availability: ToolAvailability;
   /** Server-side preview→commit gate applies (destructive / paid). */
   dangerous: boolean;
-  /** Response carries the §9.5 credits block. */
-  creditable: boolean;
   /** ACTION verbs only: this verb's OWN surface takes a filter/targets[] set, which
    *  the owning service drains. Mirrors #[ApiMethod(..., massAction:)] (§R4). */
   massAction?: boolean;

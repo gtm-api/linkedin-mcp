@@ -126,7 +126,6 @@ export const linkedinAccountSnapshotsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinAccountSnapshotFilter, LinkedinAccountSnapshotInclude, LinkedinAccountSnapshotSortable, 200),
     outputSchema: McpSearchResponse(LinkedinAccountSnapshot, undefined, LinkedinAccountSnapshotCounts),
     annotations: { title: 'Search LinkedIn account snapshots', ...RO },

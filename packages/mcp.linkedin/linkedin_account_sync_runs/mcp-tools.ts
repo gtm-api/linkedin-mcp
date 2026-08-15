@@ -142,7 +142,6 @@ export const linkedinAccountSyncRunsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinAccountSyncRunFilter, LinkedinAccountSyncRunInclude, LinkedinAccountSyncRunSortable, 200),
     outputSchema: McpSearchResponse(LinkedinAccountSyncRun, undefined, LinkedinAccountSyncRunCounts),
     annotations: { title: 'Search LinkedIn account sync runs', ...RO },
@@ -158,7 +157,6 @@ export const linkedinAccountSyncRunsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     // filter omitted: the backend metrics() query ignores it (it is only echoed
     // in applied_filters), so advertising it would be misleading. period is
     // REQUIRED by the backend FormRequest (period + period.from + period.to).
@@ -183,7 +181,6 @@ export const linkedinAccountSyncRunsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('ln_sy_', LinkedinAccountSyncRunInclude),
     outputSchema: McpGetResponse(LinkedinAccountSyncRun),
     annotations: { title: 'Get LinkedIn account sync run', ...RO },

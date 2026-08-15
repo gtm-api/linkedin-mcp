@@ -148,7 +148,6 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinAccountSmartLimitFilter, LinkedinAccountSmartLimitInclude, LinkedinAccountSmartLimitSortable, 200),
     outputSchema: McpSearchResponse(LinkedinAccountSmartLimit, undefined, LinkedinAccountSmartLimitCounts),
     annotations: { title: 'Search LinkedIn account smart limits', ...RO },
@@ -166,7 +165,6 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       daily_limit: z.number().int().min(1).max(1000).optional().describe('Active cap (1..1000).'),
@@ -191,7 +189,6 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),

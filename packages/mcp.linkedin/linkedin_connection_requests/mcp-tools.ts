@@ -111,7 +111,6 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinConnectionRequestFilter, LinkedinConnectionRequestInclude, LinkedinConnectionRequestSortable, 200),
     outputSchema: McpSearchResponse(LinkedinConnectionRequest),
     annotations: { title: 'Search connection requests', ...RO },
@@ -127,7 +126,6 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(LinkedinConnectionRequestMetricsFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -148,7 +146,6 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     stepEligible: true,
     scheduleRequired: false,
@@ -156,9 +153,9 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
       linkedin_account_sid: ACCOUNT_SID,
       profile_id: z.string().describe('Target URN: ln_id (ACoAA…) OR sn_id (ACwAA…); both accepted as profile_id.'),
       note: z.string().max(300).nullable().optional()
-        .describe('Invitation note; server caps at 200 chars when the sender is not premium.'),
+        .describe('Invitation note; server caps at 200 chars when the sender is not premium. Over the cap it is 422 unless allow_no_note_fallback is set.'),
       allow_no_note_fallback: z.boolean().optional()
-        .describe('Default false. Retry WITHOUT the note on a with-note cap failure.'),
+        .describe("Default false. When the note is longer than the sender's cap (200 free / 300 premium), send the invite WITHOUT it instead of refusing 422, for campaigns where reaching the person beats personalizing. The response says which happened in result.note_fallback_used, and the stored row carries note=null, so a follow-up does not assume a note the prospect never saw. Scope, stated plainly: this covers the length cap, which the server evaluates itself. LinkedIn's own monthly with-note quota is only visible at send time and arrives untyped, so a refusal there still fails the call rather than being retried blind (a retry after an ambiguous send can invite the person twice)."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinConnectionRequest),
@@ -175,7 +172,6 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ linkedin_account_sid: ACCOUNT_SID, ...usageMetaField }),
@@ -186,14 +182,13 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_connection_requests',
     description:
-      'Always-fresh head read of pending outbound requests: refresh the newest from LinkedIn in-request (§5.8), then return the last N (sent_at DESC). The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped, non-creditable.',
+      'Always-fresh head read of pending outbound requests: refresh the newest from LinkedIn in-request (§5.8), then return the last N (sent_at DESC). The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-requests/get-my-latest' },
     operation: 'search',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       page_size: z.number().int().min(1).max(100).optional()
@@ -216,7 +211,6 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),

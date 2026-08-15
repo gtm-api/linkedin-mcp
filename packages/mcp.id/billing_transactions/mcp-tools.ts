@@ -5,7 +5,7 @@
 // append-only, read-only financial ledger (search / metrics / get) plus the
 // get-invoice action (temporary Paddle invoice-PDF URL, mutates nothing).
 // Rows are written only by the Paddle webhook ingest; money moves via Paddle,
-// not platform credits ⇒ creditable:false.
+// not platform credits.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -47,7 +47,7 @@ const BillingTransaction = z.object({
   items: z.array(z.object({
     price_sid: z.string().nullable(),
     product_sid: z.string().nullable(),
-    product_type: z.enum(['plan', 'addon', 'credits_pack']),
+    product_type: z.enum(['plan', 'addon']),
     quantity: z.number(),
     unit_amount: z.string(),
     paddle_price_id: z.string().nullable(),
@@ -100,7 +100,6 @@ export const billingTransactionsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(BillingTransactionFilter, BillingTransactionInclude, BillingTransactionSortable),
     outputSchema: McpSearchResponse(BillingTransaction, undefined, BillingTransactionCounts),
     annotations: { title: 'Search billing transactions', ...RO },
@@ -116,7 +115,6 @@ export const billingTransactionsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     // BillingTransactionMetricsRequest makes period + period.from + period.to
     // `required`. Without a slot for them the z.object strips whatever the agent
     // sends and the call 422s every single time, for any input.
@@ -140,7 +138,6 @@ export const billingTransactionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -157,7 +154,6 @@ export const billingTransactionsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('bl_tx_'),
     outputSchema: McpGetResponse(BillingTransaction),
     annotations: { title: 'Get billing transaction', ...RO },

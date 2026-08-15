@@ -87,7 +87,6 @@ export const antidetectBrowserProxiesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: true,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -109,7 +108,6 @@ export const antidetectBrowserProxiesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: true,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -131,7 +129,6 @@ export const antidetectBrowserProxiesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(AntidetectBrowserProxyFilter, undefined, undefined, 200)
       // The SearchRequest declares no include rule and the controller builds no
       // included block, so advertising the param would be a silent no-op.

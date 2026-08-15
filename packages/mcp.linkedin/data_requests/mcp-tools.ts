@@ -2,7 +2,7 @@
 // Source of truth: product/research/gtm.service.linkedin/entities/data_requests.md
 // Format: registry v2, where each tool carries route metadata so the generic
 // dispatcher can drive it. 2 tools (the data-requests route group): the
-// READ-ONLY surface over the credit-metered scraping/enrichment ledger. There
+// READ-ONLY surface over the scraping/enrichment ledger. There
 // is NO public create: rows are born implicitly inside the two §9.6 surface
 // controllers (linkedin-scraping / linkedin-enrichment). Mounted on
 // linkedin.data alongside linkedin-searches / linkedin-search-results.
@@ -19,7 +19,7 @@ import {
 } from '@gtm/mcp-shared';
 
 // Ledger row sid prefix: the legacy `er_rq_` is kept deliberately (billing
-// references it as CreditTransaction.referenceSid); see research Decisions.
+// references it downstream); see research Decisions.
 // Backend GET restricts include.* to exactly these two relations.
 const DataRequestInclude = z.enum(['linkedin_account', 'cached_from']);
 
@@ -178,14 +178,13 @@ export const dataRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'search_data_requests',
     description:
-      'List/filter the credit-metered request history: what was asked, where it ran, what it cost, what came from cache. The go-to tool for spend audits (charged:{gt:0}), retry forensics (idempotency_key:{eq}), per-person request history (ln_member_id:{eq}) and mid-flight visibility (status:{in:["pending","running"]}). This is a read-only ledger. To RUN scraping/enrichment call the linkedin-scraping / linkedin-enrichment surfaces instead.',
+      'List/filter the request history: what was asked, where it ran, what came from cache. The go-to tool for retry forensics (idempotency_key:{eq}), per-person request history (ln_member_id:{eq}) and mid-flight visibility (status:{in:["pending","running"]}). This is a read-only ledger. To RUN scraping/enrichment call the linkedin-scraping / linkedin-enrichment surfaces instead.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/data-requests/search' },
     operation: 'search',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(DataRequestFilter, undefined, DataRequestSortable, 200)
       // The SearchRequest declares no include rule and the controller builds no
       // included block, so advertising the param would be a silent no-op.
@@ -197,14 +196,13 @@ export const dataRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'get_data_request',
     description:
-      'Fetch a single ledger row by sid to inspect one request referenced from a surface response\'s credits block, a data-requests.* webhook, or another row\'s cached_from_sid pointer.',
+      'Fetch a single ledger row by sid to inspect one request referenced from a data-requests.* webhook or another row\'s cached_from_sid pointer.',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'GET', pathTemplate: '/api/data-requests/{sid}', sidParam: 'sid' },
     operation: 'get',
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('er_rq_', DataRequestInclude),
     outputSchema: McpGetResponse(DataRequest),
     annotations: { title: 'Get data request', ...RO },

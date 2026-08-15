@@ -142,7 +142,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinConversationFilter, LinkedinConversationIncludeEnum, LinkedinConversationSortableFieldEnum, 200),
     outputSchema: McpSearchResponse(LinkedinConversation),
     annotations: { title: 'Search LinkedIn conversations', ...RO },
@@ -158,7 +157,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('ln_cv_', LinkedinConversationIncludeEnum),
     outputSchema: McpGetResponse(LinkedinConversation),
     annotations: { title: 'Get LinkedIn conversation', ...RO },
@@ -174,7 +172,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       filter: LinkedinConversationMetricsFilter.describe('Row scope; linkedin_account_sid is REQUIRED (422 without it).'),
       period: Period,
@@ -195,7 +192,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ linkedin_account_sid: ACCOUNT_SID, ...usageMetaField }),
@@ -213,7 +209,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ linkedin_account_sid: ACCOUNT_SID, ...usageMetaField }),
@@ -231,7 +226,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -254,7 +248,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -277,7 +270,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -295,7 +287,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -313,7 +304,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -335,7 +325,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -357,7 +346,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -379,7 +367,6 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

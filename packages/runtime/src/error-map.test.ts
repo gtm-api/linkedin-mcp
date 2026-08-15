@@ -11,8 +11,7 @@ const deps = {
 const tool: ToolDefinition = {
   name: 'get_linkedin_account', description: 'd', service: 'linkedin', entity: 'e', mount: 'm',
   route: { service: 'linkedin', method: 'GET', pathTemplate: '/api/x/{sid}' },
-  operation: 'get', envelope: 'get', availability: 'ga', dangerous: false, creditable: false,
-  inputSchema: z.object({ _meta: z.any().optional() }), outputSchema: z.any(),
+  operation: 'get', envelope: 'get', availability: 'ga', dangerous: false,  inputSchema: z.object({ _meta: z.any().optional() }), outputSchema: z.any(),
   annotations: { title: 't', readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false },
 };
 const ctx = { tool } as DispatchContext;

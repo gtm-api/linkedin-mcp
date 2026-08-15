@@ -27,7 +27,6 @@ function mkTool(availability: ToolAvailability, dangerous: boolean): ToolDefinit
     envelope: 'action',
     availability,
     dangerous,
-    creditable: false,
     inputSchema: z.object({ _meta: z.any().optional() }),
     outputSchema: z.any(),
     annotations: { title: 't', readOnlyHint: false, destructiveHint: dangerous, idempotentHint: false, openWorldHint: false },

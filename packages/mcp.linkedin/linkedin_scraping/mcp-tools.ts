@@ -35,9 +35,9 @@
 // been live for longer than that, and groups and courses landed the same day,
 // each already whole on the node side (both verbs plus the plugin rpc handler
 // and the SDK parser).
-// Every verb is creditable (§9.5 v5.2 explicit contract: a pinned own
-// account runs free or refuses 429; the pool debits credits only with an
-// explicit use_credits: true); the credits block attaches at runtime.
+// Every verb runs on the team's own connected accounts (§9.5, 2026-08-14
+// own-accounts-only contract: pinned account runs or refuses 429; no pin means
+// the service auto-picks a capable own account).
 // Envelope is always 'action' (synchronous mcpAction; no async on this
 // surface). Nothing is dangerous: scraping reads data (dangerous:false).
 
@@ -51,11 +51,9 @@ import { usageMetaField, McpActionResponse } from '@gtm/mcp-shared';
 
 const requestBase = {
   linkedin_account_sid: z.string().length(18).startsWith('ln_ac_').nullable().optional()
-    .describe('Executor account (ln_ac_...). OPTIONAL everywhere on this surface. Given: the call runs on that account ONLY; scraping bucket budget means charged 0, and a saturated or held bucket refuses 429 bucket_saturated (with retry_after), never a silent pool charge (§9.5 v5.2). To pay instead, omit this and pass use_credits: true.'),
-  use_credits: z.boolean().optional()
-    .describe('Explicit pool opt-in (§9.5 v5.2). true with NO linkedin_account_sid: run on the platform pool and debit the method credit cost (reason infra_pool). Neither field: 422 executor_required. Both together: 422 (contradictory).'),
+    .describe('Executor account (ln_ac_...). OPTIONAL everywhere on this surface. Given: the call runs on that account ONLY; a saturated or held scraping bucket refuses 429 bucket_saturated (with retry_after). Omitted: the service auto-picks one of your connected accounts with remaining capacity (SN verbs pick only Sales-Navigator seats; 422 no_connected_accounts when none is ready, 429 when all are at capacity).'),
   idempotency_key: z.string().max(128).nullable().optional()
-    .describe('Ledger replay guard: a repeat call with the same (team, key) returns the stored outcome; no re-execution, no double charge. Recommended on every paid call. The KEY ALONE decides: the probe does not compare arguments, so reusing one key after changing the arguments hands back the FIRST result. On the twelve search verbs that matters twice over, because switching a call from filters to url (or back) under one key replays instead of running the new search. New search, new key.'),
+    .describe('Ledger replay guard: a repeat call with the same (team, key) returns the stored outcome; no re-execution. Recommended on every search run. The KEY ALONE decides: the probe does not compare arguments, so reusing one key after changing the arguments hands back the FIRST result. On the twelve search verbs that matters twice over, because switching a call from filters to url (or back) under one key replays instead of running the new search. New search, new key.'),
 } as const;
 
 // ═══════════════════════════════════════════════════════════════
@@ -774,11 +772,11 @@ const runResult = (
 }).passthrough();
 
 // All 20 verbs share these annotations (research §Shared per-call semantics):
-// not read-only (spends rate budget, writes the ledger, may debit credits),
-// not idempotent (a repeat call without idempotency_key re-executes/re-charges).
+// not read-only (spends rate budget, writes the ledger),
+// not idempotent (a repeat call without idempotency_key re-executes).
 const SCRAPE = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false } as const;
 
-const STUB = '⛔ NOT SHIPPED YET. The contract is locked and validated now but the plugin verb is not built. Every valid, allowed call returns 501 not_implemented (context.reason=blocked_on_plugin) with no ledger row and no credit spend; do not retry.';
+const STUB = '⛔ NOT SHIPPED YET. The contract is locked and validated now but the plugin verb is not built. Every valid, allowed call returns 501 not_implemented (context.reason=blocked_on_plugin) with no ledger row; do not retry.';
 
 const base = {
   service: 'linkedin',
@@ -854,14 +852,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_people',
     description:
-      'One page of a regular LinkedIn people search, addressed EITHER by `filters` OR by a pasted search `url`: exactly one of the two, never both, never neither. Use filters when the agent composes the search itself, url for a search already built in the LinkedIn UI or for anything the filter vocabulary cannot express. Same engine, same person rows and the same 2 credits per page either way; page on with paging.has_more. commercial_use_limit_hit true means LinkedIn\'s monthly search paywall fired and rows may be truncated: switch to the Sales Navigator people tool or wait for the reset.',
+      'One page of a regular LinkedIn people search, addressed EITHER by `filters` OR by a pasted search `url`: exactly one of the two, never both, never neither. Use filters when the agent composes the search itself, url for a search already built in the LinkedIn UI or for anything the filter vocabulary cannot express. Same engine and the same person rows either way; page on with paging.has_more. commercial_use_limit_hit true means LinkedIn\'s monthly search paywall fired and rows may be truncated: switch to the Sales Navigator people tool or wait for the reset.',
     toolClass: 'typical',
     route: rt('search-people'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -880,14 +877,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_sales_nav_people',
     description:
-      'One page of a Sales Navigator people search: richer facets than the regular engine (seniority, function, tenure, headcount, company type), no commercial-use limit, SN URNs (sn_id) on the rows. Addressed EITHER by `filters`, which carry the COMPLETE SN facet vocabulary, OR by a pasted /sales/search/people `url`: exactly one of the two. Typeahead members take [{id, text, exclude}] values from scrape_linkedin_sales_nav_param_id_lookup; the static-enum members list their ids inline and need no lookup. Needs an SN-capable executor (a non-SN own account gets 422 sales_nav_required; the pool claim filters to SN seats). 2 credits per page.',
+      'One page of a Sales Navigator people search: richer facets than the regular engine (seniority, function, tenure, headcount, company type), no commercial-use limit, SN URNs (sn_id) on the rows. Addressed EITHER by `filters`, which carry the COMPLETE SN facet vocabulary, OR by a pasted /sales/search/people `url`: exactly one of the two. Typeahead members take [{id, text, exclude}] values from scrape_linkedin_sales_nav_param_id_lookup; the static-enum members list their ids inline and need no lookup. Needs an SN-capable executor (a non-SN own account gets 422 sales_nav_required; the auto-pick filters to SN seats).',
     toolClass: 'typical',
     route: rt('search-sales-nav-people'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -904,14 +900,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_service_providers',
     description:
-      "One page of LinkedIn's service-provider marketplace (freelancers and agencies), addressed EITHER by `filters` (keywords, LinkedIn's own numeric service-category and geo ids, connection degree, profile language) OR by a pasted /search/results/services/ `url`, which is how to reach anything those five cannot express: exactly one of the two. Rows are the same person previews the people search returns, because the services screen carries no ratings and no service labels in its results, only provider profiles. 2 credits per page.",
+      "One page of LinkedIn's service-provider marketplace (freelancers and agencies), addressed EITHER by `filters` (keywords, LinkedIn's own numeric service-category and geo ids, connection degree, profile language) OR by a pasted /search/results/services/ `url`, which is how to reach anything those five cannot express: exactly one of the two. Rows are the same person previews the people search returns, because the services screen carries no ratings and no service labels in its results, only provider profiles.",
     toolClass: 'typical',
     route: rt('search-service-providers'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -928,14 +923,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_jobs',
     description:
-      "One page of a LinkedIn JOB-POSTING search, addressed EITHER by `filters` (keywords is REQUIRED here, which no other engine on this surface demands) OR by a pasted /jobs/search-results/ `url`, which is the only way to hybrid or on-site work, several locations, a radius around one, verified jobs and the other facet segments LinkedIn ships: exactly one of the two. Rows are postings keyed by job_ln_id, with a tracking-free /jobs/view/ URL, title, hiring company, location plus workplace_type, listing age, the salary line as printed, and the Easy Apply / early-applicant / verified flags. Card text is read off an ENGLISH LinkedIn UI: an executor whose interface is another language returns zero rows and still reports success. Page on with has_more, never on paging.total. 2 credits per page.",
+      "One page of a LinkedIn JOB-POSTING search, addressed EITHER by `filters` (keywords is REQUIRED here, which no other engine on this surface demands) OR by a pasted /jobs/search-results/ `url`, which is the only way to hybrid or on-site work, several locations, a radius around one, verified jobs and the other facet segments LinkedIn ships: exactly one of the two. Rows are postings keyed by job_ln_id, with a tracking-free /jobs/view/ URL, title, hiring company, location plus workplace_type, listing age, the salary line as printed, and the Easy Apply / early-applicant / verified flags. Card text is read off an ENGLISH LinkedIn UI: an executor whose interface is another language returns zero rows and still reports success. Page on with has_more, never on paging.total.",
     toolClass: 'typical',
     route: rt('search-jobs'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -952,14 +946,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_events',
     description:
-      "One page of a LinkedIn EVENT search. `filters` carries keywords and NOTHING else (this engine has no location, date, type or organizer facet, and any other key is refused by name), so a pasted /search/results/events/ `url` is the only way to any facet the events screen itself offers: send exactly one of the two. Rows are events keyed by event_ln_id, with a tracking-free /events/ URL, title, the date and location lines as printed, the organizer when the card names one, the blurb, the attendee counter (0 is real, null is unread) and a cover image. The English dependency is PARTIAL: rows still come back on another interface language, but date_text and location_text can swap and organizer and attendee_count go null, silently. Page on with has_more, never on paging.total. 2 credits per page.",
+      "One page of a LinkedIn EVENT search. `filters` carries keywords and NOTHING else (this engine has no location, date, type or organizer facet, and any other key is refused by name), so a pasted /search/results/events/ `url` is the only way to any facet the events screen itself offers: send exactly one of the two. Rows are events keyed by event_ln_id, with a tracking-free /events/ URL, title, the date and location lines as printed, the organizer when the card names one, the blurb, the attendee counter (0 is real, null is unread) and a cover image. The English dependency is PARTIAL: rows still come back on another interface language, but date_text and location_text can swap and organizer and attendee_count go null, silently. Page on with has_more, never on paging.total.",
     toolClass: 'typical',
     route: rt('search-events'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -976,14 +969,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_groups',
     description:
-      "One page of a LinkedIn GROUP search, the fifth row kind on this surface. `filters` carries keywords and nothing else, exactly like the events search, so a pasted /search/results/groups/ `url` is the only way to anything the groups screen offers beyond a keyword: send exactly one of the two. Rows are groups keyed by group_ln_id, with a /groups/ URL, the name, Public or Private, the member counter both as printed and parsed (0 is real, null is unread), a best-effort blurb and a logo. WARNING, the English dependency is TOTAL, worse than the jobs search: the name is read out of English UI copy and a card whose name cannot be read is dropped, so a non-English executor returns ZERO rows and still reports success. Page on with has_more, never on paging.total. 2 credits per page.",
+      "One page of a LinkedIn GROUP search, the fifth row kind on this surface. `filters` carries keywords and nothing else, exactly like the events search, so a pasted /search/results/groups/ `url` is the only way to anything the groups screen offers beyond a keyword: send exactly one of the two. Rows are groups keyed by group_ln_id, with a /groups/ URL, the name, Public or Private, the member counter both as printed and parsed (0 is real, null is unread), a best-effort blurb and a logo. WARNING, the English dependency is TOTAL, worse than the jobs search: the name is read out of English UI copy and a card whose name cannot be read is dropped, so a non-English executor returns ZERO rows and still reports success. Page on with has_more, never on paging.total.",
     toolClass: 'typical',
     route: rt('search-groups'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1000,14 +992,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_courses',
     description:
-      'One page of a LinkedIn LEARNING course search, the sixth row kind here: `filters` OR a pasted /search/results/learning/ `url` (that screen, NOT /courses/), exactly one of the two. filters is a REQUIRED keywords plus two closed vocabularies, difficulty and time_to_complete, whose snake_case values the NODE maps onto LinkedIn\'s own labels, so never send a label yourself; the screen\'s software and subject facets need the url form. Rows are courses keyed by course_slug (this wire has no numeric id), with a tracking-free /learning/ URL, title, instructor, a normalised duration, the release and viewer lines as printed, and artwork. WARNING, the English dependency is TOTAL, as on groups: the title is read out of the "Save the course X" button label and a card without a readable title is DROPPED, so a non-English executor returns ZERO rows at success. Page on has_more, never on paging.total. 2 credits per page.',
+      'One page of a LinkedIn LEARNING course search, the sixth row kind here: `filters` OR a pasted /search/results/learning/ `url` (that screen, NOT /courses/), exactly one of the two. filters is a REQUIRED keywords plus two closed vocabularies, difficulty and time_to_complete, whose snake_case values the NODE maps onto LinkedIn\'s own labels, so never send a label yourself; the screen\'s software and subject facets need the url form. Rows are courses keyed by course_slug (this wire has no numeric id), with a tracking-free /learning/ URL, title, instructor, a normalised duration, the release and viewer lines as printed, and artwork. WARNING, the English dependency is TOTAL, as on groups: the title is read out of the "Save the course X" button label and a card without a readable title is DROPPED, so a non-English executor returns ZERO rows at success. Page on has_more, never on paging.total.',
     toolClass: 'typical',
     route: rt('search-courses'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1024,14 +1015,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_products',
     description:
-      'One page of a LinkedIn PRODUCT search, the seventh row kind here: `filters` OR a pasted /search/results/products/ `url`, exactly one of the two. filters is a REQUIRED keywords plus a one-way free_version toggle and two arrays of digit-string ids that come from DIFFERENT places: product_category from param-id-lookup type=product_category, product_company from the ordinary organization id space. Nothing reconciles them, so a swapped id returns an empty page, not an error. Rows are product pages keyed by product_slug (the wire calls it product_id, but it is a slug and must never be sent back as an id), with a tracking-free /products/ URL, name, vendor, tagline, top features and a connections counter. Unlike courses, a non-English executor still returns named rows here, but category_text and tagline can silently carry the WRONG text. Page on has_more, never on paging.total. 2 credits per page.',
+      'One page of a LinkedIn PRODUCT search, the seventh row kind here: `filters` OR a pasted /search/results/products/ `url`, exactly one of the two. filters is a REQUIRED keywords plus a one-way free_version toggle and two arrays of digit-string ids that come from DIFFERENT places: product_category from param-id-lookup type=product_category, product_company from the ordinary organization id space. Nothing reconciles them, so a swapped id returns an empty page, not an error. Rows are product pages keyed by product_slug (the wire calls it product_id, but it is a slug and must never be sent back as an id), with a tracking-free /products/ URL, name, vendor, tagline, top features and a connections counter. Unlike courses, a non-English executor still returns named rows here, but category_text and tagline can silently carry the WRONG text. Page on has_more, never on paging.total.',
     toolClass: 'typical',
     route: rt('search-products'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1048,14 +1038,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_schools',
     description:
-      'One page of a LinkedIn SCHOOL search, the eighth row kind here: `filters` OR a pasted /search/results/schools/ `url`, exactly one of the two. filters is a REQUIRED keywords and NOTHING else, the same one-member shape the events search has, so every facet the schools screen offers lives only in the url form. There is NO school-id filter: the ids param_id_lookup returns for type=school fit nothing here. Rows are school pages keyed by school_slug (the wire calls it school_id, it is a slug, it can be URL-encoded, and it is not that lookup id), with a tracking-free /school/ URL, name, location line, a students-and-alumni counter and a blurb. Names and slugs survive a non-English executor, but description can silently carry the students line. Page on has_more, never on paging.total. 2 credits per page.',
+      'One page of a LinkedIn SCHOOL search, the eighth row kind here: `filters` OR a pasted /search/results/schools/ `url`, exactly one of the two. filters is a REQUIRED keywords and NOTHING else, the same one-member shape the events search has, so every facet the schools screen offers lives only in the url form. There is NO school-id filter: the ids param_id_lookup returns for type=school fit nothing here. Rows are school pages keyed by school_slug (the wire calls it school_id, it is a slug, it can be URL-encoded, and it is not that lookup id), with a tracking-free /school/ URL, name, location line, a students-and-alumni counter and a blurb. Names and slugs survive a non-English executor, but description can silently carry the students line. Page on has_more, never on paging.total.',
     toolClass: 'typical',
     route: rt('search-schools'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1072,14 +1061,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_similar_profiles',
     description:
-      'LinkedIn’s "people also viewed" browsemap for ONE seed profile: lookalike expansion from a known-good persona. IMPORTANT: address by profile.nickname (the vanity slug) ONLY, because the wire navigates by vanityName, so a ln_id/sn_id URN is refused not_dispatchable (resolve it via enrich_linkedin_person_lite_profile first, then pass the nickname). Returns ~20 cards; rows carry ln_member_id + nickname + full_name + headline (no ACoAA id, no avatar, no degree). One-shot list (no pagination); limit caps the cards. Cost 2 credits.',
+      'LinkedIn’s "people also viewed" browsemap for ONE seed profile: lookalike expansion from a known-good persona. IMPORTANT: address by profile.nickname (the vanity slug) ONLY, because the wire navigates by vanityName, so a ln_id/sn_id URN is refused not_dispatchable (resolve it via enrich_linkedin_person_lite_profile first, then pass the nickname). Returns ~20 cards; rows carry ln_member_id + nickname + full_name + headline (no ACoAA id, no avatar, no degree). One-shot list (no pagination); limit caps the cards.',
     toolClass: 'typical',
     route: rt('similar-profiles'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1095,14 +1083,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_companies',
     description:
-      'One page of a regular LinkedIn company search, addressed EITHER by `filters` (keywords, geo ids, industry ids, headcount buckets) OR by a pasted /search/results/companies/ `url`: exactly one of the two, never both, never neither. Rows are company previews, not people. Same engine and the same 2 credits per page either way; page on with paging.has_more. For revenue, growth, follower, Fortune and buying-signal facets use scrape_linkedin_search_sales_nav_companies instead: this engine has none of them.',
+      'One page of a regular LinkedIn company search, addressed EITHER by `filters` (keywords, geo ids, industry ids, headcount buckets) OR by a pasted /search/results/companies/ `url`: exactly one of the two, never both, never neither. Rows are company previews, not people. Same engine and the same company rows either way; page on with paging.has_more. For revenue, growth, follower, Fortune and buying-signal facets use scrape_linkedin_search_sales_nav_companies instead: this engine has none of them.',
     toolClass: 'typical',
     route: rt('search-companies'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1119,14 +1106,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_sales_nav_companies',
     description:
-      'One page of a Sales Navigator ACCOUNT search, the one engine here that filters on annual revenue, company and per-department headcount growth, department headcount, follower buckets, Fortune tier and buying signals (leadership changes, funding events). Addressed EITHER by `filters`, whose typeahead members take ids from scrape_linkedin_sales_nav_param_id_lookup while the static enums are inline, OR by a pasted /sales/search/company `url`: exactly one of the two. SN-capable executor required. 2 credits per page.',
+      'One page of a Sales Navigator ACCOUNT search, the one engine here that filters on annual revenue, company and per-department headcount growth, department headcount, follower buckets, Fortune tier and buying signals (leadership changes, funding events). Addressed EITHER by `filters`, whose typeahead members take ids from scrape_linkedin_sales_nav_param_id_lookup while the static enums are inline, OR by a pasted /sales/search/company `url`: exactly one of the two. SN-capable executor required.',
     toolClass: 'typical',
     route: rt('search-sales-nav-companies'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1143,14 +1129,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_similar_companies',
     description:
-      `LinkedIn’s "similar companies / pages people also viewed" list for ONE target company: lookalike account expansion. One-shot list. Cost 2 credits.`,
+      `LinkedIn’s "similar companies / pages people also viewed" list for ONE target company: lookalike account expansion. One-shot list.`,
     toolClass: 'typical',
     route: rt('similar-companies'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1166,14 +1151,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_company_employees',
     description:
-      `List the people currently working at ONE company (the company page’s "employees" people-search, page-numbered). Heavy list, so it costs 3 credits per page.`,
+      `List the people currently working at ONE company (the company page’s "employees" people-search, page-numbered). Heavy, page-numbered list.`,
     toolClass: 'typical',
     route: rt('company-employees'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1189,14 +1173,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_company_decision_makers',
     description:
-      `Sales Navigator’s decision-makers panel for ONE company: the bounded, seniority-weighted leadership/buying-committee list SN computes. SN-capable executor required. Cost 3 credits.`,
+      `Sales Navigator’s decision-makers panel for ONE company: the bounded, seniority-weighted leadership/buying-committee list SN computes. SN-capable executor required.`,
     toolClass: 'typical',
     route: rt('company-decision-makers'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1212,14 +1195,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_posts',
     description:
-      'LinkedIn content search: find POSTS by keywords, recency or author. The discovery front door for post-engagement plays (feed the returned post_ln_id into the commenters / reactors / resharers tools). Addressed EITHER by `filters` (keywords REQUIRED) OR by a pasted /search/results/content/ `url`, which the node parses back into the same filter object: exactly one of the two, never both, never neither. CURSOR paginated, unlike every other search here: feed paging.next_cursor back verbatim and size the page with page_size. 2 credits per page.',
+      'LinkedIn content search: find POSTS by keywords, recency or author. The discovery front door for post-engagement plays (feed the returned post_ln_id into the commenters / reactors / resharers tools). Addressed EITHER by `filters` (keywords REQUIRED) OR by a pasted /search/results/content/ `url`, which the node parses back into the same filter object: exactly one of the two, never both, never neither. CURSOR paginated, unlike every other search here: feed paging.next_cursor back verbatim and size the page with page_size.',
     toolClass: 'typical',
     route: rt('search-posts'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1240,20 +1222,18 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_get_post_commenters',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of who is commenting on ONE post right now. Returns transient commenter objects (member id, nickname, name, headline, comment text, posted_at, reactions_count) annotated with is_own and is_stored / linkedin_comment_sid. Target a tracked post by linkedin_tracked_post_sid XOR any post by URL / activity URN; the post does NOT need to be tracked. One wire page per call; page on with cursor. For the reconciled list with counts / groups / q, track the post and use linkedin-comments.search. Cost 2 credits.',
+      'Direct LinkedIn read (bypasses our DB): live pull of who is commenting on ONE post right now. Returns transient commenter objects (member id, nickname, name, headline, comment text, posted_at, reactions_count) annotated with is_own and is_stored / linkedin_comment_sid. Target any post by URL or activity URN in post; tracking is not a thing here any more (the tracked-post entity was retired 2026-08-09). One wire page per call; page on with cursor.',
     toolClass: 'complex',
     route: rt('get-post-commenters'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
       ...requestBase,
-      linkedin_tracked_post_sid: z.string().length(18).startsWith('ln_tp_').nullable().optional().describe('A tracked post (activity URN taken from the stored row). Exactly one of linkedin_tracked_post_sid / post.'),
-      post: z.string().max(512).nullable().optional().describe('A linkedin.com post URL OR an activity URN, auto-detected; a URL is resolved via get_activity_urn_by_url. The post does NOT need to be tracked. Exactly one of linkedin_tracked_post_sid / post.'),
+      post: z.string().max(512).describe('A post URL or an activity URN. Accepted verbatim: `urn:li:activity:<id>`, the feed permalink (`/feed/update/urn:li:activity:<id>/`) and the share link the copy-link button produces (`/posts/<slug>-activity-<id>-<hash>`): all three are parsed locally, at no extra cost. A link with no id in it (a shortlink, a bare slug URL) is resolved by opening the page through get_activity_urn_by_url, which adds one extra page load to this call and is cached 7 days. The post does NOT need to be tracked or owned by you.'),
       page_size: z.number().int().min(1).max(100).optional().describe('Default 50; one wire page per call.'),
       cursor: z.string().nullable().optional().describe('Opaque resume token from paging.next_cursor; null = first page.'),
       ...usageMetaField,
@@ -1268,20 +1248,18 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_get_post_reactors',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of who is reacting to ONE post right now, as transient reactor objects with normalized reaction_type (MAYBE → like + WARN), annotated with is_own and is_stored / linkedin_engagement_sid. Target by linkedin_tracked_post_sid XOR post URL / activity URN; tracking not required. One wire page per call; page on with cursor. For the reconciled list use linkedin-engagements.search on a tracked post. Cost 2 credits.',
+      'Direct LinkedIn read (bypasses our DB): live pull of who is reacting to ONE post right now, as transient reactor objects with normalized reaction_type (MAYBE → like + WARN), annotated with is_own and is_stored / linkedin_engagement_sid. Target any post by URL or activity URN in post. One wire page per call; page on with cursor.',
     toolClass: 'complex',
     route: rt('get-post-reactors'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
       ...requestBase,
-      linkedin_tracked_post_sid: z.string().length(18).startsWith('ln_tp_').nullable().optional().describe('Exactly one of linkedin_tracked_post_sid / post.'),
-      post: z.string().max(512).nullable().optional().describe('Post URL OR activity URN, auto-detected; a URL is resolved via get_activity_urn_by_url. Exactly one of linkedin_tracked_post_sid / post.'),
+      post: z.string().max(512).describe('A post URL or an activity URN. Accepted verbatim: `urn:li:activity:<id>`, the feed permalink (`/feed/update/urn:li:activity:<id>/`) and the share link the copy-link button produces (`/posts/<slug>-activity-<id>-<hash>`): all three are parsed locally, at no extra cost. A link with no id in it (a shortlink, a bare slug URL) is resolved by opening the page through get_activity_urn_by_url, which adds one extra page load to this call and is cached 7 days. The post does NOT need to be tracked or owned by you.'),
       page_size: z.number().int().min(1).max(100).optional().describe('Default 50.'),
       cursor: z.string().nullable().optional().describe('Opaque resume token; null = first page.'),
       ...usageMetaField,
@@ -1296,20 +1274,18 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_get_post_resharers',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of the profiles that RESHARED one post, the third and typically highest-intent leg of the engagement trio. Same targeting (linkedin_tracked_post_sid XOR post URL / activity URN); is_own annotated, no is_stored (reshares have no persisted entity). When exposed, resharer_commentary carries the added text and reshare_urn is the reshare’s own activity URN (feed it back into get-post-commenters / -reactors). One wire page per call; page on with cursor. Cost 2 credits.',
+      'Direct LinkedIn read (bypasses our DB): live pull of the profiles that RESHARED one post, the third and typically highest-intent leg of the engagement trio. Same targeting (post URL or activity URN); is_own annotated, no is_stored (reshares have no persisted entity). When exposed, resharer_commentary carries the added text and reshare_urn is the reshare’s own activity URN (feed it back into get-post-commenters / -reactors). One wire page per call; page on with cursor.',
     toolClass: 'complex',
     route: rt('get-post-resharers'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
       ...requestBase,
-      linkedin_tracked_post_sid: z.string().length(18).startsWith('ln_tp_').nullable().optional().describe('Exactly one of linkedin_tracked_post_sid / post.'),
-      post: z.string().max(512).nullable().optional().describe('Post URL OR activity URN, auto-detected; a URL is resolved via get_activity_urn_by_url. Exactly one of linkedin_tracked_post_sid / post.'),
+      post: z.string().max(512).describe('A post URL or an activity URN. Accepted verbatim: `urn:li:activity:<id>`, the feed permalink (`/feed/update/urn:li:activity:<id>/`) and the share link the copy-link button produces (`/posts/<slug>-activity-<id>-<hash>`): all three are parsed locally, at no extra cost. A link with no id in it (a shortlink, a bare slug URL) is resolved by opening the page through get_activity_urn_by_url, which adds one extra page load to this call and is cached 7 days. The post does NOT need to be tracked or owned by you.'),
       page_size: z.number().int().min(1).max(100).optional().describe('Default 50.'),
       cursor: z.string().nullable().optional().describe('Opaque resume token; null = first page.'),
       ...usageMetaField,
@@ -1323,14 +1299,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_param_id_lookup',
     description:
-      'Facet-id typeahead for the REGULAR (non Sales Navigator) search: turn a human term ("United States", "SaaS", "Acme") into the id a filter member needs. One type per call, and the type picks the member: people → followers_of, connections → connections_of, location → locations, company → current_companies, industry → industries, service_category → service_categories. Rows are the dropdown itself, best match first, about ten of them, with no paging and no size knob. An empty rows list means the dropdown offered nothing for that term, which is an answer, not an error. It types into the account\'s already-open tab, so no page is loaded, no search is spent and the people-search commercial-use limit is untouched. Cheapest method here, 1 credit. Sales Navigator ids are a different space: use scrape_linkedin_sales_nav_param_id_lookup.',
+      'Facet-id typeahead for the REGULAR (non Sales Navigator) search: turn a human term ("United States", "SaaS", "Acme") into the id a filter member needs. One type per call, and the type picks the member: people → followers_of, connections → connections_of, location → locations, company → current_companies, industry → industries, service_category → service_categories. Rows are the dropdown itself, best match first, about ten of them, with no paging and no size knob. An empty rows list means the dropdown offered nothing for that term, which is an answer, not an error. It types into the account\'s already-open tab, so no page is loaded, no search is spent and the people-search commercial-use limit is untouched. Cheapest method here. Sales Navigator ids are a different space: use scrape_linkedin_sales_nav_param_id_lookup.',
     toolClass: 'trivial',
     route: rt('param-id-lookup'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1350,14 +1325,13 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_sales_nav_param_id_lookup',
     description:
-      'Sales Navigator facet-id typeahead: resolve one SN facet (type) into the opaque ids the SN search filters need. type is a node salesApiFacetTypeahead kind passed through verbatim; the seven text facets resolve query, the rest return their fixed / account-scoped list. Type → target filter member: TITLE → current_titles/past_titles; BING_GEO → locations/company_headquarters; INDUSTRY → industries; COMPANY_WITH_LIST → current_companies/past_companies; GROUP → groups; SCHOOL → schools; CONNECTION_OF → connections_of; ACCOUNT_LIST → account_lists (company search). Skip it for the static kinds (COMPANY_SIZE/FUNCTION/SENIORITY_V2/RELATIONSHIP/COMPANY_TYPE/TENURE/PROFILE_LANGUAGE): their full id sets are inlined in the search filter schemas. PERSONA/LEAD_LIST/LEAD_INTERACTIONS/SAVED_LEADS_AND_ACCOUNTS have no filters member yet. SN executor required. Cost 1 credit.',
+      'Sales Navigator facet-id typeahead: resolve one SN facet (type) into the opaque ids the SN search filters need. type is a node salesApiFacetTypeahead kind passed through verbatim; the seven text facets resolve query, the rest return their fixed / account-scoped list. Type → target filter member: TITLE → current_titles/past_titles; BING_GEO → locations/company_headquarters; INDUSTRY → industries; COMPANY_WITH_LIST → current_companies/past_companies; GROUP → groups; SCHOOL → schools; CONNECTION_OF → connections_of; ACCOUNT_LIST → account_lists (company search). Skip it for the static kinds (COMPANY_SIZE/FUNCTION/SENIORITY_V2/RELATIONSHIP/COMPANY_TYPE/TENURE/PROFILE_LANGUAGE): their full id sets are inlined in the search filter schemas. PERSONA/LEAD_LIST/LEAD_INTERACTIONS/SAVED_LEADS_AND_ACCOUNTS have no filters member yet. SN executor required.',
     toolClass: 'trivial',
     route: rt('sales-nav-param-id-lookup'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

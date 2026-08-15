@@ -22,8 +22,10 @@ const LinkedinAccountQuotaHit = z.object({
   team_sid: z.string(),
   linkedin_account_sid: z.string(),
 
-  reason: z.enum(['connection_request', 'inmail'])
-    .describe('LinkedinAccountQuotaHitReasonEnum: connection_request | inmail (future values may be added per research).'),
+  reason: z.enum(['connection_request', 'inmail', 'other'])
+    .describe("LinkedinAccountQuotaHitReasonEnum. The two send-class refusals keep their typed reasons (connection_request locks 1h, inmail 3h). 'other' (2026-08-14) is a LinkedIn 429 on any other action bucket - comment, react, follow, posting and the rest - locking that bucket for 24h; which bucket it was is in limit_type."),
+  limit_type: z.string().nullable()
+    .describe("The smart-limit bucket this refusal locked (comment_posts, react_posts, send_connection_requests, …). The disambiguator under reason 'other'. Null on rows written before 2026-08-14."),
 
   // Activity counters frozen at quota-hit moment
   daily_count: z.number(),
@@ -82,7 +84,7 @@ export const linkedinAccountQuotaHitsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_account_quota_hits',
     description:
-      'List LinkedIn-side block events (weekly connection-request cap, InMail rate-limit, …) for the team: immutable, append-only, one row per (account, reason) per 12h dedup window. ' +
+      'List LinkedIn-side block events (weekly connection-request cap, InMail rate-limit, a 429 on any action bucket, …) for the team: immutable, append-only, one row per (account, reason, bucket) per 12h dedup window. ' +
       'Use for: "is this account currently locked" (linkedin_quota_hit_till: { gt: "<now>" }), block-frequency trend, and "at what action volumes do blocks happen" (read the daily_count distribution). include[] linkedin_account / linkedin_account_snapshot correlate the block with account state at hit time. ' +
       'NOT for setting/clearing a lock (that lives on linkedin-account-smart-limits.linkedin_quota_hit_till) or per-target blocks (linkedin-account-block-log). No q. Sort: created_at (default desc) | linkedin_quota_hit_till.',
     toolClass: 'typical',
@@ -91,7 +93,6 @@ export const linkedinAccountQuotaHitsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinAccountQuotaHitFilter, LinkedinAccountQuotaHitInclude, LinkedinAccountQuotaHitSortable, 200),
     outputSchema: McpSearchResponse(LinkedinAccountQuotaHit, undefined, LinkedinAccountQuotaHitCounts),
     annotations: { title: 'Search LinkedIn account quota hits', ...RO },

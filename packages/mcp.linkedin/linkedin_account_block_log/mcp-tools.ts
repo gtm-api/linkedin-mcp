@@ -94,7 +94,6 @@ export const linkedinAccountBlockLogTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinAccountBlockLogFilter, LinkedinAccountBlockLogInclude, LinkedinAccountBlockLogSortable, 200),
     outputSchema: McpSearchResponse(LinkedinAccountBlockLog, undefined, LinkedinAccountBlockLogCounts),
     annotations: { title: 'Search LinkedIn account block log', ...RO },

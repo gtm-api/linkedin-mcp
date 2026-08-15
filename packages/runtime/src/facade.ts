@@ -75,7 +75,6 @@ export function registerFacadeTools(
               title: t.annotations.title,
               description: toolDescription(t),
               dangerous: t.dangerous,
-              creditable: t.creditable,
               availability: t.availability,
               // registeredShape, not t.inputSchema.shape: a dangerous tool also
               // takes commit_token, and call_tool now parses against exactly

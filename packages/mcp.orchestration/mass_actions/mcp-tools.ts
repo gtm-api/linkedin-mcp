@@ -1,14 +1,14 @@
 // Entity: MassAction (gtm.service.orchestration)
 // Source of truth: product/research/gtm.service.orchestration/entities/mass_actions.md
 //   (v3.1 statusless / standing-run, signed)
-// Format: registry v2. 9 tools = the 9 public api/mass-actions routes, verified
+// Format: registry v2. 10 tools = the 10 public api/mass-actions routes, verified
 // against fixtures/contract-oracle/orchestration.contract.json. Mounted alone on
 // /mcp/orchestration/mass-actions: this is the planner surface, and a client that
 // wants to plan a run should not have to load the webhook registry to find it.
 //
 // The surface an LLM uses to run a bulk dispatch end to end:
-//   preview -> (consent) -> create -> get / metrics -> pause / resume / release
-//   -> delete
+//   preview -> (consent) -> create -> get / metrics -> append-items / pause /
+//   resume / release -> delete
 //
 // TWO DIFFERENT `commit_token`s exist in this codebase and they are NOT the same
 // artifact. Read this before touching `dangerous` on any tool here.
@@ -29,7 +29,7 @@
 // without ever calling the backend. The run could never be committed. So create
 // is `dangerous: false` and the backend's own preview -> commit contract IS the
 // gate here: it is strictly stronger than the generic one (it validates the whole
-// plan, prices it, and lists the destructive steps before anything is enrolled),
+// plan and lists the destructive steps before anything is enrolled),
 // and the research locks exactly one consent layer for plan mode ("no second
 // confirmation layer"). `delete_mass_action` keeps the generic gate: its input is
 // a bare sid, so there is nothing to collide with.
@@ -162,7 +162,7 @@ const MassActionScope = z.union([
     .describe('Empty: a STANDING run at 0 items that an auto-scrape appends into over time.'),
 ]);
 
-// Item schema: MassActionDomain field for field (20 fields, oracle order).
+// Item schema: MassActionDomain field for field (19 fields, oracle order).
 // passthrough keeps forward-compat if the backend adds one.
 const MassAction = z.object({
   sid: z.string(),
@@ -172,7 +172,6 @@ const MassAction = z.object({
   canary_mode: MassActionCanaryMode,
   status: MassActionStatus,
   total_count: z.number(),                                // grows on append (standing runs); no terminal counters
-  credits_spent: z.number(),                              // running meter, no cap
   title: z.string().nullable(),
   schedule: z.record(z.unknown()).nullable(),             // MassActionScheduleValue; null = ASAP drain
   paused_reason: MassActionPausedReason.nullable(),       // populated only while status='paused'
@@ -196,7 +195,6 @@ const MassActionMetrics = z.object({
   in_flight: z.number(),                                  // pending + queued + running; 0 = caught up
   next_scheduled_at: z.string().nullable(),
   last_scheduled_at: z.string().nullable(),
-  credits_spent: z.number(),
   created_objects: z.record(z.number()),
   top_errors: z.array(z.object({ prefix: z.string(), count: z.number() }).passthrough()),
 }).passthrough();
@@ -204,7 +202,6 @@ const MassActionMetrics = z.object({
 const MassActionPreview = z.object({
   items_count: z.number(),                                // 0 for kind:'none'
   steps_per_item: z.number(),
-  credits_estimate: z.number(),
   dangerous_steps: z.array(z.object({ step_id: z.number(), tool: z.string() }).passthrough()),
   eta: z.object({
     starts: z.string(),                                   // 'asap' | 'scheduled'
@@ -232,6 +229,12 @@ const MassActionResumeResult = z.object({
 const MassActionReleaseResult = z.object({
   released_pending_count: z.number(),
   next_item_scheduled_at: z.string().nullable(),
+}).passthrough();
+
+const MassActionAppendItemsResult = z.object({
+  enrolled_count: z.number(),                             // leads that became items
+  skipped_duplicate_count: z.number(),                    // identity already enrolled on this run
+  total_count: z.number(),                                // the run's size after the append
 }).passthrough();
 
 // Every key here exists on the PHP MassActionFilter (12 fields). A key it does
@@ -300,7 +303,6 @@ export const massActionsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(MassActionFilter, MassActionSearchInclude, MassActionSortable, 200),
     outputSchema: McpSearchResponse(MassAction),
     annotations: { title: 'Search mass-actions', ...RO },
@@ -309,14 +311,13 @@ export const massActionsTools: ToolDefinition[] = [
     ...base,
     name: 'get_mass_action',
     description:
-      'Fetch one bulk run by sid: the plan that runs, status / paused_reason / hold_till, the canary gate, credits_spent and settled_at. include=metrics adds the item breakdown, which is where outcome lives.',
+      'Fetch one bulk run by sid: the plan that runs, status / paused_reason / hold_till, the canary gate and settled_at. include=metrics adds the item breakdown, which is where outcome lives.',
     toolClass: 'trivial',
     route: { service: 'orchestration', method: 'GET', pathTemplate: '/api/mass-actions/{sid}', sidParam: 'sid' },
     operation: 'get',
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('ma_ac_', MassActionInclude),
     outputSchema: McpGetResponse(MassAction),
     annotations: { title: 'Get mass-action', ...RO },
@@ -330,7 +331,7 @@ export const massActionsTools: ToolDefinition[] = [
         '',
         'Validates in one pass, reporting all findings at once: plan shape (1..3 steps), step-eligibility of each tool, scope shape and size (1..100), the generate-scope rule (step 1 must mint an object) and the send-class schedule mandate. A tool outside the step vocabulary comes back 422 validation_failed with error.field_errors["plan.steps.{i}.tool"] = ["not_step_eligible: ..."], naming the authorable set so the plan is repairable in one turn. Nothing is persisted, charged or created.',
         '',
-        'On success the result carries preview (items_count, steps_per_item, credits_estimate, dangerous_steps, eta, warnings), commit_token and expires_at. Show the preview to the user, then pass the token to create_mass_action UNCHANGED with the exact same inputs: it is an HMAC over them plus the caller, so any edit invalidates it (422) and needs a fresh preview. Tokens live 15 minutes.',
+        'On success the result carries preview (items_count, steps_per_item, dangerous_steps, eta, warnings), commit_token and expires_at. Show the preview to the user, then pass the token to create_mass_action UNCHANGED with the exact same inputs: it is an HMAC over them plus the caller, so any edit invalidates it (422) and needs a fresh preview. Tokens live 15 minutes.',
       ].join('\n'),
     toolClass: 'complex',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/preview' },
@@ -338,7 +339,6 @@ export const massActionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
@@ -379,7 +379,6 @@ export const massActionsTools: ToolDefinition[] = [
     // the consent gate for this verb, and the generic worker gate cannot be
     // layered on top because both claim the `commit_token` argument.
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       title: z.string().max(255).nullable().optional(),
       target_entity: z.string().max(128),
@@ -398,14 +397,13 @@ export const massActionsTools: ToolDefinition[] = [
     ...base,
     name: 'get_mass_actions_metrics',
     description:
-      "Where a run is right now, in one round-trip, without paging items. Typical call: filter {sid:{eq}}. Returns items_by_status (the outcome split), items_by_current_step, items_by_wait_reason, in_flight (0 means the run is caught up), the next / last scheduled item, credits_spent, created_objects and the top error prefixes. No group_by: the shape is fixed. Use this instead of listing a run's items to answer 'how is it going'.",
+      "Where a run is right now, in one round-trip, without paging items. Typical call: filter {sid:{eq}}. Returns items_by_status (the outcome split), items_by_current_step, items_by_wait_reason, in_flight (0 means the run is caught up), the next / last scheduled item, created_objects and the top error prefixes. No group_by: the shape is fixed. Use this instead of listing a run's items to answer 'how is it going'.",
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/metrics' },
     operation: 'metrics',
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(MassActionFilter),
     outputSchema: McpMetricsResponse(MassActionMetrics),
     annotations: { title: 'Mass-action metrics', ...RO },
@@ -421,7 +419,6 @@ export const massActionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
@@ -445,7 +442,6 @@ export const massActionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
@@ -467,7 +463,6 @@ export const massActionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
@@ -480,6 +475,35 @@ export const massActionsTools: ToolDefinition[] = [
   },
   {
     ...base,
+    name: 'append_mass_action_items',
+    description:
+      [
+        'Feed more targets into a run that is already going, without a second preview or consent token: the plan they execute is the one already approved, and appended items join the pacing chain BEHIND the tail so the schedule is not compressed.',
+        '',
+        'Identities are payload-kind leads, the same shape a targets-scope create takes. Each one must carry at least one of ln_member_id, ln_id, sn_id, company_ln_id or nickname, which is what the run dedups on: a lead already enrolled comes back in skipped_duplicate_count instead of running twice, so re-sending an overlapping batch is safe. Up to 100 per call; repeat the call to keep a standing run fed.',
+        '',
+        'The run has to be active: a paused one is 409 run_not_active (resume it first) and a stopped one is 409 too (create a new run). The canary gate still applies, so on a run whose gate is closed the appended items wait behind item 1.',
+      ].join('\n'),
+    toolClass: 'typical',
+    route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/{sid}/append-items', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      identities: z.array(z.record(z.unknown())).min(1).max(100)
+        .describe('Payload-kind leads. Identity fields (ln_member_id / ln_id / sn_id / company_ln_id / nickname) are the dedup axis; any other key rides along as per-target extras the plan steps can read.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(MassAction, MassActionAppendItemsResult),
+    annotations: { title: 'Append mass-action items', ...WRITE },
+  },
+  {
+    ...base,
     name: 'delete_mass_action',
     description:
       'STOP a bulk run. This is the cancel path and it works at any status: pending and queued items are swept to cancelled, running items finish their current step and stop at the boundary, an auto-scrape feeding a standing run stops being able to append, and the run is soft-deleted. The cascade block reports how many were cancelled and how many were still in flight. Items stay queryable; there is no undo through MCP, and a plan cannot be edited, so restarting means a fresh preview and create.',
@@ -489,7 +513,6 @@ export const massActionsTools: ToolDefinition[] = [
     envelope: 'delete_cascade',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: McpSimpleDeleteRequestSchema('ma_ac_'),
     outputSchema: McpCascadeDeleteResponse,
     annotations: { title: 'Stop and delete mass-action', ...DANGER_IDEM },

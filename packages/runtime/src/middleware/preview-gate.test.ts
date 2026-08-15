@@ -23,7 +23,6 @@ function mkTool(dangerous: boolean): ToolDefinition {
     envelope: 'action_async',
     availability: 'ga',
     dangerous,
-    creditable: false,
     inputSchema: z.object({ _meta: z.any().optional() }),
     outputSchema: z.any(),
     annotations: { title: 't', readOnlyHint: false, destructiveHint: dangerous, idempotentHint: false, openWorldHint: false },

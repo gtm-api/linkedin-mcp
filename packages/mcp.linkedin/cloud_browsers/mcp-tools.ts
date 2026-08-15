@@ -43,7 +43,6 @@ export const cloudBrowsersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ ...usageMetaField }),

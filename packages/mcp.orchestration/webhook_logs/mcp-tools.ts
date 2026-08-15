@@ -156,7 +156,6 @@ export const webhookLogsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(WebhookLogFilter, WebhookLogInclude, WebhookLogSortable),
     outputSchema: McpSearchResponse(WebhookLog, undefined, WebhookLogCounts),
     annotations: { title: 'Search webhook logs', ...RO },
@@ -172,7 +171,6 @@ export const webhookLogsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(WebhookLogFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -194,7 +192,6 @@ export const webhookLogsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       expected_status: WebhookLogStatus.optional()
@@ -215,7 +212,6 @@ export const webhookLogsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       expected_status: WebhookLogStatus.optional()

@@ -140,7 +140,6 @@ function previewResult(ctx: DispatchContext, token: string, expiresIn: number): 
       tool: ctx.tool.name,
       action,
       dangerous: true,
-      creditable: ctx.tool.creditable,
       commit_token: token,
       expires_in_seconds: expiresIn,
       instruction: `Re-call ${ctx.tool.name} with the same args + commit_token to execute.`,

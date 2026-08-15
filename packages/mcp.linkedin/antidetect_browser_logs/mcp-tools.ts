@@ -75,7 +75,6 @@ export const antidetectBrowserLogsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(AntidetectBrowserLogFilter, AntidetectBrowserLogInclude, undefined, 200),
     outputSchema: McpSearchResponse(AntidetectBrowserLog, undefined, AntidetectBrowserLogCounts),
     annotations: { title: 'Search antidetect browser logs', ...RO },

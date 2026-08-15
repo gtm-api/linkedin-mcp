@@ -7012,6 +7012,10 @@
                     "value": "get_activity_urn_by_url"
                 },
                 {
+                    "name": "GetPost",
+                    "value": "get_post"
+                },
+                {
                     "name": "GetProfileFeatured",
                     "value": "get_profile_featured"
                 },
@@ -8057,6 +8061,10 @@
                 {
                     "name": "Inmail",
                     "value": "inmail"
+                },
+                {
+                    "name": "Other",
+                    "value": "other"
                 }
             ]
         },
@@ -18573,14 +18581,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -18697,14 +18706,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -18821,14 +18831,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -18978,14 +18989,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -19102,14 +19114,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -19226,14 +19239,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -19383,14 +19397,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -19507,14 +19522,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -19631,14 +19647,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -19810,14 +19827,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -19934,14 +19952,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -20058,14 +20077,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -20215,14 +20235,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -20372,14 +20393,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -20515,14 +20537,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -20639,14 +20662,15 @@
                         "prohibits:profile_id",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Closure"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -20772,14 +20796,17 @@
                     "between": null
                 },
                 {
-                    "field": "activity_urn",
+                    "field": "post_urn",
                     "rules": [
                         "required_without:url",
                         "prohibits:url",
                         "nullable",
                         "string",
                         "max:128",
-                        "starts_with:urn:li:activity:"
+                        "regex:~^((urn:li:(activity",
+                        "share",
+                        "ugcPost):)?\\d+",
+                        "(urn:li:groupPost:)?\\d+-\\d+)$~"
                     ],
                     "required": false,
                     "nullable": true,
@@ -20793,8 +20820,8 @@
                 {
                     "field": "url",
                     "rules": [
-                        "required_without:activity_urn",
-                        "prohibits:activity_urn",
+                        "required_without:post_urn",
+                        "prohibits:post_urn",
                         "nullable",
                         "string",
                         "max:2048"
@@ -23247,21 +23274,6 @@
                     "max": 512,
                     "size": null,
                     "between": null
-                },
-                {
-                    "field": "force_dedup",
-                    "rules": [
-                        "nullable",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
                 }
             ],
             "rules_reason": null
@@ -23543,21 +23555,6 @@
                         "insightful",
                         "funny"
                     ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "force_dedup",
-                    "rules": [
-                        "nullable",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "boolean",
-                    "in": null,
                     "min": null,
                     "max": null,
                     "size": null,
@@ -32786,6 +32783,21 @@
                     "in": null,
                     "min": null,
                     "max": 300,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allow_no_note_fallback",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }

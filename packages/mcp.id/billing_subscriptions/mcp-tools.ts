@@ -7,7 +7,6 @@
 // custom action returns the plain McpActionResponse envelope (KNOWLEDGE §1.8);
 // the "async" verbs (checkout / pause / resume / cancel) embed their pending
 // hint inside result rather than using a top-level pending[]; see research.
-// Billing money moves via Paddle, not platform credits ⇒ creditable:false.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -123,7 +122,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(BillingSubscriptionFilter, BillingSubscriptionInclude, BillingSubscriptionSortable),
     outputSchema: McpSearchResponse(BillingSubscription, undefined, BillingSubscriptionCounts),
     annotations: { title: 'Search billing subscriptions', ...RO },
@@ -139,7 +137,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -166,7 +163,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -188,7 +184,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -206,7 +201,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -229,7 +223,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -252,7 +245,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -276,7 +268,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -298,7 +289,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -316,7 +306,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -334,7 +323,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -352,7 +340,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -369,7 +356,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('bl_sb_'),
     outputSchema: McpGetResponse(BillingSubscription),
     annotations: { title: 'Get billing subscription', ...RO },

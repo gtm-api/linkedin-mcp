@@ -25,7 +25,6 @@ function mkTool(over: Partial<ToolDefinition> = {}): ToolDefinition {
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       sort: z.object({ field: z.enum(['created_at', 'updated_at']) }).optional(),
       page_size: z.number().int().min(0).max(200).optional(),

@@ -33,8 +33,8 @@
     "2. 7 include params the SearchRequest never declares. Four work anyway (the controller reads",
     "   input(include)); three name documented relations no controller builds. Nine more of this class",
     "   were fixed instead, with .omit({ include: true }), where the tool named no relation at all.",
-    "3. 4 linkedin_tracked_post_sid inputs. The research file documents the XOR with post; the backend",
-    "   implements only post since the tracked-post entity moved to gs.service.signals.",
+    "3. (retired 2026-08-14) The 4 linkedin_tracked_post_sid inputs are gone: A12 dropped the arm",
+    "   from the three post tools, so the schemas and the FormRequests agree on a required post.",
     "4. 5 singles: the antidetect BYO-proxy credential pair, one api-keys filter axis, one",
     "   connection-requests filter axis, and the add-addon idempotency token. That last one is the",
     "   only entry here that is a PROMISE rather than a missing validation, and it sits on a verb",
@@ -52,21 +52,6 @@
         "tool": "create_antidetect_browser",
         "path": "custom_proxy_config.username",
         "reason": "AntidetectBrowserCreateRequest enumerates ip/port/mode of the proxy value object and omits the credential pair; the controller reads input(custom_proxy_config) whole and persists it, so the credentials travel unvalidated"
-      },
-      {
-        "tool": "scrape_linkedin_get_post_commenters",
-        "path": "linkedin_tracked_post_sid",
-        "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
-      },
-      {
-        "tool": "scrape_linkedin_get_post_reactors",
-        "path": "linkedin_tracked_post_sid",
-        "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
-      },
-      {
-        "tool": "scrape_linkedin_get_post_resharers",
-        "path": "linkedin_tracked_post_sid",
-        "reason": "research/gtm.service.linkedin/entities/linkedin_scraping.md documents linkedin_tracked_post_sid XOR post; the FormRequest implements only post, and the tracked-post entity moved to gs.service.signals, so the backend cannot resolve the sid yet"
       },
       {
         "tool": "search_linkedin_account_quota_hits",

@@ -30,7 +30,7 @@ export const MOUNTS: MountConfig[] = [
     //
     // RESOLVED on 2026-08-09 by REMOVING TOOLS, not by signing the number. The three
     // self-capability probes were one action addressed three ways - same input, same
-    // operation, same `creditable: false`, same outputSchema, differing only in which
+    // operation, same outputSchema, differing only in which
     // backend path they POSTed to - so they collapsed into a `checks` member on
     // `check_linkedin_account_premium_subscription` (product/KNOWLEDGE.md §4.10), and
     // the `/check-recruiter` and `/check-sales-nav` ROUTES were deleted with them.
@@ -111,7 +111,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/scraping',
     name: 'gtm-linkedin-scraping',
     instructions:
-      'GTM LinkedIn creditable scraping of people, companies, posts, job postings, events, groups, LinkedIn Learning courses, products and schools, plus lookalikes, company employees, decision-makers, post engagers and the two facet-id typeaheads. Every search verb is ONE tool per vertical taking either a structured filter object or a pasted LinkedIn search URL, never both; every call debits credits, so check the balance first with get_credit_balance. These are run-now, one-page pulls that return the rows inline. For a saved job over the same sources that repeats on a schedule, dedupes across runs and feeds new leads to a mass action, use /mcp/linkedin/auto-scrapes instead (people and companies only: posts, job postings, events, groups, courses, products and schools are not saveable sources).',
+      'GTM LinkedIn scraping of people, companies, posts, job postings, events, groups, LinkedIn Learning courses, products and schools, plus lookalikes, company employees, decision-makers, post engagers and the two facet-id typeaheads. Every search verb is ONE tool per vertical taking either a structured filter object or a pasted LinkedIn search URL, never both; runs land on your own connected accounts. These are run-now, one-page pulls that return the rows inline. For a saved job over the same sources that repeats on a schedule, dedupes across runs and feeds new leads to a mass action, use /mcp/linkedin/auto-scrapes instead (people and companies only: posts, job postings, events, groups, courses, products and schools are not saveable sources).',
     selectors: [p('linkedin_scraping')],
     // NO maxTools, so the platform default of 25 applies again.
     //
@@ -158,7 +158,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/enrichment',
     name: 'gtm-linkedin-enrichment',
     instructions:
-      'GTM LinkedIn creditable profile / company / post enrichment (lite & full profile, experience, skills, education, posts, featured, and more). Every call debits credits.',
+      'GTM LinkedIn profile / company / post enrichment (lite & full profile, experience, skills, education, posts, featured, and more), run on your own connected accounts.',
     selectors: [p('linkedin_enrichment')],
     maxTools: 25,
     facade: 'none',
@@ -167,7 +167,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/data',
     name: 'gtm-linkedin-data',
     instructions:
-      'GTM LinkedIn stored data plane: the credit / data-request ledger. Every creditable scrape or enrichment call lands here as one row, so this is where you audit what was spent and re-read a completed result.',
+      'GTM LinkedIn stored data plane: the data-request ledger. Every scrape or enrichment call lands here as one row, so this is where you audit what ran and re-read a completed result.',
     selectors: [p('data_requests')],
     maxTools: 25,
     facade: 'none',
@@ -191,7 +191,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/platform',
     name: 'gtm-linkedin-platform',
     instructions:
-      'GTM LinkedIn - platform integration: the admin-gated custom-request escape hatch (execute_linkedin_custom_request, one arbitrary own-account HTTP call for endpoints the typed methods do not cover; feature-flagged + host-allowlisted, non-creditable). Protected (preview then confirm). Webhooks moved to /mcp/orchestration/webhooks.',
+      'GTM LinkedIn - platform integration: the admin-gated custom-request escape hatch (execute_linkedin_custom_request, one arbitrary own-account HTTP call for endpoints the typed methods do not cover; feature-flagged + host-allowlisted). Protected (preview then confirm). Webhooks moved to /mcp/orchestration/webhooks.',
     selectors: [p('linkedin_custom_requests')],
     maxTools: 25,
     facade: 'none',
@@ -256,15 +256,6 @@ export const MOUNTS: MountConfig[] = [
       pid('billing_transactions'),
       pid('billing_payment_methods'),
     ],
-    maxTools: 25,
-    facade: 'none',
-  },
-  {
-    path: '/mcp/id/credits',
-    name: 'gtm-id-credits',
-    instructions:
-      'GTM credits: balance, ledger, metrics, and credit purchase. Purchase is protected (preview → confirm) and debits money.',
-    selectors: [pid('credit_transactions')],
     maxTools: 25,
     facade: 'none',
   },

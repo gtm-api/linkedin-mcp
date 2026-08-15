@@ -109,7 +109,6 @@ export const linkedinConnectionInvitationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinConnectionInvitationFilter, LinkedinConnectionInvitationInclude, LinkedinConnectionInvitationSortable, 200),
     outputSchema: McpSearchResponse(LinkedinConnectionInvitation),
     annotations: { title: 'Search connection invitations', ...RO },
@@ -125,7 +124,6 @@ export const linkedinConnectionInvitationsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(LinkedinConnectionInvitationMetricsFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -146,7 +144,6 @@ export const linkedinConnectionInvitationsTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ linkedin_account_sid: ACCOUNT_SID, ...usageMetaField }),
@@ -157,14 +154,13 @@ export const linkedinConnectionInvitationsTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_connection_invitations',
     description:
-      'Always-fresh head read of pending inbound invitations: refresh the newest from LinkedIn in-request (§5.8), then return the last N (received_at DESC). The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped, non-creditable.',
+      'Always-fresh head read of pending inbound invitations: refresh the newest from LinkedIn in-request (§5.8), then return the last N (received_at DESC). The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-invitations/get-my-latest' },
     operation: 'search',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       page_size: z.number().int().min(1).max(100).optional()
@@ -197,7 +193,6 @@ export const linkedinConnectionInvitationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -215,7 +210,6 @@ export const linkedinConnectionInvitationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),

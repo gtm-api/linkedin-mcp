@@ -1442,12 +1442,6 @@
                         "has_default": false
                     },
                     {
-                        "name": "credit_policy",
-                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\BillingProduct\\Values\\BillingProductCreditPolicyValue|array",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
                         "name": "is_active",
                         "type": "bool",
                         "nullable": false,
@@ -1515,12 +1509,6 @@
                     {
                         "name": "limits",
                         "type": "Gtm\\Lib\\Common\\Microservices\\Id\\BillingProduct\\Values\\BillingProductLimitsValue|array",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "credit_policy",
-                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\BillingProduct\\Values\\BillingProductCreditPolicyValue|array",
                         "nullable": false,
                         "has_default": false
                     },
@@ -5440,10 +5428,6 @@
                 {
                     "name": "Addon",
                     "value": "addon"
-                },
-                {
-                    "name": "CreditsPack",
-                    "value": "credits_pack"
                 }
             ]
         },
@@ -11863,18 +11847,13 @@
             "uri": "api/credit-transactions/get-balance",
             "controller": "App\\Entities\\CreditTransaction\\CreditTransactionController",
             "action": "getBalance",
-            "operation": "action",
+            "operation": null,
             "mass_action": false,
             "step_eligible": false,
             "step_tool": null,
             "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_view_billing",
+            "declared_arguments": [],
+            "required_permission": null,
             "internal": false,
             "request_class": "App\\Entities\\CreditTransaction\\Requests\\CreditTransactionGetBalanceRequest",
             "rules": [
@@ -11905,17 +11884,13 @@
             "uri": "api/credit-transactions/metrics",
             "controller": "App\\Entities\\CreditTransaction\\CreditTransactionController",
             "action": "metrics",
-            "operation": "metrics",
+            "operation": null,
             "mass_action": false,
             "step_eligible": false,
             "step_tool": null,
             "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_view_billing",
+            "declared_arguments": [],
+            "required_permission": null,
             "internal": false,
             "request_class": "App\\Entities\\CreditTransaction\\Requests\\CreditTransactionMetricsRequest",
             "rules": [
@@ -12151,94 +12126,16 @@
         },
         {
             "method": "POST",
-            "uri": "api/credit-transactions/purchase",
-            "controller": "App\\Entities\\CreditTransaction\\CreditTransactionController",
-            "action": "purchase",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_manage_billing",
-            "internal": false,
-            "request_class": "App\\Entities\\CreditTransaction\\Requests\\CreditTransactionPurchaseRequest",
-            "rules": [
-                {
-                    "field": "kind",
-                    "rules": [
-                        "required",
-                        "string",
-                        "in:\"enrichment\",\"platform\""
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": [
-                        "enrichment",
-                        "platform"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "amount",
-                    "rules": [
-                        "required",
-                        "integer",
-                        "min:1"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "request_id",
-                    "rules": [
-                        "required",
-                        "string",
-                        "max:64"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 64,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
             "uri": "api/credit-transactions/search",
             "controller": "App\\Entities\\CreditTransaction\\CreditTransactionController",
             "action": "search",
-            "operation": "search",
+            "operation": null,
             "mass_action": false,
             "step_eligible": false,
             "step_tool": null,
             "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_view_billing",
+            "declared_arguments": [],
+            "required_permission": null,
             "internal": false,
             "request_class": "App\\Entities\\CreditTransaction\\Requests\\CreditTransactionSearchRequest",
             "rules": [

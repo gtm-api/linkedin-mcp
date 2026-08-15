@@ -125,7 +125,6 @@ export const linkedinAccountActivityLogTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinAccountActivityLogFilter, LinkedinAccountActivityLogInclude, LinkedinAccountActivityLogSortable, 200),
     // search emits no counts block: the counts/aggregate surface is metrics-only
     // (LinkedinAccountActivityLogController::search calls mcpSearch without a
@@ -147,7 +146,6 @@ export const linkedinAccountActivityLogTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(LinkedinAccountActivityLogMetricsFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),

@@ -91,7 +91,6 @@ export const supportRequestsTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       subject: z.string().min(3).max(255)
         .describe('One-line issue title, in the user\'s language.'),
@@ -117,7 +116,6 @@ export const supportRequestsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(SupportRequestFilter, undefined, SupportRequestSortable)
       // The SearchRequest declares no include rule and the controller builds no
       // included block, so advertising the param would be a silent no-op.
@@ -136,7 +134,6 @@ export const supportRequestsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('id_sr_'),
     outputSchema: McpGetResponse(SupportRequest),
     annotations: { title: 'Get support request', ...RO },

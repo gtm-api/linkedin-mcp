@@ -524,7 +524,7 @@ const LinkedinAccountSortable = z.enum([
 // because the handler mirrors LinkedinFollowerController, which has no /{sid}
 // route either. That is why these two do not reuse SID / Target above.
 const FOLLOWING_ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
-  .describe('LinkedIn account sid (ln_ac_…): the account that does the following. Identity-bound and non-creditable, so it is REQUIRED and is never a pool account. Travels in the body; this route group has no /{sid} path.');
+  .describe('LinkedIn account sid (ln_ac_…): the account that does the following. Identity-bound, so it is REQUIRED: the verbs below act AS this account. Travels in the body; this route group has no /{sid} path.');
 
 // The same at-least-one rule as Target above, restated with the bounds
 // LinkedinFollowingFollowRequest states (ln_id 128 / sn_id 64 / nickname 100)
@@ -579,7 +579,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinAccountFilter, LinkedinAccountInclude, LinkedinAccountSortable),
     outputSchema: McpSearchResponse(LinkedinAccount, undefined, LinkedinAccountCounts),
     annotations: { title: 'Search LinkedIn accounts', ...RO },
@@ -594,7 +593,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('ln_ac_', LinkedinAccountInclude),
     outputSchema: McpGetResponse(LinkedinAccount),
     annotations: { title: 'Get LinkedIn account', ...RO },
@@ -629,7 +627,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -645,20 +642,19 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'check_linkedin_account_target_block',
     description:
-      'Check whether a target person can be reached from this account (not blocked / out of network). CREDITABLE: may run an infra-pool probe and debit credits, and the response carries a credits block.',
+      'Check whether a target person can be reached from this account (not blocked / out of network). Probes from the account itself; when the platform cannot obtain an independent second viewpoint the outcome is `inconclusive` rather than a guess.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/check-target-block', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: true,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
       target: Target,
-      force: z.boolean().optional().describe('Bypass a cached result and re-probe (may cost credits).'),
+      force: z.boolean().optional().describe('Bypass a cached result and re-probe.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount),
@@ -674,7 +670,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -691,7 +686,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -708,7 +702,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -725,7 +718,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -742,7 +734,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -757,14 +748,13 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'get_linkedin_account_my_ssi',
-    description: "Read the connected account's Social Selling Index: the overall score, the four pillars it is the sum of (professional brand, finding the right people, engaging with insights, building relationships), and where the account stands inside its industry and its own network. Answers WITHOUT a Sales Navigator seat, reporting that as active_seat: false with the scores still filled in, so it is a health signal for any account rather than a premium-only read. Non-creditable and identity-bound: the sid names the account whose own dashboard is read; there is no way to read someone else's SSI. Every score is FRACTIONAL (a real reading is 53.496, not 53), so do not round before comparing runs, the week-over-week movement is usually under a point.",
+    description: "Read the connected account's Social Selling Index: the overall score, the four pillars it is the sum of (professional brand, finding the right people, engaging with insights, building relationships), and where the account stands inside its industry and its own network. Answers WITHOUT a Sales Navigator seat, reporting that as active_seat: false with the scores still filled in, so it is a health signal for any account rather than a premium-only read. Identity-bound: the sid names the account whose own dashboard is read; there is no way to read someone else's SSI. Every score is FRACTIONAL (a real reading is 53.496, not 53), so do not round before comparing runs, the week-over-week movement is usually under a point.",
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-ssi', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -774,14 +764,13 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'get_linkedin_account_my_analytics',
-    description: "Read the connected account's creator content analytics over a date window: per metric (impressions, engagements) the daily series, the period total, and the percentage change against the prior period. Omit both dates to get the trailing 28 days, which is what the LinkedIn dashboard itself opens on. Supplying one date without the other is refused rather than half-defaulted, and a window running into the future is refused too (LinkedIn has no data there and would answer with zeroes that read like a collapse in reach). Non-creditable and identity-bound: this is the account's own dashboard, not a competitor read. The metrics map is open: new cards LinkedIn adds show up as extra keys. The 'Discovery' card (in-network vs out-of-network reach) is a separate component and is NOT included.",
+    description: "Read the connected account's creator content analytics over a date window: per metric (impressions, engagements) the daily series, the period total, and the percentage change against the prior period. Omit both dates to get the trailing 28 days, which is what the LinkedIn dashboard itself opens on. Supplying one date without the other is refused rather than half-defaulted, and a window running into the future is refused too (LinkedIn has no data there and would answer with zeroes that read like a collapse in reach). Identity-bound: this is the account's own dashboard, not a competitor read. The metrics map is open: new cards LinkedIn adds show up as extra keys. The 'Discovery' card (in-network vs out-of-network reach) is a separate component and is NOT included.",
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-analytics', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -820,7 +809,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -845,7 +833,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -870,7 +857,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -894,7 +880,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -936,7 +921,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -958,7 +942,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, target: Target, ...usageMetaField }),
@@ -969,14 +952,13 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'follow_linkedin_member',
     description:
-      "Follow a LinkedIn member as this account, so their posts reach its feed. One-way and needs no relationship: you can follow anyone whose profile allows it, connected or not, which makes it a common warmup step before a connection request. IDEMPOTENT: following someone this account already follows returns 200 with the same terminal state, so a repeat is a success, not an error. The wire cannot tell a fresh follow from a repeat, so read get_linkedin_account_my_following first if you need that answer; either way the call spends one networking_general unit (40 a day, 180 s apart). Pass target.nickname whenever you know it, even alongside ln_id: it saves LinkedIn a member lookup and cuts the action from three wire requests to two. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, no pool fallback, 429 on saturation. Writes nothing locally; the follow list catches up on the next get_linkedin_account_my_following refresh.",
+      "Follow a LinkedIn member as this account, so their posts reach its feed. One-way and needs no relationship: you can follow anyone whose profile allows it, connected or not, which makes it a common warmup step before a connection request. IDEMPOTENT: following someone this account already follows returns 200 with the same terminal state, so a repeat is a success, not an error. The wire cannot tell a fresh follow from a repeat, so read get_linkedin_account_my_following first if you need that answer; either way the call spends one networking_general unit (40 a day, 180 s apart). Pass target.nickname whenever you know it, even alongside ln_id: it saves LinkedIn a member lookup and cuts the action from three wire requests to two. Identity-bound: linkedin_account_sid REQUIRED, 429 on saturation. Writes nothing locally; the follow list catches up on the next get_linkedin_account_my_following refresh.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-followings/follow' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     stepEligible: true,
     scheduleRequired: false,
@@ -992,14 +974,13 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'unfollow_linkedin_member',
     description:
-      "Stop following a LinkedIn member as this account, the inverse of follow_linkedin_member. NOT a disconnect: it leaves a 1st-degree connection intact and only stops that member's posts reaching the feed, so it is how you mute someone you still want to stay connected to. Severing the relationship is remove_linkedin_connection. IDEMPOTENT: unfollowing someone this account does not follow returns 200 with the same terminal state, so a repeat is a success, not an error, and it still spends one networking_general unit (40 a day, 180 s apart). Pass target.nickname whenever you know it, even alongside ln_id: it saves LinkedIn a member lookup and cuts the action from three wire requests to two. Identity-bound and non-creditable: linkedin_account_sid REQUIRED, no pool fallback, 429 on saturation. Deletes nothing locally; the follow list catches up on the next get_linkedin_account_my_following refresh.",
+      "Stop following a LinkedIn member as this account, the inverse of follow_linkedin_member. NOT a disconnect: it leaves a 1st-degree connection intact and only stops that member's posts reaching the feed, so it is how you mute someone you still want to stay connected to. Severing the relationship is remove_linkedin_connection. IDEMPOTENT: unfollowing someone this account does not follow returns 200 with the same terminal state, so a repeat is a success, not an error, and it still spends one networking_general unit (40 a day, 180 s apart). Pass target.nickname whenever you know it, even alongside ln_id: it saves LinkedIn a member lookup and cuts the action from three wire requests to two. Identity-bound: linkedin_account_sid REQUIRED, 429 on saturation. Deletes nothing locally; the follow list catches up on the next get_linkedin_account_my_following refresh.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-followings/unfollow' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1021,7 +1002,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1049,7 +1029,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     stepEligible: true,
     massAction: false,
     scheduleRequired: false,
@@ -1088,7 +1067,6 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

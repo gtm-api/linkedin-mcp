@@ -7,7 +7,7 @@
 // Paddle portal deep link; `delete` proxies a Paddle DELETE. The {sid} on
 // delete is a RAW Paddle id (paymtd_…), NOT an 18-char platform sid; route
 // validation matches ^paymtd_. Card data never enters our service (PCI); money
-// moves via Paddle ⇒ creditable:false.
+// moves via Paddle.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -57,7 +57,6 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({ ...usageMetaField }),
     outputSchema: McpSearchResponse(BillingPaymentMethod),
     annotations: { title: 'List payment methods', ...RO },
@@ -73,7 +72,6 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ ...usageMetaField }),
@@ -91,7 +89,6 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({ sid: PAYMENT_METHOD_SID, ...usageMetaField }),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Delete payment method', ...DANGER },

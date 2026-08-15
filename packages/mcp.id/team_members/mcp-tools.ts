@@ -90,7 +90,6 @@ export const teamMembersTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(TeamMemberFilter, TeamMemberInclude, TeamMemberSortable),
     outputSchema: McpSearchResponse(TeamMember, undefined, TeamMemberCounts),
     annotations: { title: 'Search team members', ...RO },
@@ -106,7 +105,6 @@ export const teamMembersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -124,7 +122,6 @@ export const teamMembersTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       email: z.string().email().max(255),
       permissions: z.array(z.string().max(128)).describe('Unified permission tokens; [] = membership only.'),
@@ -146,7 +143,6 @@ export const teamMembersTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       permissions: z.array(z.string().max(128)).optional(),
@@ -168,7 +164,6 @@ export const teamMembersTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: McpSimpleDeleteRequestSchema('ts_mb_'),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Remove team member', ...DANGER },
@@ -184,7 +179,6 @@ export const teamMembersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

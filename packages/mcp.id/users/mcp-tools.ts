@@ -70,7 +70,6 @@ export const usersTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       include: z.array(UserInclude).optional().describe('Relations to eager-load: default_team, accessible_teams.'),
       ...usageMetaField,
@@ -89,7 +88,6 @@ export const usersTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       first_name: z.string().min(1).max(100).optional(),
       last_name: z.string().max(100).nullable().optional(),

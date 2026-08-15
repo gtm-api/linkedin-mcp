@@ -123,7 +123,6 @@ export const linkedinAutoScrapeResultsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinAutoScrapeResultFilter, LinkedinAutoScrapeResultInclude, LinkedinAutoScrapeResultSortable, 200),
     outputSchema: McpSearchResponse(LinkedinAutoScrapeResult, undefined, LinkedinAutoScrapeResultCounts),
     annotations: { title: 'Search LinkedIn auto-scrape results', ...RO },

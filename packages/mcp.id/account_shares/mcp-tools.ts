@@ -189,7 +189,6 @@ export const accountSharesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     // The FormRequest declares no include rule and the controller builds no
     // included block, so advertising the param would be a silent no-op.
     inputSchema: McpSearchRequestSchema(AccountShareFilter, undefined, AccountShareSortable, 200)
@@ -208,7 +207,6 @@ export const accountSharesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     // Oracle: mass_action false, step_eligible false, schedule_required false.
     // A second list surface on one entity, hence an ACTION route, but it fans
     // nothing out and orchestration has no arm that calls it.
@@ -231,7 +229,6 @@ export const accountSharesTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       channel: AccountChannel
         .describe('Which channel service owns the account you are lending.'),
@@ -259,7 +256,6 @@ export const accountSharesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     // Oracle: mass_action true, step_eligible false, schedule_required false.
     // The filter arm is the fan-out; it is drained inline by the controller,
     // and no orchestration executor arm calls this verb as a plan step.
@@ -289,7 +285,6 @@ export const accountSharesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     // Oracle: mass_action true, step_eligible false, schedule_required false.
     massAction: true,
     stepEligible: false,

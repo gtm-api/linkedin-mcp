@@ -34,7 +34,6 @@ function mkTool(readOnly: boolean, over: Partial<ToolDefinition> = {}): ToolDefi
     envelope: readOnly ? 'search' : 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({ _meta: z.any().optional() }),
     outputSchema: z.any(),
     annotations: {

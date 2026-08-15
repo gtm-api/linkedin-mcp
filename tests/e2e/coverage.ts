@@ -103,7 +103,6 @@ export function buildReport(readToolNames: string[], buckets: ContractBuckets) {
       total: uncalled.length,
       by_operation: countBy(uncalled, (t) => t.operation),
       stubs: uncalled.filter((t) => t.availability === 'stub_501').map((t) => t.name).sort(),
-      creditable: uncalled.filter((t) => t.creditable).length,
       dangerous: uncalled.filter((t) => t.dangerous).length,
     },
     local_handler_tools: localTools.map((t) => t.name).sort(),
@@ -137,11 +136,10 @@ export function formatReport(r: CoverageReport): string {
   lines.push(`  called by smoke only (not contract-checked): ${r.exercised.smoke_only.length}`);
   lines.push(`  NOT called: ${r.not_exercised.total}  ` +
     `(${Object.entries(r.not_exercised.by_operation).map(([o, n]) => `${o} ${n}`).join(', ')})`);
-  lines.push(row('    of which creditable', r.not_exercised.creditable));
   lines.push(row('    of which dangerous', r.not_exercised.dangerous));
   lines.push(row('    of which stub_501', r.not_exercised.stubs.length));
   lines.push('');
-  lines.push('  A tool is NOT called on purpose when it mutates, debits credits or acts');
+  lines.push('  A tool is NOT called on purpose when it mutates or acts');
   lines.push('  outward on LinkedIn. This arm never runs those against a live tenant; the');
   lines.push('  preview STEP of one dangerous tool is smoked, the commit step never is.');
   lines.push('');

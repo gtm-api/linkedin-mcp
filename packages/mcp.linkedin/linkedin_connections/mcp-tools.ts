@@ -141,7 +141,6 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(LinkedinConnectionFilter, LinkedinConnectionInclude, LinkedinConnectionSortable, 200),
     outputSchema: McpSearchResponse(LinkedinConnection, undefined, LinkedinConnectionCounts),
     annotations: { title: 'Search LinkedIn connections', ...RO },
@@ -157,7 +156,6 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpMetricsRequestSchema(LinkedinConnectionFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -179,7 +177,6 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ linkedin_account_sid: ACCOUNT_SID, ...usageMetaField }),
@@ -190,14 +187,13 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_connections',
     description:
-      'Always-fresh head read: refresh the newest connections from LinkedIn in-request (§5.8), then return the last N (connected_at DESC) with a counts block. The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped, non-creditable. For richer slicing call search_linkedin_connections right after.',
+      'Always-fresh head read: refresh the newest connections from LinkedIn in-request (§5.8), then return the last N (connected_at DESC) with a counts block. The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped. For richer slicing call search_linkedin_connections right after.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connections/get-my-latest' },
     operation: 'search',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       page_size: z.number().int().min(1).max(100).optional()
@@ -224,14 +220,13 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     ...base,
     name: 'check_linkedin_connection_degree',
     description:
-      "Probe one contact's current connection degree (1st / 2nd / 3rd / 4_plus) from a managed account, and actualize a stale stored row: a live connection whose degree is no longer 1st is soft-deleted (removal_kind=removed) in the same call. Reuses the get-lite-profile getter (owner-only, no pool fallback, non-creditable). Supply exactly one target identifier.",
+      "Probe one contact's current connection degree (1st / 2nd / 3rd / 4_plus) from a managed account, and actualize a stale stored row: a live connection whose degree is no longer 1st is soft-deleted (removal_kind=removed) in the same call. Reuses the get-lite-profile getter (owner-only: it runs on the account you name). Supply exactly one target identifier.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connections/check-degree' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -253,7 +248,6 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),

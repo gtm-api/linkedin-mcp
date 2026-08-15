@@ -34,7 +34,7 @@ const SID = z.string().length(18).startsWith('wh_hk_')
 const WebhookStatus = z.enum(['on', 'off', 'failed']);
 
 // The subscribable event vocabulary, verbatim from the create/update rules()
-// (WebhookEventTypeEnum, 94 values). It has to be a closed set on this side:
+// (WebhookEventTypeEnum, 96 values). It has to be a closed set on this side:
 // an in: rule 422s with "invalid", never with the list, and an agent cannot
 // subscribe to an event it has to guess the name of.
 //
@@ -96,6 +96,7 @@ const WebhookEventType = z.enum([
   'linkedin-auto-scrape-runs.failed',
   'linkedin-auto-scrapes.paused',
   'antidetect-browsers.logged-in',
+  'antidetect-browsers.login-failed',
   'antidetect-browsers.logged-out',
   'antidetect-browsers.started',
   'antidetect-browsers.stopped',
@@ -281,7 +282,6 @@ export const webhooksTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpSearchRequestSchema(WebhookFilter, WebhookInclude, WebhookSortable),
     outputSchema: McpSearchResponse(Webhook, undefined, WebhookCounts),
     annotations: { title: 'Search webhooks', ...RO },
@@ -297,7 +297,6 @@ export const webhooksTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       override_event_type: z.string().optional()
@@ -317,7 +316,6 @@ export const webhooksTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
-    creditable: false,
     inputSchema: McpGetRequestSchema('wh_hk_', WebhookInclude),
     outputSchema: McpGetResponse(Webhook),
     annotations: { title: 'Get webhook', ...RO },
@@ -333,7 +331,6 @@ export const webhooksTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: z.object({
       sid: SID,
       name: z.string().min(1).max(255).optional(),
@@ -358,7 +355,6 @@ export const webhooksTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     allowSecretFields: ['secret'],
     inputSchema: z.object({
       name: z.string().min(1).max(255),
@@ -382,7 +378,6 @@ export const webhooksTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
-    creditable: false,
     inputSchema: McpSimpleDeleteRequestSchema('wh_hk_'),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Delete webhook', ...DANGER_IDEM },

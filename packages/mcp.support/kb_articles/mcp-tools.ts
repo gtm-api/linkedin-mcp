@@ -62,7 +62,6 @@ const searchKnowledge: ToolDefinition = {
   envelope: 'search',
   availability: 'ga',
   dangerous: false,
-  creditable: false,
   inputSchema: z.object({
     query: z.string().min(2).max(300)
       .describe('English search query in help-article wording.'),
@@ -137,7 +136,6 @@ const getArticle: ToolDefinition = {
   envelope: 'get',
   availability: 'ga',
   dangerous: false,
-  creditable: false,
   inputSchema: z.object({
     id: z.string().min(1).max(200)
       .describe('Article id, e.g. "smart-limits-and-warmup".'),
