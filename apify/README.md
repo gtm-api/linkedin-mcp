@@ -6,7 +6,7 @@ The server exposes three MCP tools (`list_toolsets`, `get_toolset_tools`, `call_
 
 ## Setup
 
-1. Get an API key at [app.gtm-api.com](https://app.gtm-api.com/login) (7-day trial, no card) and connect a LinkedIn account you own.
+1. Get an API key at [app.gtm-api.com](https://app.gtm-api.com/login) (forever free plan, no card) and connect a LinkedIn account you own.
 2. Start this Actor in **Standby** mode with `gtmApiKey` set in the input, or pass the key per request instead (an `x-gtm-api-key` header, or `?gtm_api_key=...` in the URL).
 3. Point your MCP client at the Actor's Standby URL, path `/mcp`, with your Apify token:
 

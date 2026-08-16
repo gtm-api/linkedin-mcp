@@ -28,7 +28,7 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 
 ## Quickstart
 
-**1. Sign up.** Create an account at [app.gtm-api.com](https://app.gtm-api.com/login) (7-day trial, no card) and connect a LinkedIn account. It opens in a dedicated anti-detect cloud browser with its own proxy.
+**1. Sign up.** Create an account at [app.gtm-api.com](https://app.gtm-api.com/login) (forever free plan, no card) and connect a LinkedIn account. It opens in a dedicated anti-detect cloud browser with its own proxy.
 
 **2. Add the server to your MCP client.** For Claude Desktop, edit `claude_desktop_config.json` (example in [`examples/`](./examples/claude_desktop_config.json)):
 
@@ -164,7 +164,7 @@ Cookie-driven servers such as [`stickerdaniel/linkedin-mcp-server`](https://gith
 
 ## Pricing
 
-From $19 per connected account per month, scaling to $5 at volume, with unlimited API calls and no per-action fees. 7-day trial, no card. Enrichment and Signals are optional metered add-ons: [gtm-api.com/pricing](https://gtm-api.com/pricing/).
+Volume pricing per connected account per month, from $10/account at scale, with unlimited API calls and no per-action fees. Forever free plan, no card: [gtm-api.com/pricing](https://gtm-api.com/pricing/).
 
 ## A note on LinkedIn's terms
 
@@ -172,7 +172,7 @@ From $19 per connected account per month, scaling to $5 at volume, with unlimite
 
 ## Links
 
-- Sign up (7-day trial): [app.gtm-api.com](https://app.gtm-api.com/login)
+- Sign up (forever free plan): [app.gtm-api.com](https://app.gtm-api.com/login)
 - Connecting any client, step by step: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect)
 - How a LinkedIn MCP server works: [gtm-api.com/linkedin-mcp-server](https://gtm-api.com/linkedin-mcp-server/)
 - The safety method in detail: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/)

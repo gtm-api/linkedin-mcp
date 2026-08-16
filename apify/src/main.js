@@ -27,7 +27,7 @@ const READINESS_HEADER = 'x-apify-container-server-readiness-probe';
 
 const KEY_HELP = 'gtm-api key missing. Set gtmApiKey in the Actor input, or send an '
     + 'x-gtm-api-key header, or append ?gtm_api_key=... to the URL. '
-    + 'Keys: https://app.gtm-api.com/login (7-day trial).';
+    + 'Keys: https://app.gtm-api.com/login (forever free plan).';
 
 const resolveKey = (req, url) => String(
     req.headers['x-gtm-api-key'] || url.searchParams.get('gtm_api_key') || INPUT_KEY || '',

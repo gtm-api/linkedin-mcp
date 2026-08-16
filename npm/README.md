@@ -27,7 +27,7 @@ Claude Code:
 claude mcp add gtm-api -- npx -y @gtm-api/linkedin-mcp
 ```
 
-Sign up at [app.gtm-api.com](https://app.gtm-api.com/login) (7-day trial, no card) and connect a LinkedIn account you own, either before or during the consent step.
+Sign up at [app.gtm-api.com](https://app.gtm-api.com/login) (forever free plan, no card) and connect a LinkedIn account you own, either before or during the consent step.
 
 If your client speaks streamable-http itself, skip this launcher and point it straight at `https://mcp.gtm-api.com/mcp`. It will run the same OAuth flow. The launcher is for clients that can only spawn a command.
 

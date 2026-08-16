@@ -6,7 +6,7 @@
         "gtmApiKey": {
             "title": "gtm-api key",
             "type": "string",
-            "description": "API key from <a href='https://app.gtm-api.com/login'>app.gtm-api.com</a> (7-day trial, no card). Sent to the hosted endpoint as an Authorization bearer. Callers can also pass a key per request via the x-gtm-api-key header or the gtm_api_key query parameter.",
+            "description": "API key from <a href='https://app.gtm-api.com/login'>app.gtm-api.com</a> (forever free plan, no card). Sent to the hosted endpoint as an Authorization bearer. Callers can also pass a key per request via the x-gtm-api-key header or the gtm_api_key query parameter.",
             "editor": "textfield",
             "isSecret": true
         },
