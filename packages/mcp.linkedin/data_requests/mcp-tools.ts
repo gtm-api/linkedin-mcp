@@ -27,6 +27,13 @@ const DataRequestInclude = z.enum(['linkedin_account', 'cached_from']);
 
 const DataRequestKind = z.enum(['enrich', 'scrape']);
 const DataRequestStatus = z.enum(['pending', 'running', 'completed', 'rejected', 'failed']);
+// ⚠️ `infra_pool` is HISTORICAL - the execution path that wrote it was removed
+// on 2026-08-16, when credits left the platform, and every dispatch since runs
+// on the own account the row names. The value stays in the enum for exactly one
+// reason: ledger rows stored before that date still carry it and must keep
+// parsing. The PHP twin (DataRequestExecutedOnEnum) keeps its case with the same
+// note, and enum-parity asserts set equality in both directions, so neither side
+// can drop it alone.
 const DataRequestExecutedOn = z.enum(['own_account', 'infra_pool']);
 
 // One value per owned scraping/enrichment method, the whole matrix.
@@ -86,7 +93,7 @@ const DataRequestMethod = z.enum([
   'search_companies_by_url', 'search_companies_by_params',
   'search_sales_nav_companies_by_url', 'search_sales_nav_companies_by_params',
   'similar_companies', 'company_employees', 'company_decision_makers',
-  'search_posts', 'search_posts_by_url', 'get_post_commenters', 'get_post_reactors',
+  'search_posts', 'search_posts_by_url', 'get_post_comments', 'get_post_reactors',
   'get_post_resharers', 'search_param_id_lookup',
   'search_sales_nav_param_id_lookup',
 ]);
@@ -115,10 +122,8 @@ const DataRequest = z.object({
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
 
-  // Execution & billing
+  // Execution
   executed_on: DataRequestExecutedOn.nullable(),
-  charged: z.number(),
-  charge_reason: z.enum(['infra_pool', 'limit_fallback']).nullable(),
   served_from_cache: z.boolean(),
   cached_from_sid: z.string().nullable(),
   idempotency_key: z.string().nullable(),
@@ -152,10 +157,8 @@ const DataRequestFilter = z.object({
   method: filterOp(DataRequestMethod, ['eq', 'in', 'nin']).optional(),
   status: filterOp(DataRequestStatus, ['eq', 'ne', 'in', 'nin']).optional(),
   executed_on: filterOp(DataRequestExecutedOn, ['eq', 'in', 'is_null']).optional()
-    .describe('is_null:true ⇒ never dispatched (rejected / cache-served).'),
+    .describe('is_null:true ⇒ never dispatched (rejected / cache-served). `own_account` is what every dispatched row records. `infra_pool` is HISTORICAL: no run since 2026-08-16 produces it, so filtering on it matches only rows stored before that date.'),
   served_from_cache: filterOp(z.boolean(), ['eq']).optional(),
-  charged: filterOp(z.number().int(), ['eq', 'gt', 'gte', 'lt', 'lte']).optional()
-    .describe('gt:0 ⇒ rows we actually paid for.'),
   ln_member_id: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
     .describe('Canonical person axis; ln_id/sn_id inputs normalize to this.'),
   created_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
@@ -163,7 +166,7 @@ const DataRequestFilter = z.object({
     .describe('Exact-match retry-replay lookup.'),
 }).partial();
 
-const DataRequestSortable = z.enum(['created_at', 'completed_at', 'charged']);
+const DataRequestSortable = z.enum(['created_at', 'completed_at']);
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 

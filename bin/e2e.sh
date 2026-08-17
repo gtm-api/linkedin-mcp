@@ -223,11 +223,15 @@ if [ -f "$COVERAGE_JSON" ]; then
     console.log("");
     console.log(`  called by smoke only    ${r.exercised.smoke_only.length}`);
     console.log(`  NOT called              ${r.not_exercised.total}  (${ops})`);
-    console.log(`    creditable            ${r.not_exercised.creditable}`);
+    // No third bucket here on purpose: the `creditable` flag left the tool
+    // descriptor with the platform-wide credits removal (2026-08-16), so
+    // tests/e2e/coverage.ts no longer emits a `creditable` key and this reader
+    // printed `undefined` until it was dropped on 2026-08-16. The buckets below
+    // are exactly the ones buildReport() writes.
     console.log(`    dangerous             ${r.not_exercised.dangerous}`);
     console.log(`    stub_501              ${r.not_exercised.stubs.length}`);
     console.log("");
-    console.log("  A tool goes uncalled on purpose when it mutates, debits credits or acts");
+    console.log("  A tool goes uncalled on purpose when it mutates or acts");
     console.log("  outward on LinkedIn. The preview STEP of one dangerous tool is smoked; no");
     console.log("  commit step ever is. Raising \"outputSchema parsed\" means seeding rows for");
     console.log("  the no-data reads, not calling more tools.");

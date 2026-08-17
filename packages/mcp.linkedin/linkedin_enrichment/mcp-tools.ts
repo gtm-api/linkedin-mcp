@@ -33,7 +33,7 @@ import { usageMetaField, McpActionResponse } from '@gtm/mcp-shared';
 
 // ─── Shared input fragments ────────────────────────────────────────────────
 
-// Executor + replay controls, shared by all 19 methods (§9.5, own-accounts-only
+// Executor + replay controls, shared by all 22 methods (§9.5, own-accounts-only
 // contract, 2026-08-14): runs always land on one of the team's own connected
 // accounts: pinned when linkedin_account_sid is given, auto-picked otherwise.
 const executorFields = {
@@ -88,7 +88,7 @@ const companyPostsTargetField = {
 // The kind="enrich" DataRequestDomain ledger row: its full field set is owned
 // by data_requests.md, so it stays loose here (not this surface's projection).
 const DataRequestRow = z.object({}).passthrough()
-  .describe('The kind="enrich" DataRequest ledger row (status / charged / served_from_cache / cached_from_sid). The public audit anchor for this call.');
+  .describe('The kind="enrich" DataRequest journal row (status / served_from_cache / cached_from_sid). The public audit anchor for this call.');
 
 // Generic loose item, used for full-profile's RAW-WIRE truncated sub-record
 // heads, which diverge from the dedicated methods' projected shapes (the head
@@ -796,7 +796,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_post_details',
     description:
-      "One post's own data by its urn: full text, author, media, engagement counters, per-reaction breakdown, is_reshare with the original post embedded. LIVE since 2026-08-14 (node get-post). Accepts post_urn XOR url. result.post is null when the post is deleted or unavailable - a delivered answer, not an error, so do not retry it. Cost 2 credits, cached 7d. WHO engaged is scraping (get-post-commenters / get-post-reactors / get-post-resharers); impressions exist only on the executor's own posts.",
+      "One post's own data by its urn: full text, author, media, engagement counters, per-reaction breakdown, is_reshare with the original post embedded. LIVE since 2026-08-14 (node get-post). Accepts post_urn XOR url. result.post is null when the post is deleted or unavailable - a delivered answer, not an error, so do not retry it. Cached 7d. WHO engaged is scraping (get-post-comments / get-post-reactors / get-post-resharers); impressions exist only on the executor's own posts.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/post-details' },
     operation: 'action',
@@ -809,7 +809,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
       post_urn: z.string().max(128).optional()
         .describe('The post handle, in any family the wire takes: urn:li:activity:<id>, urn:li:share:<id>, urn:li:ugcPost:<id>, urn:li:groupPost:<group>-<post>, or a bare id (digits = activity, digits-digits = groupPost). Provide post_urn XOR url.'),
       url: z.string().max(2048).optional()
-        .describe('Any post URL. A feed permalink or share link resolves locally for free; a link with no id in it (a shortlink) is resolved by opening the page via get_activity_urn_by_url, adding 1 credit. Provide url XOR post_urn.'),
+        .describe('Any post URL. A feed permalink or share link resolves locally; a link with no id in it (a shortlink) costs an extra round trip, resolved by opening the page via get_activity_urn_by_url. Provide url XOR post_urn.'),
       ...executorFields,
       ...usageMetaField,
     }),

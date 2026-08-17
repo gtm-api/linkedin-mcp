@@ -1,0 +1,6 @@
+# Python deps for bin/openapi-validate.py, the only Python in this repo.
+# bin/openapi-public.sh installs them into a throwaway venv on first run, so
+# nothing here is needed to build or test the TypeScript. By hand:
+#   pip3 install -r bin/requirements.txt
+pyyaml>=6.0
+openapi-spec-validator>=0.7.1

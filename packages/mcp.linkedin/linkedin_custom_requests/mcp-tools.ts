@@ -47,7 +47,7 @@ export const linkedinCustomRequestsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: z.string().length(18).startsWith('ln_ac_')
-        .describe('REQUIRED executor: the OWN account (ln_ac_…) the call runs on. There is NO pool fallback (an arbitrary call must never run under a shared infra account).'),
+        .describe('REQUIRED executor: the OWN account (ln_ac_…) the call runs as. Every custom request runs on the account named here, carrying that account\'s session, permissions and limits, so name the account whose identity the request should carry. There is no default and no substitute: omit it and the call is rejected.'),
       url: z.string().min(1).max(2048)
         .describe('Absolute LinkedIn URL (e.g. "https://www.linkedin.com/voyager/api/…") or a bare path (resolved against https://www.linkedin.com). MUST match the server host + path allowlist (provisional: *.linkedin.com + path prefixes /voyager/api/, /sales-api/). Otherwise 403 forbidden_endpoint.'),
       method: z.enum(['GET', 'POST']).optional()

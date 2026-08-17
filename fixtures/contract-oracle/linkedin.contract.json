@@ -132,7 +132,7 @@
                         "has_default": true
                     },
                     {
-                        "name": "max_safety",
+                        "name": "proxy_5g",
                         "type": "bool",
                         "nullable": false,
                         "has_default": true
@@ -305,7 +305,7 @@
                         "has_default": true
                     },
                     {
-                        "name": "max_safety",
+                        "name": "proxy_5g",
                         "type": "bool",
                         "nullable": false,
                         "has_default": true
@@ -365,7 +365,7 @@
                     "logout_count",
                     "antidetect_browser_proxy_sid",
                     "proxy_country_code",
-                    "max_safety",
+                    "proxy_5g",
                     "last_fail_at",
                     "last_logout_at",
                     "last_start_at",
@@ -1461,12 +1461,6 @@
                         "has_default": false
                     },
                     {
-                        "name": "charged",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
                         "name": "served_from_cache",
                         "type": "bool",
                         "nullable": false,
@@ -1480,12 +1474,6 @@
                     },
                     {
                         "name": "executed_on",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "charge_reason",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -1610,12 +1598,6 @@
                         "has_default": false
                     },
                     {
-                        "name": "charged",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
                         "name": "served_from_cache",
                         "type": "bool",
                         "nullable": false,
@@ -1629,12 +1611,6 @@
                     },
                     {
                         "name": "executed_on",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "charge_reason",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -1729,8 +1705,6 @@
                     "sn_id",
                     "nickname",
                     "executed_on",
-                    "charged",
-                    "charge_reason",
                     "served_from_cache",
                     "cached_from_sid",
                     "idempotency_key",
@@ -7459,19 +7433,6 @@
                 }
             ]
         },
-        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\DataRequestChargeReasonEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "InfraPool",
-                    "value": "infra_pool"
-                },
-                {
-                    "name": "LimitFallback",
-                    "value": "limit_fallback"
-                }
-            ]
-        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\DataRequestExecutedOnEnum": {
             "backing": "string",
             "cases": [
@@ -7739,8 +7700,8 @@
                     "value": "get_activity_urn_by_url"
                 },
                 {
-                    "name": "GetPostCommenters",
-                    "value": "get_post_commenters"
+                    "name": "GetPostComments",
+                    "value": "get_post_comments"
                 },
                 {
                     "name": "GetPostReactors",
@@ -8686,8 +8647,8 @@
                     "value": "company-decision-makers"
                 },
                 {
-                    "name": "GetPostCommenters",
-                    "value": "get-post-commenters"
+                    "name": "GetPostComments",
+                    "value": "get-post-comments"
                 },
                 {
                     "name": "GetPostReactors",
@@ -9505,7 +9466,7 @@
                     "between": null
                 },
                 {
-                    "field": "max_safety",
+                    "field": "proxy_5g",
                     "rules": [
                         "sometimes",
                         "boolean"
@@ -10204,7 +10165,7 @@
                     "between": null
                 },
                 {
-                    "field": "max_safety",
+                    "field": "proxy_5g",
                     "rules": [
                         "sometimes",
                         "boolean"
@@ -14715,7 +14676,7 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "in:\"search-people-by-url\",\"search-people-by-params\",\"search-sales-nav-people-by-url\",\"search-sales-nav-people-by-params\",\"similar-profiles\",\"company-employees\",\"company-decision-makers\",\"get-post-commenters\",\"get-post-reactors\",\"get-post-resharers\",\"search-service-providers\",\"search-service-providers-by-url\",\"search-companies-by-url\",\"search-companies-by-params\",\"search-sales-nav-companies-by-url\",\"search-sales-nav-companies-by-params\",\"similar-companies\""
+                        "in:\"search-people-by-url\",\"search-people-by-params\",\"search-sales-nav-people-by-url\",\"search-sales-nav-people-by-params\",\"similar-profiles\",\"company-employees\",\"company-decision-makers\",\"get-post-comments\",\"get-post-reactors\",\"get-post-resharers\",\"search-service-providers\",\"search-service-providers-by-url\",\"search-companies-by-url\",\"search-companies-by-params\",\"search-sales-nav-companies-by-url\",\"search-sales-nav-companies-by-params\",\"similar-companies\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -14728,7 +14689,7 @@
                         "similar-profiles",
                         "company-employees",
                         "company-decision-makers",
-                        "get-post-commenters",
+                        "get-post-comments",
                         "get-post-reactors",
                         "get-post-resharers",
                         "search-service-providers",
@@ -17876,21 +17837,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -17998,21 +17944,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -18174,21 +18105,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -18299,21 +18215,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -18404,21 +18305,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -18506,21 +18392,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -18634,21 +18505,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -18756,21 +18612,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -18917,21 +18758,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -19042,21 +18868,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -19164,21 +18975,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -19325,21 +19121,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -19450,21 +19231,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -19572,21 +19338,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -19755,21 +19506,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -19880,21 +19616,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -20002,21 +19723,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -20163,21 +19869,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -20321,21 +20012,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -20465,21 +20141,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -20587,21 +20248,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -20745,21 +20391,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -23601,21 +23232,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -23741,21 +23357,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -23845,9 +23446,9 @@
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-scraping/get-post-commenters",
+            "uri": "api/linkedin-scraping/get-post-comments",
             "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
-            "action": "getPostCommenters",
+            "action": "getPostComments",
             "operation": "action",
             "mass_action": false,
             "step_eligible": false,
@@ -23861,7 +23462,7 @@
             ],
             "required_permission": "can_act_linkedin_searches",
             "internal": false,
-            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetPostCommentersRequest",
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetPostCommentsRequest",
             "rules": [
                 {
                     "field": "linkedin_account_sid",
@@ -23878,21 +23479,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -23959,6 +23545,26 @@
                     "max": 1024,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "sort_order",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:RELEVANCE,CHRONOLOGICAL,REVERSE_CHRONOLOGICAL"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "RELEVANCE",
+                        "CHRONOLOGICAL",
+                        "REVERSE_CHRONOLOGICAL"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -23998,21 +23604,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -24121,21 +23712,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -24241,21 +23817,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -24352,21 +23913,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -24493,21 +24039,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -24744,21 +24275,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -24959,21 +24475,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -25099,21 +24600,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -25236,21 +24722,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -25581,21 +25052,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -26123,21 +25579,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -26604,21 +26045,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -26822,21 +26248,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -27767,21 +27178,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -29132,21 +28528,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -29269,21 +28650,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {
@@ -29574,21 +28940,6 @@
                     "between": null
                 },
                 {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -29711,21 +29062,6 @@
                     "min": null,
                     "max": null,
                     "size": 18,
-                    "between": null
-                },
-                {
-                    "field": "use_credits",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
                     "between": null
                 },
                 {

@@ -67,15 +67,16 @@ export const WAVE1_MOUNTS: SmokeMount[] = [
   // No `stub` since 2026-08-09: the scraping mount has no §5.9 stub left. This row
   // named scrape_linkedin_get_post_comments, which was RETIRED rather than shipped -
   // it was a second tool over a verb we already dispatch (it and
-  // scrape_linkedin_get_post_commenters both resolved to slug `get-comments`), so its
+  // scrape_linkedin_get_post_comments both resolved to slug `get-comments`), so its
   // comment-side fields moved into the commenters projection. Before that the row
-  // named scrape_linkedin_similar_profiles, which is GA and creditable and was
-  // reaching the live backend on every run. `stub` is optional and every use site
-  // guards on it, so this row simply skips the short-circuit check. Re-add it if a
-  // future scraping tool lands contract-first.
+  // named scrape_linkedin_similar_profiles, which is GA and spends the account's
+  // scraping bucket, and was reaching the live backend on every run. `stub` is
+  // optional and every use site guards on it, so this row simply skips the
+  // short-circuit check. Re-add it if a future scraping tool lands contract-first.
   { path: '/mcp/linkedin/scraping', name: 'gtm-linkedin-scraping' },
-  // Same correction: enrich_linkedin_person_contact_info is GA and creditable,
-  // and that row was reaching the live backend on every run.
+  // Same correction: enrich_linkedin_person_contact_info is GA and spends the
+  // account's enrichment bucket, and that row was reaching the live backend on
+  // every run.
   { path: '/mcp/linkedin/enrichment', name: 'gtm-linkedin-enrichment', stub: 'enrich_linkedin_person_languages' },
 ];
 

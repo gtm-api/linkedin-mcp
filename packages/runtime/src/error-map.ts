@@ -78,9 +78,15 @@ export function mapErrorEnvelope(
       else lines.push('Retryable after a short backoff.');
       break;
     }
+    // 402. Every one of these is a slot/plan decision (seat cap, add-on headroom,
+    // webhook cap), never a transient failure, and the backend ships a
+    // machine-readable code plus a `context` that usually names the repair
+    // (insufficient_proxy_5g_slots carries suggested_action: buy_proxy_5g_slot),
+    // so the context is surfaced rather than dropped.
     case 'payment_required':
       lines.push(e.message);
-      lines.push('This operation needs credits or a paid plan. Check the balance with get_credit_balance or review billing tools.');
+      if (e.context) lines.push(`context: ${JSON.stringify(e.context)}`);
+      lines.push('This is a plan/quota decision, not a transient failure. Inspect the workspace plan with search_billing_subscriptions or get_billing_subscription, and the catalog with search_billing_products; buying more capacity is add_billing_subscription_addon / change_billing_subscription.');
       break;
     case 'unauthorized':
       lines.push(e.message);

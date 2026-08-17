@@ -15,9 +15,9 @@ import { mapErrorEnvelope } from '../error-map';
 //
 //   team:{sid}   the Team-SID header when the client sent one, else the
 //                `access_identity.team_sid` claim off the bearer. This is the
-//                unit that pays: credits, backend load and support cost all
-//                aggregate here, so it is the only axis where "too much" means
-//                anything financially.
+//                unit that pays: the subscription, the backend load and the
+//                support cost all aggregate here, so it is the only axis where
+//                "too much" means anything financially.
 //   actor:{...}  fallback for a token that carries no team claim at all.
 //   token:{fp}   last resort, the first 8 bytes of SHA-256 over the bearer.
 //                Never the bearer itself, in a key or in a log line.
@@ -32,11 +32,12 @@ import { mapErrorEnvelope } from '../error-map';
 // volumetric attacks are Cloudflare's layer, not ours.
 //
 // Two buckets, because the two costs are not the same size. Every call spends
-// from `calls`. A call the registry marks not-read-only (a mutation, a paid
-// action, a mass-action fan-out) ALSO spends from the tighter `writes` bucket,
-// so a runaway write loop is stopped long before a runaway read loop, which is
-// the right order: a read costs us a query, a write costs us credits, a
-// LinkedIn action, or a row somebody has to clean up.
+// from `calls`. A call the registry marks not-read-only (a mutation, a
+// LinkedIn-side action, a mass-action fan-out) ALSO spends from the tighter
+// `writes` bucket, so a runaway write loop is stopped long before a runaway
+// read loop, which is the right order: a read costs us a query, a write costs
+// us a slot out of a LinkedIn account's daily limit bucket, the support risk
+// that comes with burning it, or a row somebody has to clean up.
 //
 // ── The mechanism ───────────────────────────────────────────────────────────
 // Cloudflare's rate-limit binding when the environment binds one. It is the

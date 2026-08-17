@@ -50,10 +50,11 @@
 #   pnpm lint             Identical work to `pnpm typecheck`: every package's lint
 #                         script is the same `tsc --noEmit -p tsconfig.json`.
 #   the OAS validator     bin/openapi-public.sh normally ends by running
-#                         gtm.openapi.tech/_tools/validate.py. That validator, its
-#                         requirements.txt and its Python venv live in a THIRD repo,
-#                         and it already runs on the workstation every time the spec
-#                         is generated (write mode validates too, and refuses to run
+#                         bin/openapi-validate.py. It is Python, and this is a Node
+#                         image: satisfying bin/requirements.txt would mean adding a
+#                         python3 + venv install to a step that otherwise needs none.
+#                         It already runs on the workstation every time the spec is
+#                         generated (write mode validates too, and refuses to run
 #                         without it). CI sets SKIP_VALIDATE=1 and keeps the half
 #                         this repo owns: drift against the Zod registry.
 #

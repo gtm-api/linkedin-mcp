@@ -193,12 +193,13 @@ export const McpGroupByResponse = z.object({
 });
 
 // ═══════════════════════════════════════════════════════════════════════
-// 3. Action envelopes + credits (§9.5) + async pending refs (§10)
+// 3. Action envelopes + async pending refs (§10)
 // ═══════════════════════════════════════════════════════════════════════
 
-// The wire still carries a partner-internal `credits` block on DataRequest
-// responses (the GetSales integration meters on it); it is deliberately NOT
-// declared here: public schemas stopped describing credits on 2026-08-14.
+// 2026-08-16: credits left the platform. No envelope carries a credits block,
+// CreditsSpentValue is gone from gtm.lib.common, and GetSales reconciles off
+// POST /api/data-requests/search (kind=enrich, status=completed,
+// served_from_cache=false).
 
 // pending[] ref emitted by mcpAsyncAction. The backend contract is
 // {activity_log_sid, expected_completion_seconds, webhook_events[]}; kept

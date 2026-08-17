@@ -100,6 +100,8 @@ const AntidetectBrowser = z.object({
   // Proxy assignment (XOR: exactly one populated on managed browsers)
   antidetect_browser_proxy_sid: z.string().nullable(),
   proxy_country_code: z.string().nullable(),
+  proxy_5g: z.boolean()
+    .describe('5G Proxy add-on: the browser runs on the dedicated 5G mobile route (faster command execution, fewer retries). Each flagged browser occupies one add-on slot.'),
   // Cloud-browser access
   cloud_browser_access: z.array(z.object({
     key: z.string(),
@@ -136,6 +138,8 @@ const AntidetectBrowserFilter = z.object({
     .describe('is_null:true = ops scan for browsers not assigned to a server.'),
   antidetect_browser_proxy_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   proxy_country_code: filterOp(z.string(), ['eq', 'in']).optional(),
+  proxy_5g: filterOp(z.boolean(), ['eq']).optional()
+    .describe('eq:true = the browsers occupying a 5G Proxy add-on slot (that is how slot usage is counted).'),
   fail_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
   logout_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
   last_start_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
@@ -220,6 +224,8 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
         .describe('Assign an already-chosen pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
       proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy. The default way to pick a proxy.'),
       custom_proxy_config: CustomProxyConfig.optional(),
+      proxy_5g: z.boolean().optional()
+        .describe('Provision the browser on the 5G Proxy add-on: the dedicated 5G mobile route, sold for speed (faster command execution, fewer retries). Each flagged browser takes one add-on slot; with no headroom left the create is refused 402 insufficient_proxy_5g_slots.'),
       ...usageMetaField,
     }),
     outputSchema: McpCreateResponse(AntidetectBrowser),
@@ -323,7 +329,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'update_antidetect_browser_proxy',
     description:
-      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid pins a pooled proxy, proxy_country_code takes the least-loaded active one there, custom_proxy_config moves the browser to a customer-supplied upstream. Pooled arms need browser_owner=platform (422 managed_proxy_forbidden_for_owner); custom_proxy_config is the reverse, forbidden on platform (422 custom_proxy_forbidden_for_owner). Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty. The vendor profile is updated before the row is re-bound, so a vendor failure (503 vendor_proxy_update_failed) changes nothing. DANGEROUS twice over: the country may change, and a location flip mid-campaign can trip a LinkedIn risk check; and a running browser is stopped and started again, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
+      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. Pooled arms need browser_owner=platform (422 managed_proxy_forbidden_for_owner); custom_proxy_config is the reverse, forbidden on platform (422 custom_proxy_forbidden_for_owner). Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty. One exception: a body carrying proxy_5g alone is valid, since moving the 5G Proxy add-on binding leaves the IP untouched. The vendor profile is updated before the row is re-bound, so a vendor failure (503 vendor_proxy_update_failed) changes nothing. DANGEROUS twice over: the country may change, and a location flip mid-campaign can trip a LinkedIn risk check; and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/update-proxy' },
     operation: 'action',
@@ -338,6 +344,8 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
         .describe('Pin a specific pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
       proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy. The default way to pick a proxy.'),
       custom_proxy_config: CustomProxyConfig.optional(),
+      proxy_5g: z.boolean().optional()
+        .describe('Arm (true) or release (false) the 5G Proxy add-on binding on this browser. Omit to leave the binding untouched. A body carrying proxy_5g alone is a valid source-less call: it moves only the add-on binding and leaves the IP where it is.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(AntidetectBrowser, ProxySwapResult),

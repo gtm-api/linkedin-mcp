@@ -12,7 +12,7 @@ import { COVERAGE_OUT, formatReport, writeReport } from './e2e/coverage';
 // own `outputSchema`. This is what validates the Zod contracts against real
 // backend JSON across the whole read surface (not a hand-picked subset).
 //
-// Never invokes mutating / creditable / outward tools (action/create/update/delete).
+// Never invokes mutating / smart-limit-spending / outward tools (action/create/update/delete).
 // Opt-in (RUN_E2E=1); needs the running worker + live backends. A read that needs
 // a required filter (e.g. account-scoped / period) comes back as a clean error
 // envelope (still contract-valid) and is reported as "needs-args", not a failure.

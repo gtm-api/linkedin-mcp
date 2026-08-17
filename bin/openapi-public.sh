@@ -9,23 +9,23 @@
 # TypeScript as-is; bin/lib/register-ts.mjs only teaches it the workspace's
 # extensionless import specifiers.
 #
-# Validation REUSES gtm.openapi.tech/_tools/validate.py rather than adding a
-# second validator to the house: same OAS 3.0 structural check
-# (openapi_spec_validator), same operationId / summary / description / 4xx /
-# array-items / $ref / license / ambiguous-path rules. Route coverage is skipped
-# for these documents because they carry no `_frag/_routes.json` oracle (the
-# registry itself is the oracle, and tests/coverage-gate.test.ts is the gate).
+# Validation runs bin/openapi-validate.py: the OAS structural check
+# (openapi_spec_validator) plus the operationId / summary / description / 4xx /
+# array-items / $ref / license / ambiguous-path rules. gtm.openapi.public is the
+# only OpenAPI spec in the house now, this repo is what generates it, so the
+# validator lives here next to its one caller.
 #
-# The Python deps are installed into a throwaway venv the first time
-# (product/openapi/gtm.openapi.public/.venv, gitignored). Set SKIP_VALIDATE=1 to
-# generate without them.
+# The Python deps (bin/requirements.txt) are installed into a throwaway venv the
+# first time. It sits at product/openapi/gtm.openapi.public/.venv, gitignored
+# there and deliberately outside this repo: tests/dash-lint.test.ts walks every
+# text file under this repo root, so a venv full of third-party punctuation
+# inside it would fail that gate. Set SKIP_VALIDATE=1 to generate without them.
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 OPENAPI_DIR="$(cd "$ROOT/../../openapi" && pwd)"
 PUBLIC_DIR="$OPENAPI_DIR/gtm.openapi.public"
-TECH_DIR="$OPENAPI_DIR/gtm.openapi.tech"
 VENV="$PUBLIC_DIR/.venv"
 
 MODE="write"
@@ -48,21 +48,21 @@ if [ "${SKIP_VALIDATE:-0}" = "1" ]; then
   exit 0
 fi
 
-VALIDATOR="$TECH_DIR/_tools/validate.py"
+VALIDATOR="$ROOT/bin/openapi-validate.py"
+REQUIREMENTS="$ROOT/bin/requirements.txt"
 if [ ! -f "$VALIDATOR" ]; then
   echo "✗ validator not found at $VALIDATOR." >&2
-  echo "  gtm.openapi.tech is a sibling repo; check it out next to gtm.openapi.public," >&2
-  echo "  or re-run with SKIP_VALIDATE=1 to generate without validating." >&2
+  echo "  Re-run with SKIP_VALIDATE=1 to generate without validating." >&2
   exit 1
 fi
 
 if [ ! -x "$VENV/bin/python" ]; then
-  echo "→ creating $VENV from $TECH_DIR/requirements.txt (one time)"
+  echo "→ creating $VENV from bin/requirements.txt (one time)"
   python3 -m venv "$VENV"
-  "$VENV/bin/pip" install -q -r "$TECH_DIR/requirements.txt"
+  "$VENV/bin/pip" install -q -r "$REQUIREMENTS"
 fi
 
-echo "→ validating with gtm.openapi.tech/_tools/validate.py"
+echo "→ validating with bin/openapi-validate.py"
 status=0
 for dir in "$PUBLIC_DIR"/services/*/; do
   svc="$(basename "$dir")"

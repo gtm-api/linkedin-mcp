@@ -46,7 +46,6 @@ const Team = z.object({
   subscription_sid: z.string().nullable(),
   name: z.string(),
   status: TeamStatus,
-  trial_ends_at: z.string().nullable(),
   limits: z.object({                        // TeamLimitsValue (cache snapshot, NOT NULL)
     accounts: z.number(),
     cloud_browser: z.number(),
@@ -74,8 +73,6 @@ const TeamFilter = z.object({
     .describe('is_null:true = teams with no applied subscription.'),
   status: filterOp(TeamStatus, ['eq', 'ne', 'in']).optional(),
   q: z.string().optional().describe('Full-text LIKE (prefix/infix) over team name.'),
-  trial_ends_at: filterOp(z.string(), ['is_null', 'gte', 'lte', 'gt', 'lt']).optional()
-    .describe('is_null:false = on trial; range = trials expiring in a window.'),
   created_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
   deleted_at: filterOp(z.string(), ['is_null', 'gte', 'lte']).optional()
     .describe('Default scope is { is_null: true } (live rows).'),
@@ -97,7 +94,7 @@ export const teamsTools: ToolDefinition[] = [
     ...base,
     name: 'search_teams',
     description:
-      'List the caller\'s teams ("my workspaces"): teams they are a member of, plus teams they own. Filter by status to find suspended workspaces, by subscription_sid.is_null for teams with no capacity, or by trial_ends_at for trials expiring soon. q does an infix match on name. include[] hydrates subscription / owner / member counts. Returns a counts block. page_size:0 returns counts only.',
+      'List the caller\'s teams ("my workspaces"): teams they are a member of, plus teams they own. Filter by status to find suspended workspaces, or by subscription_sid.is_null for teams with no capacity. q does an infix match on name. include[] hydrates subscription / owner / member counts. Returns a counts block. page_size:0 returns counts only.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/teams/search' },
     operation: 'search',
@@ -126,7 +123,7 @@ export const teamsTools: ToolDefinition[] = [
     ...base,
     name: 'create_team',
     description:
-      'Create a new workspace. The caller becomes the owner AND the first member; an internal trial subscription (5 account slots, +7d, no card) is applied automatically. Names are not unique: every call creates a new team (no dedup).',
+      'Create a new workspace. The caller becomes the owner AND the first member; the free "Sandbox" plan (forever free, 1 account slot, no card) is applied automatically where the owner does not already run a free workspace. Names are not unique: every call creates a new team (no dedup).',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/teams' },
     operation: 'create',
@@ -145,7 +142,7 @@ export const teamsTools: ToolDefinition[] = [
     ...base,
     name: 'update_team',
     description:
-      'Rename a team or edit its config. Only name / config are mutable; owner_user_sid (transfer-ownership), status (derived), subscription_sid (apply/unapply), limits (system) and trial_ends_at are read-only and silently rejected. At least one field required.',
+      'Rename a team or edit its config. Only name / config are mutable; owner_user_sid (transfer-ownership), status (derived), subscription_sid (apply/unapply) and limits (system) are read-only and silently rejected. At least one field required.',
     toolClass: 'typical',
     route: { service: 'id', method: 'PATCH', pathTemplate: '/api/teams/{sid}', sidParam: 'sid' },
     operation: 'update',
@@ -165,7 +162,7 @@ export const teamsTools: ToolDefinition[] = [
     ...base,
     name: 'delete_team',
     description:
-      'Cascade soft-delete a workspace and its owned rows (members, keys, sessions, oauth clients, certs, credit lots). Owner-only. DESTRUCTIVE. Blocked (409 delete_blocked) while a paid applied subscription is live. Unapply/cancel it first; clear soft blockers (active keys / members) with acknowledge[].',
+      'Cascade soft-delete a workspace and its owned rows (members, keys, sessions, oauth clients, certs). Owner-only. DESTRUCTIVE. Blocked (409 delete_blocked) while a paid applied subscription is live. Unapply/cancel it first; clear soft blockers (active keys / members) with acknowledge[].',
     toolClass: 'typical',
     route: { service: 'id', method: 'DELETE', pathTemplate: '/api/teams/{sid}', sidParam: 'sid' },
     operation: 'delete',

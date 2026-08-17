@@ -1648,12 +1648,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "trial_ends_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
                         "name": "paused_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -1785,12 +1779,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "trial_ends_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
                         "name": "paused_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -1852,7 +1840,6 @@
                     "price_sid",
                     "current_period_ends_at",
                     "next_billed_at",
-                    "trial_ends_at",
                     "canceled_at",
                     "created_at",
                     "updated_at",
@@ -2236,19 +2223,7 @@
                     }
                 ]
             },
-            "filter": {
-                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\CreditLot\\CreditLotFilter",
-                "fields": [
-                    "sid",
-                    "kind",
-                    "source",
-                    "status",
-                    "source_item_sid",
-                    "granted_at",
-                    "expires_at",
-                    "created_at"
-                ]
-            }
+            "filter": null
         },
         "CreditTransaction": {
             "domain": {
@@ -2441,20 +2416,7 @@
                     }
                 ]
             },
-            "filter": {
-                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\CreditTransaction\\CreditTransactionFilter",
-                "fields": [
-                    "sid",
-                    "kind",
-                    "type",
-                    "status",
-                    "operation",
-                    "reference_sid",
-                    "request_id",
-                    "created_at",
-                    "confirmed_at"
-                ]
-            }
+            "filter": null
         },
         "Notification": {
             "domain": {
@@ -4135,12 +4097,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "trial_ends_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
                         "name": "config",
                         "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Team\\Values\\TeamConfigValue|array|null",
                         "nullable": true,
@@ -4236,12 +4192,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "trial_ends_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
                         "name": "config",
                         "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Team\\Values\\TeamConfigValue|array|null",
                         "nullable": true,
@@ -4287,7 +4237,6 @@
                     "owner_user_sid",
                     "subscription_sid",
                     "status",
-                    "trial_ends_at",
                     "created_at",
                     "deleted_at"
                 ]
@@ -5452,10 +5401,6 @@
                     "value": "active"
                 },
                 {
-                    "name": "Trialing",
-                    "value": "trialing"
-                },
-                {
                     "name": "Canceled",
                     "value": "canceled"
                 }
@@ -5531,20 +5476,12 @@
                 {
                     "name": "CurrentPeriodEndsAt",
                     "value": "current_period_ends_at"
-                },
-                {
-                    "name": "TrialEndsAt",
-                    "value": "trial_ends_at"
                 }
             ]
         },
         "Gtm\\Lib\\Common\\Microservices\\Id\\BillingSubscription\\Enums\\BillingSubscriptionStatusEnum": {
             "backing": "string",
             "cases": [
-                {
-                    "name": "Trialing",
-                    "value": "trialing"
-                },
                 {
                     "name": "Active",
                     "value": "active"
@@ -5643,54 +5580,21 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Conversion\\Enums\\ConversionEventEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "LinkedinConnected",
+                    "value": "linkedin_connected"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\CreditLot\\Enums\\CreditKindEnum": {
             "backing": "string",
             "cases": [
                 {
-                    "name": "Enrichment",
-                    "value": "enrichment"
-                },
-                {
                     "name": "Platform",
                     "value": "platform"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\CreditLot\\Enums\\CreditLotGroupableFieldsEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Kind",
-                    "value": "kind"
-                },
-                {
-                    "name": "Source",
-                    "value": "source"
-                },
-                {
-                    "name": "Status",
-                    "value": "status"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\CreditLot\\Enums\\CreditLotSortableFieldEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "ExpiresAt",
-                    "value": "expires_at"
-                },
-                {
-                    "name": "GrantedAt",
-                    "value": "granted_at"
-                },
-                {
-                    "name": "AmountRemaining",
-                    "value": "amount_remaining"
-                },
-                {
-                    "name": "AmountGranted",
-                    "value": "amount_granted"
                 }
             ]
         },
@@ -5708,10 +5612,6 @@
                 {
                     "name": "Refund",
                     "value": "refund"
-                },
-                {
-                    "name": "PartnerDelegated",
-                    "value": "partner_delegated"
                 }
             ]
         },
@@ -5729,57 +5629,6 @@
                 {
                     "name": "Expired",
                     "value": "expired"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\CreditTransaction\\Enums\\CreditTransactionGroupableFieldsEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Type",
-                    "value": "type"
-                },
-                {
-                    "name": "Status",
-                    "value": "status"
-                },
-                {
-                    "name": "Operation",
-                    "value": "operation"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\CreditTransaction\\Enums\\CreditTransactionSeriesBucketEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Day",
-                    "value": "day"
-                },
-                {
-                    "name": "Week",
-                    "value": "week"
-                },
-                {
-                    "name": "Month",
-                    "value": "month"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\CreditTransaction\\Enums\\CreditTransactionSortableFieldEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "CreatedAt",
-                    "value": "created_at"
-                },
-                {
-                    "name": "ConfirmedAt",
-                    "value": "confirmed_at"
-                },
-                {
-                    "name": "Amount",
-                    "value": "amount"
                 }
             ]
         },
@@ -5909,10 +5758,6 @@
                     "value": "password_changed"
                 },
                 {
-                    "name": "Welcome",
-                    "value": "welcome"
-                },
-                {
                     "name": "AccountErasureScheduled",
                     "value": "account_erasure_scheduled"
                 },
@@ -5981,16 +5826,8 @@
                     "value": "subscription_paused"
                 },
                 {
-                    "name": "SubscriptionResumed",
-                    "value": "subscription_resumed"
-                },
-                {
                     "name": "SubscriptionCanceled",
                     "value": "subscription_canceled"
-                },
-                {
-                    "name": "TrialEnded",
-                    "value": "trial_ended"
                 },
                 {
                     "name": "PaymentReceipt",
@@ -5999,10 +5836,6 @@
                 {
                     "name": "PaymentFailed",
                     "value": "payment_failed"
-                },
-                {
-                    "name": "CreditsExpiring",
-                    "value": "credits_expiring"
                 },
                 {
                     "name": "SslCertificateExpiring",
@@ -6584,10 +6417,6 @@
                     "value": "none"
                 },
                 {
-                    "name": "Trial",
-                    "value": "trial"
-                },
-                {
                     "name": "Free",
                     "value": "free"
                 },
@@ -6684,6 +6513,52 @@
                 {
                     "name": "Unqualified",
                     "value": "unqualified"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\User\\Enums\\UserSenderBracketEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "R1_10",
+                    "value": "r1_10"
+                },
+                {
+                    "name": "R10Plus",
+                    "value": "r10_plus"
+                },
+                {
+                    "name": "R20Plus",
+                    "value": "r20_plus"
+                },
+                {
+                    "name": "R50Plus",
+                    "value": "r50_plus"
+                },
+                {
+                    "name": "R100Plus",
+                    "value": "r100_plus"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\User\\Enums\\UserSetupStepEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Verify",
+                    "value": "verify"
+                },
+                {
+                    "name": "Questions",
+                    "value": "questions"
+                },
+                {
+                    "name": "Workspace",
+                    "value": "workspace"
+                },
+                {
+                    "name": "Call",
+                    "value": "call"
                 }
             ]
         },
@@ -10385,20 +10260,6 @@
                     "between": null
                 },
                 {
-                    "field": "filter.trial_ends_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "filter.canceled_at",
                     "rules": [
                         "nullable"
@@ -10509,7 +10370,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "in:\"created_at\",\"updated_at\",\"current_period_ends_at\",\"trial_ends_at\""
+                        "in:\"created_at\",\"updated_at\",\"current_period_ends_at\""
                     ],
                     "required": false,
                     "nullable": true,
@@ -10517,8 +10378,7 @@
                     "in": [
                         "created_at",
                         "updated_at",
-                        "current_period_ends_at",
-                        "trial_ends_at"
+                        "current_period_ends_at"
                     ],
                     "min": null,
                     "max": null,
@@ -11592,799 +11452,6 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "POST",
-            "uri": "api/credit-lots/search",
-            "controller": "App\\Entities\\CreditLot\\CreditLotController",
-            "action": "search",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": false,
-            "request_class": "App\\Entities\\CreditLot\\Requests\\CreditLotSearchRequest",
-            "rules": [
-                {
-                    "field": "filter",
-                    "rules": [
-                        "nullable",
-                        "array"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.sid",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.kind",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.source",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.status",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.source_item_sid",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.granted_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.expires_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.created_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "sort",
-                    "rules": [
-                        "nullable",
-                        "array"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "sort.field",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "in:\"expires_at\",\"granted_at\",\"amount_remaining\",\"amount_granted\""
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": [
-                        "expires_at",
-                        "granted_at",
-                        "amount_remaining",
-                        "amount_granted"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "sort.direction",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "in:\"asc\",\"desc\""
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": [
-                        "asc",
-                        "desc"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "page_size",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:0",
-                        "max:500"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 0,
-                    "max": 500,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "limit",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:0",
-                        "max:500"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 0,
-                    "max": 500,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "cursor",
-                    "rules": [
-                        "nullable",
-                        "string"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/credit-transactions/get-balance",
-            "controller": "App\\Entities\\CreditTransaction\\CreditTransactionController",
-            "action": "getBalance",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": false,
-            "request_class": "App\\Entities\\CreditTransaction\\Requests\\CreditTransactionGetBalanceRequest",
-            "rules": [
-                {
-                    "field": "kind",
-                    "rules": [
-                        "required",
-                        "string",
-                        "in:\"enrichment\",\"platform\""
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": [
-                        "enrichment",
-                        "platform"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/credit-transactions/metrics",
-            "controller": "App\\Entities\\CreditTransaction\\CreditTransactionController",
-            "action": "metrics",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": false,
-            "request_class": "App\\Entities\\CreditTransaction\\Requests\\CreditTransactionMetricsRequest",
-            "rules": [
-                {
-                    "field": "period",
-                    "rules": [
-                        "required",
-                        "array"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "period.from",
-                    "rules": [
-                        "required",
-                        "date"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "date",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "period.to",
-                    "rules": [
-                        "required",
-                        "date",
-                        "after_or_equal:period.from"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "date",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter",
-                    "rules": [
-                        "nullable",
-                        "array"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.sid",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.kind",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.type",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.status",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.operation",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.reference_sid",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.request_id",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.created_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.confirmed_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "group_by",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "in:\"type\",\"status\",\"operation\""
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": [
-                        "type",
-                        "status",
-                        "operation"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "bucket",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "in:\"day\",\"week\",\"month\""
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": [
-                        "day",
-                        "week",
-                        "month"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/credit-transactions/search",
-            "controller": "App\\Entities\\CreditTransaction\\CreditTransactionController",
-            "action": "search",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": false,
-            "request_class": "App\\Entities\\CreditTransaction\\Requests\\CreditTransactionSearchRequest",
-            "rules": [
-                {
-                    "field": "filter",
-                    "rules": [
-                        "nullable",
-                        "array"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.sid",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.kind",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.type",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.status",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.operation",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.reference_sid",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.request_id",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.created_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "filter.confirmed_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "sort",
-                    "rules": [
-                        "nullable",
-                        "array"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "array",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "sort.field",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "in:\"created_at\",\"confirmed_at\",\"amount\""
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": [
-                        "created_at",
-                        "confirmed_at",
-                        "amount"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "sort.direction",
-                    "rules": [
-                        "nullable",
-                        "string",
-                        "in:\"asc\",\"desc\""
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": [
-                        "asc",
-                        "desc"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "page_size",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:0",
-                        "max:500"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 0,
-                    "max": 500,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "limit",
-                    "rules": [
-                        "nullable",
-                        "integer",
-                        "min:0",
-                        "max:500"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "integer",
-                    "in": null,
-                    "min": 0,
-                    "max": 500,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "cursor",
-                    "rules": [
-                        "nullable",
-                        "string"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
         },
         {
             "method": "POST",
@@ -15881,20 +14948,6 @@
                     "between": null
                 },
                 {
-                    "field": "filter.trial_ends_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "filter.created_at",
                     "rules": [
                         "nullable"
@@ -16476,6 +15529,43 @@
                     "between": null
                 },
                 {
+                    "field": "config.setup_step",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "in:\"verify\",\"questions\",\"workspace\",\"call\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "verify",
+                        "questions",
+                        "workspace",
+                        "call"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "config.setup_completed",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "config.onboarding_completed",
                     "rules": [
                         "sometimes",
@@ -16926,6 +16016,94 @@
                     "in": null,
                     "min": 8,
                     "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "auth/qualify",
+            "controller": "App\\Http\\Controllers\\AuthController",
+            "action": "qualify",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\QualifyRequest",
+            "rules": [
+                {
+                    "field": "qty_of_senders",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "qty_of_senders_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"r1_10\",\"r10_plus\",\"r20_plus\",\"r50_plus\",\"r100_plus\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "r1_10",
+                        "r10_plus",
+                        "r20_plus",
+                        "r50_plus",
+                        "r100_plus"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "automate_first",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "heard_from",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
                     "size": null,
                     "between": null
                 }
@@ -17487,6 +16665,57 @@
             "rules_reason": null
         },
         {
+            "method": "POST",
+            "uri": "auth/verify-email",
+            "controller": "\\App\\Http\\Controllers\\AuthController",
+            "action": "verifyEmailCode",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\VerifyEmailCodeRequest",
+            "rules": [
+                {
+                    "field": "email",
+                    "rules": [
+                        "required",
+                        "string",
+                        "email",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "code",
+                    "rules": [
+                        "required",
+                        "string",
+                        "digits:6"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
             "method": "GET",
             "uri": "auth/verify-email/{email}/{code}",
             "controller": "App\\Http\\Controllers\\AuthController",
@@ -17576,91 +16805,6 @@
             "uri": "internal/billing/customers/search",
             "controller": "App\\Entities\\BillingPaddleCustomer\\InternalBillingPaddleCustomerController",
             "action": "search",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "POST",
-            "uri": "internal/credits/check",
-            "controller": "App\\Entities\\CreditTransaction\\InternalCreditController",
-            "action": "check",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "POST",
-            "uri": "internal/credits/debit",
-            "controller": "App\\Entities\\CreditTransaction\\InternalCreditController",
-            "action": "debit",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "POST",
-            "uri": "internal/credits/debit-batch",
-            "controller": "App\\Entities\\CreditTransaction\\InternalCreditController",
-            "action": "debitBatch",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "POST",
-            "uri": "internal/credits/release",
-            "controller": "App\\Entities\\CreditTransaction\\InternalCreditController",
-            "action": "release",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "POST",
-            "uri": "internal/credits/reserve",
-            "controller": "App\\Entities\\CreditTransaction\\InternalCreditController",
-            "action": "reserve",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
@@ -17918,6 +17062,23 @@
             "uri": "internal/users/erase",
             "controller": "App\\Entities\\User\\InternalUserController",
             "action": "erase",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/users/track-conversion",
+            "controller": "App\\Entities\\User\\InternalUserController",
+            "action": "trackConversion",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,

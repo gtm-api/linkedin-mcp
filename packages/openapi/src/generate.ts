@@ -183,7 +183,7 @@ const infoDescription = (service: PublicServiceId, toolCount: number): string =>
     '',
     'GENERATED. This document is projected from the Zod MCP tool registry in `product/mcp/gtm.mcp` (one tool per public endpoint, 1:1). Do not edit it by hand; edit the tool definition and regenerate with `pnpm openapi:public`.',
     '',
-    `Surface: the public \`/api\` contract of \`gtm.service.${service}\`, ${toolCount} operations. Internal (\`/internal\`) and health endpoints are deliberately absent; the code-faithful spec that documents those lives in \`product/openapi/gtm.openapi.tech\`.`,
+    `Surface: the public \`/api\` contract of \`gtm.service.${service}\`, ${toolCount} operations. This is the only OpenAPI document the platform publishes. Internal (\`/internal\`) and health endpoints are deliberately absent: they are not part of any contract, they can change without notice, and the service source is their only description.`,
     '',
     'Conventions:',
     '- Auth is a bearer JWT, optionally narrowed by the `Team-SID` header.',

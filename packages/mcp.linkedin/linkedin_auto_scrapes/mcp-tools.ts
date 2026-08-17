@@ -61,7 +61,7 @@ const SourceMethod = z.enum([
   'similar-profiles',
   'company-employees',
   'company-decision-makers',
-  'get-post-commenters',
+  'get-post-comments',
   'get-post-reactors',
   'get-post-resharers',
   // The services marketplace joined the eligible set on 2026-07-30 with its verbs

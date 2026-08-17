@@ -995,7 +995,7 @@ first production deploy has actually happened.
 | `pnpm e2e` | `RUN_E2E=1` calls every safe read tool through a running worker against live backends with a seeded team. CI has no Docker, no seeded database and no worker on :8788, so it structurally cannot | workstation: [The live e2e arm](#the-live-e2e-arm) below |
 | `pnpm smoke` | needs a DEPLOYED worker and a real token | workstation: steps 9 and 11 |
 | `pnpm lint` | identical work to `pnpm typecheck` (every package's `lint` is the same `tsc --noEmit`) | nowhere, deliberately |
-| the OAS validator | `bin/openapi-public.sh` normally ends with `gtm.openapi.tech/_tools/validate.py`; that validator, its `requirements.txt` and its venv live in a third private repo | workstation: `pnpm openapi:public` validates in write mode and refuses to run without it, so the spec is validated whenever it is generated |
+| the OAS validator | `bin/openapi-public.sh` ends by running a Python validator (`pyyaml` + `openapi-spec-validator` in a throwaway venv), and the pinned `node:24-bookworm` image has no Python environment for it | workstation: `pnpm openapi:public` validates in write mode and refuses to run without it, so the spec is validated whenever it is generated |
 
 The fixture staleness that CI cannot see is the one that hurts most: every contract
 gate reads `fixtures/contract-oracle/*.contract.json`, so a fixture that went stale
@@ -1043,7 +1043,8 @@ it from a pass count:
 - the read surface split four ways: **outputSchema parsed** (the real assertion),
   **needs-args** (the tool wanted a required filter and returned a clean error
   envelope), **no-data** (nothing seeded to read), **other-error**;
-- what was not called, and why: mutating, creditable and outward tools are never run
+- what was not called, and why: mutating tools and tools that act outward on LinkedIn
+  (the ones that spend a LinkedIn account's smart-limit budget) are never run
   against a live tenant. One dangerous tool is driven to its PREVIEW step; no commit
   step ever runs, which is exactly the gap check 6 of the smoke fills.
 

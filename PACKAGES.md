@@ -18,11 +18,11 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 > collapsed into the stateless `linkedin-posting` group (`create-post`, `comment`, `react`). Post
 > READING is `linkedin-scraping` (get-post-comments / -commenters / -reactors / -resharers) and
 > `linkedin-enrichment` (post-details); the saved-search job store is gone, so `/mcp/linkedin/data`
-> is the credit ledger alone.
+> is the execution journal alone.
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| accounts | `/mcp/linkedin/accounts` | linkedin_accounts (24), linkedin_account_smart_limits (3) | 27 | ✅ |
+| accounts | `/mcp/linkedin/accounts` | linkedin_accounts (22), linkedin_account_smart_limits (3) | 25 | ✅ (at cap) |
 | account_monitor | `/mcp/linkedin/account-monitor` | linkedin_account_snapshots (1), linkedin_benchmarks (1), linkedin_account_quota_hits (1), linkedin_account_block_log (1), linkedin_account_activity_log (2), linkedin_account_sync_runs (3) | 9 | ✅ |
 | messaging | `/mcp/linkedin/messaging` | linkedin_conversations (13), linkedin_messages (12) | 25 | ✅ (budget **28**, 3 free) |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (6), linkedin_connection_invitations (6), linkedin_followers (3) | 21 | ✅ |
@@ -46,7 +46,7 @@ parent. Neither existing candidate was honest:
   fit at all (21 + 13 = 34, so it would take a budget of 34 and gut the reason the cap exists), and
   the two surfaces answer different questions - the design research (§9.6, in the private
   monorepo) layers them deliberately: scraping is
-  a run-now, one-page pull with the rows inline in the HTTP response and credits debited per call;
+  a run-now, one-page pull with the rows inline in the HTTP response, one `scraping` bucket slot per call;
   an auto-scrape is a saved, deduped, multi-page, optionally recurring job with persisted results and
   a new-lead delta. The mount instruction on each now names the other, so the router is explicit.
 - **`/mcp/linkedin/account-monitor`** (9 / 25) fits on arithmetic alone and is wrong on every other
@@ -66,7 +66,7 @@ from `linkedin_messages` onto two URLs - would make a client mount twice to do o
 degrading one mount, and `tests/worker-boot.test.ts` is the only thing that catches it: read its
 headroom table before authoring a messaging tool.
 
-## mcp.orchestration: 2 mounts / 21 tools
+## mcp.orchestration: 2 mounts / 22 tools
 
 `gtm.service.orchestration` owns the cross-service plumbing: one webhook registry and one delivery
 log for every producer service, plus mass actions. Base URL `ORCHESTRATION_BASE_URL` (local `:8025`,
@@ -75,7 +75,7 @@ log for every producer service, plus mass actions. Base URL `ORCHESTRATION_BASE_
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
 | webhooks | `/mcp/orchestration/webhooks` | webhooks (6), webhook_logs (4) | 10 | ✅ |
-| mass_actions | `/mcp/orchestration/mass-actions` | mass_actions (9), mass_action_items (2) | 11 | ✅ |
+| mass_actions | `/mcp/orchestration/mass-actions` | mass_actions (10), mass_action_items (2) | 12 | ✅ |
 
 ⚠️ `webhooks` + `webhook_logs` moved here from `mcp.linkedin/platform` at the 2026-07-26
 orchestration cutover: the registry is platform-wide, so the log carries `account_sid`
@@ -87,9 +87,10 @@ did not change.
 its 2 tools (`search_mass_action_items`, `retry_mass_action_items`). `retry` is the service's only
 `mass_action: true` route, so its allow-list waiver in
 `fixtures/contract-oracle/mass-action-allowlist.json` is gone and that list is empty for
-orchestration. The 9 parent `mass_actions` tools landed on the same mount later that day
+orchestration. The 10 parent `mass_actions` tools landed on the same mount later that day
 (`preview_` / `create_` / `search_` / `get_` / `delete_mass_action`, `get_mass_actions_metrics`,
-`pause_` / `resume_mass_action`, `release_mass_action_canary`), which took the orchestration ratchet
+`pause_` / `resume_mass_action`, `release_mass_action_canary`, `append_mass_action_items`), which
+took the orchestration ratchet
 to **0** and emptied its `drift-ledger.json` lists: the service is at full MCP coverage. All four
 parent lifecycle verbs are `massAction: false` / `stepEligible: false` by declaration, not by
 omission: the fan-out this service performs is the RUN, and its control surface is single-target
@@ -116,15 +117,18 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 5 mounts / 77 tools
+## mcp.id: 4 mounts / 73 tools
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
 | identity | `/mcp/id/identity` | users (2), teams (6), team_members (6), sessions (2) | 16 | ✅ |
 | access | `/mcp/id/access` | api_keys (7), oauth_clients (5), oauth_authorizations (3), account_shares (5) | 20 | ✅ |
 | billing | `/mcp/id/billing` | billing_products (1), billing_subscriptions (13), billing_transactions (4), billing_payment_methods (3) | 21 | ✅ |
-| credits | `/mcp/id/credits` | credit_transactions (4) | 4 | ✅ |
 | platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), observability_requests (2), support_requests (3) | 16 | ✅ |
+
+2026-08-16 - the `credits` mount and the `credit_transactions` package were removed with the
+platform-wide credits exit; data-bus reads are no longer metered.
+
 ⚠️ `account_shares` moved here from `mcp.linkedin/platform` at the 2026-07-26 handover cutover: a
 handover binds TWO tenants that may live in different clusters, so the record and its tools belong on
 `gtm.service.id`, and the LinkedIn service now exposes only the six internal `/internal/handover/*`
@@ -169,8 +173,10 @@ all 44 listed in `drift-ledger.json`. Authoring the package burns both down rout
 
 ## mcp.support: 1 mount / 2 tools
 
-No backend service: the KB is bundled into the worker (BM25 index, plus Cloudflare Vectorize in
-production), so the 1:1 `/api` rule does not apply here.
+No backend service: the two tools are `localHandler`s that query the Mintlify discovery index over
+the published docs site (`kb_articles/mintlify-retriever.ts`), so the 1:1 `/api` rule does not apply
+here. No bundled index and no fallback - when the docs index is unreachable the tool errors rather
+than answering from stale local data (Eugene, 2026-08-14).
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
@@ -178,8 +184,8 @@ production), so the 1:1 `/api` rule does not apply here.
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **259 tools**
-(linkedin 159 + id 77 + orchestration 21 + support 2).
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **256 tools**
+(linkedin 159 + id 73 + orchestration 22 + support 2).
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
 service". That was wrong twice over. `support` is a `ServiceId` like the other three, and the
@@ -191,11 +197,11 @@ outside it. The selector list drives one thing only: the DECLARED surface, which
 tool count for this path and the number quoted here. Listing three services made both under-report by
 2, so the fourth selector was added on 2026-07-27 and `tests/worker-boot.test.ts` now asserts the
 facade's declared set equals the registry, which is what stops that number drifting again. The KB
-running on a bundled index instead of a backend service is a dispatch detail (`localHandler`), not a
-reason to hide it from the one endpoint that is meant to be the whole platform.
+running on a local handler over the docs index instead of a backend service is a dispatch detail
+(`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **49 registry packages / 259 tools**, served over **19 mounts + 1 facade**. By service:
-linkedin 159 (27 packages), id 77 (17), orchestration 21 (4), support 2 (1). Every number in this
+Totals: **48 registry packages / 256 tools**, served over **18 mounts + 1 facade**. By service:
+linkedin 159 (27 packages), id 73 (16), orchestration 22 (4), support 2 (1). Every number in this
 file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
 `MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
 run, so re-run it rather than editing a count by hand.
@@ -211,5 +217,5 @@ nobody had noticed it at all. Both now have rows, and the table they live in
 so `pnpm test` goes red on the offline run rather than a mount shipping unexercised. The same module
 checks each row against the registry: the named tool has to be on that mount, a row's "stub" has to
 actually be `availability: 'stub_501'`, and its arguments have to satisfy the tool's own schema.
-That last pair caught two rows calling GA creditable tools (`scrape_linkedin_similar_profiles`,
+That last pair caught two rows calling live GA tools (`scrape_linkedin_similar_profiles`,
 `enrich_linkedin_person_contact_info`) in the belief they were stubs.

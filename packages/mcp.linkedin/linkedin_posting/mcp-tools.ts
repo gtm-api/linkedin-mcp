@@ -17,7 +17,7 @@
 // comments and reactions, our-vs-native attribution) left for gs.service.signals
 // on getsales.io, so linkedin-tracked-posts / -comments / -engagements /
 // -searches / -search-results no longer exist on this backend. Post READING is
-// linkedin-scraping (get-post-comments / -commenters / -reactors / -resharers)
+// linkedin-scraping (get-post-comments / -reactors / -resharers)
 // and linkedin-enrichment (post-details).
 
 import { z } from 'zod';
@@ -137,7 +137,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_comment',
     description:
-      'Leave ONE outbound comment on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-comment): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. Outward and fire-on-success: the post does NOT need to be tracked or owned by us, and nothing is persisted on this service. Identity-bound: linkedin_account_sid REQUIRED, spends the comment_posts bucket (30/day at a 360 s floor), saturation returns 429. Reply to an existing comment by passing parent_comment_urn. The comment text comes in text; templates and AI generation are outside this API. Returns the created comment ref plus the activity-log row. To react instead use react_linkedin_post; to read a post\'s existing comments or commenters use the linkedin-scraping get-post-comments / get-post-commenters tools; to resolve a post URL to its activity URN use get_activity_urn_by_url.',
+      'Leave ONE outbound comment on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-comment): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. Outward and fire-on-success: the post does NOT need to be tracked or owned by us, and nothing is persisted on this service. Identity-bound: linkedin_account_sid REQUIRED, spends the comment_posts bucket (30/day at a 360 s floor), saturation returns 429. Reply to an existing comment by passing parent_comment_urn. The comment text comes in text; templates and AI generation are outside this API. Returns the created comment ref plus the activity-log row. To react instead use react_linkedin_post; to read a post\'s existing comments and who wrote them use the linkedin-scraping get-post-comments tool (one read, both halves); to resolve a post URL to its activity URN use get_activity_urn_by_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/comment' },
     operation: 'action',

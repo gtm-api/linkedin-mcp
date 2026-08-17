@@ -1,5 +1,5 @@
 // Entity: LinkedIn Account Sync Run (gtm.service.linkedin)
-// Source of truth: product/research/gtm.service.linkedin/entities/linkedin_account_sync_run.md
+// Source of truth: product/research/gtm.service.linkedin/entities/linkedin_account_sync_runs.md
 // Format: registry v2, where each tool carries route metadata so the generic
 // dispatcher can drive it. 3 tools (the linkedin-account-sync-runs route group,
 // read-only over MCP: search + metrics + get). Runs are created/advanced by the

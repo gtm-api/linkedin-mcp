@@ -108,7 +108,7 @@ const SERVICES: ServiceSpec[] = [
 //   1. | Action | Method + Path | Status | Request type | Response type | Notes |   (87 tables)
 //   2. | Tool | HTTP | Class | Supported | Note |                                   (id/oauth_authorizations)
 //   3. | Action | Path | Ledger method | Plugin verb | Cost | Matrix row | Notes |   (linkedin/linkedin_scraping, no status column)
-//   4. | Operation | Method | Path | Notes |                                        (linkedin/linkedin_account_sync_run, no status column)
+//   4. | Operation | Method | Path | Notes |                                        (linkedin/linkedin_account_sync_runs, no status column)
 //   5. | Operation | Route | State |                                                (id/support_requests)
 // A sixth shape appearing tomorrow does not break the gate: it lands in the unparsed
 // count, which the coverage guard prints and holds.

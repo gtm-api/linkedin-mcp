@@ -79,7 +79,7 @@ const MassActionStepToolCanonical = z.enum([
   // Added 2026-08-13. Spends comment_posts (30/day at a 360 s floor), a much tighter
   // budget than the reaction above: size a run accordingly. Takes `text` from the step
   // args, and replies in-thread when the item payload carries a parent comment urn,
-  // which a get-post-commenters row does.
+  // which a get-post-comments row does.
   'linkedin-posting.comment',
   // Added 2026-08-13. Send-class, so a plan containing it requires a schedule.
   // Spends send_messages (50/day at a 480 s floor). Takes `text` from the step args

@@ -1,5 +1,5 @@
 // Entity: LinkedIn Account Snapshot (gtm.service.linkedin)
-// Source of truth: product/research/gtm.service.linkedin/entities/linkedin_account_snapshot.md
+// Source of truth: product/research/gtm.service.linkedin/entities/linkedin_account_snapshots.md
 // Format: registry v2, where each tool carries route metadata so the generic
 // dispatcher can drive it. 1 tool (the linkedin-account-snapshots route group);
 // snapshots are immutable & append-only: create/get/delete live on /internal/,

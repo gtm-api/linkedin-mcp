@@ -8,8 +8,9 @@ import { mintDevToken } from './token';
 // enrichment). Opt-in (RUN_E2E=1), needs a running worker + backend.
 // Deterministic + side-effect-free: mount loads (initialize), tool counts
 // (tools/list), a read search where safe, and a stub call (answered in-worker,
-// before any credit / plugin / backend work). GA scraping/enrichment pulls are
-// NOT called: they debit credits and need the node automation.
+// before any plugin / backend work). GA scraping/enrichment pulls are NOT
+// called: they spend a LinkedIn account's smart-limit budget and need the node
+// automation.
 
 const RUN = process.env.RUN_E2E === '1';
 const BASE = process.env.MCP_URL ?? 'http://localhost:8788';
@@ -69,7 +70,7 @@ suite('e2e wave-1 domain mounts (live worker + backend)', () => {
         // own schema at collection), so this reaches the stub gate rather than
         // dying in input validation. The gate is the first middleware in the
         // chain, so `source: 'mcp_runtime'` is the proof that nothing was sent
-        // to the backend: no credit debit, no plugin work, no round trip.
+        // to the backend: no smart-limit spend, no plugin work, no round trip.
         const parsed = McpErrorResponse.parse(r.result.structuredContent);
         expect(parsed.error.code).toBe('not_implemented');
         expect(parsed.error.context?.['source']).toBe('mcp_runtime');

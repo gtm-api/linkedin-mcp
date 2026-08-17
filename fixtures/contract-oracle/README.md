@@ -511,10 +511,14 @@ comment asserting the account carried no status enum.
 Per service, the maximum number of DISTINCT unmapped enum sites. Distinct sites
 rather than occurrences: one shared value object reached from 99 tools is one
 unpinned promise and one edit. It may only decrease; the gate prints the new
-number the moment it falls and fails when it rises. Two structural classes
-dominate what is in it and neither is fixable from this repo:
-`Core\Values\CreditsSpentValue` constrains `reason` / `executed_on` with
-`Rule::in` over class CONSTANTS rather than an enum, so no enum dump can carry
-them; and most search FormRequests outside `gtm.service.id` constrain neither
-`sort.field` nor `include.*`, which makes our Zod enum stricter than the backend
-rather than drifted from it. The file's `_comment` lists the rest by class.
+number the moment it falls and fails when it rises. One structural class
+dominates what is in it, and it is fixed backend side, one FormRequest at a time:
+most search FormRequests outside `gtm.service.id` constrain neither `sort.field`
+nor `include.*`, which makes our Zod enum stricter than the backend rather than
+drifted from it. That class is 29 of the 34 sites left on 2026-08-16 (linkedin
+21, id 4, orchestration 4); the other five are singles with no PHP enum behind
+them at all. Per-service totals, and so the ceilings, are linkedin 25, id 4,
+orchestration 5. `Core\Values\CreditsSpentValue` was the second dominant class
+here until the platform-wide credits removal on 2026-08-16 deleted the value
+object, which is what the ceiling drop from 27 / 7 / 7 paid for. The file's
+`_comment` lists the rest by class.

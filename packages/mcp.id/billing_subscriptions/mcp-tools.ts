@@ -28,7 +28,7 @@ const PRICE_SID = z.string().length(18).startsWith('bl_pc_')
 const TEAM_SID = z.string().length(18).startsWith('ts_tm_')
   .describe('Team sid (ts_tm_…): the applied team.');
 
-const BillingSubscriptionStatusEnum = z.enum(['trialing', 'active', 'past_due', 'paused', 'canceled']);
+const BillingSubscriptionStatusEnum = z.enum(['active', 'past_due', 'paused', 'canceled']);
 const BillingSubscriptionCollectionModeEnum = z.enum(['automatic', 'manual']);
 
 // Loose item / counts schemas: full field set is tightened by the Stage-1
@@ -47,13 +47,12 @@ const BillingSubscription = z.object({
     price_sid: z.string(),
     paddle_item_id: z.string().nullable(),
     quantity: z.number(),
-    status: z.enum(['active', 'trialing', 'canceled']),
+    status: z.enum(['active', 'canceled']),
   })),
   currency: z.string(),
   current_period_starts_at: z.string().nullable(),
   current_period_ends_at: z.string().nullable(),
   next_billed_at: z.string().nullable(),
-  trial_ends_at: z.string().nullable(),
   paused_at: z.string().nullable(),
   scheduled_resume_at: z.string().nullable(),
   scheduled_change: z.object({
@@ -89,7 +88,6 @@ const BillingSubscriptionFilter = z.object({
   price_sid: filterOp(z.string(), ['eq', 'in']).optional(),
   current_period_ends_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
   next_billed_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
-  trial_ends_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
   canceled_at: filterOp(z.string(), ['gte', 'lte', 'is_null']).optional(),
   created_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
   updated_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
@@ -108,14 +106,14 @@ const base = {
 // Closed sets taken verbatim from the route rules(): an in: rule answers a 422
 // with "invalid", never with the list, so the tool has to carry it.
 const BillingSubscriptionInclude = z.enum(['price', 'product', 'team', 'latest_transactions']);
-const BillingSubscriptionSortable = z.enum(['created_at', 'updated_at', 'current_period_ends_at', 'trial_ends_at']);
+const BillingSubscriptionSortable = z.enum(['created_at', 'updated_at', 'current_period_ends_at']);
 
 export const billingSubscriptionsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'search_billing_subscriptions',
     description:
-      "List the caller's billing subscriptions: the ones they bought (owner = caller, including floating subscriptions applied to no team) plus the one applied to a team they can read. Filter by status, team_sid:{is_null:true} for floating, paddle_subscription_id:{is_null:true} for the trial, or trial_ends_at / current_period_ends_at for expiry windows. include price / product / team / latest_transactions to hydrate context. page_size:0 returns counts only.",
+      "List the caller's billing subscriptions: the ones they bought (owner = caller, including floating subscriptions applied to no team) plus the one applied to a team they can read. Filter by status, team_sid:{is_null:true} for floating, paddle_subscription_id:{is_null:true} for the internal sentinels (free/partner), or current_period_ends_at for expiry windows. include price / product / team / latest_transactions to hydrate context. page_size:0 returns counts only.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/search' },
     operation: 'search',

@@ -71,8 +71,9 @@ export function buildRuntimeConfig(env: Env): RuntimeConfig {
     // task runs 5 to 20 a minute, so this is thirty times the working rate and
     // no honest caller will ever see it, while a retry loop with no backoff
     // runs thousands a minute and trips in about six seconds. The write bucket
-    // is a fifth of that, because a write spends credits or touches a LinkedIn
-    // account, and neither is undone by noticing the storm afterwards.
+    // is a fifth of that, because a write spends a LinkedIn account's
+    // smart-limit budget or acts outward on LinkedIn, and neither is undone by
+    // noticing the storm afterwards.
     rateLimit: rateLimitOf(env),
     previewGate: {
       enabled: secret !== null,

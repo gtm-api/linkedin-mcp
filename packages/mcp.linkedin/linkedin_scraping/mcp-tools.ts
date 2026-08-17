@@ -14,8 +14,10 @@
 // the groups, courses, products and schools verticals landed in that shape rather
 // than as a ninth, tenth, eleventh and twelfth pair. The mount went 26 tools to
 // 19 and gave back the raise its budget had taken; courses put it at 20, products
-// at 21 and schools at 22, still under the platform default 25. Schools was the
-// LAST node search vertical we did not mirror, so this list is now complete.
+// at 21 and schools at 22, and it has been at 21 since 2026-08-09, when
+// the separate comment-content method retired into get-post-comments, still under the platform
+// default 25. Schools was the LAST node search vertical we did not mirror, so
+// this list is now complete.
 //
 // The LEDGER did not merge with the surface. A url-addressed people search
 // still writes DataRequestMethodEnum::SearchPeopleByUrl and a filters-addressed
@@ -27,9 +29,10 @@
 //
 // Availability is code-authoritative: DataRequestMethodEnum::isImplemented()
 // (== wireGetter() !== null) gates the §5.9 stub guard in
-// DataRequestExecutionService (501 before any ledger insert). ALL 21 of the 21
-// methods are GA today; get-post-comments is the last 501 stub, waiting on its
-// plugin verb. param-id-lookup left that list on 2026-08-07, when the node
+// DataRequestExecutionService (501 before any journal insert). ALL 21 of the 21
+// methods are GA today, so this surface carries NO stub: the separate
+// comment-content method was the last one and it did not ship, it retired into
+// get-post-comments on 2026-08-09. param-id-lookup left that list on 2026-08-07, when the node
 // shipped the flagship facet typeahead (GET /api/linkedin/typehead-linkedin);
 // jobs and events joined the surface on 2026-08-08 against node verbs that had
 // been live for longer than that, and groups and courses landed the same day,
@@ -436,12 +439,12 @@ const SalesNavTypeaheadType = z.enum([
 // Output schemas: preview item projections are tightened to their
 // documented field sets (research §Transient preview objects, confirmed
 // against the backend preview mappers); every item keeps .passthrough()
-// for forward-compat. The embedded ledger row is another entity's Domain
+// for forward-compat. The embedded journal row is another entity's Domain
 // (data_requests), so it is left passthrough here, not restated.
 // ═══════════════════════════════════════════════════════════════
 
-const DataRequestLedgerRow = z.object({}).passthrough()
-  .describe('The kind="scrape" data_requests ledger row for this call (terminal completed), embedded as result.data_request; served_from_cache always false. Full DataRequestDomain shape owned by ./data_requests.md, so it is left passthrough here.');
+const DataRequestJournalRow = z.object({}).passthrough()
+  .describe('The kind="scrape" DataRequest journal row for this call (terminal completed), embedded as result.data_request; served_from_cache always false. Full DataRequestDomain shape owned by ./data_requests.md, so it is left passthrough here.');
 
 const PageNumberPaging = z.object({
   page: z.number().int(),
@@ -704,8 +707,11 @@ const LinkedinCommenterPreview = z.object({
   is_pinned: z.boolean(),
   is_edited: z.boolean(),
   is_own: z.boolean().describe('Commenter matches one of the team’s managed accounts (same rule as sync).'),
-  is_stored: z.boolean().describe('Already persisted as a linkedin-comments row (resolvable only for a tracked post).'),
-  linkedin_comment_sid: z.string().nullable(),
+  // `is_stored` / `linkedin_comment_sid` were declared here (and therefore in the
+  // published spec, as REQUIRED members) but the surface has never emitted either:
+  // they were resolvable only against a tracked post, and that entity was retired
+  // 2026-08-09. A generated client waiting on them waits forever, so they are gone
+  // rather than nulled: this read is transient by definition and stores nothing.
 }).passthrough();
 
 const LinkedinEngagerPreview = z.object({
@@ -719,8 +725,11 @@ const LinkedinEngagerPreview = z.object({
     .describe('Normalized reaction type (MAYBE → like + WARN, as on sync), per LinkedinEngagementReactionTypeEnum.'),
   reacted_at: z.string().nullable(),
   is_own: z.boolean(),
-  is_stored: z.boolean().describe('Already persisted as a linkedin-engagements row (resolvable only for a tracked post).'),
-  linkedin_engagement_sid: z.string().nullable(),
+  // Same phantom pair as the commenter preview above, same reason: `is_stored` /
+  // `linkedin_engagement_sid` were REQUIRED here and in the published spec, and the
+  // surface has never emitted either. `.passthrough()` widens what may arrive, it
+  // does not make a declared member optional, so every real response failed this
+  // schema. Removed rather than nulled.
 }).passthrough();
 
 const LinkedinResharerPreview = z.object({
@@ -731,7 +740,7 @@ const LinkedinResharerPreview = z.object({
   resharer_headline: z.string().nullable(),
   resharer_picture_url: z.string().nullable(),
   resharer_commentary: z.string().nullable().describe('Text added when resharing (empty for a plain reshare).'),
-  reshare_urn: z.string().nullable().describe('The reshare’s own activity URN. Feed it back into get-post-commenters/-reactors to scrape the reshare itself.'),
+  reshare_urn: z.string().nullable().describe('The reshare’s own activity URN. Feed it back into get-post-comments/-reactors to scrape the reshare itself.'),
   is_own: z.boolean(),
 }).passthrough();
 
@@ -758,7 +767,7 @@ const LinkedinSalesNavParamIdPreview = z.object({
 }).passthrough();
 
 // Result envelope factory: item is always null; the transient list + paging +
-// ledger row live in result. `paging` schema varies (page-numbered / cursor /
+// journal row live in result. `paging` schema varies (page-numbered / cursor /
 // null for single-shot lookups); `extra` carries per-verb response fields.
 const runResult = (
   rowSchema: z.ZodTypeAny,
@@ -767,16 +776,16 @@ const runResult = (
 ) => z.object({
   rows: z.array(rowSchema).describe('The transient result list, in LinkedIn’s order; NOTHING persisted.'),
   paging: pagingSchema,
-  data_request: DataRequestLedgerRow,
+  data_request: DataRequestJournalRow,
   ...extra,
 }).passthrough();
 
 // All 20 verbs share these annotations (research §Shared per-call semantics):
-// not read-only (spends rate budget, writes the ledger),
+// not read-only (spends rate budget, writes the journal),
 // not idempotent (a repeat call without idempotency_key re-executes).
 const SCRAPE = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false } as const;
 
-const STUB = '⛔ NOT SHIPPED YET. The contract is locked and validated now but the plugin verb is not built. Every valid, allowed call returns 501 not_implemented (context.reason=blocked_on_plugin) with no ledger row; do not retry.';
+const STUB = '⛔ NOT SHIPPED YET. The contract is locked and validated now but the plugin verb is not built. Every valid, allowed call returns 501 not_implemented (context.reason=blocked_on_plugin) with no journal row; do not retry.';
 
 const base = {
   service: 'linkedin',
@@ -1220,11 +1229,11 @@ export const linkedinScrapingTools: ToolDefinition[] = [
   },
   {
     ...base,
-    name: 'scrape_linkedin_get_post_commenters',
+    name: 'scrape_linkedin_get_post_comments',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of who is commenting on ONE post right now. Returns transient commenter objects (member id, nickname, name, headline, comment text, posted_at, reactions_count) annotated with is_own and is_stored / linkedin_comment_sid. Target any post by URL or activity URN in post; tracking is not a thing here any more (the tracked-post entity was retired 2026-08-09). One wire page per call; page on with cursor.',
+      'Direct LinkedIn read (bypasses our DB): one page of the COMMENTS on ONE post, live. This is the only comments read there is - a row carries the comment AND the person who wrote it (content, posted_at, comment_permalink, reactions_count, replies_count, is_pinned, is_edited + member id, nickname, name, headline), annotated with is_own, so reading "what was written" and "who commented" is a single call and never two. Target any post by URL, activity URN, or the backend urn a company-page post / newsletter issue / group thread carries (share, ugcPost, groupPost) in post. Top-level comments only: replies are not on this wire at all, replies_count is a count. Order with sort_order; one wire page per call, page on with cursor.',
     toolClass: 'complex',
-    route: rt('get-post-commenters'),
+    route: rt('get-post-comments'),
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
@@ -1233,8 +1242,9 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       ...requestBase,
-      post: z.string().max(512).describe('A post URL or an activity URN. Accepted verbatim: `urn:li:activity:<id>`, the feed permalink (`/feed/update/urn:li:activity:<id>/`) and the share link the copy-link button produces (`/posts/<slug>-activity-<id>-<hash>`): all three are parsed locally, at no extra cost. A link with no id in it (a shortlink, a bare slug URL) is resolved by opening the page through get_activity_urn_by_url, which adds one extra page load to this call and is cached 7 days. The post does NOT need to be tracked or owned by you.'),
+      post: z.string().max(512).describe('The post, named any way you have it. Cheapest is a post urn - `urn:li:share:<id>`, `urn:li:ugcPost:<id>` (company-page posts, newsletter issues), `urn:li:groupPost:<group>-<post>` - because that is what the comment list is actually addressed by. An `urn:li:activity:<id>`, a feed permalink (`/feed/update/urn:li:activity:<id>/`) or the share link the copy-link button produces (`/posts/<slug>-activity-<id>-<hash>`) all work too: the urn is parsed out locally at no cost, then converted to the post urn through one extra read that is cached for 7 days, so only the first call on a given post pays it. A linkedin.com link with no id in it (a bare slug URL) adds one more page load to find the urn. An `lnkd.in` shortlink is NOT resolvable and is refused 422 post_not_resolvable: expand it yourself first. A post LinkedIn will not name (deleted, or not visible to the executing account) is refused 422 post_urn_not_resolvable. The post does NOT need to be tracked or owned by you.'),
       page_size: z.number().int().min(1).max(100).optional().describe('Default 50; one wire page per call.'),
+      sort_order: z.enum(['RELEVANCE', 'CHRONOLOGICAL', 'REVERSE_CHRONOLOGICAL']).optional().describe('Order of the comment list. RELEVANCE is LinkedIn\'s own default and what you get when this is omitted; REVERSE_CHRONOLOGICAL is "Most recent" in the UI, CHRONOLOGICAL walks oldest-first. Polling a watched post for new comments wants REVERSE_CHRONOLOGICAL, because under relevance a new comment is not guaranteed to be on page 1. A cursor belongs to the order it was issued under - do not resume a walk with a different sort_order.'),
       cursor: z.string().nullable().optional().describe('Opaque resume token from paging.next_cursor; null = first page.'),
       ...usageMetaField,
     }),
@@ -1242,7 +1252,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
       post: ResolvedPost,
       skipped_invalid_rows: z.number().int().describe('Wire comments with urn=null / no decodable author skipped.'),
     })),
-    annotations: { title: 'Scrape post commenters', ...SCRAPE },
+    annotations: { title: 'Scrape post comments', ...SCRAPE },
   },
   {
     ...base,
@@ -1274,7 +1284,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_get_post_resharers',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of the profiles that RESHARED one post, the third and typically highest-intent leg of the engagement trio. Same targeting (post URL or activity URN); is_own annotated, no is_stored (reshares have no persisted entity). When exposed, resharer_commentary carries the added text and reshare_urn is the reshare’s own activity URN (feed it back into get-post-commenters / -reactors). One wire page per call; page on with cursor.',
+      'Direct LinkedIn read (bypasses our DB): live pull of the profiles that RESHARED one post, the third and typically highest-intent leg of the engagement trio. Same targeting (post URL or activity URN); is_own annotated, no is_stored (reshares have no persisted entity). When exposed, resharer_commentary carries the added text and reshare_urn is the reshare’s own activity URN (feed it back into get-post-comments / -reactors). One wire page per call; page on with cursor.',
     toolClass: 'complex',
     route: rt('get-post-resharers'),
     operation: 'action',

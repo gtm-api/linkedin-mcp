@@ -124,7 +124,7 @@ export const MOUNTS: MountConfig[] = [
     // surface. 26 became 18, groups landed as the ninth vertical, courses as the
     // tenth, products as the eleventh and schools as the twelfth, and the mount
     // now sat at 22 against the default 25, and at 21 since 2026-08-09, when
-    // get-post-comments retired into get-post-commenters: the two had ALWAYS
+    // the separate comment-content method retired into get-post-comments: the two had ALWAYS
     // dispatched the same node verb (`get-comments`, one page, one paid call), so
     // the comment-side fields moved into the commenters projection instead.
     //

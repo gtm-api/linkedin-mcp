@@ -17,14 +17,28 @@ import {
 // Includes on get-current (see research Includes).
 const UserInclude = z.enum(['default_team', 'accessible_teams']);
 
-// In-Domain user preferences / onboarding state (patched via update).
+// In-Domain user preferences / onboarding state, as READ back on the user row.
+//
+// Two surfaces share this object and must not be conflated: `setup_*` is the
+// post-signup wizard, `onboarding_*` is the in-app Get started checklist.
 const UserConfig = z.object({
   latest_team_sid: z.string().nullable().optional()
     .describe('Which workspace to open on load (ts_tm_…); NOT default_team_sid.'),
+  setup_completed: z.boolean().optional()
+    .describe('The post-signup wizard is finished (or its last step was skipped).'),
+  setup_step: z.enum(['verify', 'questions', 'workspace', 'call']).nullable().optional()
+    .describe('Resume point inside the wizard; null = not started.'),
+  setup_call_step: z.boolean().nullable().optional()
+    .describe('Read-only. Whether this user\'s wizard includes step 04 (intro call): null = not scored yet, so it is offered. Server-computed from the step 02 sender bracket; silently dropped if sent to update.'),
   onboarding_completed: z.boolean().optional(),
   onboarding_steps: z.array(z.string()).optional(),
   locale: z.string().max(8).nullable().optional(),
 }).passthrough();
+
+// The writable subset, mirroring UserUpdateRequest::configPatch(): everything
+// above EXCEPT `setup_call_step`, which the backend strips because a
+// server-computed sales verdict its own subject can overwrite is not a verdict.
+const UserConfigPatch = UserConfig.omit({ setup_call_step: true });
 
 // Tight item projection: every UserDomain field enumerated (research users.md
 // #### Domain). Trailing .passthrough() tolerates forward-compatible additions.
@@ -95,7 +109,7 @@ export const usersTools: ToolDefinition[] = [
       phone: z.string().max(32).nullable().optional(),
       timezone: z.string().nullable().optional().describe('IANA tz, e.g. "Europe/Riga".'),
       country: z.string().length(2).nullable().optional().describe('ISO 3166-1 alpha-2.'),
-      config: UserConfig.optional(),
+      config: UserConfigPatch.optional(),
       ...usageMetaField,
     }),
     outputSchema: McpUpdateResponse(User),
