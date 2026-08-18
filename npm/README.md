@@ -33,15 +33,32 @@ If your client speaks streamable-http itself, skip this launcher and point it st
 
 ## Authentication
 
-The hosted endpoint takes OAuth tokens only. Your client discovers the flow on its own: the first call returns a `WWW-Authenticate` challenge naming the server's metadata document, mcp-remote registers itself with the authorization server (dynamic client registration, so nothing has to be pre-registered with us) and opens the consent page.
+Two ways in; pick one.
 
-A gtm-api API key (`gtm_live_...`) authenticates the [REST API](https://docs.gtm-api.com/api-reference/overview), not this server. Sending one here answers `401 invalid_token`. Versions up to 1.1.0 required `GTM_API_KEY` and sent it as a bearer, which could not work; if your config still sets it, the variable is now ignored and you can drop it.
+**OAuth (default).** With no environment set, your client discovers the flow on its own: the first call returns a `WWW-Authenticate` challenge naming the server's metadata document, mcp-remote registers itself with the authorization server (dynamic client registration, so nothing has to be pre-registered with us) and opens the consent page in a browser. Tokens are cached under `~/.mcp-auth`. Best for anything with a human at the keyboard.
+
+**API key.** Set `GTM_API_KEY` to a key from the app (Settings, API keys) and the launcher sends it as the bearer on every call: no browser, no consent screen. Best for headless machines, CI and servers where a browser round-trip is not an option. A rejected key fails fast at startup with the reason instead of looping.
+
+```json
+{
+  "mcpServers": {
+    "gtm-api": {
+      "command": "npx",
+      "args": ["-y", "@gtm-api/linkedin-mcp"],
+      "env": { "GTM_API_KEY": "gtm_live_..." }
+    }
+  }
+}
+```
+
+Version notes: launchers up to 1.1.0 required `GTM_API_KEY` but the endpoint rejected keys back then, so they failed on the first call; 1.2.x ignored the variable and did OAuth only. Key auth works from 1.3.0 on, and requires nothing else in the config.
 
 ## Environment variables
 
 | Variable | Required | Meaning |
 |---|---|---|
 | `GTM_MCP_URL` | no | Endpoint override, defaults to `https://mcp.gtm-api.com/mcp` |
+| `GTM_API_KEY` | no | Authenticate with this `gtm_live_...` key instead of OAuth |
 
 Extra CLI arguments pass through to `mcp-remote`, so its flags are available: `--debug` to write detailed logs to `~/.mcp-auth`, `--host` to change the callback hostname, `--allow-http` for a plain-http endpoint override.
 

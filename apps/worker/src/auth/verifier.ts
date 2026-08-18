@@ -79,6 +79,31 @@ export function makeVerifier(auth: AuthConfig) {
     else if (auth.mode === 'dev' && auth.devBearer) token = auth.devBearer;
     if (!token) return fail('invalid_request', 'missing bearer token');
 
+    // Api-key bearer (`gtm_live_…`, authentication.mdx): an opaque platform
+    // credential, not a JWT: none of the claim checks below apply. The
+    // whitelist it verifies against lives in the id service, which this edge
+    // must not hold, so the bearer is forwarded as-is and the backend guard's
+    // api-key branch is the authoritative check. Same trust model as the JWT
+    // signature: the edge screens shape, the backend decides. A garbage
+    // `gtm_live_` string costs one backend 401, exactly like a garbage JWT
+    // that passes structural checks.
+    if (token.startsWith('gtm_live_')) {
+      return {
+        kind: 'ok',
+        scope: {
+          token,
+          teamSid: request.headers.get('Team-SID'),
+          // Unknown at the edge for opaque keys, the backend resolves the
+          // key's own team and ignores foreign Team-SID claims anyway; the
+          // rate-limit gate falls through to its per-token axis.
+          tokenTeamSid: null,
+          actor: { type: 'api_key', sid: null },
+          permissions: [],
+          traceId: request.headers.get('X-Trace-Id') ?? crypto.randomUUID(),
+        },
+      };
+    }
+
     const parts = token.split('.');
     if (parts.length !== 3) return fail('invalid_token', 'malformed jwt');
     const jwtHeader = decodeSegment(parts[0]);
