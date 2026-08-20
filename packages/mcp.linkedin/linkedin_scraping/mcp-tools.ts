@@ -680,14 +680,22 @@ const LinkedinSchoolPreview = z.object({
   position: z.number().int().nullable().describe('The card\'s slot on THIS page, 0 based and page local, so it is not a rank across pages. Numbering happens before dropped cards are removed, which can leave gaps.'),
 }).passthrough();
 
+// author_ln_member_id / author_ln_id / author_company_ln_id were REMOVED
+// 2026-08-20. The content-search parser sets author.profile_id to null
+// unconditionally, and says why: the ACoA id is not in the SDUI stream this
+// surface reads. All three could therefore only ever be null, which tells a
+// caller nothing and invites branching - the same call as the retired is_tracked
+// pair. The author is identified here by nickname + profile URL instead.
 const LinkedinPostPreview = z.object({
   post_ln_id: z.string().nullable(),
-  author_ln_member_id: z.string().nullable(),
-  author_ln_id: z.string().nullable(),
-  author_company_ln_id: z.string().nullable(),
-  author_nickname: z.string().nullable(),
+  author_nickname: z.string().nullable()
+    .describe('The /in/ slug. Null for an ORGANIZATION author: the parser detects the company case and skips member parsing.'),
   author_full_name: z.string().nullable(),
   author_headline: z.string().nullable(),
+  author_profile_url: z.string().nullable()
+    .describe('Clean /in/ URL, no query string. Null for an organization author, exactly like author_nickname - a filled name with a null profile_url is today the only signal that a post was published by a company page.'),
+  author_picture_url: z.string().nullable()
+    .describe('Author avatar, filled for members and organizations alike.'),
   content: z.string().nullable(),
   posted_at: z.string().nullable(),
   reactions_count: z.number().int().nullable(),
