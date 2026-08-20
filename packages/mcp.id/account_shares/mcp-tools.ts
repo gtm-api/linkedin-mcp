@@ -149,6 +149,10 @@ const AccountShareFilter = z.object({
   created_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
 }).partial();
 
+// The only hydration key on this entity: the OTHER workspace on the row (the
+// holder when you issued the share, the owner when you received it).
+const AccountShareInclude = z.enum(['counterparty_team']);
+
 const AccountShareSortable = z.enum(['created_at', 'planned_return_at', 'updated_at']);
 
 // Both terminating verbs answer with the same two numbers. closing_count is
@@ -189,10 +193,7 @@ export const accountSharesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    // The FormRequest declares no include rule and the controller builds no
-    // included block, so advertising the param would be a silent no-op.
-    inputSchema: McpSearchRequestSchema(AccountShareFilter, undefined, AccountShareSortable, 200)
-      .omit({ include: true }),
+    inputSchema: McpSearchRequestSchema(AccountShareFilter, AccountShareInclude, AccountShareSortable, 200),
     outputSchema: McpSearchResponse(AccountShare),
     annotations: { title: 'Search issued account shares', ...RO },
   },
@@ -200,7 +201,7 @@ export const accountSharesTools: ToolDefinition[] = [
     ...base,
     name: 'list_received_account_shares',
     description:
-      'List the account shares your team RECEIVED: accounts on loan TO you. Reach for this whenever the question is about a BORROWED account (what did we borrow, from whom, until when, is it still active), and for search_account_shares when it is about an account your own team owns and lent out. Registered as an action route but it is a plain read, with the same envelope, filters and sorts as search. It is also the holder\'s only programmatic arrival signal, because the domain events fan out to the owner team alone: poll filter { status: { eq: "active" } } sorted by created_at asc. Rows belong to the owner tenant, so created_by and ended_by arrive with permissions emptied and the trace id nulled. No include[], no counts block; page_size 0 returns pagination.total_count alone. Needs can_view_account_shares.',
+      'List the account shares your team RECEIVED: accounts on loan TO you. Reach for this whenever the question is about a BORROWED account (what did we borrow, from whom, until when, is it still active), and for search_account_shares when it is about an account your own team owns and lent out. Registered as an action route but it is a plain read, with the same envelope, filters and sorts as search. It is also the holder\'s only programmatic arrival signal, because the domain events fan out to the owner team alone: poll filter { status: { eq: "active" } } sorted by created_at asc. Rows belong to the owner tenant, so created_by and ended_by arrive with permissions emptied and the trace id nulled. include:["counterparty_team"] names the other workspace; no counts block, and page_size 0 returns pagination.total_count alone. Needs can_view_account_shares.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/account-shares/list-received' },
     operation: 'action',
@@ -213,8 +214,7 @@ export const accountSharesTools: ToolDefinition[] = [
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
-    inputSchema: McpSearchRequestSchema(AccountShareFilter, undefined, AccountShareSortable, 200)
-      .omit({ include: true }),
+    inputSchema: McpSearchRequestSchema(AccountShareFilter, AccountShareInclude, AccountShareSortable, 200),
     outputSchema: McpSearchResponse(AccountShare),
     annotations: { title: 'List received account shares', ...RO },
   },

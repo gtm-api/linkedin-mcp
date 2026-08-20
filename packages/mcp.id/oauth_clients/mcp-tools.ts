@@ -24,6 +24,12 @@ const SID = z.string().length(18).startsWith('id_oc_')
   .describe('OAuth client sid (id_oc_…).');
 
 const OauthClientStatus = z.enum(['active', 'disabled']);
+// What KIND of caller the client's tokens represent. It is frozen into every
+// mint (access_identity.actor_type), so it is an identity decision, not a label:
+// DCR-registered clients default to `agent`, hand-made ones to `integration`,
+// and a change here only affects tokens minted afterwards.
+const OauthClientActorKind = z.enum(['agent', 'integration']);
+
 const OauthGrantType = z.enum(['authorization_code', 'refresh_token']);
 const OauthRegistrationKind = z.enum(['manual', 'dynamic']);
 
@@ -144,6 +150,8 @@ export const oauthClientsTools: ToolDefinition[] = [
         .describe('Default: [authorization_code, refresh_token].'),
       platform: z.boolean().optional()
         .describe('Admin only: register a platform client (team_sid = null) instead of a team client.'),
+      actor_kind: OauthClientActorKind.optional()
+        .describe('Default for a hand-made client: integration. Pick agent when the tokens will act for an autonomous caller.'),
       ...usageMetaField,
     }),
     outputSchema: McpCreateResponse(OauthClient),
@@ -168,6 +176,8 @@ export const oauthClientsTools: ToolDefinition[] = [
       permissions: z.array(z.string().max(128)).optional()
         .describe('FULL replacement of the permission ceiling.'),
       grant_types: z.array(OauthGrantType).min(1).optional(),
+      actor_kind: OauthClientActorKind.optional()
+        .describe('Reclassify the client; only tokens minted after the change carry the new kind.'),
       status: OauthClientStatus.optional()
         .describe('disabled cascade-revokes the client\'s grants + issued tokens.'),
       ...usageMetaField,

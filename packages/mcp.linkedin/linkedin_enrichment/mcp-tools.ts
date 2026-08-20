@@ -41,6 +41,8 @@ const executorFields = {
     .describe('Executor account (ln_ac_...). Given: the call runs on that account ONLY; a saturated or held enrichment bucket refuses 429 bucket_saturated (with retry_after). Omitted: the service auto-picks one of your connected accounts with remaining capacity (422 no_connected_accounts when none is ready, 429 when all are at capacity).'),
   idempotency_key: z.string().max(128).nullable().optional()
     .describe('Replay guard (team_sid, idempotency_key). A repeat with the same key returns the stored ledger outcome: no re-execution.'),
+  trust_cache_max_age_days: z.number().int().min(1).max(3650).nullable().optional()
+    .describe('Accept a stored payload this many days old instead of fetching (probe tier 2, §9.5): a hit answers with served_from_cache / cache_source "data_cluster", spending no browser run and no bucket slot. Omitted, the stored payload is never consulted and the call always dispatches.'),
 };
 
 // Person target: EXACTLY ONE of the two (both/neither → 422, backend-validated).
@@ -59,10 +61,14 @@ const pageFields = {
     .describe('Opaque cursor: pass back paging.next_page_cursor verbatim; omitted = first page.'),
 };
 
-// Company target, company-profile only: URL, flat (v1).
+// Company target (company-profile / company-lite-profile): `company_url` XOR
+// `domain`, both backend-validated by a required_without + prohibits pair, so
+// neither given and both given are each a 422.
 const companyTargetFields = {
-  company_url: z.string().max(2048)
-    .describe('https://www.linkedin.com/company/{slug}/ (or a Sales Nav company URL).'),
+  company_url: z.string().max(2048).nullable().optional()
+    .describe('https://www.linkedin.com/company/{slug}/ (or a Sales Nav company URL). Provide company_url XOR domain.'),
+  domain: z.string().max(191).nullable().optional()
+    .describe('The company website instead of its LinkedIn URL ("acme.com", "www.acme.com" and "https://acme.com/pricing" all fold to the same host): resolved to a LinkedIn identity through the stored corpus, so a miss is refused company_not_resolvable rather than searched for live. This is the way to turn a domain you already have into the company profile. Provide domain XOR company_url.'),
 };
 
 // Company target, company-posts only: NESTED and id-first. The wire getter has
@@ -453,8 +459,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
-      company_url: z.string().max(2048).startsWith('https://www.linkedin.com/')
-        .describe('A /company/<slug>/ page (cheap) or a /sales/company/<id> URL (costs an extra resolve).'),
+      ...companyTargetFields,
       ...executorFields,
       ...usageMetaField,
     }),

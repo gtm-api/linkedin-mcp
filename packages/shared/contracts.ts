@@ -26,6 +26,10 @@ export const McpEnvelopeMeta = z.object({
     .describe('Server-side wall clock.'),
   debug_url: z.string()
     .describe('Deep link to the post-call analysis UI.'),
+  team_sid: z.string().nullable().optional()
+    .describe('The team this call ran in (the token team, or the team_sid override). Null when unauthenticated; absent from pre-2026-08-20 backends.'),
+  actor_type: z.string().nullable().optional()
+    .describe('user | agent | api_key | system. Null when unauthenticated; absent from pre-2026-08-20 backends.'),
 });
 
 // ═══════════════════════════════════════════════════════════════════════

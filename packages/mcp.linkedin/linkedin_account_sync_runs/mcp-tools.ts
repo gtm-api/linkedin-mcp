@@ -102,6 +102,9 @@ const LinkedinAccountSyncRunFilter = z.object({
   wait_reason: str(['eq', 'in', 'is_null']),
   started_at: str(['gte', 'lte']),
   finished_at: str(['gte', 'lte', 'is_null']),
+  // Generation cut: reset-sync stamps superseded terminal runs, so
+  // { archived_at: { is_null: true } } is "current generation only".
+  archived_at: str(['is_null', 'gte', 'lte']),
   created_at: str(['gte', 'lte']),
 }).partial();
 

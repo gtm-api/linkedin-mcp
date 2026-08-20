@@ -1,7 +1,7 @@
 // Entity: Billing Subscription (gtm.service.id)
 // Source of truth: product/research/gtm.service.id/entities/billing_subscriptions.md
 // Format: registry v2. Each tool carries route metadata so the generic
-// dispatcher can drive it. 13 tools (the billing-subscriptions route group):
+// dispatcher can drive it. 14 tools (the billing-subscriptions route group):
 // two read tools (search / get) + eleven custom actions. Money-moving mutations
 // are dangerous:true → the server-side preview→commit gate applies. Every
 // custom action returns the plain McpActionResponse envelope (KNOWLEDGE §1.8);
@@ -326,6 +326,25 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
     outputSchema: McpActionResponse(BillingSubscription),
     annotations: { title: 'Cancel subscription', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'undo_cancel_billing_subscription',
+    description:
+      'Drop a scheduled cancel before it takes effect; billing continues as if cancel was never asked. Decided on the live Paddle state: nothing pending is a success no-op (cleared:false), a scheduled pause or resume is refused with 409 scheduled_change_is_not_cancel naming the verb that clears it, and an already canceled subscription is too late to undo. Synchronous, no charge, no pending block. Also the unlock a 409 subscription_locked_pending_changes points at. Requires billing.manage.',
+    toolClass: 'typical',
+    route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/{sid}/undo-cancel', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    // Keeps money flowing rather than stopping it, and re-running it is a no-op:
+    // the one verb in this family that is neither destructive nor gated.
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ sid: SID, ...usageMetaField }),
+    outputSchema: McpActionResponse(BillingSubscription),
+    annotations: { title: 'Undo scheduled cancel', readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
     ...base,

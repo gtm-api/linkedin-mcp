@@ -85,6 +85,13 @@ describe('commit token mint/verify', () => {
     expect(await verifyCommitToken(token, 'tool_a', other, SECRET, NOW)).toMatchObject({ ok: false, reason: 'args_mismatch' });
   });
 
+  it('binds the resolved team: a preview for one team never commits into another', async () => {
+    const hash = await canonicalArgsHash({ sid: 'ln_ac_1' });
+    const { token } = await mintCommitToken('t', hash, SECRET, 300, NOW, 'j', 'ts_tm_aaaaaaaaaaaa');
+    expect(await verifyCommitToken(token, 't', hash, SECRET, NOW, 'ts_tm_bbbbbbbbbbbb')).toMatchObject({ ok: false, reason: 'team_mismatch' });
+    expect(await verifyCommitToken(token, 't', hash, SECRET, NOW, 'ts_tm_aaaaaaaaaaaa')).toMatchObject({ ok: true, jti: 'j' });
+  });
+
   it('rejects tampered signature', async () => {
     const hash = await canonicalArgsHash({ sid: 'ln_ac_1' });
     const { token } = await mintCommitToken('t', hash, SECRET, 300, NOW, 'j');

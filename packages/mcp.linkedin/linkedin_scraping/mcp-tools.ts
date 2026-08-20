@@ -469,10 +469,14 @@ const CursorPaging = z.object({
   total: z.number().int().nullable(),
 }).passthrough().describe('Cursor paging: feed next_cursor back verbatim; null = terminal page.');
 
+// `is_tracked` / `linkedin_tracked_post_sid` were REMOVED 2026-08-18, the same
+// phantom-field cleanup as the `is_stored` pair on the previews below: they
+// annotated the reply with the caller's tracked-post row, that entity left this
+// service with the content trio, and the backend had been hard-coding them
+// `false` / `null` ever since. A published field with exactly one possible value
+// only invites a caller to branch on it. Watching one post is an auto-scrape now.
 const ResolvedPost = z.object({
   post_ln_id: z.string(),
-  is_tracked: z.boolean(),
-  linkedin_tracked_post_sid: z.string().nullable(),
 }).passthrough().describe('The resolved post target the getter ran against.');
 
 // Projection field set per research §Transient preview objects (LinkedinPersonPreview)
@@ -1258,7 +1262,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_get_post_reactors',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of who is reacting to ONE post right now, as transient reactor objects with normalized reaction_type (MAYBE → like + WARN), annotated with is_own and is_stored / linkedin_engagement_sid. Target any post by URL or activity URN in post. One wire page per call; page on with cursor.',
+      'Direct LinkedIn read (bypasses our DB): live pull of who is reacting to ONE post right now, as transient reactor objects with normalized reaction_type (MAYBE → like + WARN), annotated with is_own. Target any post by URL or activity URN in post. One wire page per call; page on with cursor.',
     toolClass: 'complex',
     route: rt('get-post-reactors'),
     operation: 'action',
@@ -1284,7 +1288,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_get_post_resharers',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of the profiles that RESHARED one post, the third and typically highest-intent leg of the engagement trio. Same targeting (post URL or activity URN); is_own annotated, no is_stored (reshares have no persisted entity). When exposed, resharer_commentary carries the added text and reshare_urn is the reshare’s own activity URN (feed it back into get-post-comments / -reactors). One wire page per call; page on with cursor.',
+      'Direct LinkedIn read (bypasses our DB): live pull of the profiles that RESHARED one post, the third and typically highest-intent leg of the engagement trio. Same targeting (post URL or activity URN); is_own annotated. When exposed, resharer_commentary carries the added text and reshare_urn is the reshare’s own activity URN (feed it back into get-post-comments / -reactors). One wire page per call; page on with cursor.',
     toolClass: 'complex',
     route: rt('get-post-resharers'),
     operation: 'action',

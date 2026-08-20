@@ -1,7 +1,7 @@
 // Entity: Antidetect Browser (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/antidetect_browsers.md
 // Format: registry v2, where each tool carries route metadata so the generic
-// dispatcher can drive it. 10 tools (the antidetect-browsers route group),
+// dispatcher can drive it. 11 tools (the antidetect-browsers route group),
 // mounted on linkedin.browsers alongside proxies / logs / cloud-browsers /
 // cloud-browser-sessions.
 
@@ -41,14 +41,19 @@ const AntidetectBrowserStatus = z.enum([
   'error_investigation', 'maintenance', 'shared_out', 'subscription_required',
 ]);
 
-// Customer bring-your-own proxy tuple (forbidden for platform-owned browsers).
+// Customer bring-your-own proxy tuple. Allowed on any browser whose vendor
+// profile WE minted (browser_owner=platform included: our profile, their proxy);
+// forbidden on a profile bound by id, whose proxy lives in the customer's own
+// vendor account. Both write paths PROBE the tuple first and refuse an
+// unreachable one (422 custom_proxy_unreachable_*), and the probe's exit country
+// is what lands in proxy_country_code: the blob itself states no geo.
 const CustomProxyConfig = z.object({
   ip: z.string().describe('Proxy host.'),
   port: z.number().int().min(1).max(65535),
   username: z.string().optional(),
   password: z.string().optional(),
   mode: z.enum(['http', 'socks4', 'socks5']).optional().describe('Default http.'),
-}).describe('Custom proxy connection tuple (customer BYO path).');
+}).describe('Custom proxy connection tuple (customer BYO path). Probed before it is written; 5G Proxy cannot ride it.');
 
 // envelope.result of update-proxy / replace-proxy. `restarted` is the field that matters to
 // an agent: the swap powers a live browser off and back on, so a sender that was running is
@@ -100,6 +105,20 @@ const AntidetectBrowser = z.object({
   // Proxy assignment (XOR: exactly one populated on managed browsers)
   antidetect_browser_proxy_sid: z.string().nullable(),
   proxy_country_code: z.string().nullable(),
+  // The password-free half of a BYO upstream, derived from the persistence-only
+  // column. Non-null is how a reader tells "routed through the proxy the customer
+  // supplied" from "on our managed pool" (antidetect_browser_proxy_sid set) and
+  // from "external profile, proxy set in the vendor" (browser_owner=customer).
+  // exit_ip / latency_ms are what the probe measured when the proxy was attached,
+  // not a live reading: nothing re-probes an upstream that is not ours.
+  custom_proxy: z.object({
+    ip: z.string(),
+    port: z.number().int(),
+    mode: z.string(),
+    username: z.string().nullable(),
+    exit_ip: z.string().nullable(),
+    latency_ms: z.number().int().nullable(),
+  }).nullable(),
   proxy_5g: z.boolean()
     .describe('5G Proxy add-on: the browser runs on the dedicated 5G mobile route (faster command execution, fewer retries). Each flagged browser occupies one add-on slot.'),
   // Cloud-browser access
@@ -204,9 +223,62 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
   },
   {
     ...base,
+    name: 'list_antidetect_browser_proxy_countries',
+    description:
+      'Proxy countries a new browser can be given right now, with how many active proxies back each. Empty list = the pool is dry; create refuses a country with no stock (422 proxy_pool_empty).',
+    toolClass: 'trivial',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/proxy-countries' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    // No body: the answer is the state of the MANAGED pool, not of any one row.
+    inputSchema: z.object({ ...usageMetaField }),
+    outputSchema: McpActionResponse(z.null(), z.object({
+      countries: z.array(z.object({
+        country_code: z.string().describe('ISO-3166-1 alpha-2, lowercase.'),
+        available: z.number().int().nonnegative().describe('Active proxies stocked in that country.'),
+      })).describe('Sorted by country_code; pass one of these as create\'s proxy_country_code.'),
+    })),
+    annotations: { title: 'List proxy countries', ...RO },
+  },
+  {
+    ...base,
+    name: 'check_antidetect_browser_proxy',
+    description:
+      'Probe a customer-supplied proxy tuple and report the exit it reaches: country, IP and round-trip latency. Nothing is written, and no browser is named: call it for a proxy you are about to pass as custom_proxy_config, on create or on update-proxy. A proxy that refuses is a SUCCESSFUL call with ok:false plus error_kind (timeout | tls | network | http_error); only a malformed tuple is a 422. The write paths run the same probe themselves, so this verb is for showing the operator what a tuple resolves to BEFORE committing to it.',
+    toolClass: 'trivial',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/check-proxy' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      ip: z.string().describe('Proxy host.'),
+      port: z.number().int().min(1).max(65535),
+      mode: z.enum(['http', 'socks4', 'socks5']).optional().describe('Default http.'),
+      username: z.string().nullable().optional(),
+      password: z.string().nullable().optional(),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), z.object({
+      ok: z.boolean().describe('True when the request was routed through the proxy.'),
+      error_kind: z.string().nullable().describe('Why it failed: timeout | tls | network | http_error. Null on success.'),
+      exit_ip: z.string().nullable().describe('The address the probe target saw. Null when the target answered nothing parseable.'),
+      country_code: z.string().nullable().describe('ISO-3166-1 alpha-2 exit country; this is what create / update-proxy store on the browser.'),
+      latency_ms: z.number().int().nullable().describe('Round-trip time of the probe.'),
+    })),
+    annotations: { title: 'Check custom proxy', ...RO },
+  },
+  {
+    ...base,
     name: 'create_antidetect_browser',
     description:
-      'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code is the default, the others cover a caller-supplied upstream or an already-resolved pooled proxy. Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the customer bring-your-own path (no proxy source then). DANGEROUS: creates real vendor + proxy infrastructure. To provision SEVERAL browsers under a SINGLE approval (e.g. "create 3 browsers with connect links"), do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key). One preview/confirm covers the whole batch and returns a ma_ sid you monitor in the background; the connect links are read back from each browser row when it finishes.',
+      'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code is the default, custom_proxy_config routes that minted profile through a proxy the caller supplies (probed first, 422 custom_proxy_unreachable_* when dead, never with proxy_5g). Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the BYO-PROFILE path instead, with no proxy source: that profile carries its own. DANGEROUS: creates real vendor + proxy infrastructure. For SEVERAL browsers under ONE approval, do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key), then read the connect links off each row when it finishes.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers' },
     operation: 'create',
@@ -329,7 +401,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'update_antidetect_browser_proxy',
     description:
-      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. Pooled arms need browser_owner=platform (422 managed_proxy_forbidden_for_owner); custom_proxy_config is the reverse, forbidden on platform (422 custom_proxy_forbidden_for_owner). Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty. One exception: a body carrying proxy_5g alone is valid, since moving the 5G Proxy add-on binding leaves the IP untouched. The vendor profile is updated before the row is re-bound, so a vendor failure (503 vendor_proxy_update_failed) changes nothing. DANGEROUS twice over: the country may change, and a location flip mid-campaign can trip a LinkedIn risk check; and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
+      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. EVERY arm needs browser_owner=platform: a profile bound by id keeps its proxy in the vendor (422 managed_proxy_forbidden_for_owner / 422 custom_proxy_forbidden_for_owner). custom_proxy_config is probed first (422 custom_proxy_unreachable_* changes nothing), takes the exit country measured there, and RELEASES any armed 5G slot. Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty, 5G on a BYO proxy 422 proxy_5g_requires_managed_proxy. proxy_5g alone is a valid body: it moves the add-on binding only. DANGEROUS twice over: a location flip mid-campaign can trip a LinkedIn risk check, and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/update-proxy' },
     operation: 'action',

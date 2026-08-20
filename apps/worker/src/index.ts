@@ -5,6 +5,7 @@ import {
   makePreviewGate,
   makeRateLimitGate,
   makeSizeBudget,
+  makeTeamScope,
   resolveMounts,
   stubGate,
   runWithAuthScope,
@@ -267,12 +268,20 @@ export default {
     //   stubGate          a stub_501 tool is answered in-worker, so a dangerous
     //                     stub never mints a commit token, never writes KV and
     //                     never hits the backend.
+    //   makeTeamScope     resolves the team override (facade `team_sid` param /
+    //                     Team-SID header) into a sibling-team installation
+    //                     token (RFC 8693) and swaps the scope, BEFORE the
+    //                     preview gate so the gate binds the RESOLVED team
+    //                     into the commit token.
     //   makePreviewGate   last gate before dispatch: by here the call is within
-    //                     its budget and is going to really run.
+    //                     its budget, scoped to its final team, and is going to
+    //                     really run. The commit token binds (tool, args, team),
+    //                     so a preview for team A can never commit into team B.
     const factory = createServerFactory(REGISTRY, deps, [
       makeSizeBudget(deps),
       makeRateLimitGate(deps),
       stubGate,
+      makeTeamScope(deps),
       makePreviewGate(deps),
     ]);
     const scope: AuthScope = { ...auth.scope, mountPath: mount.config.path };

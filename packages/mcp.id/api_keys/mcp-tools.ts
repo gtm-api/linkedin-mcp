@@ -205,6 +205,8 @@ export const apiKeysTools: ToolDefinition[] = [
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
         to: z.string().describe('ISO 8601 UTC window end; must be at or after from.'),
       }).describe('Required metrics window [from, to).'),
+      group_by: z.enum(['status']).nullable().optional()
+        .describe('Split the aggregate by key status instead of returning one total.'),
     }),
     outputSchema: McpMetricsResponse(ApiKeyMetrics),
     annotations: { title: 'API key metrics', ...RO },

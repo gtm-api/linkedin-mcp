@@ -83,15 +83,22 @@ suite('e2e /mcp/linkedin/accounts (live worker + backend)', () => {
   // stub call used to cost a preview round trip, a KV write and a second round
   // trip to be told a fixed answer). `context.source` is the field that settles
   // it without parsing prose.
-  it('a stub is answered in-worker, with no backend hop', async () => {
-    const r = await rpc('tools/call', { name: ACCOUNTS_MOUNT.stub, arguments: stubArgsOf(ACCOUNTS_MOUNT) });
-    expect(r.result.isError).toBe(true);
-    const parsed = McpErrorResponse.parse(r.result.structuredContent);
-    expect(parsed.error.code).toBe('not_implemented');
-    expect(parsed.error.recoverable).toBe(false);
-    expect(parsed.error.context?.['source']).toBe('mcp_runtime');
-    expect(parsed.error.context?.['availability']).toBe('stub_501');
-  });
+  //
+  // Guarded like `search` above: ACCOUNTS_MOUNT deliberately declares no `stub`
+  // since 2026-07-30 (the mount's last §5.9 stub went GA), and smoke-mounts.ts
+  // promises "every use site guards on it" - calling with an undefined name
+  // just produced a protocol-level -32602 that asserted nothing about the gate.
+  if (ACCOUNTS_MOUNT.stub) {
+    it('a stub is answered in-worker, with no backend hop', async () => {
+      const r = await rpc('tools/call', { name: ACCOUNTS_MOUNT.stub, arguments: stubArgsOf(ACCOUNTS_MOUNT) });
+      expect(r.result.isError).toBe(true);
+      const parsed = McpErrorResponse.parse(r.result.structuredContent);
+      expect(parsed.error.code).toBe('not_implemented');
+      expect(parsed.error.recoverable).toBe(false);
+      expect(parsed.error.context?.['source']).toBe('mcp_runtime');
+      expect(parsed.error.context?.['availability']).toBe('stub_501');
+    });
+  }
 
   it('preview gate returns a commit token without executing', async () => {
     const r = await rpc('tools/call', { name: PREVIEW_SMOKE_TOOL, arguments: { sid: 'ln_ac_000000000000', types: [RESET_SYNC_TYPE] } });

@@ -172,7 +172,7 @@ export const teamMembersTools: ToolDefinition[] = [
     ...base,
     name: 'accept_team_member_invitation',
     description:
-      'Accept a pending invite by its one-time code. Public REST: code-bearer, no team scope. Hashes the code, matches a live invited row with an unexpired code, flips invited → active, binds the authenticated user_sid, and sets users.default_team_sid if the user had none. Idempotent for the same user (already_accepted:true).',
+      'Accept a pending invite by its one-time code. Public REST: code-bearer, no team scope. Hashes the code, matches the row it belongs to and branches on that row: invited → flips invited → active, binds the authenticated user_sid, and sets users.default_team_sid if the user had none; already active for the SAME user → 200 already_accepted:true naming that same invite; already redeemed by another account → 409 invitation_already_redeemed; no row (unknown, cancelled, or the membership was removed) → 404. An expired code is 409 invitation_expired, a seatless plan 402.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/team-members/accept-invitation' },
     operation: 'action',

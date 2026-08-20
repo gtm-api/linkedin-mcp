@@ -415,6 +415,15 @@ Per tool, resolved to the route it points at:
   at the SHALLOWEST undeclared path (naming `filter.updated_at` says everything
   its `.gte` / `.lte` operator keys would). Remaining drift is in
   `request-parity-baseline.json`, below.
+- **optional-field completeness.** The missing quadrant, added 2026-08-18: every
+  OPTIONAL field the route accepts also has a slot. Required fields were covered
+  above and Zod-side extras by the unknown-key gate, so this direction was the one
+  nothing watched, and it is how `DELETE /api/teams/{sid}` kept
+  `next_default_team_sid` (plus `acknowledge: erase_account`) to itself while the
+  tool shipped without them. It fails softer than the required class (the call
+  still works, it just cannot carry that argument), so pre-existing drift lives in
+  `request-parity-baseline.json` under `missing_keys`. `prohibited*` rules are not
+  drift: the backend is REFUSING the key, so a tool without a slot is correct.
 - **bound parity.** No STATED Zod bound is wider than the stated backend bound.
   The page-size ceiling is per entity, not global (`McpFormRequest::pageSize()`
   clamps at 500 but the owning `{Entity}SearchRequest` validates, and caps at 100,
@@ -440,14 +449,29 @@ individually instead of calling all seven undeclared.
 
 ### The request-parity baseline (`request-parity-baseline.json`)
 
-Read by the unknown-key gate only. The other three request gates carry NO
-baseline, by design: their drift was driven to zero the day they landed, and
-every class they catch is a tool-side fix. Same shrink discipline as the ledger
-and the two allow-lists: one line per key, each with the reason it is not fixed,
-and an entry that stopped drifting FAILS the gate and prints the line to delete.
+Two sections, one per direction: `unknown_keys` for the unknown-key gate (a key
+the tool declares and the route does not) and `missing_keys` for the
+optional-field gate (a key the route accepts and the tool omits). The other three
+request gates carry NO baseline, by design: their drift was driven to zero the day
+they landed, and every class they catch is a tool-side fix. Same shrink discipline
+as the ledger and the two allow-lists: one line per key, each with the reason it
+is not fixed, and an entry that stopped drifting FAILS the gate and prints the
+line to delete.
 
-It holds 118 keys in three shapes, and the shape matters because only one of them
-is a tool bug:
+`missing_keys` accepts `"tool": "*"`, one line waiving a PATH across the whole
+service. It exists for exactly the class-wide facts, and there is one today: the
+legacy `limit` alias of `page_size`, which ~35 search FormRequests still accept
+for the table frontends. Forty identical lines would bury the handful of real
+holes the gate is for, and a class is one decision, not forty. Everything else is
+per tool. The gate landed with the rest of its findings FIXED rather than
+recorded: the enrichment surface got `trust_cache_max_age_days` (all 22 methods)
+and company `domain` addressing, `include[]` came back on `search_data_requests`
+and both account-share list tools (the comments claiming the controllers built no
+`included` block had gone stale), plus `actor_kind`, `group_by`, `learning_enabled`,
+`reason` and the `archived_at` filter axis.
+
+`unknown_keys` holds 118 keys in three shapes, and the shape matters because only
+one of them is a tool bug:
 
 1. **89 metrics filter axes.** The 8 `*_metrics` tools reuse their entity's search
    filter, while each `{Entity}MetricsRequest` declares a much narrower set and

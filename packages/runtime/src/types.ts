@@ -207,4 +207,12 @@ export interface DispatchContext {
   args: Record<string, unknown>;
   scope: AuthScope;
   deps: RuntimeDeps;
+  /**
+   * Team the caller asked this ONE call to run in (facade `call_tool`
+   * `team_sid`, top-level or lifted out of `arguments` on tools that do not
+   * own the field). Consumed by the team-scope middleware, which exchanges the
+   * bearer for a sibling-team installation token; never part of `args`, so it
+   * can never leak into a backend body.
+   */
+  teamSidOverride?: string | null;
 }

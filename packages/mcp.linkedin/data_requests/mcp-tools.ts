@@ -188,10 +188,7 @@ export const dataRequestsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    inputSchema: McpSearchRequestSchema(DataRequestFilter, undefined, DataRequestSortable, 200)
-      // The SearchRequest declares no include rule and the controller builds no
-      // included block, so advertising the param would be a silent no-op.
-      .omit({ include: true }),
+    inputSchema: McpSearchRequestSchema(DataRequestFilter, DataRequestInclude, DataRequestSortable, 200),
     outputSchema: McpSearchResponse(DataRequest),
     annotations: { title: 'Search data requests', ...RO },
   },

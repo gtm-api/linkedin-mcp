@@ -1,6 +1,6 @@
 {
   "_comment": [
-    "REQUEST-PARITY BASELINE. Read by the unknown-key gate in tests/contract-parity.test.ts:",
+    "REQUEST-PARITY BASELINE. Two sections, one per direction, both read by tests/contract-parity.test.ts and both shrink-only: `unknown_keys` = a key the inputSchema declares and the route rules() do not; `missing_keys` = a key the route accepts and the inputSchema omits (the optional-field gate, added 2026-08-18; the required half fails outright and is never baselined). An entry that stopped drifting FAILS the gate and prints the line to delete. In `missing_keys` only, `\"tool\": \"*\"` waives one path across the service: it is for class-wide facts (today: the legacy `limit` alias of `page_size`), never for a tool-specific hole.",
     "every inputSchema key the route rules() does not declare is either fixed on the tool or listed",
     "here with the reason it is not. IT MAY ONLY SHRINK. An entry that stopped drifting FAILS the",
     "gate and prints the line to delete, exactly like ratchet.json and the two allow-lists next to it,",
@@ -37,24 +37,16 @@
     "   were fixed instead, with .omit({ include: true }), where the tool named no relation at all.",
     "3. (retired 2026-08-14) The 4 linkedin_tracked_post_sid inputs are gone: A12 dropped the arm",
     "   from the three post tools, so the schemas and the FormRequests agree on a required post.",
-    "4. 5 singles: the antidetect BYO-proxy credential pair, one api-keys filter axis, one",
-    "   connection-requests filter axis, and the add-addon idempotency token. That last one is the",
-    "   only entry here that is a PROMISE rather than a missing validation, and it sits on a verb",
-    "   that charges a card: pay it off by implementing the replay or by dropping the field, not by",
-    "   leaving it."
+    "4. 3 singles: one api-keys filter axis, one connection-requests filter axis, and the add-addon",
+    "   idempotency token. That last one is the only entry here that is a PROMISE rather than a",
+    "   missing validation, and it sits on a verb that charges a card: pay it off by implementing the",
+    "   replay or by dropping the field, not by leaving it.",
+    "   (paid off 2026-08-20) The antidetect BYO-proxy credential pair is gone: the connect modal now",
+    "   collects username/password, so AntidetectBrowserCreateRequest declares them like update-proxy",
+    "   already did, and they no longer travel unvalidated."
   ],
   "unknown_keys": {
     "linkedin": [
-      {
-        "tool": "create_antidetect_browser",
-        "path": "custom_proxy_config.password",
-        "reason": "AntidetectBrowserCreateRequest enumerates ip/port/mode of the proxy value object and omits the credential pair; the controller reads input(custom_proxy_config) whole and persists it, so the credentials travel unvalidated"
-      },
-      {
-        "tool": "create_antidetect_browser",
-        "path": "custom_proxy_config.username",
-        "reason": "AntidetectBrowserCreateRequest enumerates ip/port/mode of the proxy value object and omits the credential pair; the controller reads input(custom_proxy_config) whole and persists it, so the credentials travel unvalidated"
-      },
       {
         "tool": "search_linkedin_account_quota_hits",
         "path": "include",
@@ -170,5 +162,63 @@
     ],
     "orchestration": [],
     "email": []
+  },
+  "missing_keys": {
+    "linkedin": [
+      {
+        "tool": "*",
+        "path": "limit",
+        "reason": "legacy `limit` alias of `page_size`, kept on the search FormRequests for the table frontends that still send it. Tools speak the cursor contract (`page_size` + `cursor`) and must not learn a second spelling of the same knob: two page-size keys on one tool is a 422 waiting for whichever the agent picks second. Class-wide by design (`tool: \"*\"`): one decision, not forty lines. Delete when the alias leaves the FormRequests."
+      },
+      {
+        "tool": "get_antidetect_browser",
+        "path": "cursor",
+        "reason": "GET /api/antidetect-browsers/{sid} is bound to AntidetectBrowserSearchRequest, the SEARCH FormRequest, so its rule set describes a list call: this tool reads ONE row by sid and the controller passes none of these through. Delete when the show action gets a FormRequest of its own."
+      },
+      {
+        "tool": "get_antidetect_browser",
+        "path": "filter",
+        "reason": "GET /api/antidetect-browsers/{sid} is bound to AntidetectBrowserSearchRequest, the SEARCH FormRequest, so its rule set describes a list call: this tool reads ONE row by sid and the controller passes none of these through. Delete when the show action gets a FormRequest of its own."
+      },
+      {
+        "tool": "get_antidetect_browser",
+        "path": "page_size",
+        "reason": "GET /api/antidetect-browsers/{sid} is bound to AntidetectBrowserSearchRequest, the SEARCH FormRequest, so its rule set describes a list call: this tool reads ONE row by sid and the controller passes none of these through. Delete when the show action gets a FormRequest of its own."
+      },
+      {
+        "tool": "get_antidetect_browser",
+        "path": "sort",
+        "reason": "GET /api/antidetect-browsers/{sid} is bound to AntidetectBrowserSearchRequest, the SEARCH FormRequest, so its rule set describes a list call: this tool reads ONE row by sid and the controller passes none of these through. Delete when the show action gets a FormRequest of its own."
+      },
+      {
+        "tool": "run_antidetect_browser",
+        "path": "now",
+        "reason": "run and stop share AntidetectBrowserActionRequest, and `now` is stop's shortcut (commit `stopped` at once instead of waiting for the node teardown). On run it is accepted and ignored, so offering it would advertise a knob that does nothing. stop_antidetect_browser declares it."
+      },
+      {
+        "tool": "get_linkedin_account_sync_runs_metrics",
+        "path": "filter",
+        "reason": "metrics tools were deliberately narrowed to the axes the aggregation applies (2026-07-27, the same call recorded under unknown_keys): this one aggregates over the window alone, so a filter the tool advertised would be silently dropped."
+      }
+    ],
+    "id": [
+      {
+        "tool": "*",
+        "path": "limit",
+        "reason": "legacy `limit` alias of `page_size`, kept on the search FormRequests for the table frontends that still send it. Tools speak the cursor contract (`page_size` + `cursor`) and must not learn a second spelling of the same knob: two page-size keys on one tool is a 422 waiting for whichever the agent picks second. Class-wide by design (`tool: \"*\"`): one decision, not forty lines. Delete when the alias leaves the FormRequests."
+      },
+      {
+        "tool": "search_teams",
+        "path": "q",
+        "reason": "duplicate spelling of `filter.q` (both are declared by TeamSearchRequest and both hit the same LIKE over team name). The tool speaks the filter contract, and two ways to say one thing is how an agent ends up sending both."
+      }
+    ],
+    "orchestration": [
+      {
+        "tool": "*",
+        "path": "limit",
+        "reason": "legacy `limit` alias of `page_size`, kept on the search FormRequests for the table frontends that still send it. Tools speak the cursor contract (`page_size` + `cursor`) and must not learn a second spelling of the same knob: two page-size keys on one tool is a 422 waiting for whichever the agent picks second. Class-wide by design (`tool: \"*\"`): one decision, not forty lines. Delete when the alias leaves the FormRequests."
+      }
+    ]
   }
 }

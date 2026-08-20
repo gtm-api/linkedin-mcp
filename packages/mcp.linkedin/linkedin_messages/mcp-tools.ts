@@ -311,7 +311,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing basic-messenger thread; provide this OR a profile URN."),
+      linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing basic-messenger thread; provide this OR a profile URN. Our sid only: a raw LinkedIn 2-…== thread id is NOT accepted here, resolve it first with search_linkedin_conversations filter.conversation_hash.eq."),
       ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…) for a new thread.'),
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (ACwAA…); interchangeable with ln_id.'),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars.'),

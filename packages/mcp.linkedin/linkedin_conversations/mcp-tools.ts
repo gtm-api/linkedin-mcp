@@ -39,7 +39,8 @@ const LinkedinConversation = z.object({
   sid: z.string(),
   team_sid: z.string(),
   linkedin_account_sid: z.string(),
-  conversation_hash: z.string(),
+  conversation_hash: z.string()
+    .describe('LinkedIn\'s OWN thread id, the 2-…== value that appears in a messaging URL and in every raw wire payload. Not our sid. This is the id a user has in hand when they name a thread, so filter.conversation_hash is how you turn it into a conversation sid.'),
   messenger_type: MessengerType,
   ln_member_id: z.string().nullable(),
   ln_id: z.string().nullable(),
@@ -93,7 +94,8 @@ const LinkedinConversationFilter = z.object({
   sid: filterOp(z.string(), ['eq', 'in']),
   linkedin_account_sid: filterOp(z.string(), ['eq', 'in']),
   messenger_type: filterOp(MessengerType, ['eq', 'ne', 'in', 'nin']),
-  conversation_hash: filterOp(z.string(), ['eq', 'in']),
+  conversation_hash: filterOp(z.string(), ['eq', 'in'])
+    .describe('Exact match on LinkedIn\'s own thread id (the 2-…== value from a messaging URL or a raw payload). THE way to resolve a thread the user named by id into its sid: filter.conversation_hash.eq, never q (which only LIKEs nickname) and never sid (our ln_cv_ space). Unique per (linkedin_account_sid, messenger_type), so pass the account too when the same thread could exist on both surfaces.'),
   ln_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   ln_member_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   sn_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
@@ -135,7 +137,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_conversations',
     description:
-      'List LinkedIn message threads for the team across both messenger surfaces (basic LinkedIn + Sales Navigator) with operator-object filters (account, contact ids, messenger_type, event-count, activity / message-sync clock ranges), sort, cursor pagination, and include[] for the parent account and the last 50 messages. Live rows by default; page_size:0 for count-only.',
+      'List LinkedIn message threads for the team across both messenger surfaces (basic LinkedIn + Sales Navigator) with operator-object filters (account, contact ids, conversation_hash = LinkedIn\'s own 2-…== thread id, messenger_type, event-count, activity / message-sync clock ranges), sort, cursor pagination, and include[] for the parent account and the last 50 messages. Live rows by default; page_size:0 for count-only. Given a thread id by the user, look it up with filter.conversation_hash.eq: q is a nickname LIKE and will not find it.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/search' },
     operation: 'search',

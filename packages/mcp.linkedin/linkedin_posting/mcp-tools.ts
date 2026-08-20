@@ -123,7 +123,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
       text: z.string().max(3000)
         .describe('Post body, always present. Empty is legal ONLY alongside an image. 3000 is LinkedIn\'s own cap, refused here rather than burning a posting slot.'),
       images: z.array(LinkedinPostingImageValue).max(1).optional()
-        .describe('At most one image. The wire refuses a second, so a longer array is a 422 here instead of a spent browser dispatch.'),
+        .describe('At most one image. The wire refuses a second, so a longer array is a 422 here instead of a spent browser dispatch. The decoded bytes across all images must also stay under 35 MB in total; over that is a 422, because a bigger body is refused by the node\'s JSON parser as a bare 413 with no response envelope.'),
       visibility: LinkedinPostingVisibility.optional()
         .describe('ANYONE (the node default) or CONNECTIONS_ONLY. Omit to let the node apply its own default.'),
       allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional()

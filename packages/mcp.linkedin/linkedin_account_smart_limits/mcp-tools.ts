@@ -169,6 +169,8 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
       sid: SID,
       daily_limit: z.number().int().min(1).max(1000).optional().describe('Active cap (1..1000).'),
       target_limit: z.number().int().min(0).max(1000).nullable().optional().describe('Warm-up ceiling; null clears it.'),
+      learning_enabled: z.boolean().optional()
+        .describe('Whether the adaptive ceiling keeps moving. false pins learned_ceiling where it stands; the quota-hit block clock still arms either way, so this is a tuning knob, not a safety switch.'),
       delay_in_seconds: z.number().int().min(1).max(3600).optional().describe('Batch-boundary cooldown (1..3600).'),
       smart_limits_enabled: z.boolean().optional(),
       reset_hold: z.boolean().optional().describe('Clear the daily-saturation hold in the same call (the atomic "raise the limit AND resume now"). Only resumes if the new daily_limit > done_today_count; otherwise the row re-holds. Never touches a LinkedIn-side lock.'),

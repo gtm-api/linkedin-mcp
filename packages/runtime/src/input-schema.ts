@@ -24,6 +24,32 @@ const COMMIT_TOKEN = z
   );
 
 /**
+ * The team-scope override, advertised in exactly ONE contract: the facade's
+ * `call_tool` (top level, next to `name`/`arguments`). Deliberately NOT
+ * injected into per-tool schemas - the platform doctrine is that a tool's
+ * team comes from the token, never from its arguments, and the advertised
+ * contracts must keep saying so. Domain mounts switch teams via the
+ * `Team-SID` header instead (per connection).
+ */
+export const TeamSidOverride = z
+  .string()
+  .length(18)
+  .startsWith('ts_tm_')
+  .describe(
+    'Run this call in another of your teams. The edge exchanges the request token for a sibling installation token (RFC 8693); the OAuth grant must cover that team and you must be a live member. Omit to act in the token team (see meta.team_sid on any response).',
+  );
+
+/**
+ * Whether the tool's OWN contract has a `team_sid` body field (e.g.
+ * create_api_key keys a new api-key to a team). The facade never lifts the
+ * field out of those tools' arguments - it is entity data and reaches the
+ * backend as declared.
+ */
+export function toolOwnsTeamSid(tool: ToolDefinition): boolean {
+  return 'team_sid' in tool.inputSchema.shape;
+}
+
+/**
  * The tool's own inputSchema shape, plus `commit_token` on dangerous tools.
  * Added here rather than in the entity files so the preview-gate field stays
  * consistent and the entity files stay clean.

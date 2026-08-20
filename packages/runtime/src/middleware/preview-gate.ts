@@ -72,6 +72,11 @@ interface TokenPayload {
   v: 1;
   tool: string;
   args_hash: string;
+  /* Team the preview was issued under (resolved scope, team-scope middleware
+     runs first). Empty string when the scope carries no team (api-key edge
+     case). Binds confirm-to-preview across tenants: a preview for team A can
+     never be committed into team B. */
+  team: string;
   iat: number;
   exp: number;
   jti: string;
@@ -84,9 +89,10 @@ export async function mintCommitToken(
   ttlSeconds: number,
   nowMs: number,
   jti: string,
+  team = '',
 ): Promise<{ token: string; expiresIn: number }> {
   const iat = Math.floor(nowMs / 1000);
-  const payload: TokenPayload = { v: 1, tool, args_hash: argsHash, iat, exp: iat + ttlSeconds, jti };
+  const payload: TokenPayload = { v: 1, tool, args_hash: argsHash, team, iat, exp: iat + ttlSeconds, jti };
   const body = b64urlFromString(JSON.stringify(payload));
   const sig = await hmac(secret, body);
   return { token: `${body}.${sig}`, expiresIn: ttlSeconds };
@@ -94,7 +100,7 @@ export async function mintCommitToken(
 
 export type VerifyVerdict =
   | { ok: true; jti: string }
-  | { ok: false; reason: 'malformed' | 'bad_signature' | 'expired' | 'wrong_tool' | 'args_mismatch' };
+  | { ok: false; reason: 'malformed' | 'bad_signature' | 'expired' | 'wrong_tool' | 'args_mismatch' | 'team_mismatch' };
 
 export async function verifyCommitToken(
   token: string,
@@ -102,6 +108,7 @@ export async function verifyCommitToken(
   argsHash: string,
   secret: string,
   nowMs: number,
+  team = '',
 ): Promise<VerifyVerdict> {
   const parts = token.split('.');
   if (parts.length !== 2) return { ok: false, reason: 'malformed' };
@@ -116,6 +123,9 @@ export async function verifyCommitToken(
   }
   if (payload.tool !== tool) return { ok: false, reason: 'wrong_tool' };
   if (payload.args_hash !== argsHash) return { ok: false, reason: 'args_mismatch' };
+  // Pre-team tokens (payload.team undefined) fail closed as a mismatch too:
+  // they cannot prove which tenant their preview showed.
+  if ((payload.team ?? '') !== team) return { ok: false, reason: 'team_mismatch' };
   if (payload.exp * 1000 <= nowMs) return { ok: false, reason: 'expired' };
   return { ok: true, jti: payload.jti };
 }
@@ -124,12 +134,13 @@ function errorResult(text: string): ToolResult {
   return { content: [{ type: 'text', text }], isError: true };
 }
 
-function previewResult(ctx: DispatchContext, token: string, expiresIn: number): ToolResult {
+function previewResult(ctx: DispatchContext, token: string, expiresIn: number, team: string): ToolResult {
   const action = ctx.tool.route.pathTemplate.split('/').pop() ?? ctx.tool.name;
   const text = [
     `⚠️ ${ctx.tool.name} is a protected action and needs confirmation before it runs.`,
     `Nothing has changed yet. Review the arguments below, then call ${ctx.tool.name} AGAIN with the exact same arguments plus "commit_token": "${token}" to execute.`,
     `The token is single-use and expires in ${expiresIn}s.`,
+    ...(team !== '' ? [`It will execute in team ${team}.`] : []),
     '',
     `arguments: ${JSON.stringify((() => { const { commit_token: _c, ...r } = ctx.args; return r; })())}`,
   ].join('\n');
@@ -142,6 +153,7 @@ function previewResult(ctx: DispatchContext, token: string, expiresIn: number): 
       dangerous: true,
       commit_token: token,
       expires_in_seconds: expiresIn,
+      team_sid: team !== '' ? team : null,
       instruction: `Re-call ${ctx.tool.name} with the same args + commit_token to execute.`,
     },
   };
@@ -153,6 +165,7 @@ const FAIL_MESSAGES: Record<string, string> = {
   expired: 'The commit_token has expired. Request a fresh preview and confirm promptly.',
   wrong_tool: 'The commit_token was issued for a different tool. Request a fresh preview.',
   args_mismatch: 'The arguments changed since the preview. Request a fresh preview for the new arguments.',
+  team_mismatch: 'The team changed since the preview. Request a fresh preview in the team you are committing to.',
 };
 
 export function makePreviewGate(deps: RuntimeDeps): ToolMiddleware {
@@ -168,15 +181,18 @@ export function makePreviewGate(deps: RuntimeDeps): ToolMiddleware {
 
     const nowMs = deps.now?.() ?? Date.now();
     const argsHash = await canonicalArgsHash(ctx.args);
+    // The RESOLVED team: the team-scope middleware runs before this gate, so
+    // tokenTeamSid already reflects any team_sid override / Team-SID header.
+    const team = ctx.scope.tokenTeamSid ?? ctx.scope.teamSid ?? '';
     const provided = typeof ctx.args.commit_token === 'string' ? (ctx.args.commit_token as string) : undefined;
 
     if (!provided) {
       const jti = crypto.randomUUID();
-      const { token, expiresIn } = await mintCommitToken(ctx.tool.name, argsHash, gate.secret, gate.ttlSeconds, nowMs, jti);
-      return previewResult(ctx, token, expiresIn);
+      const { token, expiresIn } = await mintCommitToken(ctx.tool.name, argsHash, gate.secret, gate.ttlSeconds, nowMs, jti, team);
+      return previewResult(ctx, token, expiresIn, team);
     }
 
-    const verdict = await verifyCommitToken(provided, ctx.tool.name, argsHash, gate.secret, nowMs);
+    const verdict = await verifyCommitToken(provided, ctx.tool.name, argsHash, gate.secret, nowMs, team);
     if (!verdict.ok) return errorResult(FAIL_MESSAGES[verdict.reason]);
 
     const store = deps.commitTokens;

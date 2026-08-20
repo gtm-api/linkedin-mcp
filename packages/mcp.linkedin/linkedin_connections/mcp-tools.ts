@@ -250,7 +250,12 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     dangerous: true,
     massAction: false,
     scheduleRequired: false,
-    inputSchema: z.object({ sid: SID, ...usageMetaField }),
+    inputSchema: z.object({
+      sid: SID,
+      reason: z.string().max(255).nullable().optional()
+        .describe('Free-form note on why the connection was removed; context for whoever reads the row later, never sent to LinkedIn.'),
+      ...usageMetaField,
+    }),
     outputSchema: McpActionResponse(LinkedinConnection),
     annotations: { title: 'Remove connection', ...DANGER },
   },

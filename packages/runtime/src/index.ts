@@ -11,6 +11,7 @@ export * from './input-schema';
 export * from './mounts';
 export * from './server-factory';
 export * from './middleware/preview-gate';
+export * from './middleware/team-scope';
 export * from './middleware/stub-gate';
 export * from './middleware/rate-limit';
 export * from './middleware/size-budget';

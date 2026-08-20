@@ -122,6 +122,52 @@ describe('facade call_tool argument validation', () => {
     expect(dispatched[0].args).toEqual({ commit_token: 'tok_1' });
   });
 
+  it('sets teamSidOverride from the top-level team_sid param, never through args', async () => {
+    const { call, dispatched } = facade([mkTool()]);
+
+    const result = await call({ name: 'search_things', arguments: { page_size: 5 }, team_sid: 'ts_tm_bbbbbbbbbbbb' });
+
+    expect(result.isError).toBeUndefined();
+    expect(dispatched[0].teamSidOverride).toBe('ts_tm_bbbbbbbbbbbb');
+    expect(dispatched[0].args).toEqual({ page_size: 5 });
+  });
+
+  it('lifts arguments.team_sid on a tool that does not own the field (the natural agent gesture)', async () => {
+    const { call, dispatched } = facade([mkTool()]);
+
+    const result = await call({ name: 'search_things', arguments: { page_size: 5, team_sid: 'ts_tm_bbbbbbbbbbbb' } });
+
+    expect(result.isError).toBeUndefined();
+    expect(dispatched[0].teamSidOverride).toBe('ts_tm_bbbbbbbbbbbb');
+    expect(dispatched[0].args).toEqual({ page_size: 5 });
+  });
+
+  it('rejects a malformed lifted team_sid instead of silently dropping it', async () => {
+    const { call, dispatched } = facade([mkTool()]);
+
+    const result = await call({ name: 'search_things', arguments: { team_sid: 'not-a-team' } });
+
+    expect(dispatched).toEqual([]);
+    expect(result.isError).toBe(true);
+    expect(Object.keys((result.structuredContent as { error: { field_errors: object } }).error.field_errors)).toEqual(['team_sid']);
+  });
+
+  it('leaves team_sid in the args of a tool whose own contract claims the field', async () => {
+    const { call, dispatched } = facade([mkTool({
+      name: 'create_api_key',
+      operation: 'create',
+      envelope: 'create',
+      inputSchema: z.object({ team_sid: z.string(), label: z.string().optional(), _meta: z.any().optional() }),
+      annotations: { title: 'Create api key', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+    })]);
+
+    const result = await call({ name: 'create_api_key', arguments: { team_sid: 'ts_tm_bbbbbbbbbbbb', label: 'ci' } });
+
+    expect(result.isError).toBeUndefined();
+    expect(dispatched[0].teamSidOverride).toBeUndefined();
+    expect(dispatched[0].args).toEqual({ team_sid: 'ts_tm_bbbbbbbbbbbb', label: 'ci' });
+  });
+
   it('still reports an unknown tool name rather than parsing against nothing', async () => {
     const { call, dispatched } = facade([mkTool()]);
 
