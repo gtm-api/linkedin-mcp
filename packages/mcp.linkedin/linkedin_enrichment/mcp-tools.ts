@@ -814,7 +814,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
       post_urn: z.string().max(128).optional()
         .describe('The post handle, in any family the wire takes: urn:li:activity:<id>, urn:li:share:<id>, urn:li:ugcPost:<id>, urn:li:groupPost:<group>-<post>, or a bare id (digits = activity, digits-digits = groupPost). Provide post_urn XOR url.'),
       url: z.string().max(2048).optional()
-        .describe('Any post URL. A feed permalink or share link resolves locally; a link with no id in it (a shortlink) costs an extra round trip, resolved by opening the page via get_activity_urn_by_url. Provide url XOR post_urn.'),
+        .describe('Any post URL. A feed permalink or a share link carrying the id resolves locally, one round trip. A linkedin.com link with NO id in it is fetched by the link itself, also one round trip. Only a shortlink (lnkd.in) still costs two, because it has to be opened to be read. Provide url XOR post_urn.'),
       ...executorFields,
       ...usageMetaField,
     }),
