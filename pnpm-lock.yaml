@@ -15,6 +15,21 @@ importers:
         specifier: 5.9.3
         version: 5.9.3
 
+  apps/tail-loki:
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: 5.20260711.1
+        version: 5.20260711.1
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+      vitest:
+        specifier: 4.1.10
+        version: 4.1.10(@types/node@24.13.3)(vite@8.1.4(@types/node@24.13.3)(esbuild@0.28.1)(yaml@2.9.0))
+      wrangler:
+        specifier: 4.110.0
+        version: 4.110.0(@cloudflare/workers-types@5.20260711.1)
+
   apps/worker:
     dependencies:
       '@cfworker/json-schema':

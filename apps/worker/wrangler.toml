@@ -97,6 +97,15 @@ preview_urls = true
 [env.production.observability]
 enabled = true
 
+# Console output additionally streams to the gtm-mcp-tail tail consumer
+# (apps/tail-loki), which pushes it to the platform's Grafana Cloud Loki: the
+# per-call wide events become queryable next to the copilot's and the backends'
+# logs, and external MCP sessions get a Grafana footprint at all. That worker
+# must be deployed BEFORE this env - a tail binding to a missing service fails
+# the deploy.
+[[env.production.tail_consumers]]
+service = "gtm-mcp-tail"
+
 [env.production.vars]
 ENV_NAME = "production"
 # Not 'dev' in any deployed env: AUTH_MODE=dev accepts the server-side DEV_BEARER

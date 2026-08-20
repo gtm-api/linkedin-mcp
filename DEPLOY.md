@@ -546,6 +546,7 @@ dispatches into that.
 | Rate limiter | `RATE_LIMIT_CALLS` | nothing to create | - |
 | Rate limiter | `RATE_LIMIT_WRITES` | nothing to create | - |
 | DNS record for `mcp.gtm-api.com` | - | **wrangler**, on the first deploy | once |
+| Tail worker `gtm-mcp-tail` | `tail_consumers` | `apps/tail-loki`: `wrangler deploy` + 3 secrets | once, BEFORE any worker deploy that binds it |
 
 The two rate limiters need no provisioning step: `namespace_id` in the
 `[[env.production.ratelimits]]` blocks is ours to choose and only has to be unique per
@@ -556,6 +557,23 @@ Their `simple.limit` and the `RATE_LIMIT_*_PER_WINDOW` vars have to change toget
 the binding enforces, the var is what the agent is told. The preflight fails on drift
 between them. Counters are per colo, so a caller spread over many colos gets a multiple
 of the nominal limit; these numbers exist to stop a storm, not to meter billing.
+
+The tail worker ships the production worker's console output (the per-call wide
+events above all) to the platform's Grafana Cloud Loki, where they join the rest of
+the telemetry under one trace id. Provision it once, before any worker deploy that
+carries the `tail_consumers` binding:
+
+```
+cd apps/tail-loki
+wrangler deploy
+wrangler secret put LOKI_PUSH_URL     # Loki push endpoint
+wrangler secret put LOKI_PUSH_USER    # Loki tenant user id
+wrangler secret put LOKI_PUSH_TOKEN   # write token, logs:write scope
+```
+
+All three values live in the private monorepo's secrets docs; they are secrets here
+because this repository is public. Verify with any authenticated MCP call, then the
+Loki query `{service="gtm.mcp"}`.
 
 The DNS record is not yours to create either. Cloudflare creates a proxied,
 Workers-managed record and issues the certificate when the custom domain is attached.

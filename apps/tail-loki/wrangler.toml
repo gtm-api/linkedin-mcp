@@ -1,0 +1,20 @@
+# gtm-mcp-tail - ships the production worker's console output to Grafana Cloud Loki.
+#
+# Cloudflare's own Workers Logs live in the Cloudflare dashboard, with short
+# retention and no way to join them with the rest of the platform's telemetry.
+# This worker is bound to gtm-mcp as a tail consumer (apps/worker wrangler.toml,
+# [env.production]): every invocation's console lines - notably the one wide
+# event per JSON-RPC message - land in the same Loki the platform's services
+# ship to, so one trace_id query covers the whole chain.
+#
+# LOKI_PUSH_URL / LOKI_PUSH_USER / LOKI_PUSH_TOKEN are worker SECRETS
+# (`wrangler secret put`, values in the private monorepo's secrets docs): this
+# repository is public and the observability stack's identifiers stay out of it.
+#
+# Deploy order matters: this worker must exist before gtm-mcp deploys with its
+# tail_consumers binding, or that deploy fails.
+name = "gtm-mcp-tail"
+main = "src/index.ts"
+compatibility_date = "2026-06-01"
+# A tail consumer needs no route; nothing should ever fetch it.
+workers_dev = false
