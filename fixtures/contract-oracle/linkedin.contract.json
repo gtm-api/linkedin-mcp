@@ -6170,6 +6170,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "is_deleted",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
                         "name": "custom_content",
                         "type": "?array",
                         "nullable": true,
@@ -6304,6 +6310,12 @@
                         "name": "reactions",
                         "type": "?array",
                         "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "is_deleted",
+                        "type": "bool",
+                        "nullable": false,
                         "has_default": true
                     },
                     {
@@ -7220,6 +7232,14 @@
                 {
                     "name": "DeletePost",
                     "value": "delete_post"
+                },
+                {
+                    "name": "GetScheduledPosts",
+                    "value": "get_scheduled_posts"
+                },
+                {
+                    "name": "DeleteScheduledPost",
+                    "value": "delete_scheduled_post"
                 },
                 {
                     "name": "MarkConversationAsRead",
@@ -22957,6 +22977,28 @@
                     "between": null
                 }
             ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-messages/{sid}/delete-on-linkedin",
+            "controller": "App\\Entities\\LinkedinMessage\\LinkedinMessageController",
+            "action": "deleteOnLinkedin",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageDeleteOnLinkedinRequest",
+            "rules": [],
             "rules_reason": null
         },
         {

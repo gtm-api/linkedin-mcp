@@ -423,6 +423,26 @@ export const linkedinMessagesTools: ToolDefinition[] = [
   },
   {
     ...base,
+    name: 'delete_linkedin_message_on_linkedin',
+    description:
+      'Recall one of OUR OWN sent messages on LinkedIn: it disappears for EVERY participant in the thread, not just for us. Addressed by the message sid, like react_linkedin_message. Irreversible and unlike anything else on this surface - a wrong sid destroys a real conversation, so confirm the message before calling. The stored row is NOT removed: it stays in the thread marked is_deleted with an emptied body, which is exactly what LinkedIn serves afterwards, so the operator can still see that something was withdrawn. Basic messenger only: an SN message or a non-2-… message_hash is refused before dispatch, as is a message already marked is_deleted (the wire has no documented answer for a second recall). LinkedIn does not pre-validate recallability, so "too old" or "not yours" comes back as a wire error after dispatch. Spends the messaging_general bucket, the same one the reaction verbs use.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/{sid}/delete-on-linkedin', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinMessage),
+    annotations: { title: 'Recall message on LinkedIn', ...DANGER },
+  },
+  {
+    ...base,
     name: 'download_linkedin_message_attachment',
     description:
       'Download one inbound attachment of a basic-messenger message, returned inline as a base64 data_url (nothing is persisted, no row changes). This verb is addressed by RAW LinkedIn ids, not by our message sid, so assemble it from a message row you already hold (search_linkedin_messages): linkedin_account_sid = that row\'s linkedin_account_sid; message_id = that row\'s message_hash (must be the 2-… form); attachment_urn = attachments[i].urn on the same row. profile_id is the ACTING account\'s own LinkedIn URN: read ln_id off that linkedin_account_sid via search_linkedin_accounts, NOT the other party\'s URN. 120 s budget, up to ~50 MB; spends the messaging_general bucket.',
