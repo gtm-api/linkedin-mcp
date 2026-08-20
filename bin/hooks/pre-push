@@ -23,10 +23,20 @@ if ! command -v pnpm >/dev/null 2>&1; then
   exit 0
 fi
 
-if [ ! -d "$ROOT/../../research" ]; then
-  echo "pre-push: no ../../research next to this repo. research-parity and the openapi"
-  echo "          drift gate read the umbrella checkout (<umbrella>/product), so the"
-  echo "          suite below will fail until gtm.mcp sits inside it."
+# Same resolution the gates use (tests/umbrella.ts): the corpus sits next to
+# this repo, or next to the MAIN checkout when this is a linked worktree. Warn
+# only when both come up empty, because that is when the suite actually fails.
+CORPUS_PARENT="$ROOT/../.."
+if [ ! -d "$CORPUS_PARENT/research" ]; then
+  COMMON_DIR="$(git rev-parse --git-common-dir)"
+  case "$COMMON_DIR" in /*) ;; *) COMMON_DIR="$ROOT/$COMMON_DIR" ;; esac
+  CORPUS_PARENT="$(dirname "$COMMON_DIR")/../.."
+fi
+if [ ! -d "$CORPUS_PARENT/research" ]; then
+  echo "pre-push: no research/ two levels up from this repo or from its main checkout."
+  echo "          research-parity and the openapi drift gate read the umbrella checkout"
+  echo "          (<umbrella>/product), so the suite below will fail until gtm.mcp sits"
+  echo "          inside it."
 fi
 
 echo "pre-push: pnpm typecheck && pnpm test"
