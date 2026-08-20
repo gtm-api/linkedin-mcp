@@ -46,9 +46,10 @@ id = "gtm_mcp_commit_tokens_local"
 
 # ── production ──────────────────────────────────────────────────────────────
 # Deployed with `pnpm deploy:production` - full walkthrough in ../../DEPLOY.md.
-# AI + Vectorize bindings exist ONLY here: their absence in the default (dev)
-# env is what keeps `wrangler dev` fully local - the support KB falls back to
-# the bundled BM25 index (see mcp.support/kb_articles).
+# No AI or Vectorize bindings: the support KB queries the Mintlify discovery
+# index over the published docs site, and its one dependency is the
+# MINTLIFY_ASSISTANT_KEY secret (DEPLOY.md step 5). Unset, only the two KB
+# tools error (see mcp.support/kb_articles).
 [env.production]
 name = "gtm-mcp"
 # CUSTOM DOMAIN, not a route, and the difference is not cosmetic.

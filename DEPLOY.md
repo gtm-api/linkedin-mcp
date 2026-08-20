@@ -14,8 +14,10 @@ ONE deployable environment.
 | `production` | `pnpm deploy:production` | **https://mcp.gtm-api.com** (custom domain) |
 
 Local development is unaffected by everything below: the default env has no cloud
-bindings, talks to the Docker backends on :8020 / :8021 / :8025, and the support KB
-serves from the bundled BM25 index.
+bindings and talks to the Docker backends on :8020 / :8021 / :8025. The support KB
+has no local index: `bin/mcp-dev.sh` renders `MINTLIFY_ASSISTANT_KEY` from
+`~/.gtm-secrets/common.env` into the dev worker, and without the key the two KB
+tools error by design while everything else runs.
 
 **There is no staging env, on purpose.** It used to exist as a second worker on
 workers.dev and it was the wrong shape: it pointed at the same beta backends as
@@ -41,7 +43,7 @@ because the worker cannot be the first thing deployed: three of its precondition
 prepared on 2026-07-27 by four parallel sessions and reconciled into one sequence here.
 
 The steps numbered **1 to 20** are cross repo and run once, for this first release. The
-steps numbered **W1 to W12** are the worker's own runbook, unchanged, and they keep the
+steps numbered **W1 to W11** are the worker's own runbook, unchanged, and they keep the
 numbers that `wrangler.toml`, `bin/smoke.sh` and `bin/deploy-preflight.mjs` refer to as
 "DEPLOY.md step N": W4 is step 4 in [The runbook](#the-runbook), W9 is step 9, and so on.
 Their detail sections live below and are worth reading; the list here is the order and the
@@ -445,7 +447,7 @@ step 10, against the orchestration host.
 `wrangler.toml` is already this exact prefix, and the worker preflight will now pass its
 edge phase.
 
-## Phase 6. The worker (W1 to W12)
+## Phase 6. The worker (W1 to W11)
 
 Only now. Each of these has a detail section under [The runbook](#the-runbook) with the
 same number; nothing about them changed in this consolidation.
@@ -454,16 +456,15 @@ same number; nothing about them changed in this consolidation.
 |---|---|---|---|
 | **W1** | Eugene, once per machine | `cd apps/worker && pnpm exec wrangler login && pnpm exec wrangler whoami` | `whoami` prints the account that owns the `gtm-api.com` zone, on the Workers Paid plan. A different account means the custom domain fails at attach time with a confusing error. |
 | **W2** | done | the upstream dependencies | This is phases 1 to 5 above. `pnpm deploy:preflight` re-checks both from the laptop at W8. |
-| **W3** | any engineer, per deploy | `pnpm oracle:check && pnpm typecheck && pnpm test && pnpm e2e && node bin/build-kb-index.mjs` | All green, and `e2e` prints its coverage block. Needs the four Docker backends up. `oracle:check` first: a stale fixture takes the whole suite green with it. |
+| **W3** | any engineer, per deploy | `pnpm oracle:check && pnpm typecheck && pnpm test && pnpm e2e` | All green, and `e2e` prints its coverage block. Needs the four Docker backends up. `oracle:check` first: a stale fixture takes the whole suite green with it. |
 | **W4** | Eugene, once | `cd apps/worker && pnpm exec wrangler kv namespace create COMMIT_TOKENS --env production` | Prints a namespace id. **Paste it over `TODO_kv_namespace_id`** in `[[env.production.kv_namespaces]]` and commit it: an account-scoped resource id, not a secret. This is the one value that feeds a later step. A wrong id is worse than none, so the preflight also asks the account whether it exists. Rollback: `wrangler kv namespace delete`, though an unused namespace costs nothing. |
-| **W5** | Eugene, once | `cd apps/worker && pnpm exec wrangler vectorize create gtm-kb --dimensions=1024 --metric=cosine` | `dimensions` must match `@cf/baai/bge-m3` (1024). Changing the model later means recreating the index and a `--full` re-embed. |
+| **W5** | Eugene, once | `cd apps/worker && pnpm exec wrangler secret put MINTLIFY_ASSISTANT_KEY --env production` | The Mintlify assistant key, the same value `bin/mcp-dev.sh` reads from `~/.gtm-secrets/common.env`. Unset, the worker still serves: only the two KB tools error, naming this key. |
 | **W6** | Eugene, once | `openssl rand -base64 48` then `cd apps/worker && pnpm exec wrangler secret put PREVIEW_TOKEN_SECRET --env production` | Real entropy, never committed. Unset means the preview gate is off and **every dangerous tool refuses**, which is safe but half the product does not work. Rotating it later invalidates outstanding commit tokens, whose TTL is 300s. |
 | **W7** | Eugene, once | `dig +short mcp.gtm-api.com` | **No output.** Cloudflare refuses to attach a custom domain to a hostname that already has a record, and the deploy then fails half applied. Delete any `mcp` record in zone `gtm-api.com` first. Nothing to create: wrangler makes the proxied record and the certificate on the first deploy. |
 | **W8** | any engineer, per deploy | `pnpm deploy:preflight` (or `MCP_JWT=<real token> pnpm deploy:preflight`) | Exit 0 = ready. Exit 1 lists every blocker: offline phase (placeholders, custom domain vs `MCP_RESOURCE_URL`, `workers_dev` false, `preview_urls` true, rate-limit drift), then edge (each `{base}/live` returns the **body** `{"status":"alive"}`, the id host publishes the exact `AUTH_ISSUER` string, `mcp.gtm-api.com` free or already ours), then account (`PREVIEW_TOKEN_SECRET` set, KV id owned). Today it exits 1 on the KV id alone, because the offline phase stops before touching the network. It takes **no arguments**; passing one exits 2. |
 | **W9** | Eugene, per deploy | `cd apps/worker && pnpm exec wrangler versions upload --env production`, then `MCP_JWT=… MCP_TEAM_SID=… pnpm smoke https://<version>-gtm-mcp.<account>.workers.dev` | A Version ID plus a preview URL, and `smoke: GREEN`. Nothing is deployed, no route changes, `mcp.gtm-api.com` untouched. Wrangler warns that preview URLs are on while `workers_dev` is off: that is the intended state. The preview is **not** a sandbox (production KV, counters and backends), which is why the smoke reads three rows and confirms a dangerous tool against a nonexistent sid. |
 | **W10** | Eugene, per deploy | `pnpm deploy:production` | Runs the preflight, then `wrangler deploy --env production`, which uploads, deploys **and attaches the custom domain**, creating the DNS record and certificate. A 525 or 1016 for a minute or two is certificate issuance. The **first** deploy must be this command: `wrangler versions deploy` does not apply triggers and `wrangler triggers deploy` is experimental. Later deploys can promote the rehearsed version. Rollback: `wrangler deployments list --env production` then `wrangler rollback <id> --env production`, which reverts code **and** the vars bundled with that version. Removing the hostname itself is a dashboard action (Workers, Domains and Routes), and it deletes the Workers-managed DNS record with it. |
 | **W11** | Eugene, per deploy | `MCP_JWT=<token> MCP_TEAM_SID=<team sid> pnpm smoke` | Six checks against `https://mcp.gtm-api.com`, ending `smoke: GREEN`. Health `ok` with `rate_limit.status: "edge"`, the two discovery documents agreeing with `wrangler.toml`, the token's own `iss`/`aud`, one live read, and preview then confirm then **replay**, which must answer `This confirmation token was already used`. Without `MCP_JWT` it runs the configuration half and exits 1: a deploy nobody called a tool against is not a verified deploy. |
-| **W12** | Eugene, after the first deploy | `export CLOUDFLARE_ACCOUNT_ID=… CLOUDFLARE_API_TOKEN=… && node bin/vectorize-kb.mjs --dry-run && node bin/vectorize-kb.mjs` | Chunks embedded and upserted, stale ids pruned, after which `search_knowledge` runs hybrid retrieval. Rollback: re-run with `--full`, or delete and recreate the index. |
 
 **Release landed when** W11 is green against `https://mcp.gtm-api.com` and the same token
 reaches a live read through the edge. Record the date, the commit and the `pnpm e2e`
@@ -541,8 +542,6 @@ dispatches into that.
 | Resource | Binding | Created by | When |
 |---|---|---|---|
 | KV namespace | `COMMIT_TOKENS` | step 4, `wrangler kv namespace create` | once |
-| Vectorize index `gtm-kb` | `VECTORIZE_KB` | step 5, `wrangler vectorize create` | once |
-| Workers AI | `AI` | nothing to create (needs Workers Paid) | - |
 | Rate limiter | `RATE_LIMIT_CALLS` | nothing to create | - |
 | Rate limiter | `RATE_LIMIT_WRITES` | nothing to create | - |
 | DNS record for `mcp.gtm-api.com` | - | **wrangler**, on the first deploy | once |
@@ -582,12 +581,18 @@ refuses to attach a custom domain to a hostname that already has one, and the de
 then fails half-applied. The zone's SSL/TLS mode, which caused the `app.gtm-api.com`
 redirect loop in July, is irrelevant here: a custom domain has no origin to fetch from.
 
-When `AI` + `VECTORIZE_KB` are bound, `search_knowledge` runs **hybrid** retrieval
-(vector + BM25, RRF-fused) and degrades to BM25 on any vector-path error.
+The support KB is deliberately absent from this table: `search_knowledge` and
+`get_kb_article` query the Mintlify discovery index over the published docs site,
+so their one dependency is the `MINTLIFY_ASSISTANT_KEY` worker secret (step 5),
+not a Cloudflare resource. There is no local index and no fallback (decision
+2026-08-14): unconfigured or unreachable, the two KB tools error with a message
+naming the dependency, and every other tool is unaffected. The index is
+Mintlify's, built from the docs site as published, so an article edit needs no
+rebuild or reload step in this repo.
 
 ## The runbook
 
-The steps below are the worker's own twelve, in order, and they are **W1 to W12** in
+The steps below are the worker's own eleven, in order, and they are **W1 to W11** in
 [First production release](#first-production-release), which is where the who, the
 frequency and the cross repo dependencies live. Their numbers are the ones `wrangler.toml`,
 `bin/smoke.sh` and `bin/deploy-preflight.mjs` mean when a comment says "DEPLOY.md step N".
@@ -599,8 +604,8 @@ first, and step 8 below refuses the deploy if they have not.
 
 ### Step 1. Account prerequisites (Eugene, once per machine)
 
-1. The Cloudflare account is on the **Workers Paid** plan. Vectorize, Workers AI and
-   the platform rate-limit bindings all need it.
+1. The Cloudflare account is on the **Workers Paid** plan. The platform rate-limit
+   bindings need it.
 2. Authenticate the CLI:
    ```bash
    cd apps/worker
@@ -611,9 +616,6 @@ first, and step 8 below refuses the deploy if they have not.
    that the deploy lands in the account that owns the `gtm-api.com` zone, and a custom
    domain in the wrong account fails at attach time with a confusing error. Nothing
    before this step needs credentials, the preflight's offline phase included.
-3. A separate API token for the KB pipeline (used by `bin/vectorize-kb.mjs`, **not** by
-   the worker): account permissions **Workers AI: Run** + **Vectorize: Edit**. Store it
-   as `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` in `~/.gtm-secrets`.
 
 ### Step 2. Deploy the two upstream dependencies (Eugene, once)
 
@@ -648,7 +650,6 @@ gateway`. A published prefix with no app behind it answers 502, and an unresolva
 pnpm oracle:check              # contract fixtures still match the live backends
 pnpm typecheck && pnpm test    # the same suite CI runs, must be green
 pnpm e2e                       # the LIVE arm: real worker, real backends, real envelopes
-node bin/build-kb-index.mjs    # refresh the bundled BM25 index
 ```
 
 `oracle:check` comes first because `pnpm test` cannot replace it: every contract gate
@@ -679,17 +680,27 @@ refuses at the confirm step, fail-closed) and a blocker to the preflight. Filled
 *wrong* id it is worse than either, because nothing notices until the first commit token
 is written, so the preflight also asks the account whether that id exists.
 
-### Step 5. Create the Vectorize index (Eugene, once)
+### Step 5. Set MINTLIFY_ASSISTANT_KEY (Eugene, once)
 
 ```bash
 cd apps/worker
-pnpm exec wrangler vectorize create gtm-kb --dimensions=1024 --metric=cosine
+pnpm exec wrangler secret put MINTLIFY_ASSISTANT_KEY --env production
 ```
 
-`dimensions` MUST match the embedding model (`@cf/baai/bge-m3` is 1024). Create it
-before the first deploy: `[[env.production.vectorize]]` binds `gtm-kb` by name, and a
-binding is not the place to discover the index does not exist. Changing the model later
-means recreating the index and a `--full` re-embed.
+The Mintlify assistant API key, and the one dependency of the support KB: the two
+KB tools (`search_knowledge`, `get_kb_article`) query the Mintlify discovery index
+over the published docs site, with no local index and no fallback (decision
+2026-08-14: a stale local index answering silently is a quality regression nobody
+can see). The value is the `MINTLIFY_ASSISTANT_KEY=` line in
+`~/.gtm-secrets/common.env`, the same one `bin/mcp-dev.sh` renders into the dev
+worker.
+
+Unset, the worker boots and serves everything else: only the two KB tools error,
+with a message naming this key, so a missing secret cannot take anything else
+down. Neither the preflight nor `/health` checks it; the optional KB probe under
+[Post-deploy checks](#post-deploy-checks) is what proves it live. The optional
+`MINTLIFY_DOCS_DOMAIN` var picks the docs domain the index serves and defaults to
+`docs.gtm-api.com`.
 
 ### Step 6. Set PREVIEW_TOKEN_SECRET (Eugene, once)
 
@@ -813,16 +824,6 @@ Defaults to `https://mcp.gtm-api.com`. Six checks; what each one proves is
 against https://mcp.gtm-api.com`. Without `MCP_JWT` it runs the configuration half,
 says so, and exits 1: a deploy nobody called a tool against is not a verified deploy.
 
-### Step 12. Load the vector index (Eugene, after the first deploy)
-
-```bash
-export CLOUDFLARE_ACCOUNT_ID=…  CLOUDFLARE_API_TOKEN=…   # the step 1.3 token
-node bin/vectorize-kb.mjs --dry-run    # shows embed/delete counts
-node bin/vectorize-kb.mjs              # embeds changed chunks, upserts, prunes stale ids
-```
-
-Details in [Load the vector index](#load-the-vector-index).
-
 ## Post-deploy checks
 
 `pnpm smoke [url]` runs all six. They are listed here with the manual equivalent,
@@ -912,8 +913,8 @@ it answers `Could not record the confirmation token`, the binding resolved but t
 namespace id is not one this account owns. KV is eventually consistent across colos, so
 `bin/smoke.sh` retries (c) a few times before calling it a failure.
 
-Optionally the in-worker support KB, which needs no backend at all and so isolates a
-backend problem from a worker problem:
+Optionally the support KB, which touches no gtm backend (its one dependency is the
+Mintlify discovery API) and so separates a backend problem from a worker problem:
 
 ```bash
 curl -s -X POST "$WORKER/mcp/support/knowledge" \
@@ -922,9 +923,12 @@ curl -s -X POST "$WORKER/mcp/support/knowledge" \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"search_knowledge","arguments":{"query":"connect linkedin account"}}}'
 ```
 
-A hybrid response is indistinguishable from BM25 in shape; to confirm the vector path is
-live, check `wrangler tail --env production`: a `support_kb_vector_fallback` event means
-the vector path failed and BM25 answered.
+Real hits from the docs index mean step 5 landed. An error naming
+`MINTLIFY_ASSISTANT_KEY` means the secret is missing on this env, and the two KB
+tools are all it affects. An error saying knowledge search is temporarily
+unavailable means the key is set but the Mintlify API did not answer;
+`wrangler tail --env production` carries the matching
+`support_kb_search_unavailable` event with the upstream detail.
 
 ## Rollback
 
@@ -957,32 +961,6 @@ anything else.
 The auth pair is not optional paperwork: with `AUTH_MODE=jwt` and no issuer the edge
 would have nothing to compare `iss` and `aud` against, so both checks would pass
 everything. That configuration is refused rather than served.
-
-## Load the vector index
-
-```bash
-export CLOUDFLARE_ACCOUNT_ID=…  CLOUDFLARE_API_TOKEN=…   # the step 1.3 token
-node bin/vectorize-kb.mjs --dry-run    # shows embed/delete counts
-node bin/vectorize-kb.mjs              # embeds changed chunks, upserts, prunes stale ids
-```
-
-The script is incremental (manifest in `bin/.vectorize-manifest.json`, gitignored):
-only new/changed chunks are embedded, ids that disappeared from the corpus are deleted.
-`--full` forces a complete re-embed (e.g. after changing the embedding model; keep
-`EMBEDDING_MODEL` in `vector-retriever.ts` and `vectorize-kb.mjs` in lockstep, and
-recreate the index if dimensions change).
-
-## KB update loop (after every article edit)
-
-```bash
-node bin/build-kb-index.mjs    # bundled index (dev + prod fallback)
-pnpm deploy:production         # ships the new BM25 fallback
-node bin/vectorize-kb.mjs      # embeddings (incremental)
-```
-
-Order matters only in that the deploy ships the new BM25 fallback; vectorize can run
-before or after. Costs: bge-m3 embedding of the whole current corpus is fractions of a
-cent; Vectorize storage/query at this scale is effectively free tier.
 
 ## CI (Bitbucket Pipelines)
 
@@ -1127,8 +1105,8 @@ there first (`pnpm openapi:public`, commit the regenerated
 
 ## Not yet wired (deliberate)
 
-- **Deploy from CI**: `build-kb-index -> deploy-preflight -> wrangler deploy ->
-  vectorize-kb` maps onto one more Pipelines step with `CLOUDFLARE_API_TOKEN` as a repo
+- **Deploy from CI**: `deploy-preflight -> wrangler deploy` maps onto one more
+  Pipelines step with a deploy-scoped `CLOUDFLARE_API_TOKEN` as a repo
   secret. Left manual until a first production deploy has actually happened, and until
   someone decides what the CI equivalent of step 9 is (a version upload plus `pnpm
   smoke` against the preview URL would work, but it needs a long-lived token that can
