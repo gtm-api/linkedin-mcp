@@ -1,8 +1,8 @@
 // Entity: LinkedIn Posting (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/linkedin_posting.md
 // Format: registry v2, each tool carries route metadata so the generic
-// dispatcher can drive it. 3 tools (the linkedin-posting route group), mounted
-// on linkedin.content.
+// dispatcher can drive it. 6 tools (the linkedin-posting route group), mounted
+// on linkedin.content: three writes and the undo of each.
 //
 // This is the stateless content-AUTHORING surface: no table, no Domain, no
 // events. Each action dispatches the matching plugin wire verb on the account's
@@ -84,13 +84,34 @@ const CommentResult = z.object({
   activity_log: ACTIVITY_LOG,
 }).passthrough();
 
+const DeletePostResult = z.object({
+  deleted: z.literal(true).describe('Always true on a 200: a refused delete is a 409, never a success body.'),
+  message: z.string().nullable().describe("LinkedIn's own confirmation toast, when it sends one."),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+const DeleteCommentResult = z.object({
+  deleted: z.literal(true),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+const UnreactResult = z.object({
+  removed: z.literal(true),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
 const ReactResult = z.object({
   activity_log: ACTIVITY_LOG,
 }).passthrough();
 
-// All three verbs write outward to LinkedIn under a real identity, spend a §9
-// write bucket, and cannot be undone through this API, so destructiveHint is
-// true. That is also the registry invariant for dangerous: true.
+// Every verb here writes outward to LinkedIn under a real identity and spends a
+// §9 write bucket, so destructiveHint is true. That is also the registry
+// invariant for dangerous: true.
+//
+// The three creates ARE now undoable through this API (2026-08-20), which is a
+// change of fact but not of hint: destructiveHint marks an outward write, and an
+// undo is itself one. The undo spends the bucket of the create it reverses, and
+// those buckets burst 2 so the pair fits back-to-back.
 const DANGER = {
   readOnlyHint: false,
   destructiveHint: true,
@@ -181,5 +202,73 @@ export const linkedinPostingTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(z.null(), ReactResult),
     annotations: { title: 'React to LinkedIn post', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'delete_linkedin_post',
+    description:
+      'Delete one of OUR OWN LinkedIn posts, addressed by activity_urn (wire delete-post). The counterpart of create_linkedin_post and the way to retract a post an agent published: pass the activity_urn that create_linkedin_post returned, or the post URL. LinkedIn only deletes the account\'s own posts and we do not pre-validate that. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME posting bucket as publishing (5/day at a 1200 s floor, bursting 2 so a publish and its delete fit back-to-back), saturation returns 429. Backend urns (urn:li:share:, urn:li:ugcPost:) are NOT accepted here even though create_linkedin_post returns one: the wire builds its payload from the numeric activity id. A refusal - not your post, already gone - comes back as 409 post_not_deleted with LinkedIn\'s own toast in error.context, never as a success. Nothing is stored on this service, so nothing local is deleted either.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/delete-post' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      activity_urn: z.string().min(1).max(512)
+        .describe('The post to delete: urn:li:activity:<id>, a bare numeric activity id, or a post URL carrying the id (converted locally, same rule as entity_urn on the write verbs). urn:li:share: / urn:li:ugcPost: are refused by the wire.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), DeletePostResult),
+    annotations: { title: 'Delete LinkedIn post', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'delete_linkedin_comment',
+    description:
+      'Delete one of OUR OWN LinkedIn comments, addressed by comment_urn (wire delete-comment). The counterpart of create_linkedin_comment. You already hold the handle: create_linkedin_comment returns comment_urn, and the linkedin-scraping get-post-comments rows carry the same compound urn, so a comment can be removed without any extra read. LinkedIn only deletes the account\'s own comments and we do not pre-validate that. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME comment_posts bucket as commenting (30/day at a 360 s floor, bursting 2 so a comment and its delete fit back-to-back), saturation returns 429. Nothing is stored on this service.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/delete-comment' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      comment_urn: z.string().min(1).max(512)
+        .describe('The comment to delete, as our comment readers return it: urn:li:comment:(<thread>,<id>) over any post family. The fsd form urn:li:fsd_comment:(<id>,<full thread urn>) that LinkedIn\'s own responses carry is accepted too and normalized on the wire side.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), DeleteCommentResult),
+    annotations: { title: 'Delete LinkedIn comment', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'unreact_linkedin_post',
+    description:
+      'Remove OUR reaction from a LinkedIn post or comment, addressed by the same entity_urn react_linkedin_post took (wire delete-reaction). Undo a reaction left by mistake or by a play that has been retargeted. Takes no reaction_type: LinkedIn holds at most one reaction per account per entity, so removal is unambiguous. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME react_posts bucket as reacting (30/day at a 360 s floor, bursting 2 so a reaction and its removal fit back-to-back), saturation returns 429. Removing a reaction that was never there is not a documented success on the wire, so it comes back as 409 reaction_not_removed rather than a cheerful no-op.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/unreact' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      entity_urn: ENTITY_URN,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), UnreactResult),
+    annotations: { title: 'Remove LinkedIn reaction', ...DANGER },
   },
 ];

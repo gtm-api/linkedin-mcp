@@ -7002,6 +7002,10 @@
                     "value": "get_post"
                 },
                 {
+                    "name": "GetPostByLink",
+                    "value": "get_post_by_link"
+                },
+                {
                     "name": "GetProfileFeatured",
                     "value": "get_profile_featured"
                 },
@@ -7198,12 +7202,24 @@
                     "value": "like_post"
                 },
                 {
+                    "name": "UnlikePost",
+                    "value": "unlike_post"
+                },
+                {
                     "name": "CommentPost",
                     "value": "comment_post"
                 },
                 {
+                    "name": "DeleteComment",
+                    "value": "delete_comment"
+                },
+                {
                     "name": "CreatePost",
                     "value": "create_post"
+                },
+                {
+                    "name": "DeletePost",
+                    "value": "delete_post"
                 },
                 {
                     "name": "MarkConversationAsRead",
@@ -7224,6 +7240,10 @@
                 {
                     "name": "UnreactOnMessage",
                     "value": "unreact_on_message"
+                },
+                {
+                    "name": "DeleteMessage",
+                    "value": "delete_message"
                 },
                 {
                     "name": "AddParticipants",
@@ -23291,6 +23311,120 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-posting/delete-comment",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "deleteComment",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingDeleteCommentRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "comment_urn",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:512"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/delete-post",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "deletePost",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingDeletePostRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "activity_urn",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:512"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-posting/react",
             "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
             "action": "react",
@@ -23364,6 +23498,63 @@
                     ],
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/unreact",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "unreact",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingUnreactRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "entity_urn",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:512"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 512,
                     "size": null,
                     "between": null
                 }
