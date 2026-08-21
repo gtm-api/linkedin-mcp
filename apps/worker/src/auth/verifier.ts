@@ -41,6 +41,24 @@ function prmUrlFor(resource: string | null): string {
   }
 }
 
+// X-Trace-Id arrives in one of two wire forms carrying the same 128 bits: the
+// platform's dashed UUID, or the bare 32-hex W3C/OTel trace id every OTel SDK
+// emits. Canonicalize to the dashed lowercase form so the worker's wide events
+// and the backends' logs key on ONE string, and mint when absent or unusable:
+// a trace id is telemetry, and garbage must never fail or skew a call. Found
+// live 2026-08-21: this header used to be forwarded verbatim, the backends
+// validated it as a UUID, and every call carrying an OTel id answered 422.
+function resolveTraceId(request: Request): string {
+  const raw = request.headers.get('X-Trace-Id')?.trim().toLowerCase() ?? '';
+  const hex = /^[0-9a-f]{32}$/.test(raw)
+    ? raw
+    : /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(raw)
+      ? raw.replace(/-/g, '')
+      : null;
+  if (hex === null || hex === '0'.repeat(32)) return crypto.randomUUID();
+  return `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
+}
+
 // OAuth 2.1 resource-server token check.
 //
 // The platform signs JWTs with a shared HS256 secret; that secret must never
@@ -99,7 +117,7 @@ export function makeVerifier(auth: AuthConfig) {
           tokenTeamSid: null,
           actor: { type: 'api_key', sid: null },
           permissions: [],
-          traceId: request.headers.get('X-Trace-Id') ?? crypto.randomUUID(),
+          traceId: resolveTraceId(request),
         },
       };
     }
@@ -155,7 +173,7 @@ export function makeVerifier(auth: AuthConfig) {
         tokenTeamSid: (ai.team_sid as string | undefined) ?? null,
         actor: { type: actorType, sid: actorSid },
         permissions: permTokens,
-        traceId: request.headers.get('X-Trace-Id') ?? crypto.randomUUID(),
+        traceId: resolveTraceId(request),
       },
     };
   };

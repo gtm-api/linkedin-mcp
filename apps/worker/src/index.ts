@@ -88,6 +88,14 @@ const logger: Logger = {
 // Distil one JSON-RPC message + its response into the fields we log: the method,
 // the tool being called (resolved THROUGH the facade - `call_tool` unwraps to the
 // real inner tool, shown as `call_tool→<tool>`), and whether it succeeded.
+//
+// `ok` is the CALLER's outcome, not the transport's: false when the JSON-RPC
+// envelope errored OR the tool result carries isError:true. For that to mean
+// anything, the dispatcher guarantees every backend HTTP >= 400 becomes an
+// isError result even when the body is not the platform error envelope; the
+// 2026-08-21 trace-id 422 logged ok:true precisely because that guarantee was
+// missing. An alert on ok=false therefore sees business failures, not just
+// envelope failures.
 function summarizeCall(
   msg: unknown,
   resp: unknown,

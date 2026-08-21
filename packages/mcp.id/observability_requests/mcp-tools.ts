@@ -140,7 +140,7 @@ export const observabilityTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     inputSchema: z.object({
-      trace_id: z.string().describe('The request trace_id (UUID v7, 36 chars).'),
+      trace_id: z.string().describe('The request trace_id: the dashed UUID from meta.trace_id / X-Trace-Id, or the same id in the bare 32-hex OTel form.'),
       ...usageMetaField,
     }),
     outputSchema: McpGetResponse(ObservabilityRequest),

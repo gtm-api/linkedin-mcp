@@ -49,3 +49,42 @@ describe('api-key bearers', () => {
     expect(result.error).toBe('invalid_token');
   });
 });
+
+describe('X-Trace-Id canonicalization', () => {
+  const key = 'gtm_live_' + 'a'.repeat(40);
+  const DASHED = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+
+  function scopeFor(extra: Record<string, string> = {}) {
+    const result = makeVerifier(auth)(requestWithBearer(key, extra));
+    expect(result.kind).toBe('ok');
+    return result.kind === 'ok' ? result.scope : (undefined as never);
+  }
+
+  it('renders a bare 32-hex OTel trace id in the dashed canonical form', () => {
+    // The 2026-08-21 live break: forwarded verbatim, the backends validated it
+    // as a UUID and answered 422 on every call carrying an OTel id.
+    const scope = scopeFor({ 'X-Trace-Id': '1d98e7585b07a4dc6f9d4f0bae2b7a88' });
+    expect(scope.traceId).toBe('1d98e758-5b07-a4dc-6f9d-4f0bae2b7a88');
+  });
+
+  it('passes a dashed uuid through, case folded', () => {
+    const scope = scopeFor({ 'X-Trace-Id': '1D98E758-5B07-A4DC-6F9D-4F0BAE2B7A88' });
+    expect(scope.traceId).toBe('1d98e758-5b07-a4dc-6f9d-4f0bae2b7a88');
+  });
+
+  it('mints a fresh id for garbage instead of forwarding it', () => {
+    const scope = scopeFor({ 'X-Trace-Id': 'not-a-trace-id' });
+    expect(scope.traceId).toMatch(DASHED);
+    expect(scope.traceId).not.toContain('not-a');
+  });
+
+  it('mints a fresh id for the all-zero W3C invalid-trace sentinel', () => {
+    const scope = scopeFor({ 'X-Trace-Id': '0'.repeat(32) });
+    expect(scope.traceId).toMatch(DASHED);
+    expect(scope.traceId).not.toBe('00000000-0000-0000-0000-000000000000');
+  });
+
+  it('mints a fresh id when the header is absent', () => {
+    expect(scopeFor().traceId).toMatch(DASHED);
+  });
+});

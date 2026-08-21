@@ -144,6 +144,45 @@ export function mapErrorEnvelope(
   };
 }
 
+// A backend HTTP error whose body is NOT the platform error envelope
+// (`{success:false, error:{...}}`): a gateway or framework layer answered
+// before any controller ran. Live case 2026-08-21: a Laravel 422 minted during
+// auth resolution (raw `{message, errors}` body) fell through to
+// renderSuccess, the caller read it as a tool-argument problem, and the wide
+// event logged ok:true. Never a success. Name the layer honestly so the model
+// does not go debugging its arguments, and surface what the body did say.
+export function httpErrorResult(
+  ctx: DispatchContext,
+  status: number,
+  body: unknown,
+): ToolResult {
+  const b = (body ?? {}) as { message?: unknown; errors?: unknown };
+  const lines: string[] = [
+    `${ctx.tool.name} failed: the backend rejected the call with HTTP ${status} outside the tool's own contract (no MCP error envelope).`,
+    'This usually comes from an infrastructure or middleware layer, not from the tool arguments.',
+  ];
+  if (typeof b.message === 'string' && b.message !== '') lines.push(b.message);
+  // Laravel's validation shape ({field: [messages]}) is the known offender;
+  // flatten it so the actual reason is readable.
+  if (b.errors && typeof b.errors === 'object') {
+    for (const [field, fieldMessages] of Object.entries(b.errors as Record<string, unknown>)) {
+      for (const m of Array.isArray(fieldMessages) ? fieldMessages : [fieldMessages]) {
+        lines.push(`  • ${field}: ${typeof m === 'string' ? m : JSON.stringify(m)}`);
+      }
+    }
+  }
+  lines.push(
+    status >= 500
+      ? 'Server-side failure: a retry may help; if it persists, report it with the body above.'
+      : 'Rewording the arguments will not fix this; report it with the body above if it is not a header/credential problem on your side.',
+  );
+  return {
+    content: [{ type: 'text', text: lines.join('\n') }],
+    isError: true,
+    structuredContent: body && typeof body === 'object' ? (body as Record<string, unknown>) : { body },
+  };
+}
+
 export function transportErrorResult(
   ctx: DispatchContext,
   err: { reason: string; status?: number; detail: string },

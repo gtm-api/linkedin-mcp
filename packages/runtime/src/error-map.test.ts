@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
-import { mapErrorEnvelope } from './error-map';
+import { httpErrorResult, mapErrorEnvelope } from './error-map';
 import type { DispatchContext, RuntimeDeps, ToolDefinition } from './types';
 
 const deps = {
@@ -58,5 +58,36 @@ describe('mapErrorEnvelope', () => {
     const r = mapErrorEnvelope(429, { success: false, error: { code: 'rate_limited', message: 'slow down', recoverable: true, context: { retry_after: 42 } }, meta: { trace_id: 'abc' } }, ctx);
     expect(r.content[0].text).toMatch(/retry after 42s/i);
     expect(r.content[0].text).toMatch(/trace: abc/);
+  });
+});
+
+describe('httpErrorResult (backend error without the platform envelope)', () => {
+  it('renders a raw Laravel 422 as isError, naming the layer, not the arguments', () => {
+    // The 2026-08-21 live shape: AccessIdentityValue's uuid rule threw during
+    // auth resolution and Laravel rendered its own validation body.
+    const r = httpErrorResult(ctx, 422, {
+      message: 'The trace id field must be a valid UUID.',
+      errors: { trace_id: ['The trace id field must be a valid UUID.'] },
+    });
+    expect(r.isError).toBe(true);
+    const text = r.content[0].text;
+    expect(text).toMatch(/HTTP 422/);
+    expect(text).toMatch(/no MCP error envelope/i);
+    expect(text).toMatch(/not from the tool arguments/i);
+    expect(text).toMatch(/trace_id: The trace id field must be a valid UUID\./);
+    expect(r.structuredContent).toMatchObject({ message: 'The trace id field must be a valid UUID.' });
+  });
+
+  it('renders a bodyless 5xx as isError with a retry hint', () => {
+    const r = httpErrorResult(ctx, 502, {});
+    expect(r.isError).toBe(true);
+    expect(r.content[0].text).toMatch(/HTTP 502/);
+    expect(r.content[0].text).toMatch(/retry may help/i);
+  });
+
+  it('wraps a non-object body instead of dropping it', () => {
+    const r = httpErrorResult(ctx, 403, 'nope');
+    expect(r.isError).toBe(true);
+    expect(r.structuredContent).toEqual({ body: 'nope' });
   });
 });

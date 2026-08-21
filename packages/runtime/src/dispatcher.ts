@@ -1,6 +1,6 @@
 import type { DispatchContext, ToolResult } from './types';
 import { backendFetch } from './backend-client';
-import { mapErrorEnvelope, transportErrorResult } from './error-map';
+import { httpErrorResult, mapErrorEnvelope, transportErrorResult } from './error-map';
 import { renderSuccess } from './envelope';
 
 // The generic core handler shared by all 229 tools. Because every backend
@@ -41,6 +41,13 @@ export async function dispatch(ctx: DispatchContext): Promise<ToolResult> {
   const env = res.envelope as { success?: boolean } | null;
   if (env && env.success === false) {
     return mapErrorEnvelope(res.status, env as never, ctx);
+  }
+  // An HTTP error without the platform envelope (a gateway 502, a framework
+  // 4xx minted before any controller ran) must never render as success. It
+  // used to: the 2026-08-21 trace-id 422 reached callers as a success-shaped
+  // result AND logged ok:true, pointing the debugging at the tool arguments.
+  if (res.status >= 400) {
+    return httpErrorResult(ctx, res.status, res.envelope);
   }
   return renderSuccess(ctx, res.envelope);
 }
