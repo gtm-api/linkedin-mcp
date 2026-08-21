@@ -168,8 +168,25 @@ const PostAuthorRef = z.object({
   picture_url: z.string().nullable(),
 }).passthrough();
 
+// The group a post was published in (wire Post.group, 2026-08-21). Only on
+// group posts; null everywhere else. ⚠️ On a group post the CARD ACTOR is the
+// group itself, so `author` is reconstructed from the card's description line:
+// a bare name with profile_url / picture_url / ids all null - do not read a
+// null profile_url there as "organization author" (that inference belongs to
+// content-search rows, not group posts).
+const PostGroupRef = z.object({
+  group_id: z.string().nullable(),
+  name: z.string(),
+  url: z.string().nullable(),
+  logo_url: z.string().nullable(),
+}).passthrough();
+
 // person-posts item (row 53): controller rewrites created_at (top-level + the
-// nested reshared_post) from epoch-ms to ISO 8601; every other field passes through.
+// nested reshared_post) from epoch-ms to ISO 8601; every other field passes
+// through - which is how `group` reaches this surface on all four post
+// readers (person-posts / company-posts / post-details / get-post-by-link).
+// `.optional()` because §9.5 TTL-cached payloads written before 2026-08-21
+// predate the key.
 const PostItem = z.object({
   activity_urn: z.string(),
   post_urn: z.string().nullable(),
@@ -187,6 +204,7 @@ const PostItem = z.object({
     author: PostAuthorRef,
     images: z.array(z.string()),
   }).passthrough().nullable(),
+  group: PostGroupRef.nullable().optional(),
   num_likes: z.number(),
   num_comments: z.number(),
   num_shares: z.number(),

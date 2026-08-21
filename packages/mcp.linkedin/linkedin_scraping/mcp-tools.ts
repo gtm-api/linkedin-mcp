@@ -733,8 +733,8 @@ const LinkedinEngagerPreview = z.object({
   reactor_full_name: z.string().nullable(),
   reactor_headline: z.string().nullable(),
   reactor_picture_url: z.string().nullable(),
-  reaction_type: z.enum(['like', 'celebrate', 'support', 'love', 'insightful', 'funny'])
-    .describe('Normalized reaction type (MAYBE → like + WARN, as on sync), per LinkedinEngagementReactionTypeEnum.'),
+  reaction_type: z.enum(['like', 'celebrate', 'support', 'love', 'insightful', 'funny', 'interested'])
+    .describe('The reaction, in OUR write vocabulary (the same names react_linkedin_post takes; wire INTEREST reads as insightful, MAYBE as interested). Until 2026-08-21 the wire names leaked here lowercased.'),
   reacted_at: z.string().nullable(),
   is_own: z.boolean(),
   // Same phantom pair as the commenter preview above, same reason: `is_stored` /
@@ -1270,7 +1270,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_get_post_reactors',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of who is reacting to ONE post right now, as transient reactor objects with normalized reaction_type (MAYBE → like + WARN), annotated with is_own. Target any post by URL or activity URN in post. One wire page per call; page on with cursor.',
+      'Direct LinkedIn read (bypasses our DB): live pull of who is reacting to ONE post - or ONE COMMENT - right now, as transient reactor objects with reaction_type in OUR write vocabulary (interested = the event-post reaction), annotated with is_own. Target a post by URL or activity URN in post, or target a comment by its urn (either form: urn:li:comment:(...) or the fsd urn:li:fsd_comment:(...)) to read the comment\'s reactors (2026-08-21). One wire page per call; page on with cursor.',
     toolClass: 'complex',
     route: rt('get-post-reactors'),
     operation: 'action',
@@ -1281,7 +1281,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       ...requestBase,
-      post: z.string().max(512).describe('A post URL or an activity URN. Accepted verbatim: `urn:li:activity:<id>`, the feed permalink (`/feed/update/urn:li:activity:<id>/`) and the share link the copy-link button produces (`/posts/<slug>-activity-<id>-<hash>`): all three are parsed locally, at no extra cost. A link with no id in it (a shortlink, a bare slug URL) is resolved by opening the page through get_activity_urn_by_url, which adds one extra page load to this call and is cached 7 days. The post does NOT need to be tracked or owned by you.'),
+      post: z.string().max(512).describe('A post URL, an activity URN, or a COMMENT urn (public or fsd form - passed to the wire verbatim, no page load: a comment IS the entity). Post forms accepted verbatim: `urn:li:activity:<id>`, the feed permalink (`/feed/update/urn:li:activity:<id>/`) and the share link the copy-link button produces (`/posts/<slug>-activity-<id>-<hash>`): all three are parsed locally, at no extra cost. A link with no id in it (a shortlink, a bare slug URL) is resolved by opening the page through get_activity_urn_by_url, which adds one extra page load to this call and is cached 7 days. The post does NOT need to be tracked or owned by you.'),
       page_size: z.number().int().min(1).max(100).optional().describe('Default 50.'),
       cursor: z.string().nullable().optional().describe('Opaque resume token; null = first page.'),
       ...usageMetaField,
@@ -1296,7 +1296,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_get_post_resharers',
     description:
-      'Direct LinkedIn read (bypasses our DB): live pull of the profiles that RESHARED one post, the third and typically highest-intent leg of the engagement trio. Same targeting (post URL or activity URN); is_own annotated. When exposed, resharer_commentary carries the added text and reshare_urn is the reshare’s own activity URN (feed it back into get-post-comments / -reactors). One wire page per call; page on with cursor.',
+      'Direct LinkedIn read (bypasses our DB): live pull of the profiles that RESHARED one post, the third and typically highest-intent leg of the engagement trio. Targeting mirrors the reshare feed\'s own grammar (2026-08-21): a post URL, an activity URN, or a backend urn:li:share: / urn:li:ugcPost: urn verbatim - NOT urn:li:groupPost:, which is refused 422 reshare_target_unsupported (a group post has no reshare feed). is_own annotated. When exposed, resharer_commentary carries the added text and reshare_urn is the reshare’s own activity URN (feed it back into get-post-comments / -reactors). One wire page per call; page on with cursor.',
     toolClass: 'complex',
     route: rt('get-post-resharers'),
     operation: 'action',
@@ -1307,7 +1307,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       ...requestBase,
-      post: z.string().max(512).describe('A post URL or an activity URN. Accepted verbatim: `urn:li:activity:<id>`, the feed permalink (`/feed/update/urn:li:activity:<id>/`) and the share link the copy-link button produces (`/posts/<slug>-activity-<id>-<hash>`): all three are parsed locally, at no extra cost. A link with no id in it (a shortlink, a bare slug URL) is resolved by opening the page through get_activity_urn_by_url, which adds one extra page load to this call and is cached 7 days. The post does NOT need to be tracked or owned by you.'),
+      post: z.string().max(512).describe('A post URL, an activity URN, or a backend post urn (`urn:li:share:<id>` / `urn:li:ugcPost:<id>`, passed verbatim). NOT `urn:li:groupPost:` - the reshare feed refuses it, so we refuse it locally by name. URL forms are parsed locally at no extra cost; a link with no id in it (a shortlink, a bare slug URL) is resolved by opening the page through get_activity_urn_by_url, which adds one extra page load to this call and is cached 7 days. The post does NOT need to be tracked or owned by you.'),
       page_size: z.number().int().min(1).max(100).optional().describe('Default 50.'),
       cursor: z.string().nullable().optional().describe('Opaque resume token; null = first page.'),
       ...usageMetaField,

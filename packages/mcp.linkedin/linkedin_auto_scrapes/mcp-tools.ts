@@ -264,7 +264,7 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
       source_method: SourceMethod.optional()
         .describe('The paginated verb to replay. Required (with source_input) for every non-search source.'),
       source_input: z.record(z.unknown()).optional()
-        .describe("The verb's own arguments. One key is mandatory per family: url, filters, anchor_company_ln_id, anchor_nickname (similar-profiles takes the vanity slug, never a URN), or activity_urn. filters takes the SAME schema as the matching scrape_linkedin_search_* (the merged tools; the old _by_params names are gone) tool (see it for the facet vocabulary and typeahead workflow)."),
+        .describe("The verb's own arguments. One key is mandatory per family: url, filters, anchor_company_ln_id, anchor_nickname (similar-profiles takes the vanity slug, never a URN), or activity_urn. filters takes the SAME schema as the matching scrape_linkedin_search_* (the merged tools; the old _by_params names are gone) tool (see it for the facet vocabulary and typeahead workflow). On get-post-comments an optional sort_order (RELEVANCE | CHRONOLOGICAL | REVERSE_CHRONOLOGICAL) is FROZEN here at create and used on every page of every run - a cursor belongs to the ordering it was minted under, so the walk's sort can never change mid-run; a value outside that vocabulary is a 422."),
       replay_frequency: ReplayFrequency.nullable().optional()
         .describe('Cadence: hourly | daily | weekly | monthly. Omit or null for a one-shot job that runs once.'),
       mass_action_sid: MASS_ACTION_SID.nullable().optional()

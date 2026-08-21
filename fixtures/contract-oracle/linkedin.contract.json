@@ -8966,6 +8966,10 @@
                 {
                     "name": "Funny",
                     "value": "funny"
+                },
+                {
+                    "name": "Interested",
+                    "value": "interested"
                 }
             ]
         }
@@ -23143,6 +23147,67 @@
                     "max": 512,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "mentions",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.profile_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.name",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -23338,6 +23403,130 @@
                     "rules": [
                         "sometimes",
                         "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.profile_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.start",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:0"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.length",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "brand_partnership",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "author_organization_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:~^\\d+$~"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "group_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:~^\\d+$~"
                     ],
                     "required": false,
                     "nullable": false,
@@ -23673,7 +23862,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "in:\"like\",\"celebrate\",\"support\",\"love\",\"insightful\",\"funny\""
+                        "in:\"like\",\"celebrate\",\"support\",\"love\",\"insightful\",\"funny\",\"interested\""
                     ],
                     "required": false,
                     "nullable": true,
@@ -23684,7 +23873,8 @@
                         "support",
                         "love",
                         "insightful",
-                        "funny"
+                        "funny",
+                        "interested"
                     ],
                     "min": null,
                     "max": null,
@@ -33094,7 +33284,7 @@
                     "rules": [
                         "required",
                         "string",
-                        "in:\"like\",\"celebrate\",\"support\",\"love\",\"insightful\",\"funny\""
+                        "in:\"like\",\"celebrate\",\"support\",\"love\",\"insightful\",\"funny\",\"interested\""
                     ],
                     "required": true,
                     "nullable": false,
@@ -33105,7 +33295,8 @@
                         "support",
                         "love",
                         "insightful",
-                        "funny"
+                        "funny",
+                        "interested"
                     ],
                     "min": null,
                     "max": null,

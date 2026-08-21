@@ -125,6 +125,12 @@ const LinkedinMessage = z.object({
     is_viewer_reacted: z.boolean(),
     first_reacted_at: z.string().nullable(),
   }).passthrough()).nullable(),
+  // RECALLED: withdrawn for every participant (voyager messageBodyRenderFormat
+  // === RECALLED arrives with an emptied body). Written by our own
+  // delete_linkedin_message_on_linkedin AND, since 2026-08-21, reconciled by
+  // sync when ANYBODY recalls - one-way false → true, text emptied with it.
+  // The row keeps its place in the thread: "withdrawn" is a fact to show.
+  is_deleted: z.boolean(),
   message_hash: z.string(),
   sent_at: z.string(),
   custom_content: z.record(z.unknown()).nullable(),

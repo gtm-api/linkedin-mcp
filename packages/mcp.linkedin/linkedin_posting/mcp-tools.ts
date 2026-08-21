@@ -42,7 +42,7 @@ const ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
 // (create_linkedin_post's published-post urn, get_activity_urn_by_url's result):
 // those really are activity urns and keep the name.
 const ENTITY_URN = z.string().min(1).max(512)
-  .describe('The post handle: urn:li:activity:<id> for a member post, or urn:li:ugcPost:<id> for a company-page post or a newsletter issue (LinkedIn threads those as ugcPost, not activity). Either form is passed to the wire verbatim. A post URL is also accepted when the id is in it: the feed permalink and the share link (/posts/<slug>-activity-<id>-<hash>) are both converted locally. A link WITHOUT an id (a shortlink, a bare slug URL) is refused 422 entity_urn_not_resolvable: reading those means opening the page, so call get_activity_urn_by_url first rather than have a write verb open a page silently. The post does NOT need to be tracked or owned by us. Renamed from activity_urn on 2026-07-30; the old name is no longer accepted.');
+  .describe('The target handle, in the wire\'s full social-thread vocabulary (2026-08-21): a post urn in any of the four families - urn:li:activity:<id> (member posts), urn:li:share:<id>, urn:li:ugcPost:<id> (company pages and newsletters), urn:li:groupPost:<groupId>-<postId> (group threads) - or a COMMENT key to target a comment, in either form: public urn:li:comment:((activity|share|ugcPost|groupPost):<id>,<id>) or the fsd urn:li:fsd_comment:(<commentId>,<full thread urn>) LinkedIn\'s own responses carry (normalized before the wire). All pass verbatim; a malformed urn is refused 422 before any dispatch. A post URL is also accepted when the id is in it: the feed permalink and the share link (/posts/<slug>-activity-<id>-<hash>) are both converted locally. A link WITHOUT an id (a shortlink, a bare slug URL) is refused 422 entity_urn_not_resolvable: reading those means opening the page, so call get_activity_urn_by_url first rather than have a write verb open a page silently. The post does NOT need to be tracked or owned by us. Renamed from activity_urn on 2026-07-30; the old name is no longer accepted.');
 
 // BREAKING, 2026-08-06: create-post went live and its reserved contract was
 // rewritten to the node's express-validator chain, which disagreed with it in
@@ -102,6 +102,9 @@ const UnreactResult = z.object({
 }).passthrough();
 
 const ReactResult = z.object({
+  // The graphql mutation's resourceKey (2026-08-21); null when the response
+  // shape drifted - the activity-log row stays the durable record.
+  reaction_urn: z.string().nullable(),
   activity_log: ACTIVITY_LOG,
 }).passthrough();
 
@@ -162,7 +165,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_post',
     description:
-      'Publish ONE feed post under the account\'s own identity (wire create-post). Public and irreversible through this API: there is no delete verb here. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (the tightest write limit, 1200 s between posts), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when an image is attached; a call with neither non-blank text nor an image is a 422. At most ONE image, base64 only, no fetch-by-url. Body and alt text are published byte for byte, blank lines included. Nothing is stored here: the response carries the published post (urn, url, time, the body LinkedIn kept) plus the activity-log row.',
+      'Publish ONE feed post - as the member, AS a company page it administers (author_organization_id), or INTO a group (group_id) - wire create-post. Public; retract with delete_linkedin_post. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when an image is attached; neither non-blank text nor an image is a 422. At most ONE image, base64 only. Body and alt text publish byte for byte, blank lines included. mentions makes spans of text clickable profile links (positions in UTF-16 code units); brand_partnership adds the "Brand partnership" flag; group_id and visibility are mutually exclusive. Nothing is stored here: the response carries the published post (urn, url, time, the body LinkedIn kept) plus the activity-log row.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/create-post' },
     operation: 'action',
@@ -178,9 +181,24 @@ export const linkedinPostingTools: ToolDefinition[] = [
       images: z.array(LinkedinPostingImageValue).max(1).optional()
         .describe('At most one image. The wire refuses a second, so a longer array is a 422 here instead of a spent browser dispatch. The decoded bytes across all images must also stay under 35 MB in total; over that is a 422, because a bigger body is refused by the node\'s JSON parser as a bare 413 with no response envelope.'),
       visibility: LinkedinPostingVisibility.optional()
-        .describe('ANYONE (the node default) or CONNECTIONS_ONLY. Omit to let the node apply its own default.'),
+        .describe('ANYONE (the node default) or CONNECTIONS_ONLY. Omit to let the node apply its own default. Mutually exclusive with group_id.'),
       allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional()
-        .describe('Who may comment: ALL (the node default), CONNECTIONS_ONLY, or NONE to disable comments.'),
+        .describe('Who may comment: ALL (the node default), CONNECTIONS_ONLY, or NONE to disable comments. Works on group posts too.'),
+      mentions: z.array(z.object({
+        profile_id: z.string().min(1)
+          .describe('Who to mention: a bare ACoA… profile id or the full urn:li:fsd_profile:<id>.'),
+        start: z.number().int().min(0)
+          .describe('Span start in text, in UTF-16 code units (JS String offsets).'),
+        length: z.number().int().min(1)
+          .describe('Span length in UTF-16 code units. start+length must fit inside text - out of bounds is a 422 here, not a spent dispatch.'),
+      })).optional()
+        .describe('Profile mentions as READY POSITIONS over text (2026-08-21) - unlike create_linkedin_comment\'s {profile_id, name} search pairs. Require non-blank text.'),
+      brand_partnership: z.boolean().optional()
+        .describe('true adds LinkedIn\'s "Brand partnership" label (paid endorsement). false and absent both send nothing - the wire\'s own shape.'),
+      author_organization_id: z.string().regex(/^\d+$/).optional()
+        .describe('Post AS a company page the account administers: the bare numeric company id (same form get_linkedin_company_posts takes). Omit to post as the member.'),
+      group_id: z.string().regex(/^\d+$/).optional()
+        .describe('Post INTO a group: the bare numeric group id. Mutually exclusive with visibility - a group post sets container visibility, not member-feed visibility.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), CreatePostResult),
@@ -190,7 +208,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_comment',
     description:
-      'Leave ONE outbound comment on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-comment): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. Outward and fire-on-success: the post does NOT need to be tracked or owned by us, and nothing is persisted on this service. Identity-bound: linkedin_account_sid REQUIRED, spends the comment_posts bucket (30/day at a 360 s floor), saturation returns 429. Reply to an existing comment by passing parent_comment_urn. The comment text comes in text; templates and AI generation are outside this API. Returns the created comment ref plus the activity-log row. To react instead use react_linkedin_post; to read a post\'s existing comments and who wrote them use the linkedin-scraping get-post-comments tool (one read, both halves); to resolve a post URL to its activity URN use get_activity_urn_by_url.',
+      'Leave ONE outbound comment on any LinkedIn post, addressed by its social-thread urn in entity_urn (wire create-comment) - a post urn in any of the four families entity_urn documents. Outward and fire-on-success: the post does NOT need to be tracked or owned by us; nothing is persisted here. Identity-bound: linkedin_account_sid REQUIRED, spends the comment_posts bucket (30/day at a 360 s floor), saturation returns 429. Reply to an existing comment via parent_comment_urn. mentions turns exact substrings of text into clickable profile links ({profile_id, name} pairs, matched left to right in list order - a name missing or out of order is a 422 with no dispatch spent). Returns the created comment ref plus the activity-log row. To react use react_linkedin_post; to read a post\'s comments and who wrote them use the scraping get-post-comments tool; to resolve a post URL use get_activity_urn_by_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/comment' },
     operation: 'action',
@@ -206,6 +224,13 @@ export const linkedinPostingTools: ToolDefinition[] = [
       text: z.string().min(1).max(1250).describe('The comment body (caller-supplied, no templates or AI in-app).'),
       parent_comment_urn: z.string().max(512).nullable().optional()
         .describe('Reply target: the comment URN to reply under. Omit or null for a top-level comment.'),
+      mentions: z.array(z.object({
+        profile_id: z.string().min(1)
+          .describe('Who to mention: a bare ACoA… profile id (as get-post-comments and the profile readers return) or the full urn:li:fsd_profile:<id>.'),
+        name: z.string().min(1)
+          .describe('The exact substring of text that becomes the clickable link (usually the profile name).'),
+      })).optional()
+        .describe('Profile mentions (2026-08-21). Names are matched in text left to right in list order, each search starting after the previous mention. The node computes the character offsets itself.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), CommentResult),
@@ -215,7 +240,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'react_linkedin_post',
     description:
-      'Leave OUR reaction on any LinkedIn post, addressed by its post-thread URN in entity_urn (wire create-reaction): member posts by urn:li:activity:<id>, company-page posts and newsletter issues by urn:li:ugcPost:<id>. The social-selling counterpart of create_linkedin_comment, e.g. warm a prospect up by reacting to their post before a connect. Outward and fire-on-success: the post does NOT need to be tracked, and nothing is persisted on this service. Identity-bound: linkedin_account_sid REQUIRED, spends the react_posts bucket (30/day at a 360 s floor), saturation returns 429. Two different managed accounts reacting to the same post are two independent calls. Returns the activity-log row. To comment use create_linkedin_comment; to read who already reacted use the linkedin-scraping get-post-reactors tool.',
+      'Leave OUR reaction on any LinkedIn post OR comment, addressed by its social-thread urn in entity_urn (wire create-reaction): a post urn in any family, or a comment urn (either form) to react to a comment - the same vocabulary entity_urn documents. The social-selling counterpart of create_linkedin_comment, e.g. warm a prospect up by reacting to their post before a connect. Outward and fire-on-success: the post does NOT need to be tracked, and nothing is persisted on this service. Identity-bound: linkedin_account_sid REQUIRED, spends the react_posts bucket (30/day at a 360 s floor), saturation returns 429. Two different managed accounts reacting to the same post are two independent calls. Returns reaction_urn (the created reaction\'s key; null on wire drift) plus the activity-log row. reaction_type interested is the "Interested" reaction on event posts. To comment use create_linkedin_comment; to read who already reacted use the linkedin-scraping get-post-reactors tool.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/react' },
     operation: 'action',
@@ -228,8 +253,8 @@ export const linkedinPostingTools: ToolDefinition[] = [
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       entity_urn: ENTITY_URN,
-      reaction_type: z.enum(['like', 'celebrate', 'support', 'love', 'insightful', 'funny']).nullable().optional()
-        .describe('The reaction to leave, mapped to the plugin wire ReactionType. Defaults to like.'),
+      reaction_type: z.enum(['like', 'celebrate', 'support', 'love', 'insightful', 'funny', 'interested']).nullable().optional()
+        .describe('The reaction to leave, mapped to the plugin wire ReactionType. Defaults to like. interested (wire MAYBE) is the "Interested" reaction LinkedIn shows on event posts.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), ReactResult),
@@ -239,7 +264,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'delete_linkedin_post',
     description:
-      'Delete one of OUR OWN LinkedIn posts, addressed by activity_urn (wire delete-post). The counterpart of create_linkedin_post and the way to retract a post an agent published: pass the activity_urn that create_linkedin_post returned, or the post URL. LinkedIn only deletes the account\'s own posts and we do not pre-validate that. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME posting bucket as publishing (5/day at a 1200 s floor, bursting 2 so a publish and its delete fit back-to-back), saturation returns 429. Backend urns (urn:li:share:, urn:li:ugcPost:) are NOT accepted here even though create_linkedin_post returns one: the wire builds its payload from the numeric activity id. A refusal - not your post, already gone - comes back as 409 post_not_deleted with LinkedIn\'s own toast in error.context, never as a success. Nothing is stored on this service, so nothing local is deleted either.',
+      'Delete one of OUR OWN LinkedIn posts, addressed by activity_urn (wire delete-post). The counterpart of create_linkedin_post and the way to retract a post an agent published: pass the activity_urn that create_linkedin_post returned, or the post URL. LinkedIn only deletes the account\'s own posts and we do not pre-validate that. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME posting bucket as publishing (20/day in series of 3 at a 1200 s pause; free plan 4 - the series is what lets a publish and its delete fit back-to-back), saturation returns 429. Backend urns (urn:li:share:, urn:li:ugcPost:) are NOT accepted here even though create_linkedin_post returns one: the wire builds its payload from the numeric activity id. A refusal - not your post, already gone - comes back as 409 post_not_deleted with LinkedIn\'s own toast in error.context, never as a success. Nothing is stored on this service, so nothing local is deleted either.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/delete-post' },
     operation: 'action',
