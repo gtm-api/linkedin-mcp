@@ -7359,6 +7359,10 @@
                     "value": "posting"
                 },
                 {
+                    "name": "PostingGeneral",
+                    "value": "posting_general"
+                },
+                {
                     "name": "CustomRequest",
                     "value": "custom_request"
                 },
@@ -8169,6 +8173,10 @@
                 {
                     "name": "Posting",
                     "value": "posting"
+                },
+                {
+                    "name": "PostingGeneral",
+                    "value": "posting_general"
                 },
                 {
                     "name": "CustomRequest",
@@ -23467,6 +23475,154 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-posting/delete-scheduled-post",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "deleteScheduledPost",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingDeleteScheduledPostRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "post_urn",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:512"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/get-scheduled-posts",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "getScheduledPosts",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingGetScheduledPostsRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "author_organization_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/",
+                        "max:30"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 30,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-posting/react",
             "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
             "action": "react",
@@ -32962,6 +33118,677 @@
                     "min": null,
                     "max": null,
                     "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/alerts",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "alerts",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsAlertsRequest",
+            "rules": [
+                {
+                    "field": "severity",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "severity.*",
+                    "rules": [
+                        "string",
+                        "in:\"critical\",\"warning\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "critical",
+                        "warning"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kinds",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kinds.*",
+                    "rules": [
+                        "string",
+                        "in:\"linkedin.stale_heartbeat\",\"linkedin.browser_issue\",\"linkedin.account_sync_failed\",\"linkedin.quota_hit\",\"linkedin.limit_hold\",\"linkedin.browser_errors_spike\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin.stale_heartbeat",
+                        "linkedin.browser_issue",
+                        "linkedin.account_sync_failed",
+                        "linkedin.quota_hit",
+                        "linkedin.limit_hold",
+                        "linkedin.browser_errors_spike"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/fleet-summary",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "fleetSummary",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsFleetSummaryRequest",
+            "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/infra",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "infra",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsInfraRequest",
+            "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/linkedin-accounts/get",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "getLinkedinAccount",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsLinkedinAccountGetRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/linkedin-accounts/logs",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "linkedinAccountLogs",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsLinkedinAccountLogsRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "kind",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"browser\",\"activity\",\"sync\",\"block\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "browser",
+                        "activity",
+                        "sync",
+                        "block"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/linkedin-accounts/search",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "searchLinkedinAccounts",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsLinkedinAccountSearchRequest",
+            "rules": [
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "health",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "health.*",
+                    "rules": [
+                        "string",
+                        "in:\"issue\",\"stopped\",\"parked\",\"warning\",\"sleeping\",\"healthy\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "issue",
+                        "stopped",
+                        "parked",
+                        "warning",
+                        "sleeping",
+                        "healthy"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "browser_status",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "browser_status.*",
+                    "rules": [
+                        "string",
+                        "in:\"stopped\",\"queued_to_start\",\"initializing\",\"running\",\"idle\",\"queued_to_stop\",\"start_issue\",\"running_issue\",\"login_issue\",\"error_investigation\",\"maintenance\",\"shared_out\",\"subscription_required\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "stopped",
+                        "queued_to_start",
+                        "initializing",
+                        "running",
+                        "idle",
+                        "queued_to_stop",
+                        "start_issue",
+                        "running_issue",
+                        "login_issue",
+                        "error_investigation",
+                        "maintenance",
+                        "shared_out",
+                        "subscription_required"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "account_status",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "account_status.*",
+                    "rules": [
+                        "string",
+                        "in:\"new\",\"initial_syncing\",\"active\",\"sync_failed\",\"shared_out\",\"subscription_required\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "new",
+                        "initial_syncing",
+                        "active",
+                        "sync_failed",
+                        "shared_out",
+                        "subscription_required"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "q",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "has_hold",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "include_deleted",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"health\",\"team_sid\",\"name\",\"warmup_score\",\"last_heartbeat_at\",\"errors_24h\",\"done_24h\",\"queue_pending\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "health",
+                        "team_sid",
+                        "name",
+                        "warmup_score",
+                        "last_heartbeat_at",
+                        "errors_24h",
+                        "done_24h",
+                        "queue_pending"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "direction",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"asc\",\"desc\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/queues",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "queues",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsQueuesRequest",
+            "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/team-rollup",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "teamRollup",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsTeamRollupRequest",
+            "rules": [
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],

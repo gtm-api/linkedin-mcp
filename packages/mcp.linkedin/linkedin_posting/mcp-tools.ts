@@ -1,8 +1,9 @@
 // Entity: LinkedIn Posting (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/linkedin_posting.md
 // Format: registry v2, each tool carries route metadata so the generic
-// dispatcher can drive it. 6 tools (the linkedin-posting route group), mounted
-// on linkedin.content: three writes and the undo of each.
+// dispatcher can drive it. 8 tools (the linkedin-posting route group), mounted
+// on linkedin.content: three writes, the undo of each, and the scheduled-posts
+// queue pair (a private read + a draft delete, 2026-08-21).
 //
 // This is the stateless content-AUTHORING surface: no table, no Domain, no
 // events. Each action dispatches the matching plugin wire verb on the account's
@@ -103,6 +104,37 @@ const UnreactResult = z.object({
 const ReactResult = z.object({
   activity_log: ACTIVITY_LOG,
 }).passthrough();
+
+// One SCHEDULED (unpublished) share from the queue. The identity field is the
+// urn; the rest is best-effort off LinkedIn's preview objects.
+const ScheduledPostRow = z.object({
+  post_urn: z.string().nullable()
+    .describe('The queued share\'s BACKEND urn (urn:li:share:/ugcPost:/groupPost:) - the exact handle delete_linkedin_scheduled_post takes. NOT an activity urn: an unpublished post has no activity yet.'),
+  scheduled_at: z.string().nullable()
+    .describe('Planned publication time, ISO 8601; null when the preview did not carry it (best-effort field).'),
+  text: z.string().describe('Draft body; empty string when the draft has no text.'),
+  error_message: z.string().nullable()
+    .describe("LinkedIn's own preview error (e.g. failed media processing); normally null."),
+}).passthrough();
+
+const GetScheduledPostsResult = z.object({
+  rows: z.array(ScheduledPostRow),
+  paging: z.object({
+    next_cursor: z.string().nullable().describe('Offset cursor for the next page; null when the queue is exhausted.'),
+    total: z.number().int().nullable().describe("The wire's total queue size, when it sends one."),
+  }).passthrough(),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+const DeleteScheduledPostResult = z.object({
+  deleted: z.literal(true)
+    .describe('Always true on a 200: a refused delete is a 409 scheduled_post_not_deleted, never a success body.'),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+// The queue READ drives a real browser dispatch (so not readOnly-pure) but
+// mutates nothing - the linkedin-scraping convention, mirrored.
+const QUEUE_READ = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false } as const;
 
 // Every verb here writes outward to LinkedIn under a real identity and spends a
 // §9 write bucket, so destructiveHint is true. That is also the registry
@@ -270,5 +302,55 @@ export const linkedinPostingTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(z.null(), UnreactResult),
     annotations: { title: 'Remove LinkedIn reaction', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'get_linkedin_scheduled_posts',
+    description:
+      "One page of the account's SCHEDULED-posts queue: drafts waiting for their publication time, each with post_urn, scheduled_at, text and LinkedIn's own error_message (wire get-scheduled-posts). A PRIVATE read - nobody on LinkedIn sees it - so it spends the posting_general bucket (60/day, 60 s floor, bursting 3), NOT one of the five daily posting slots. Pass author_organization_id (the bare numeric company id) to read a COMPANY PAGE's queue the account administers instead of the member's own. Offset-paged: page_size 1-100 (default 20), pass paging.next_cursor back as cursor. rows[].post_urn is the exact handle delete_linkedin_scheduled_post takes. Scheduling itself is not exposed through this API yet - posts are scheduled in LinkedIn's own UI; this pair reads and cleans the queue.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/get-scheduled-posts' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      page_size: z.number().int().min(1).max(100).optional()
+        .describe("Rows per page, the node's own [1, 100] gate. Defaults to 20."),
+      cursor: z.string().min(1).max(200).optional()
+        .describe('The previous page\'s paging.next_cursor, verbatim. Omit for the first page.'),
+      author_organization_id: z.string().regex(/^\d+$/).max(30).optional()
+        .describe("Read a company page's queue instead of the member's own: the bare numeric organization id (as in linkedin.com/company/<id>). The account must administer that page or the queue comes back empty."),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), GetScheduledPostsResult),
+    annotations: { title: 'Get scheduled LinkedIn posts', ...QUEUE_READ },
+  },
+  {
+    ...base,
+    name: 'delete_linkedin_scheduled_post',
+    description:
+      "Delete one SCHEDULED (never published) post from the account's queue, addressed by the BACKEND urn get_linkedin_scheduled_posts returns as rows[].post_urn (wire delete-scheduled-post). NOT a variant of delete_linkedin_post: an unpublished share has no activity urn, and this verb runs a graphql mutation against the queue while delete-post drives an SDUI action on a live feed post - the two handles are not interchangeable. The deleted draft was never seen by any audience, so this spends posting_general (60/day, 60 s floor), not a posting slot: cleaning three drafts must not cost three of five daily publications. A refusal - not this account's draft, or already gone - comes back as 409 scheduled_post_not_deleted, never as a success.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/delete-scheduled-post' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      post_urn: z.string().min(1).max(512)
+        .describe('The queued share to delete: urn:li:share:<id>, urn:li:ugcPost:<id> or urn:li:groupPost:<groupId>-<postId>, exactly as rows[].post_urn hands it back. The grammar is enforced on the wire.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), DeleteScheduledPostResult),
+    annotations: { title: 'Delete scheduled LinkedIn post', ...DANGER },
   },
 ];

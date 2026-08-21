@@ -45,6 +45,7 @@ const LinkedinAccountSmartLimit = z.object({
     'scraping',
     'enrichment',
     'posting',
+    'posting_general',
     'custom_request',
     // The 16th case. LinkedinAccountSmartLimitTypeEnum calls it the hidden
     // governor and no tool creates one, but the bootstrap job does, so a search
