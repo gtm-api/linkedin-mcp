@@ -67,7 +67,12 @@ const LinkedinAccount = z.object({
   // unusable for reasons no clock records, and new / initial_syncing /
   // sync_failed are the onboarding phases initial_sync_completed_at alone
   // cannot tell apart (null means both "never started" and "failed").
-  status: LinkedinAccountStatus,
+  //
+  // The describe below exists because of a live incident (2026-08-21): a
+  // health summary echoed this field as "all active" while half the fleet was
+  // signed out. The field READS like health and is not.
+  status: LinkedinAccountStatus
+    .describe('Platform lifecycle (onboarding phases and hold states), NOT health and NOT login state: a sender signed out of LinkedIn still reads "active" here. Login state lives on the bound browser, request include antidetect_browser and read its status (login_issue means signed out).'),
 
   // Sharing linkage (sharing rework). Non-null only while the account is inside
   // a share; share_role says which side of it this row is.
@@ -157,7 +162,24 @@ const LinkedinAccount = z.object({
   deleted_at: z.string().nullable(),
 }).passthrough();
 
-const LinkedinAccountCounts = z.object({}).passthrough();
+// Typed counters (research §LinkedinAccountCounts) so the schema itself teaches
+// what a health read can lean on. `groups` stays undeclared under the trailing
+// .passthrough(): it is always an empty map on this entity.
+const LinkedinAccountCounts = z.object({
+  total_count: z.number().int().describe('Rows matching the filter.'),
+  with_sn_count: z.number().int().describe('Accounts with has_sn = true.'),
+  with_premium_count: z.number().int().describe('Accounts with has_premium = true.'),
+  with_recruiter_count: z.number().int().describe('Accounts with has_recruiter = true.'),
+  active_today_count: z.number().int()
+    .describe('Heartbeat since today 00:00 UTC. Server UTC day boundary, not schedule-aware.'),
+  stale_count: z.number().int()
+    .describe('Heartbeat cold for over 24h or never set. Not schedule-aware, so out-of-window quiet time also counts.'),
+  // Optional ONLY for deploy-order tolerance: the worker must not fail parsing
+  // a backend that predates the counter. Tighten to required once the linkedin
+  // service with signed_out_count is on prod.
+  signed_out_count: z.number().int().optional()
+    .describe('Accounts whose bound live browser sits in login_issue, meaning SIGNED OUT of LinkedIn. Non-zero says senders need re-login even when every item shows status "active" (that field is lifecycle, not login state). Attribute per row via include antidetect_browser.'),
+}).passthrough();
 
 const LinkedinAccountFilter = z.object({
   q: z.string().optional().describe('Full-text LIKE over full_name + nickname. Identity ids (ln_member_id, sn_id) are exact-match fields, not q targets.'),
@@ -168,7 +190,7 @@ const LinkedinAccountFilter = z.object({
   // true when the sharing rework added LinkedinAccountStatusEnum and the column
   // behind it, and LinkedinAccountFilter declares `status`.
   status: filterOp(LinkedinAccountStatus, ['eq', 'ne', 'in', 'nin']).optional()
-    .describe('Lifecycle state. active = usable; shared_out = lent to another team; subscription_required = plan lapsed.'),
+    .describe('Lifecycle state. active = usable; shared_out = lent to another team; subscription_required = plan lapsed. NOT a login-state axis: signed-out senders still match active, filter them by reading the included antidetect_browser per row.'),
 
   // Identity / linkage (exact-match; substring on full_name/nickname is via q).
   sid: filterOp(z.string(), ['eq', 'in']).optional(),
@@ -491,7 +513,7 @@ const LinkedinAccountInclude = z.enum([
   'linkedin_connection_invitations_counts',
   'linkedin_conversations_counts',
   'linkedin_followers_counts',
-]);
+]).describe('antidetect_browser carries the sender LOGIN and runtime state (browser status login_issue means signed out of LinkedIn; also error_reason, logout_count, last_logout_at). The account item alone cannot answer "is this sender signed in": its status field is lifecycle. Health data: linkedin_account_smart_limits (budgets and holds), linkedin_account_snapshot (latest warmup score), linkedin_account_quota_hits / linkedin_account_block_log (last 50 incident rows each), *_counts (child tallies).');
 
 const LinkedinAccountSortable = z.enum([
   'created_at',
@@ -572,7 +594,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_accounts',
     description:
-      'List LinkedIn accounts on the team with filtering, sorting and cursor pagination. Returns a counts block of predicate tallies. Use this to find an account sid before calling account-scoped tools.',
+      'List LinkedIn accounts (senders) on the team with operator filters, sort and cursor pagination, plus an always-present counts block (total, premium / SN / Recruiter, active_today, stale, signed_out). Also the way to find an account sid before calling account-scoped tools. For ANY health or availability question, request include antidetect_browser: login state lives on the bound browser row, whose status login_issue means the sender is signed out of LinkedIn. The item status field is platform lifecycle and stays active through a logout, so never read it as health. counts.signed_out_count flags signed-out senders even without the include; per-row attribution needs it. A full sender health summary combines antidetect_browser with linkedin_account_smart_limits, linkedin_account_snapshot (warmup score) and linkedin_account_block_log_counts. Items with includes are large: page a fleet with page_size 10 or less and follow next_cursor instead of asking for one big page.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/search' },
     operation: 'search',
@@ -586,7 +608,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'get_linkedin_account',
-    description: 'Fetch a single LinkedIn account by sid, with optional eager-loaded relations.',
+    description: 'Fetch a single LinkedIn account by sid, with optional eager-loaded relations. For login or health state add include antidetect_browser: browser status login_issue means the sender is signed out of LinkedIn, while the item status field is platform lifecycle, not login state.',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'GET', pathTemplate: '/api/linkedin-accounts/{sid}', sidParam: 'sid' },
     operation: 'get',
