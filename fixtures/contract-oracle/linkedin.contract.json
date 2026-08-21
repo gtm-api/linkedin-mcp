@@ -7359,10 +7359,6 @@
                     "value": "posting"
                 },
                 {
-                    "name": "PostingGeneral",
-                    "value": "posting_general"
-                },
-                {
                     "name": "CustomRequest",
                     "value": "custom_request"
                 },
@@ -8173,10 +8169,6 @@
                 {
                     "name": "Posting",
                     "value": "posting"
-                },
-                {
-                    "name": "PostingGeneral",
-                    "value": "posting_general"
                 },
                 {
                     "name": "CustomRequest",
@@ -33651,7 +33643,7 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "in:\"health\",\"team_sid\",\"name\",\"warmup_score\",\"last_heartbeat_at\",\"errors_24h\",\"done_24h\",\"queue_pending\""
+                        "in:\"health\",\"team_sid\",\"name\",\"warmup_score\",\"last_heartbeat_at\",\"errors_24h\",\"done_24h\",\"queue_pending\",\"connections_today\",\"messages_today\",\"last_activity_at\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -33664,7 +33656,10 @@
                         "last_heartbeat_at",
                         "errors_24h",
                         "done_24h",
-                        "queue_pending"
+                        "queue_pending",
+                        "connections_today",
+                        "messages_today",
+                        "last_activity_at"
                     ],
                     "min": null,
                     "max": null,
