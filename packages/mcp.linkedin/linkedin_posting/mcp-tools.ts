@@ -240,7 +240,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'react_linkedin_post',
     description:
-      'Leave OUR reaction on any LinkedIn post OR comment, addressed by its social-thread urn in entity_urn (wire create-reaction): a post urn in any family, or a comment urn (either form) to react to a comment - the same vocabulary entity_urn documents. The social-selling counterpart of create_linkedin_comment, e.g. warm a prospect up by reacting to their post before a connect. Outward and fire-on-success: the post does NOT need to be tracked, and nothing is persisted on this service. Identity-bound: linkedin_account_sid REQUIRED, spends the react_posts bucket (30/day at a 360 s floor), saturation returns 429. Two different managed accounts reacting to the same post are two independent calls. Returns reaction_urn (the created reaction\'s key; null on wire drift) plus the activity-log row. reaction_type interested is the "Interested" reaction on event posts. To comment use create_linkedin_comment; to read who already reacted use the linkedin-scraping get-post-reactors tool.',
+      'Leave OUR reaction on any LinkedIn post OR comment, addressed by its social-thread urn in entity_urn (wire create-reaction): a post urn in any family, or a comment urn (either form) - the vocabulary entity_urn documents. The social-selling counterpart of create_linkedin_comment. Outward and fire-on-success: the post does NOT need to be tracked, nothing is persisted here. Identity-bound: linkedin_account_sid REQUIRED, spends the react_posts bucket (30/day at a 360 s floor), saturation returns 429. Returns reaction_urn (the created reaction\'s key; null on wire drift) plus the activity-log row. interested is the EVENT-post reaction: ordinary posts silently ignore it (success envelope, null reaction_urn, nothing lands - verified live), so a null urn after an interested react is the no-op tell. To comment use create_linkedin_comment; to read who already reacted use the scraping get-post-reactors tool.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/react' },
     operation: 'action',
@@ -254,7 +254,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
       linkedin_account_sid: ACCOUNT_SID,
       entity_urn: ENTITY_URN,
       reaction_type: z.enum(['like', 'celebrate', 'support', 'love', 'insightful', 'funny', 'interested']).nullable().optional()
-        .describe('The reaction to leave, mapped to the plugin wire ReactionType. Defaults to like. interested (wire MAYBE) is the "Interested" reaction LinkedIn shows on event posts.'),
+        .describe('The reaction to leave, mapped to the plugin wire ReactionType. Defaults to like. interested (wire MAYBE) works on EVENT posts; ordinary posts silently ignore it (null reaction_urn back).'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), ReactResult),
