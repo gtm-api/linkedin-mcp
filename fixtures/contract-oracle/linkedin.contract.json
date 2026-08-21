@@ -23309,14 +23309,14 @@
                     "rules": [
                         "sometimes",
                         "array",
-                        "max:1"
+                        "max:20"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "array",
                     "in": null,
                     "min": null,
-                    "max": 1,
+                    "max": 20,
                     "size": null,
                     "between": null
                 },
@@ -23403,6 +23403,101 @@
                     "rules": [
                         "sometimes",
                         "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "video",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "video.file_base64",
+                    "rules": [
+                        "required_with:video",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "video.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "video.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "video.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scheduled_at",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "date"
                     ],
                     "required": false,
                     "nullable": false,

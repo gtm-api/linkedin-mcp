@@ -165,7 +165,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_post',
     description:
-      'Publish ONE feed post - as the member, AS a company page it administers (author_organization_id), or INTO a group (group_id) - wire create-post. Public; retract with delete_linkedin_post. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when an image is attached; neither non-blank text nor an image is a 422. At most ONE image, base64 only. Body and alt text publish byte for byte, blank lines included. mentions makes spans of text clickable profile links (positions in UTF-16 code units); brand_partnership adds the "Brand partnership" flag; group_id and visibility are mutually exclusive. Nothing is stored here: the response carries the published post (urn, url, time, the body LinkedIn kept) plus the activity-log row.',
+      'Publish ONE feed post - as the member, AS a company page it administers (author_organization_id), or INTO a group (group_id) - now or scheduled (scheduled_at) - wire create-post. Public; retract with delete_linkedin_post, or delete a scheduled draft with delete_linkedin_scheduled_post. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when media is attached; no text, images or video at all is a 422. Media: up to 20 images XOR one video, base64 only, 35 MB decoded total. Body and alt text publish byte for byte, blank lines included. mentions makes spans of text clickable profile links (positions in UTF-16 code units); brand_partnership adds the "Brand partnership" flag; group_id and visibility are mutually exclusive. Nothing is stored here: the response carries the published post (urn, url, time, the body LinkedIn kept) plus the activity-log row.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/create-post' },
     operation: 'action',
@@ -178,12 +178,22 @@ export const linkedinPostingTools: ToolDefinition[] = [
       linkedin_account_sid: ACCOUNT_SID,
       text: z.string().max(3000)
         .describe('Post body, always present. Empty is legal ONLY alongside an image. 3000 is LinkedIn\'s own cap, refused here rather than burning a posting slot.'),
-      images: z.array(LinkedinPostingImageValue).max(1).optional()
-        .describe('At most one image. The wire refuses a second, so a longer array is a 422 here instead of a spent browser dispatch. The decoded bytes across all images must also stay under 35 MB in total; over that is a 422, because a bigger body is refused by the node\'s JSON parser as a bare 413 with no response envelope.'),
+      images: z.array(LinkedinPostingImageValue).max(20).optional()
+        .describe('Up to 20 images (the node\'s own cap; array order = carousel order). Mutually exclusive with video. The decoded bytes across ALL media must stay under 35 MB in total; over that is a 422, because a bigger body is refused by the node\'s JSON parser as a bare 413 with no response envelope. For 2+ images the backend supplies the account\'s own member id to the wire itself - no profile_id field exists here. Uploads are sequential node-side, so many large images make a SLOW synchronous call - the post can publish even if your client times out first, so do not blind-retry a timeout (a duplicate public post is the cost).'),
       visibility: LinkedinPostingVisibility.optional()
         .describe('ANYONE (the node default) or CONNECTIONS_ONLY. Omit to let the node apply its own default. Mutually exclusive with group_id.'),
       allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional()
         .describe('Who may comment: ALL (the node default), CONNECTIONS_ONLY, or NONE to disable comments. Works on group posts too.'),
+      video: z.object({
+        file_base64: z.string().min(1)
+          .describe('The video bytes: a data:<mime>;base64,<...> URL or bare base64. One video per post.'),
+        file_byte_size: z.number().int().min(1).nullable().optional(),
+        file_name: z.string().min(1).max(255).nullable().optional(),
+        file_type: z.string().min(1).max(255).nullable().optional(),
+      }).optional()
+        .describe('ONE video, image-shaped minus alt_text. Mutually exclusive with images (LinkedIn does not mix them in a share - 422 here). Shares the 35 MB media budget. The upload is a single large PUT through the browser and is SLOW: the synchronous call can outlive your client timeout while the post still publishes - do not blind-retry.'),
+      scheduled_at: z.string().optional()
+        .describe('Schedule the post instead of publishing now: ISO 8601 with timezone, must be in the future (a strictly-past time is a 422; within a minute of now is passed through for LinkedIn to judge). A SCHEDULED share legitimately answers with null activity_urn/url - post_urn is the handle. Read and clean the queue with get_linkedin_scheduled_posts / delete_linkedin_scheduled_post. Scheduling is LinkedIn-side: the draft lives in ITS queue, nothing is stored here.'),
       mentions: z.array(z.object({
         profile_id: z.string().min(1)
           .describe('Who to mention: a bare ACoA… profile id or the full urn:li:fsd_profile:<id>.'),
