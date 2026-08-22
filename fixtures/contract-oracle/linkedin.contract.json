@@ -30136,6 +30136,38 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "rdp_settings.width",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rdp_settings.height",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -31393,6 +31425,38 @@
                     "type": "array",
                     "in": null,
                     "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rdp_settings.width",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rdp_settings.height",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
                     "max": null,
                     "size": null,
                     "between": null

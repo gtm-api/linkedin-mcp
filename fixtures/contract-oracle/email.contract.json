@@ -9866,6 +9866,612 @@
         },
         {
             "method": "POST",
+            "uri": "internal/ops/alerts",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "alerts",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsAlertsRequest",
+            "rules": [
+                {
+                    "field": "severity",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "severity.*",
+                    "rules": [
+                        "string",
+                        "in:\"critical\",\"warning\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "critical",
+                        "warning"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kinds",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kinds.*",
+                    "rules": [
+                        "string",
+                        "in:\"email.reconnect_required\",\"email.sending_paused\",\"email.health_critical\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "email.reconnect_required",
+                        "email.sending_paused",
+                        "email.health_critical"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/email-accounts/get",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "getEmailAccount",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsEmailAccountGetRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/email-accounts/logs",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "emailAccountLogs",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsEmailAccountLogsRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "kind",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"activity\",\"sync\",\"bounce\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "activity",
+                        "sync",
+                        "bounce"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/email-accounts/search",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "searchEmailAccounts",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsEmailAccountSearchRequest",
+            "rules": [
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "health",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "health.*",
+                    "rules": [
+                        "string",
+                        "in:\"issue\",\"stopped\",\"warning\",\"healthy\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "issue",
+                        "stopped",
+                        "warning",
+                        "healthy"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "status",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "status.*",
+                    "rules": [
+                        "string",
+                        "in:\"connecting\",\"active\",\"reconnect_required\",\"disconnected\",\"subscription_required\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "connecting",
+                        "active",
+                        "reconnect_required",
+                        "disconnected",
+                        "subscription_required"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "provider",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "provider.*",
+                    "rules": [
+                        "string",
+                        "in:\"google\",\"microsoft\",\"imap_smtp\",\"gtm_hosted\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "google",
+                        "microsoft",
+                        "imap_smtp",
+                        "gtm_hosted"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "q",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "paused",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sync_stale",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"health\",\"team_sid\",\"address\",\"provider\",\"status\",\"created_at\",\"connected_at\",\"last_messages_sync_at\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "health",
+                        "team_sid",
+                        "address",
+                        "provider",
+                        "status",
+                        "created_at",
+                        "connected_at",
+                        "last_messages_sync_at"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "direction",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"asc\",\"desc\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/fleet-summary",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "fleetSummary",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/queues",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "queues",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/team-rollup",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "teamRollup",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsTeamRollupRequest",
+            "rules": [
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/slots/reconcile",
             "controller": "App\\Entities\\EmailAccount\\InternalEmailAccountController",
             "action": "reconcileSlots",

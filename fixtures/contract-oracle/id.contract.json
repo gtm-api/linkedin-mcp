@@ -5746,6 +5746,10 @@
                     "value": "email_verification"
                 },
                 {
+                    "name": "EmailChangeVerification",
+                    "value": "email_change_verification"
+                },
+                {
                     "name": "PasswordReset",
                     "value": "password_reset"
                 },
@@ -10769,6 +10773,22 @@
                     "max": null,
                     "size": 18,
                     "between": null
+                },
+                {
+                    "field": "quantity",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -13165,7 +13185,8 @@
                     "rules": [
                         "required",
                         "string",
-                        "uuid"
+                        "regex:/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+                        "[0-9a-fA-F]{32})$/"
                     ],
                     "required": true,
                     "nullable": false,
@@ -17317,6 +17338,1109 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "ops/alerts",
+            "controller": "App\\Ops\\Controllers\\OpsAlertController",
+            "action": "search",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsAlertsRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "severity",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "severity.*",
+                    "rules": [
+                        "string",
+                        "in:\"critical\",\"warning\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "critical",
+                        "warning"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kinds",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kinds.*",
+                    "rules": [
+                        "string",
+                        "in:\"linkedin.stale_heartbeat\",\"linkedin.browser_issue\",\"linkedin.account_sync_failed\",\"linkedin.quota_hit\",\"linkedin.limit_hold\",\"linkedin.browser_errors_spike\",\"email.reconnect_required\",\"email.sending_paused\",\"email.health_critical\",\"orchestration.webhook_failed\",\"orchestration.mass_action_paused\",\"billing.past_due\",\"team.suspended\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "linkedin.stale_heartbeat",
+                        "linkedin.browser_issue",
+                        "linkedin.account_sync_failed",
+                        "linkedin.quota_hit",
+                        "linkedin.limit_hold",
+                        "linkedin.browser_errors_spike",
+                        "email.reconnect_required",
+                        "email.sending_paused",
+                        "email.health_critical",
+                        "orchestration.webhook_failed",
+                        "orchestration.mass_action_paused",
+                        "billing.past_due",
+                        "team.suspended"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/email-senders/search",
+            "controller": "App\\Ops\\Controllers\\OpsSenderController",
+            "action": "searchEmail",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsSenderSearchRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
+            "uri": "ops/email-senders/{sid}",
+            "controller": "App\\Ops\\Controllers\\OpsSenderController",
+            "action": "showEmail",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/email-senders/{sid}/logs",
+            "controller": "App\\Ops\\Controllers\\OpsSenderController",
+            "action": "emailLogs",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsSenderLogsRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kind",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"browser\",\"activity\",\"sync\",\"block\",\"bounce\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "browser",
+                        "activity",
+                        "sync",
+                        "block",
+                        "bounce"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/infra",
+            "controller": "App\\Ops\\Controllers\\OpsPlatformController",
+            "action": "infra",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/linkedin-senders/search",
+            "controller": "App\\Ops\\Controllers\\OpsSenderController",
+            "action": "searchLinkedin",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsSenderSearchRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
+            "uri": "ops/linkedin-senders/{sid}",
+            "controller": "App\\Ops\\Controllers\\OpsSenderController",
+            "action": "showLinkedin",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/linkedin-senders/{sid}/logs",
+            "controller": "App\\Ops\\Controllers\\OpsSenderController",
+            "action": "linkedinLogs",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsSenderLogsRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kind",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"browser\",\"activity\",\"sync\",\"block\",\"bounce\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "browser",
+                        "activity",
+                        "sync",
+                        "block",
+                        "bounce"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
+            "uri": "ops/me",
+            "controller": "App\\Ops\\Controllers\\OpsMeController",
+            "action": "show",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/overview",
+            "controller": "App\\Ops\\Controllers\\OpsPlatformController",
+            "action": "overview",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/users/search",
+            "controller": "App\\Ops\\Controllers\\OpsUserController",
+            "action": "search",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsUserSearchRequest",
+            "rules": [
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "q",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:191"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 191,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_status",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_status.*",
+                    "rules": [
+                        "string",
+                        "in:\"unverified\",\"verified\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "unverified",
+                        "verified"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "is_superadmin",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"created_at\",\"updated_at\",\"email\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "created_at",
+                        "updated_at",
+                        "email"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "direction",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"asc\",\"desc\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
+            "uri": "ops/users/{userSid}",
+            "controller": "App\\Ops\\Controllers\\OpsUserController",
+            "action": "show",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "ops/workspaces/rollup",
+            "controller": "App\\Ops\\Controllers\\OpsWorkspaceController",
+            "action": "rollup",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsWorkspaceRollupRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "max:200"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "max:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 18,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/workspaces/search",
+            "controller": "App\\Ops\\Controllers\\OpsWorkspaceController",
+            "action": "search",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsWorkspaceSearchRequest",
+            "rules": [
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "q",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:191"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 191,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "status",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "status.*",
+                    "rules": [
+                        "string",
+                        "in:\"active\",\"suspended\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "active",
+                        "suspended"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan.*",
+                    "rules": [
+                        "string",
+                        "in:\"none\",\"free\",\"paid\",\"partner\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "none",
+                        "free",
+                        "paid",
+                        "partner"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "has_senders",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"created_at\",\"updated_at\",\"name\",\"status\",\"plan\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "created_at",
+                        "updated_at",
+                        "name",
+                        "status",
+                        "plan"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "direction",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"asc\",\"desc\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
+            "uri": "ops/workspaces/{teamSid}",
+            "controller": "App\\Ops\\Controllers\\OpsWorkspaceController",
+            "action": "show",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
