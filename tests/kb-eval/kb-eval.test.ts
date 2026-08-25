@@ -29,7 +29,9 @@ import { GOLDEN, type GoldenQuery } from './queries';
 
 const RUN = process.env.RUN_KB_EVAL === '1';
 const DOMAIN = process.env.MINTLIFY_DOCS_DOMAIN ?? 'docs.gtm-api.com';
-const TOP_K = 5;
+// The tool's production default is 5; override to probe how routing degrades
+// at a smaller k (KB_EVAL_TOP_K=3 pnpm kb:eval) before touching the default.
+const TOP_K = Number(process.env.KB_EVAL_TOP_K ?? 5);
 
 function resolveKey(): string | null {
   const env = process.env.MINTLIFY_ASSISTANT_KEY?.trim();
@@ -61,6 +63,8 @@ interface QueryOutcome {
   outcome: 'pass' | 'fail' | 'gap';
   known_gap?: string;
   failures: string[];
+  /** 1-based rank of the first hit matching expect_paths; null = not served. */
+  first_expected_rank: number | null;
   received_count: number;
   duration_ms: number;
   hits: EvalHit[];
@@ -93,17 +97,33 @@ describe.runIf(RUN)('kb retrieval eval', () => {
     return;
   }
 
+  const key = KEY;
+  // One retry: the live index occasionally drops a single call (seen on the
+  // 2026-08-25 runs). A transient blip should not fail a golden run; a real
+  // outage still fails both attempts.
+  async function searchWithRetry(query: string) {
+    try {
+      return await searchKbMintlify({ key, domain: DOMAIN }, query, TOP_K);
+    } catch (err) {
+      console.warn(`kb-eval: retrying "${query}" after: ${String(err)}`);
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      return searchKbMintlify({ key, domain: DOMAIN }, query, TOP_K);
+    }
+  }
+
   for (const q of GOLDEN) {
-    it(q.id, { timeout: 20_000 }, async () => {
-      const { hits, io } = await searchKbMintlify({ key: KEY, domain: DOMAIN }, q.query, TOP_K);
+    it(q.id, { timeout: 45_000 }, async () => {
+      const { hits, io } = await searchWithRetry(q.query);
       const paths = hits.map((h) => h.article_id);
       const failures = judge(q, paths, hits.map((h) => h.content).join('\n').toLowerCase());
+      const rankIdx = paths.findIndex((hp) => q.expect_paths.some((p) => matchesPath(hp, p)));
       outcomes.push({
         id: q.id,
         query: q.query,
         outcome: failures.length === 0 ? 'pass' : q.known_gap ? 'gap' : 'fail',
         ...(q.known_gap ? { known_gap: q.known_gap } : {}),
         failures,
+        first_expected_rank: rankIdx === -1 ? null : rankIdx + 1,
         received_count: io.received_count,
         duration_ms: io.duration_ms,
         hits: hits.map((h, i) => ({

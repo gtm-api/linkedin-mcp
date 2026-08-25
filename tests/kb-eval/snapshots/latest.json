@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-25T12:34:32.909Z",
+  "generated_at": "2026-08-25T14:59:27.414Z",
   "domain": "docs.gtm-api.com",
   "top_k": 5,
   "summary": {
@@ -13,8 +13,9 @@
       "query": "connect LinkedIn account antidetect browser",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 938,
+      "duration_ms": 1133,
       "hits": [
         {
           "article_id": "kb/connect-a-linkedin-account",
@@ -78,8 +79,9 @@
       "query": "LinkedIn connection fails verification checkpoint login",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 747,
+      "duration_ms": 709,
       "hits": [
         {
           "article_id": "kb/browser-troubleshooting",
@@ -143,8 +145,9 @@
       "query": "LinkedIn account verification status what it means smart limits enabled",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 3,
       "received_count": 10,
-      "duration_ms": 560,
+      "duration_ms": 762,
       "hits": [
         {
           "article_id": "api-reference/linkedin/linkedin_account_smart_limits/search-linkedin-account-smart-limits",
@@ -208,8 +211,9 @@
       "query": "warmup score account health meaning penalties",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 864,
+      "duration_ms": 727,
       "hits": [
         {
           "article_id": "kb/account-health",
@@ -234,17 +238,6 @@
           "content": "## Warmup\n\nA freshly connected account starts with reduced budgets that ramp up gradually. The ramp\nis driven by six live signals about the account, shown in the drawer: recent activity,\nconcurrent sessions and IPs, blocks, limit hits, account age, and profile completeness.\nThey multiply into the day's allowance.\n\n<Note>\n  Warmup counts real sends: activity the account actually performed matters, not just\n  time passed. A dormant account ramps slower than one that is actively and successfully\n  working.\n</Note>"
         },
         {
-          "article_id": "kb/index",
-          "chars_full": 604,
-          "chars_sent": 604,
-          "truncated": false,
-          "hash": "753768bc",
-          "article_title": "Safety and pacing",
-          "section": "Safety and pacing",
-          "score": 0.3333333333333333,
-          "content": "## Safety and pacing\n\n<CardGroup cols={2}>\n  <Card title=\"Smart limits and warmup\" href=\"/kb/smart-limits-and-warmup\" icon=\"shield\">\n    Per-action daily budgets, the warmup ramp, holds and how to release them.\n  </Card>\n\n  <Card title=\"Sync windows and auto-suspend\" href=\"/kb/sync-windows-and-auto-suspend\" icon=\"clock\">\n    When recurring syncs run, what ignores the window, and how browsers sleep and wake.\n  </Card>\n\n  <Card title=\"Account health\" href=\"/kb/account-health\" icon=\"heart-pulse\">\n    The signals behind the score, what each state means, and which ones self-heal.\n  </Card>\n</CardGroup>"
-        },
-        {
           "article_id": "api-reference/linkedin/linkedin_account_snapshots/search-linkedin-account-snapshots",
           "chars_full": 16457,
           "chars_sent": 1411,
@@ -252,7 +245,7 @@
           "hash": "422d2b5b",
           "article_title": "Search LinkedIn account snapshots",
           "section": "Intro",
-          "score": 0.25,
+          "score": 0.3333333333333333,
           "content": "REST Endpoint POST /api/linkedin-account-snapshots/search\nSummary: Search LinkedIn account snapshots\nDescription: Per-account warmup snapshots over time (immutable, append-only, captured ~every 22h by the scheduler). Use for: a warmup trend over N days (filter linkedin_account_sid + created_at range), before/after compare (paused automation, rotated proxy/nickname), and reading warmup_breakdown + tips to explain WHY a warmup_score is what it is (score = round(100 × ∏(1 − penalty_pct/100)) over 6 compounding drivers). For the LATEST snapshot per account use linkedin-accounts.search with include[]=linkedin_account_snapshot (1:1); searching here for the latest is more expensive. No q (no text-searchable fields). Sort: created_at (default desc) | warmup_score. include[]: linkedin_account.\n\nContract:\n- MCP tool `search_linkedin_account_snapshots`, registry package `mcp.linkedin/linkedin_account_snapshots`, mount `linkedin.account-monitor`.\n- Operation `search`, response envelope `search`.\n- Flags: read only.\nRequest body:\nContent type: application/json\n- filter: type object\n- filter.sid: type object\n- filter.sid.eq: type string\n- filter.sid.in: type string[]\n- filter.sid.in[]: type string\n- filter.linkedin_account_sid: type object; description Primary filter for per-account history / trend views.\n- filter.linkedin_account_sid.eq: type string\n[truncated: fetch the full page with get_kb_article]"
         },
         {
@@ -263,8 +256,19 @@
           "hash": "fff6d2ca",
           "article_title": "Get my SSI",
           "section": "Intro",
-          "score": 0.2,
+          "score": 0.25,
           "content": "Get my SSI\nRead the connected account's Social Selling Index: the overall score, the four pillars it is the sum of (professional brand, finding the right people, engaging with insights, building relationships), and where the account stands inside its industry and its own network. Answers WITHOUT a Sales Navigator seat, reporting that as active_seat: false with the scores still filled in, so it is a health signal for any account rather than a premium-only read. Identity-bound: the sid names the account whose own dashboard is read; there is no way to read someone else's SSI. Every score is FRACTIONAL (a real reading is 53.496, not 53), so do not round before comparing runs, the week-over-week movement is usually under a point.\n\nContract:\n- MCP tool `get_linkedin_account_my_ssi`, registry package `mcp.linkedin/linkedin_accounts`, mount `linkedin.accounts`.\n- Operation `action`, response envelope `action`.\n- Flags: read only."
+        },
+        {
+          "article_id": "kb/billing-and-plans",
+          "chars_full": 131,
+          "chars_sent": 131,
+          "truncated": false,
+          "hash": "6342d4ac",
+          "article_title": "Related",
+          "section": "Related",
+          "score": 0.2,
+          "content": "## Related\n\n* [Smart limits and warmup](/kb/smart-limits-and-warmup)\n* [Connect a LinkedIn account](/kb/connect-a-linkedin-account)"
         }
       ]
     },
@@ -273,8 +277,9 @@
       "query": "smart limit status held what does it mean",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 682,
+      "duration_ms": 671,
       "hits": [
         {
           "article_id": "kb/smart-limits-and-warmup",
@@ -321,15 +326,15 @@
           "content": "Update LinkedIn account smart limit\nPatch the operator-tunable policy of one limit row (daily_limit / target_limit / delay_in_seconds / smart_limits_enabled; at least one field OR reset_hold:true required). status is recomputed atomically. A spent daily budget shows as status \"held\" (there is no \"saturated\" status). Raising daily_limit does NOT by itself clear that hold. Pass reset_hold:true IN THE SAME CALL to raise the cap AND resume now (the atomic \"raise + resume\"). The hold only actually clears if the new daily_limit is above done_today_count; otherwise the saturation-latch immediately re-holds it. On a smart-managed row the persistent lever is target_limit (a manual daily_limit below smart_limit is only transient until the next snapshot). System-managed fields (done_today_count, smart_limit, hold_till, linkedin_quota_hit_till, status, …) are rejected as fields. Use reset_hold to clear the hold. A LinkedIn-side lock (linkedin_quota_hit_till) is never resettable.\n\nContract:\n- MCP tool `update_linkedin_account_smart_limit`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `update`, response envelope `update`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
         },
         {
-          "article_id": "kb/index",
-          "chars_full": 604,
-          "chars_sent": 604,
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/search-linkedin-account-smart-limits",
+          "chars_full": 991,
+          "chars_sent": 991,
           "truncated": false,
-          "hash": "753768bc",
-          "article_title": "Safety and pacing",
-          "section": "Safety and pacing",
+          "hash": "53b62f5a",
+          "article_title": "Search LinkedIn account smart limits",
+          "section": "Intro",
           "score": 0.2,
-          "content": "## Safety and pacing\n\n<CardGroup cols={2}>\n  <Card title=\"Smart limits and warmup\" href=\"/kb/smart-limits-and-warmup\" icon=\"shield\">\n    Per-action daily budgets, the warmup ramp, holds and how to release them.\n  </Card>\n\n  <Card title=\"Sync windows and auto-suspend\" href=\"/kb/sync-windows-and-auto-suspend\" icon=\"clock\">\n    When recurring syncs run, what ignores the window, and how browsers sleep and wake.\n  </Card>\n\n  <Card title=\"Account health\" href=\"/kb/account-health\" icon=\"heart-pulse\">\n    The signals behind the score, what each state means, and which ones self-heal.\n  </Card>\n</CardGroup>"
+          "content": "Search LinkedIn account smart limits\nList per-limit_type policy rows (one account owns 15 public buckets: send_connection_requests, send_messages, send_inmails, scraping, enrichment, custom_request, …) with filters, sorting, cursor pagination and a counts block (status / limit_type / smart_limits_enabled breakdowns). Use for: \"which limits are at their daily cap / held / blocked by LinkedIn\" (status filter; held means the daily budget is spent), \"can account X still send InMails today\" (filter linkedin_account_sid + limit_type, read status + daily_limit − done_today_count), fleet capacity, smart-limit adoption rate. Single-row case = search(filter:{linkedin_account_sid, limit_type}, page_size:1). No q. include[]: linkedin_account, linkedin_account_quota_hits.\n\nContract:\n- MCP tool `search_linkedin_account_smart_limits`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
         }
       ]
     },
@@ -338,8 +343,9 @@
       "query": "raise a smart limit release a hold",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 610,
+      "duration_ms": 772,
       "hits": [
         {
           "article_id": "kb/smart-limits-and-warmup",
@@ -403,8 +409,9 @@
       "query": "sender signed out of LinkedIn how to log in again",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 1240,
+      "duration_ms": 787,
       "hits": [
         {
           "article_id": "kb/account-health",
@@ -468,8 +475,9 @@
       "query": "antidetect browser will not start",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 607,
+      "duration_ms": 611,
       "hits": [
         {
           "article_id": "kb/browser-troubleshooting",
@@ -533,8 +541,9 @@
       "query": "cloud browser statuses running stopped suspended",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 720,
+      "duration_ms": 746,
       "hits": [
         {
           "article_id": "kb/antidetect-browsers-and-proxies",
@@ -598,8 +607,9 @@
       "query": "proxy connectivity check failed what to do",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 797,
+      "duration_ms": 657,
       "hits": [
         {
           "article_id": "kb/proxy-troubleshooting",
@@ -663,8 +673,9 @@
       "query": "use my own proxy for the browser",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 632,
+      "duration_ms": 689,
       "hits": [
         {
           "article_id": "kb/antidetect-browsers-and-proxies",
@@ -728,8 +739,9 @@
       "query": "message not appearing in inbox sync delay",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 724,
+      "duration_ms": 701,
       "hits": [
         {
           "article_id": "kb/inbox-and-message-sync",
@@ -743,17 +755,6 @@
           "content": "Inbox and message sync\nHow conversations and messages reach the platform: what the initial backfill imports, how often each surface re-syncs, what realtime push covers, and why a message may not be there yet."
         },
         {
-          "article_id": "kb/index",
-          "chars_full": 251,
-          "chars_sent": 251,
-          "truncated": false,
-          "hash": "316057c3",
-          "article_title": "Conversations",
-          "section": "Conversations",
-          "score": 0.5,
-          "content": "## Conversations\n\n<CardGroup cols={2}>\n  <Card title=\"Inbox and message sync\" href=\"/kb/inbox-and-message-sync\" icon=\"inbox\">\n    What the backfill imports, how often each surface refreshes, and why a reply may not be there yet.\n  </Card>\n</CardGroup>"
-        },
-        {
           "article_id": "kb/sync-windows-and-auto-suspend",
           "chars_full": 1833,
           "chars_sent": 396,
@@ -761,7 +762,7 @@
           "hash": "e35cb466",
           "article_title": "Sync windows and auto-suspend",
           "section": "Intro",
-          "score": 0.3333333333333333,
+          "score": 0.5,
           "content": "Each LinkedIn account has a **sync window**: the days and hours during which recurring\nsynchronizations (inbox, connections, invitations, followers) are created and picked\nup. Outside the window no new recurring sync starts.\n\n<Frame caption=\"The Account Sync tab: sync days and hours at the top, per-kind sync intervals below, each editable.\">\n[truncated: fetch the full page with get_kb_article]"
         },
         {
@@ -772,7 +773,7 @@
           "hash": "ba167942",
           "article_title": "Sync my LinkedIn conversations",
           "section": "Intro",
-          "score": 0.25,
+          "score": 0.3333333333333333,
           "content": "Sync my LinkedIn conversations\nStart a background sync run that reconciles the full basic-LinkedIn-messenger thread directory for one account. ASYNC: returns a pending ref (sync_run_sid) to poll; changed threads have their messages pulled inline. Use for initial backfill / full reconciliation; for a fresh inbox head use get_my_latest_linkedin_conversations.\n\nContract:\n- MCP tool `sync_my_linkedin_conversations`, registry package `mcp.linkedin/linkedin_conversations`, mount `linkedin.messaging`.\n- Operation `action`, response envelope `action_async`.\n- Flags: none."
         },
         {
@@ -783,8 +784,19 @@
           "hash": "4cb80e93",
           "article_title": "Sync connection requests",
           "section": "Intro",
-          "score": 0.2,
+          "score": 0.25,
           "content": "REST Endpoint POST /api/linkedin-connection-requests/sync-linkedin-connection-requests\nSummary: Sync connection requests\nDescription: Refresh the outbound sent-invitations snapshot for one account by inserting a sync_run (upsert-only). ASYNC: returns pending refs to poll or await the linkedin-connection-requests.sync-completed webhook.\n\nContract:\n- MCP tool `sync_linkedin_connection_requests`, registry package `mcp.linkedin/linkedin_connection_requests`, mount `linkedin.network`.\n- Operation `action`, response envelope `action_async`.\n- Flags: none.\nRequest body:\nContent type: application/json\n- linkedin_account_sid: type string; required; description LinkedIn account sid (ln_ac_…) of the sending account.\nResponses:\n200: `action_async` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required\n- async: type enum<boolean>; required; enum true\n- item: type object | null; required\n- item.sid: type string; required\n- item.team_sid: type string; required\n- item.linkedin_account_sid: type string; required\n- item.ln_member_id: type string; required\n- item.ln_id: type string | null; required\n- item.sn_id: type string | null; required\n- item.nickname: type string | null; required\n- item.note: type string | null; required\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_connection_invitations/sync-connection-invitations",
+          "chars_full": 8526,
+          "chars_sent": 1418,
+          "truncated": true,
+          "hash": "0edc5742",
+          "article_title": "Sync connection invitations",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "REST Endpoint POST /api/linkedin-connection-invitations/sync-my-linkedin-connection-invitations\nSummary: Sync connection invitations\nDescription: Kick off a fresh inbound-invitations sync for one account by inserting a sync_run. ASYNC: returns pending refs to poll or await the linkedin-connection-invitations.sync-completed webhook.\n\nContract:\n- MCP tool `sync_my_linkedin_connection_invitations`, registry package `mcp.linkedin/linkedin_connection_invitations`, mount `linkedin.network`.\n- Operation `action`, response envelope `action_async`.\n- Flags: none.\nRequest body:\nContent type: application/json\n- linkedin_account_sid: type string; required; description LinkedIn account sid (ln_ac_…) of the receiving account.\nResponses:\n200: `action_async` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required\n- async: type enum<boolean>; required; enum true\n- item: type object | null; required\n- item.sid: type string; required\n- item.team_sid: type string; required\n- item.linkedin_account_sid: type string; required\n- item.ln_member_id: type string; required\n- item.ln_id: type string | null; required\n- item.sn_id: type string | null; required\n- item.nickname: type string | null; required\n- item.note: type string | null; required\n[truncated: fetch the full page with get_kb_article]"
         }
       ]
     },
@@ -793,8 +805,9 @@
       "query": "force refresh conversations sync now",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 793,
+      "duration_ms": 1548,
       "hits": [
         {
           "article_id": "kb/inbox-and-message-sync",
@@ -841,15 +854,15 @@
           "content": "Get my latest LinkedIn conversations\nAlways-fresh head read of the basic-LinkedIn-messenger thread list for one account (§5.8 foreground refresh, then the last N threads from the refreshed DB, last_activity_at DESC). Never serves stale data: it 429s with bucket_saturated / sync_in_progress instead. Use before an inbox decision; use sync_my_linkedin_conversations for full backfill.\n\nContract:\n- MCP tool `get_my_latest_linkedin_conversations`, registry package `mcp.linkedin/linkedin_conversations`, mount `linkedin.messaging`.\n- Operation `action`, response envelope `search`.\n- Flags: none."
         },
         {
-          "article_id": "kb/index",
-          "chars_full": 251,
-          "chars_sent": 251,
+          "article_id": "api-reference/linkedin/linkedin_conversations/sync-my-linkedin-conversations",
+          "chars_full": 570,
+          "chars_sent": 570,
           "truncated": false,
-          "hash": "316057c3",
-          "article_title": "Conversations",
-          "section": "Conversations",
+          "hash": "ba167942",
+          "article_title": "Sync my LinkedIn conversations",
+          "section": "Intro",
           "score": 0.2,
-          "content": "## Conversations\n\n<CardGroup cols={2}>\n  <Card title=\"Inbox and message sync\" href=\"/kb/inbox-and-message-sync\" icon=\"inbox\">\n    What the backfill imports, how often each surface refreshes, and why a reply may not be there yet.\n  </Card>\n</CardGroup>"
+          "content": "Sync my LinkedIn conversations\nStart a background sync run that reconciles the full basic-LinkedIn-messenger thread directory for one account. ASYNC: returns a pending ref (sync_run_sid) to poll; changed threads have their messages pulled inline. Use for initial backfill / full reconciliation; for a fresh inbox head use get_my_latest_linkedin_conversations.\n\nContract:\n- MCP tool `sync_my_linkedin_conversations`, registry package `mcp.linkedin/linkedin_conversations`, mount `linkedin.messaging`.\n- Operation `action`, response envelope `action_async`.\n- Flags: none."
         }
       ]
     },
@@ -858,8 +871,9 @@
       "query": "sync window schedule when does the account sync",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 588,
+      "duration_ms": 875,
       "hits": [
         {
           "article_id": "kb/sync-windows-and-auto-suspend",
@@ -923,8 +937,9 @@
       "query": "browser auto-suspend and wake",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 509,
+      "duration_ms": 662,
       "hits": [
         {
           "article_id": "kb/sync-windows-and-auto-suspend",
@@ -960,17 +975,6 @@
           "content": "## Browser lifecycle\n\nA browser is **created** (cloud-minted or bring-your-own), **run** when work needs it,\nand **stopped** when idle.\n\n<Note>\n  An idle running browser is suspended automatically after about 15 minutes without\n  activity, and due syncs or actions wake it on their own. See\n  [Sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend).\n</Note>\n\nIf a running browser becomes unhealthy (its LinkedIn tab dies, the profile crashes), the\nplatform marks it with an issue status and powers it off instead of leaving it running\nblind. Fix the underlying problem, most often the proxy, then run it again. Deleting a\nbrowser removes the profile; the bound LinkedIn account can be reconnected later through\na new browser."
         },
         {
-          "article_id": "kb/index",
-          "chars_full": 604,
-          "chars_sent": 604,
-          "truncated": false,
-          "hash": "753768bc",
-          "article_title": "Safety and pacing",
-          "section": "Safety and pacing",
-          "score": 0.25,
-          "content": "## Safety and pacing\n\n<CardGroup cols={2}>\n  <Card title=\"Smart limits and warmup\" href=\"/kb/smart-limits-and-warmup\" icon=\"shield\">\n    Per-action daily budgets, the warmup ramp, holds and how to release them.\n  </Card>\n\n  <Card title=\"Sync windows and auto-suspend\" href=\"/kb/sync-windows-and-auto-suspend\" icon=\"clock\">\n    When recurring syncs run, what ignores the window, and how browsers sleep and wake.\n  </Card>\n\n  <Card title=\"Account health\" href=\"/kb/account-health\" icon=\"heart-pulse\">\n    The signals behind the score, what each state means, and which ones self-heal.\n  </Card>\n</CardGroup>"
-        },
-        {
           "article_id": "kb/smart-limits-and-warmup",
           "chars_full": 202,
           "chars_sent": 202,
@@ -978,8 +982,19 @@
           "hash": "8757835d",
           "article_title": "Related",
           "section": "Related",
-          "score": 0.2,
+          "score": 0.25,
           "content": "## Related\n\n* [Sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend)\n* [Antidetect browsers and proxies](/kb/antidetect-browsers-and-proxies)\n* [Run a mass action](/guides/run-a-mass-action)"
+        },
+        {
+          "article_id": "kb/account-health",
+          "chars_full": 194,
+          "chars_sent": 194,
+          "truncated": false,
+          "hash": "1fa14daf",
+          "article_title": "Related",
+          "section": "Related",
+          "score": 0.2,
+          "content": "## Related\n\n* [Smart limits and warmup](/kb/smart-limits-and-warmup)\n* [Sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend)\n* [Browser troubleshooting](/kb/browser-troubleshooting)"
         }
       ]
     },
@@ -988,8 +1003,9 @@
       "query": "free plan what is included limits",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 508,
+      "duration_ms": 677,
       "hits": [
         {
           "article_id": "kb/billing-and-plans",
@@ -1053,8 +1069,9 @@
       "query": "upgrade or change subscription plan",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 3,
       "received_count": 10,
-      "duration_ms": 554,
+      "duration_ms": 800,
       "hits": [
         {
           "article_id": "api-reference/id/billing_subscriptions/change-subscription",
@@ -1118,8 +1135,9 @@
       "query": "payment failed subscription status past due",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 2090,
+      "duration_ms": 753,
       "hits": [
         {
           "article_id": "kb/billing-and-plans",
@@ -1133,6 +1151,17 @@
           "content": "## Subscription statuses\n\n| Status     | What it means                                                    |\n| ---------- | ---------------------------------------------------------------- |\n| `active`   | Paid and current, or the free Sandbox plan                       |\n| `past_due` | A payment failed; a grace window is running                      |\n| `paused`   | Billing stopped by request; the workspace is gated, data is kept |\n| `canceled` | Ended. Terminal: a new subscription is a new purchase            |\n\nThe workspace itself is either active or suspended, derived from the above: `active` is\nactive, `paused` is suspended, and `past_due` stays active until the grace window closes."
         },
         {
+          "article_id": "api-reference/id/billing_subscriptions/pause-subscription",
+          "chars_full": 632,
+          "chars_sent": 632,
+          "truncated": false,
+          "hash": "aa3a63f8",
+          "article_title": "Pause subscription",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Pause subscription\nPause the subscription effective the next billing period. DANGEROUS state change (server-side confirm gate); while paused the applied team is gated like suspended, slots/data retained, billing stops. No charge. The committed status arrives via webhook. Resume with resume_billing_subscription. Requires billing.manage.\n\nContract:\n- MCP tool `pause_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
           "article_id": "mcp/agent-signup",
           "chars_full": 852,
           "chars_sent": 852,
@@ -1140,7 +1169,7 @@
           "hash": "0a39c2fc",
           "article_title": "When Sandbox is not enough",
           "section": "When Sandbox is not enough",
-          "score": 0.5,
+          "score": 0.3333333333333333,
           "content": "## When Sandbox is not enough\n\nSandbox never expires, but verbs answer `402` with `subscription_required` the moment the workspace needs more than the free plan grants, for example a second connected account or a webhook. That moment is handleable by the agent, not just reportable:\n\n1. Read the state: search `billing-subscriptions` for the workspace and see `status`.\n2. Mint a payment link: create a checkout for the plan through the billing tools (or a Paddle portal link for an existing subscription). Both return a URL a human can open.\n3. Hand the URL to your operator with the one-line reason, and retry the blocked action after the `billing-subscriptions.activated` webhook, or on your next run.\n\nThe agent never touches payment credentials: the link opens Paddle's checkout in the operator's browser, and the platform unblocks on the webhook."
         },
         {
@@ -1151,19 +1180,8 @@
           "hash": "f5c45855",
           "article_title": "Unapply subscription",
           "section": "Intro",
-          "score": 0.3333333333333333,
-          "content": "REST Endpoint POST /api/billing-subscriptions/{sid}/unapply\nSummary: Unapply subscription\nDescription: Detach a subscription from its team, returning it to floating on the buyer's balance. DANGEROUS: removes the team's capacity (the team goes suspended if this was its only applied subscription); does NOT cancel billing or refund. Used to move a subscription to another team. Requires billing.manage.\n\nContract:\n- MCP tool `unapply_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API.\nPath parameters:\n- sid: type string; required; description Billing subscription sid (bl_sb_…).\nResponses:\n200: `action` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required; description kebab-case verb; matches the route segment.\n- item: type object | null; required\n- item.sid: type string; required\n- item.owner_user_sid: type string; required\n- item.team_sid: type string | null; required\n- item.paddle_subscription_id: type string | null; required\n- item.status: type enum<string>; required; enum active, past_due, paused, canceled\n[truncated: fetch the full page with get_kb_article]"
-        },
-        {
-          "article_id": "api-reference/id/billing_subscriptions/pause-subscription",
-          "chars_full": 632,
-          "chars_sent": 632,
-          "truncated": false,
-          "hash": "aa3a63f8",
-          "article_title": "Pause subscription",
-          "section": "Intro",
           "score": 0.25,
-          "content": "Pause subscription\nPause the subscription effective the next billing period. DANGEROUS state change (server-side confirm gate); while paused the applied team is gated like suspended, slots/data retained, billing stops. No charge. The committed status arrives via webhook. Resume with resume_billing_subscription. Requires billing.manage.\n\nContract:\n- MCP tool `pause_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+          "content": "REST Endpoint POST /api/billing-subscriptions/{sid}/unapply\nSummary: Unapply subscription\nDescription: Detach a subscription from its team, returning it to floating on the buyer's balance. DANGEROUS: removes the team's capacity (the team goes suspended if this was its only applied subscription); does NOT cancel billing or refund. Used to move a subscription to another team. Requires billing.manage.\n\nContract:\n- MCP tool `unapply_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API.\nPath parameters:\n- sid: type string; required; description Billing subscription sid (bl_sb_…).\nResponses:\n200: `action` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required; description kebab-case verb; matches the route segment.\n- item: type object | null; required\n- item.sid: type string; required\n- item.owner_user_sid: type string; required\n- item.team_sid: type string | null; required\n- item.paddle_subscription_id: type string | null; required\n- item.status: type enum<string>; required; enum active, past_due, paused, canceled\n[truncated: fetch the full page with get_kb_article]"
         },
         {
           "article_id": "api-reference/id/billing_subscriptions/change-subscription",
@@ -1183,8 +1201,9 @@
       "query": "invite a teammate to the workspace",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 1108,
+      "duration_ms": 629,
       "hits": [
         {
           "article_id": "kb/workspaces-and-team-members",
@@ -1248,8 +1267,9 @@
       "query": "share a connected LinkedIn account with another workspace",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 539,
+      "duration_ms": 631,
       "hits": [
         {
           "article_id": "kb/account-sharing-and-handover",
@@ -1285,17 +1305,6 @@
           "content": "## What a workspace owns\n\nA workspace id starts with `ts_tm_`, and each of these belongs to exactly one of them:\n\n* Connected LinkedIn accounts, their browsers, conversations, searches, mass actions, auto scrapes.\n* API keys, login sessions and OAuth grants. **A key is workspace-wide**: it reaches every account\n  in that workspace, and no key can be scoped to one account.\n* The plan, the account-slot cap and the billing history.\n* The member list, including invitations nobody has accepted yet.\n\nExactly one person is the **owner** (`owner_user_sid`), the only structural role on the platform.\nEverything else is a permission list, which is why the app shows an **Access** column rather than a\nrole column. Two workspace fields are editable: `name` (1 to 255 characters) and `config.timezone`\n(an IANA zone such as `Europe/Berlin`); `status`, `plan`, `limits` and the owner are\nderived, and the API drops them silently if you send them.\n\nMembership does not share accounts: being a member of workspace A and B does not let you drive A's\nLinkedIn account from B. Moving an account across workspaces is a share or a transfer, both in\n[account sharing and handover](/kb/account-sharing-and-handover)."
         },
         {
-          "article_id": "kb/index",
-          "chars_full": 639,
-          "chars_sent": 639,
-          "truncated": false,
-          "hash": "6007f63a",
-          "article_title": "Accounts and browsers",
-          "section": "Accounts and browsers",
-          "score": 0.25,
-          "content": "## Accounts and browsers\n\n<CardGroup cols={2}>\n  <Card title=\"Connect a LinkedIn account\" href=\"/kb/connect-a-linkedin-account\" icon=\"plug\">\n    Connect in the app, wait out the initial sync, then work with it anywhere.\n  </Card>\n\n  <Card title=\"Antidetect browsers and proxies\" href=\"/kb/antidetect-browsers-and-proxies\" icon=\"globe\">\n    One account, one isolated browser, one proxy. Lifecycle, checks, diagnostics.\n  </Card>\n\n  <Card title=\"Share or transfer an account\" href=\"/kb/account-sharing-and-handover\" icon=\"handshake\">\n    Lend an account to another workspace and take it back, or hand it over for good.\n  </Card>\n</CardGroup>"
-        },
-        {
           "article_id": "kb/connect-a-linkedin-account",
           "chars_full": 1309,
           "chars_sent": 1309,
@@ -1303,8 +1312,19 @@
           "hash": "da6e64ba",
           "article_title": "2. Watch the initial sync",
           "section": "2. Watch the initial sync",
-          "score": 0.2,
+          "score": 0.25,
           "content": "## 2. Watch the initial sync\n\nThe account enters onboarding: an initial import of the profile, conversations,\nconnections and invitations, in a strict order. Outbound actions are held until it\ncompletes.\n\n```bash theme={null}\ncurl -X POST \"https://app.gtm-api.com/linkedin/v4/api/linkedin-accounts/search\" \\\n  -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"filter\": {\"q\": \"cooper\"}}'\n```\n\nThe `status` field is the account lifecycle:\n\n| Status                  | Meaning                                              |\n| ----------------------- | ---------------------------------------------------- |\n| `new`                   | Connected, sync not started                          |\n| `initial_syncing`       | First sync in progress                               |\n| `active`                | Usable; outbound actions allowed                     |\n| `sync_failed`           | The sync hit a problem; check the account in the app |\n| `shared_out`            | Lent to another team via account sharing             |\n| `subscription_required` | The plan lapsed; renew to reactivate                 |\n\nUntil the account reaches `active`, outbound endpoints (connection requests, messages)\nanswer with a `conflict` error. Read endpoints work as soon as data lands."
+        },
+        {
+          "article_id": "api-reference/id/account_shares/search-issued-account-shares",
+          "chars_full": 1056,
+          "chars_sent": 1056,
+          "truncated": false,
+          "hash": "7a768d2b",
+          "article_title": "Search issued account shares",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Search issued account shares\nList the account shares your team ISSUED: accounts you lent OUT to another workspace. Sharing is TEMPORARY and revocable; permanent ownership transfer is a web-app-only flow with no MCP tool, so never offer this as a way to give an account away. This is also the polling surface, since there is no get tool and no /{sid} route: read one loan with filter { sid: { eq } } and watch status until active (the holder can work), failed (it never started, read failure_reason), or terminal recalled / returned. filter.owner_account_sid answers 'is this account lent out and to whom'; holder_over_slot finds loans that landed with no free slot. The number recall_account_share has to confirm is pagination.total_count here, NOT total_matched; page_size 0 returns it with no rows. No include[], no counts block, no free-text q. Needs can_view_account_shares.\n\nContract:\n- MCP tool `search_account_shares`, registry package `mcp.id/account_shares`, mount `id.access`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
         }
       ]
     },
@@ -1313,8 +1333,9 @@
       "query": "find email address or phone for a LinkedIn profile",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 680,
+      "duration_ms": 694,
       "hits": [
         {
           "article_id": "kb/enrichment",
@@ -1378,8 +1399,9 @@
       "query": "schedule a recurring scrape to collect leads automatically",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 539,
+      "duration_ms": 646,
       "hits": [
         {
           "article_id": "kb/auto-scrapes",
@@ -1443,8 +1465,9 @@
       "query": "search people with filters Sales Navigator",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 3,
       "received_count": 10,
-      "duration_ms": 640,
+      "duration_ms": 742,
       "hits": [
         {
           "article_id": "api-reference/linkedin/linkedin_scraping/scrape-sales-navigator-people-search",
@@ -1508,8 +1531,9 @@
       "query": "receive webhooks subscribe to events verify signature",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 477,
+      "duration_ms": 661,
       "hits": [
         {
           "article_id": "guides/receive-webhooks",
@@ -1573,8 +1597,9 @@
       "query": "run a mass action preview and commit",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 487,
+      "duration_ms": 622,
       "hits": [
         {
           "article_id": "guides/run-a-mass-action",
@@ -1638,8 +1663,9 @@
       "query": "cursor pagination page_size filter operators",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 815,
+      "duration_ms": 678,
       "hits": [
         {
           "article_id": "concepts/pagination-and-filtering",
@@ -1703,8 +1729,9 @@
       "query": "error envelope error codes meaning",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 784,
+      "duration_ms": 860,
       "hits": [
         {
           "article_id": "concepts/envelopes-and-errors",
@@ -1768,8 +1795,9 @@
       "query": "connect Claude MCP client to the platform",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 496,
+      "duration_ms": 656,
       "hits": [
         {
           "article_id": "mcp/connect",
@@ -1833,8 +1861,9 @@
       "query": "API key authentication bearer token Team-SID header",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 1,
       "received_count": 10,
-      "duration_ms": 623,
+      "duration_ms": 713,
       "hits": [
         {
           "article_id": "authentication",
@@ -1898,8 +1927,9 @@
       "query": "search linkedin accounts API endpoint request parameters",
       "outcome": "pass",
       "failures": [],
+      "first_expected_rank": 2,
       "received_count": 10,
-      "duration_ms": 555,
+      "duration_ms": 678,
       "hits": [
         {
           "article_id": "kb/people-and-company-search",
