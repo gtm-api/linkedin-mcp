@@ -15212,15 +15212,14 @@
                     "field": "acknowledge.*",
                     "rules": [
                         "string",
-                        "in:revoke_keys,remove_members,erase_account"
+                        "in:revoke_keys,remove_members"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": [
                         "revoke_keys",
-                        "remove_members",
-                        "erase_account"
+                        "remove_members"
                     ],
                     "min": null,
                     "max": null,

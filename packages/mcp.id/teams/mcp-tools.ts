@@ -162,21 +162,18 @@ export const teamsTools: ToolDefinition[] = [
     ...base,
     name: 'delete_team',
     description:
-      'Cascade soft-delete a workspace and its owned rows (members, keys, sessions, oauth clients, certs). Owner-only. DESTRUCTIVE. Blocked (409 delete_blocked) while a paid applied subscription is live. Unapply/cancel it first; clear soft blockers (active keys / members) with acknowledge[]. Deleting the owner\'s LAST workspace erases their account too (72h cancelable), which is what the last_workspace blocker and its erase_account acknowledge mean.',
+      'Cascade soft-delete a workspace and its owned rows (members, keys, sessions, oauth clients, certs). Owner-only. DESTRUCTIVE. Blocked (409 delete_blocked) while a paid applied subscription is live. Unapply/cancel it first; clear soft blockers (active keys / members) with acknowledge[]. Deleting the owner\'s LAST workspace is allowed and leaves their ACCOUNT untouched: they are left with no workspace until their next sign-in provisions a replacement. Erasing an account is a separate deliberate act, never a side effect of this tool.',
     toolClass: 'typical',
     route: { service: 'id', method: 'DELETE', pathTemplate: '/api/teams/{sid}', sidParam: 'sid' },
     operation: 'delete',
     envelope: 'delete_cascade',
     availability: 'ga',
     dangerous: true,
-    inputSchema: McpCascadeDeleteRequestSchema('ts_tm_', z.enum(['revoke_keys', 'remove_members', 'erase_account'])).extend({
+    inputSchema: McpCascadeDeleteRequestSchema('ts_tm_', z.enum(['revoke_keys', 'remove_members'])).extend({
       next_default_team_sid: z.string().length(18).startsWith('ts_tm_').optional()
         .describe('Which of the caller\'s other live memberships becomes their working team afterwards; default is the oldest one. 422 if it is not an active membership of theirs in another live team.'),
     }),
-    outputSchema: McpCascadeDeleteResponse.extend({
-      account_erasure_requested: z.boolean()
-        .describe('True when this was the caller\'s last workspace: the acknowledged account erasure is scheduled with it (72h cancelable by email).'),
-    }),
+    outputSchema: McpCascadeDeleteResponse,
     annotations: { title: 'Delete team', ...DANGER },
   },
   {
