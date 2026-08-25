@@ -11,6 +11,7 @@
     "test": "turbo test",
     "e2e": "bash bin/e2e.sh",
     "test:e2e": "pnpm --filter @gtm/mcp-tests test:e2e",
+    "kb:eval": "pnpm --filter @gtm/mcp-tests kb:eval",
     "lint": "turbo lint",
     "deploy:preflight": "node bin/deploy-preflight.mjs",
     "deploy:production": "pnpm --filter @gtm/mcp-worker run deploy:production",

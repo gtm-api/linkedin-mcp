@@ -1,0 +1,1962 @@
+{
+  "generated_at": "2026-08-25T12:34:32.909Z",
+  "domain": "docs.gtm-api.com",
+  "top_k": 5,
+  "summary": {
+    "pass": 30,
+    "gap": 0,
+    "fail": 0
+  },
+  "queries": [
+    {
+      "id": "connect-linkedin-account",
+      "query": "connect LinkedIn account antidetect browser",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 938,
+      "hits": [
+        {
+          "article_id": "kb/connect-a-linkedin-account",
+          "chars_full": 212,
+          "chars_sent": 212,
+          "truncated": false,
+          "hash": "4085761d",
+          "article_title": "Connect a LinkedIn account",
+          "section": "Intro",
+          "score": 1,
+          "content": "Connect a LinkedIn account\nConnect an account in the app, wait out the initial sync, then work with it over the API. The login happens inside a dedicated antidetect browser; no password ever reaches the platform."
+        },
+        {
+          "article_id": "kb/antidetect-browsers-and-proxies",
+          "chars_full": 200,
+          "chars_sent": 200,
+          "truncated": false,
+          "hash": "f2c4d333",
+          "article_title": "Related",
+          "section": "Related",
+          "score": 0.5,
+          "content": "## Related\n\n* [Connect a LinkedIn account](/kb/connect-a-linkedin-account)\n* [Sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend)\n* [Smart limits and warmup](/kb/smart-limits-and-warmup)"
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/search-antidetect-browsers",
+          "chars_full": 611,
+          "chars_sent": 611,
+          "truncated": false,
+          "hash": "0d077bb1",
+          "article_title": "Search antidetect browsers",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Search antidetect browsers\nList antidetect browsers on the team with filters (name lookup via the vendor_name filter, eq/in), sorting and cursor pagination. Live browsers by default (deleted_at.is_null:true). Returns a counts block of predicate tallies; include[] can eager-load linkedin_account, antidetect_browser_proxy and antidetect_browser_logs. Use this to find a browser sid before run / stop / delete.\n\nContract:\n- MCP tool `search_antidetect_browsers`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/create-antidetect-browser",
+          "chars_full": 1261,
+          "chars_sent": 1261,
+          "truncated": false,
+          "hash": "9e0efce9",
+          "article_title": "Create antidetect browser",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Create antidetect browser\nProvision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code is the default, custom_proxy_config routes that minted profile through a proxy the caller supplies (probed first, 422 custom_proxy_unreachable_* when dead, never with proxy_5g). Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the BYO-PROFILE path instead, with no proxy source: that profile carries its own. DANGEROUS: creates real vendor + proxy infrastructure. For SEVERAL browsers under ONE approval, do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:\"generate\", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key), then read the connect links off each row when it finishes.\n\nContract:\n- MCP tool `create_antidetect_browser`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `create`, response envelope `create`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/delete-antidetect-browser",
+          "chars_full": 756,
+          "chars_sent": 756,
+          "truncated": false,
+          "hash": "9e7726cc",
+          "article_title": "Delete antidetect browser",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Delete antidetect browser\nDecommission (soft-delete) a single antidetect browser by sid: outward, destructive, one-way through MCP. Variant B cascade: the bound linkedin-account is soft-deleted and pending plugin tasks transition to failed; the cascade block reports the counts. A platform-minted GoLogin profile is reclaimed (deleted) at the vendor unless another live browser row still holds it; customer BYO vendor profiles are left intact.\n\nContract:\n- MCP tool `delete_antidetect_browser`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `delete`, response envelope `delete_cascade`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        }
+      ]
+    },
+    {
+      "id": "connect-fails-checkpoint",
+      "query": "LinkedIn connection fails verification checkpoint login",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 747,
+      "hits": [
+        {
+          "article_id": "kb/browser-troubleshooting",
+          "chars_full": 2061,
+          "chars_sent": 1369,
+          "truncated": true,
+          "hash": "4d96708d",
+          "article_title": "Re-login is the only fix",
+          "section": "Re-login is the only fix",
+          "score": 1,
+          "content": "### Re-login is the only fix\n\nPressing **Start** re-verifies the session end to end rather than repairing it: either the\nsession turns out intact and the browser recovers to `running`, or the login wall is hit\nagain and the row goes straight back to `login_issue` with another power-off.\n\n1. In the account drawer, the red **Signed out of LinkedIn** banner sits above the tabs;\n   click **Log in via cloud browser** there (the same link is on the account row).\n   Connecting takes up to 30 seconds.\n2. Click **Log into LinkedIn** and complete the login in that window, including any\n   verification LinkedIn asks for. You are typing into the account's own browser, on its\n   own proxy, so the device and location LinkedIn sees do not change.\n3. Click **I have logged in** and keep the window open while the profile uploads to\n   secure storage. The upload is confirmed from the launcher log within about 90 seconds;\n   the app then closes the window and watches the browser every 3 seconds for up to 4\n   minutes. Reaching `running` reports **LinkedIn session restored, the browser is back\n   up**; hitting the 4-minute deadline reports **Still verifying the session, we'll keep\n   working in the background**.\n\nSyncing and automations resume on their own once the browser is running again, from where\nthey stopped.\n\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "kb/connect-a-linkedin-account",
+          "chars_full": 414,
+          "chars_sent": 414,
+          "truncated": false,
+          "hash": "f6a9c15a",
+          "article_title": "If the connection fails",
+          "section": "If the connection fails",
+          "score": 0.5,
+          "content": "## If the connection fails\n\n* The browser must be **running** and the LinkedIn tab reachable: a stopped or faulted\n  browser cannot bind an account.\n* Check the proxy: a dead or blocked proxy prevents LinkedIn from loading. Run the\n  connectivity check in the browser drawer\n  ([how](/kb/antidetect-browsers-and-proxies#diagnose-a-proxy)).\n* If the account was connected on another team, disconnect it there first."
+        },
+        {
+          "article_id": "kb/proxy-troubleshooting",
+          "chars_full": 205,
+          "chars_sent": 205,
+          "truncated": false,
+          "hash": "6c6699a0",
+          "article_title": "Proxy problems",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Proxy problems\nLinkedIn will not load, the account keeps hitting verification, the browser stops overnight: how to tell a broken proxy from a lost session or normal auto-suspend, and what to do about each."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_connections/check-connection-degree",
+          "chars_full": 582,
+          "chars_sent": 582,
+          "truncated": false,
+          "hash": "298606a3",
+          "article_title": "Check connection degree",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Check connection degree\nProbe one contact's current connection degree (1st / 2nd / 3rd / 4_plus) from a managed account, and actualize a stale stored row: a live connection whose degree is no longer 1st is soft-deleted (removal_kind=removed) in the same call. Reuses the get-lite-profile getter (owner-only: it runs on the account you name). Supply exactly one target identifier.\n\nContract:\n- MCP tool `check_linkedin_connection_degree`, registry package `mcp.linkedin/linkedin_connections`, mount `linkedin.network`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_connections/sync-my-connections",
+          "chars_full": 541,
+          "chars_sent": 541,
+          "truncated": false,
+          "hash": "26ddde52",
+          "article_title": "Sync my connections",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Sync my connections\nKick off a full background connections sync for one account by inserting a sync_run (upsert-only: new/updated rows only, no removal detection). ASYNC: returns pending refs to poll or await the linkedin-connections.sync-completed webhook. For an in-request head refresh use get_my_latest_linkedin_connections instead.\n\nContract:\n- MCP tool `sync_my_linkedin_connections`, registry package `mcp.linkedin/linkedin_connections`, mount `linkedin.network`.\n- Operation `action`, response envelope `action_async`.\n- Flags: none."
+        }
+      ]
+    },
+    {
+      "id": "verification-smart-limits",
+      "query": "LinkedIn account verification status what it means smart limits enabled",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 560,
+      "hits": [
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/search-linkedin-account-smart-limits",
+          "chars_full": 991,
+          "chars_sent": 991,
+          "truncated": false,
+          "hash": "53b62f5a",
+          "article_title": "Search LinkedIn account smart limits",
+          "section": "Intro",
+          "score": 1,
+          "content": "Search LinkedIn account smart limits\nList per-limit_type policy rows (one account owns 15 public buckets: send_connection_requests, send_messages, send_inmails, scraping, enrichment, custom_request, …) with filters, sorting, cursor pagination and a counts block (status / limit_type / smart_limits_enabled breakdowns). Use for: \"which limits are at their daily cap / held / blocked by LinkedIn\" (status filter; held means the daily budget is spent), \"can account X still send InMails today\" (filter linkedin_account_sid + limit_type, read status + daily_limit − done_today_count), fleet capacity, smart-limit adoption rate. Single-row case = search(filter:{linkedin_account_sid, limit_type}, page_size:1). No q. include[]: linkedin_account, linkedin_account_quota_hits.\n\nContract:\n- MCP tool `search_linkedin_account_smart_limits`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/update-linkedin-account-smart-limit",
+          "chars_full": 1306,
+          "chars_sent": 1306,
+          "truncated": false,
+          "hash": "96979697",
+          "article_title": "Update LinkedIn account smart limit",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Update LinkedIn account smart limit\nPatch the operator-tunable policy of one limit row (daily_limit / target_limit / delay_in_seconds / smart_limits_enabled; at least one field OR reset_hold:true required). status is recomputed atomically. A spent daily budget shows as status \"held\" (there is no \"saturated\" status). Raising daily_limit does NOT by itself clear that hold. Pass reset_hold:true IN THE SAME CALL to raise the cap AND resume now (the atomic \"raise + resume\"). The hold only actually clears if the new daily_limit is above done_today_count; otherwise the saturation-latch immediately re-holds it. On a smart-managed row the persistent lever is target_limit (a manual daily_limit below smart_limit is only transient until the next snapshot). System-managed fields (done_today_count, smart_limit, hold_till, linkedin_quota_hit_till, status, …) are rejected as fields. Use reset_hold to clear the hold. A LinkedIn-side lock (linkedin_quota_hit_till) is never resettable.\n\nContract:\n- MCP tool `update_linkedin_account_smart_limit`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `update`, response envelope `update`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "kb/smart-limits-and-warmup",
+          "chars_full": 728,
+          "chars_sent": 728,
+          "truncated": false,
+          "hash": "c082c483",
+          "article_title": "Limit statuses",
+          "section": "Limit statuses",
+          "score": 0.3333333333333333,
+          "content": "## Limit statuses\n\n| Status             | Meaning                                                                                                              |\n| ------------------ | -------------------------------------------------------------------------------------------------------------------- |\n| `active`           | Budgets available, actions flow normally                                                                             |\n| `held`             | The current budget is spent; outbound actions are parked until the refresh. The normal daily-cap state, not an error |\n| `linkedin_blocked` | LinkedIn itself restricted the account; actions stay parked until the restriction clears                             |"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/reset-linkedin-account-smart-limit-hold",
+          "chars_full": 1072,
+          "chars_sent": 1072,
+          "truncated": false,
+          "hash": "9cc725c8",
+          "article_title": "Reset LinkedIn account smart-limit hold",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Reset LinkedIn account smart-limit hold\nClear OUR platform-side pause (hold_till = null) on one row. Prefer update({daily_limit:<higher>, reset_hold:true}) for the common \"raise the cap AND resume\". This standalone action is for resuming WITHOUT changing the limit (only meaningful when done_today_count < daily_limit, e.g. a systemic hold). On a spent budget (done_today_count >= daily_limit) the saturation-latch re-holds immediately, so this is a no-op that stays held; raise daily_limit first. Idempotent (no-op if hold was already clear). Does NOT touch done_today_count or linkedin_quota_hit_till: a LinkedIn-side hard lock cannot be reset from the public surface (result.new_status stays linkedin_blocked if that clock is still active).\n\nContract:\n- MCP tool `reset_linkedin_account_smart_limit_hold`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "kb/connect-a-linkedin-account",
+          "chars_full": 746,
+          "chars_sent": 746,
+          "truncated": false,
+          "hash": "45d5755e",
+          "article_title": "3. Check capabilities and limits",
+          "section": "3. Check capabilities and limits",
+          "score": 0.2,
+          "content": "## 3. Check capabilities and limits\n\n* `POST /api/linkedin-accounts/{sid}/check-sales-nav`, `/check-premium`,\n  `/check-recruiter` report what the account's LinkedIn subscription actually supports.\n  Sales Navigator endpoints on an account without Sales Navigator fail upfront with\n  `validation_failed` rather than mid-run.\n* `POST /api/linkedin-account-smart-limits/search` returns the account's current\n  per-action daily budgets. A newly connected account starts well below platform\n  maximums and warms up as it ages; read these limits instead of assuming a number.\n  See [Smart limits and warmup](/kb/smart-limits-and-warmup).\n* `POST /api/linkedin-account-snapshots/search` gives the health timeline the platform\n  records for the account."
+        }
+      ]
+    },
+    {
+      "id": "warmup-score-penalties",
+      "query": "warmup score account health meaning penalties",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 864,
+      "hits": [
+        {
+          "article_id": "kb/account-health",
+          "chars_full": 2245,
+          "chars_sent": 1452,
+          "truncated": true,
+          "hash": "41f10292",
+          "article_title": "The warmup score",
+          "section": "The warmup score",
+          "score": 1,
+          "content": "## The warmup score\n\nOne integer from 0 to 100, recomputed on every snapshot as `round(100 * (1 - p1) * ... * (1 - p6))`: six\nsignals each remove a fraction of what is left, so they compound rather than add up. A signal with no\npenalty is left out of the breakdown, which is why `warmup_breakdown` comes back empty on a healthy\naccount. The table itself always lists all six signals, the healthy ones marked `ok`.\n\n| Signal         | UI label          | What it reads                                                                               | Penalty                                                       |\n| -------------- | ----------------- | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |\n| `account_age`  | **Account age**   | Months since the account's earliest known connection                                        | `0` at 4 months or older, otherwise `0.80 * (4 - age) / 4`    |\n| `limit_hits`   | **Limit hits**    | Rows in the limit-hit log over the last 30 days                                             | `0` up to 3 hits, then `7.14%` per extra hit, capped at `70%` |\n| `blocks`       | **Blocks**        | Rows in the block log over the last 30 days                                                 | `1 - 0.60^blocks`, capped at `85%`                            |\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "kb/smart-limits-and-warmup",
+          "chars_full": 516,
+          "chars_sent": 516,
+          "truncated": false,
+          "hash": "4548ba6a",
+          "article_title": "Warmup",
+          "section": "Warmup",
+          "score": 0.5,
+          "content": "## Warmup\n\nA freshly connected account starts with reduced budgets that ramp up gradually. The ramp\nis driven by six live signals about the account, shown in the drawer: recent activity,\nconcurrent sessions and IPs, blocks, limit hits, account age, and profile completeness.\nThey multiply into the day's allowance.\n\n<Note>\n  Warmup counts real sends: activity the account actually performed matters, not just\n  time passed. A dormant account ramps slower than one that is actively and successfully\n  working.\n</Note>"
+        },
+        {
+          "article_id": "kb/index",
+          "chars_full": 604,
+          "chars_sent": 604,
+          "truncated": false,
+          "hash": "753768bc",
+          "article_title": "Safety and pacing",
+          "section": "Safety and pacing",
+          "score": 0.3333333333333333,
+          "content": "## Safety and pacing\n\n<CardGroup cols={2}>\n  <Card title=\"Smart limits and warmup\" href=\"/kb/smart-limits-and-warmup\" icon=\"shield\">\n    Per-action daily budgets, the warmup ramp, holds and how to release them.\n  </Card>\n\n  <Card title=\"Sync windows and auto-suspend\" href=\"/kb/sync-windows-and-auto-suspend\" icon=\"clock\">\n    When recurring syncs run, what ignores the window, and how browsers sleep and wake.\n  </Card>\n\n  <Card title=\"Account health\" href=\"/kb/account-health\" icon=\"heart-pulse\">\n    The signals behind the score, what each state means, and which ones self-heal.\n  </Card>\n</CardGroup>"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_snapshots/search-linkedin-account-snapshots",
+          "chars_full": 16457,
+          "chars_sent": 1411,
+          "truncated": true,
+          "hash": "422d2b5b",
+          "article_title": "Search LinkedIn account snapshots",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "REST Endpoint POST /api/linkedin-account-snapshots/search\nSummary: Search LinkedIn account snapshots\nDescription: Per-account warmup snapshots over time (immutable, append-only, captured ~every 22h by the scheduler). Use for: a warmup trend over N days (filter linkedin_account_sid + created_at range), before/after compare (paused automation, rotated proxy/nickname), and reading warmup_breakdown + tips to explain WHY a warmup_score is what it is (score = round(100 × ∏(1 − penalty_pct/100)) over 6 compounding drivers). For the LATEST snapshot per account use linkedin-accounts.search with include[]=linkedin_account_snapshot (1:1); searching here for the latest is more expensive. No q (no text-searchable fields). Sort: created_at (default desc) | warmup_score. include[]: linkedin_account.\n\nContract:\n- MCP tool `search_linkedin_account_snapshots`, registry package `mcp.linkedin/linkedin_account_snapshots`, mount `linkedin.account-monitor`.\n- Operation `search`, response envelope `search`.\n- Flags: read only.\nRequest body:\nContent type: application/json\n- filter: type object\n- filter.sid: type object\n- filter.sid.eq: type string\n- filter.sid.in: type string[]\n- filter.sid.in[]: type string\n- filter.linkedin_account_sid: type object; description Primary filter for per-account history / trend views.\n- filter.linkedin_account_sid.eq: type string\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_accounts/get-my-ssi",
+          "chars_full": 935,
+          "chars_sent": 935,
+          "truncated": false,
+          "hash": "fff6d2ca",
+          "article_title": "Get my SSI",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Get my SSI\nRead the connected account's Social Selling Index: the overall score, the four pillars it is the sum of (professional brand, finding the right people, engaging with insights, building relationships), and where the account stands inside its industry and its own network. Answers WITHOUT a Sales Navigator seat, reporting that as active_seat: false with the scores still filled in, so it is a health signal for any account rather than a premium-only read. Identity-bound: the sid names the account whose own dashboard is read; there is no way to read someone else's SSI. Every score is FRACTIONAL (a real reading is 53.496, not 53), so do not round before comparing runs, the week-over-week movement is usually under a point.\n\nContract:\n- MCP tool `get_linkedin_account_my_ssi`, registry package `mcp.linkedin/linkedin_accounts`, mount `linkedin.accounts`.\n- Operation `action`, response envelope `action`.\n- Flags: read only."
+        }
+      ]
+    },
+    {
+      "id": "limit-statuses",
+      "query": "smart limit status held what does it mean",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 682,
+      "hits": [
+        {
+          "article_id": "kb/smart-limits-and-warmup",
+          "chars_full": 728,
+          "chars_sent": 728,
+          "truncated": false,
+          "hash": "c082c483",
+          "article_title": "Limit statuses",
+          "section": "Limit statuses",
+          "score": 1,
+          "content": "## Limit statuses\n\n| Status             | Meaning                                                                                                              |\n| ------------------ | -------------------------------------------------------------------------------------------------------------------- |\n| `active`           | Budgets available, actions flow normally                                                                             |\n| `held`             | The current budget is spent; outbound actions are parked until the refresh. The normal daily-cap state, not an error |\n| `linkedin_blocked` | LinkedIn itself restricted the account; actions stay parked until the restriction clears                             |"
+        },
+        {
+          "article_id": "kb/account-health",
+          "chars_full": 1035,
+          "chars_sent": 1035,
+          "truncated": false,
+          "hash": "2eacd6d7",
+          "article_title": "How health drives smart limits",
+          "section": "How health drives smart limits",
+          "score": 0.5,
+          "content": "## How health drives smart limits\n\nOn each snapshot the score becomes a ceiling per action type (`platform_max[bucket] * warmup_score / 100`,\nrounded) and the budget walks toward it. Up is gradual, down is instant: each recompute moves a budget up\nby about **20%** of the gap to its ceiling (at least 1), so recovery takes several snapshots, while a\nceiling below the current budget drops it at once, and the upward step is held while the bucket's\nLinkedIn lock (`linkedin_quota_hit_till`) is still in the future, that is after a recent limit hit or a\ncaptcha. A prospect block holds nothing directly; it lowers the next snapshot's score, and the score\nlowers the ceiling. A fresh refusal does not recompute budgets by itself: it writes the temporary\nlock, and its presence in the 30-day count changes the score at the next capture. Your own configured\nceiling is never touched. Budgets, holds, the `active` / `held` / `linkedin_blocked` statuses and how to\nrelease a hold are in [smart limits and warmup](/kb/smart-limits-and-warmup)."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/reset-linkedin-account-smart-limit-hold",
+          "chars_full": 1072,
+          "chars_sent": 1072,
+          "truncated": false,
+          "hash": "9cc725c8",
+          "article_title": "Reset LinkedIn account smart-limit hold",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Reset LinkedIn account smart-limit hold\nClear OUR platform-side pause (hold_till = null) on one row. Prefer update({daily_limit:<higher>, reset_hold:true}) for the common \"raise the cap AND resume\". This standalone action is for resuming WITHOUT changing the limit (only meaningful when done_today_count < daily_limit, e.g. a systemic hold). On a spent budget (done_today_count >= daily_limit) the saturation-latch re-holds immediately, so this is a no-op that stays held; raise daily_limit first. Idempotent (no-op if hold was already clear). Does NOT touch done_today_count or linkedin_quota_hit_till: a LinkedIn-side hard lock cannot be reset from the public surface (result.new_status stays linkedin_blocked if that clock is still active).\n\nContract:\n- MCP tool `reset_linkedin_account_smart_limit_hold`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/update-linkedin-account-smart-limit",
+          "chars_full": 1306,
+          "chars_sent": 1306,
+          "truncated": false,
+          "hash": "96979697",
+          "article_title": "Update LinkedIn account smart limit",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Update LinkedIn account smart limit\nPatch the operator-tunable policy of one limit row (daily_limit / target_limit / delay_in_seconds / smart_limits_enabled; at least one field OR reset_hold:true required). status is recomputed atomically. A spent daily budget shows as status \"held\" (there is no \"saturated\" status). Raising daily_limit does NOT by itself clear that hold. Pass reset_hold:true IN THE SAME CALL to raise the cap AND resume now (the atomic \"raise + resume\"). The hold only actually clears if the new daily_limit is above done_today_count; otherwise the saturation-latch immediately re-holds it. On a smart-managed row the persistent lever is target_limit (a manual daily_limit below smart_limit is only transient until the next snapshot). System-managed fields (done_today_count, smart_limit, hold_till, linkedin_quota_hit_till, status, …) are rejected as fields. Use reset_hold to clear the hold. A LinkedIn-side lock (linkedin_quota_hit_till) is never resettable.\n\nContract:\n- MCP tool `update_linkedin_account_smart_limit`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `update`, response envelope `update`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "kb/index",
+          "chars_full": 604,
+          "chars_sent": 604,
+          "truncated": false,
+          "hash": "753768bc",
+          "article_title": "Safety and pacing",
+          "section": "Safety and pacing",
+          "score": 0.2,
+          "content": "## Safety and pacing\n\n<CardGroup cols={2}>\n  <Card title=\"Smart limits and warmup\" href=\"/kb/smart-limits-and-warmup\" icon=\"shield\">\n    Per-action daily budgets, the warmup ramp, holds and how to release them.\n  </Card>\n\n  <Card title=\"Sync windows and auto-suspend\" href=\"/kb/sync-windows-and-auto-suspend\" icon=\"clock\">\n    When recurring syncs run, what ignores the window, and how browsers sleep and wake.\n  </Card>\n\n  <Card title=\"Account health\" href=\"/kb/account-health\" icon=\"heart-pulse\">\n    The signals behind the score, what each state means, and which ones self-heal.\n  </Card>\n</CardGroup>"
+        }
+      ]
+    },
+    {
+      "id": "raise-limit-release-hold",
+      "query": "raise a smart limit release a hold",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 610,
+      "hits": [
+        {
+          "article_id": "kb/smart-limits-and-warmup",
+          "chars_full": 1181,
+          "chars_sent": 1181,
+          "truncated": false,
+          "hash": "14b22ff5",
+          "article_title": "Raise a limit, release a hold",
+          "section": "Raise a limit, release a hold",
+          "score": 1,
+          "content": "## Raise a limit, release a hold\n\nLimits are editable per account in the drawer. Raising a limit offers **reset hold**,\nwhich atomically raises the budget and resumes everything parked on it in one step.\nWithout reset hold, the raised budget takes effect on the next refresh cycle.\n\n<CodeGroup>\n  ```bash curl theme={null}\n  # Read an account's current buckets and what is spent today\n  curl -X POST \"https://app.gtm-api.com/linkedin/v4/api/linkedin-account-smart-limits/search\" \\\n    -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n    -H \"Content-Type: application/json\" \\\n    -d '{\"filter\": {\"linkedin_account_sid\": {\"eq\": \"ln_ac_YOUR_ACCOUNT\"}}}'\n  ```\n\n  ```bash reset-hold theme={null}\n  # Raise a bucket and release its hold in one step\n  curl -X POST \"https://app.gtm-api.com/linkedin/v4/api/linkedin-account-smart-limits/lm_sl_YOUR_LIMIT/reset-hold\" \\\n    -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n    -H \"Content-Type: application/json\" \\\n    -d '{}'\n  ```\n</CodeGroup>\n\n<Warning>\n  Hitting a budget over the API answers `limit_exceeded`. The action can resume the next\n  day or after the limit is raised; the account is not penalized for your retry logic.\n</Warning>"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/reset-linkedin-account-smart-limit-hold",
+          "chars_full": 1072,
+          "chars_sent": 1072,
+          "truncated": false,
+          "hash": "9cc725c8",
+          "article_title": "Reset LinkedIn account smart-limit hold",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Reset LinkedIn account smart-limit hold\nClear OUR platform-side pause (hold_till = null) on one row. Prefer update({daily_limit:<higher>, reset_hold:true}) for the common \"raise the cap AND resume\". This standalone action is for resuming WITHOUT changing the limit (only meaningful when done_today_count < daily_limit, e.g. a systemic hold). On a spent budget (done_today_count >= daily_limit) the saturation-latch re-holds immediately, so this is a no-op that stays held; raise daily_limit first. Idempotent (no-op if hold was already clear). Does NOT touch done_today_count or linkedin_quota_hit_till: a LinkedIn-side hard lock cannot be reset from the public surface (result.new_status stays linkedin_blocked if that clock is still active).\n\nContract:\n- MCP tool `reset_linkedin_account_smart_limit_hold`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/update-linkedin-account-smart-limit",
+          "chars_full": 1306,
+          "chars_sent": 1306,
+          "truncated": false,
+          "hash": "96979697",
+          "article_title": "Update LinkedIn account smart limit",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Update LinkedIn account smart limit\nPatch the operator-tunable policy of one limit row (daily_limit / target_limit / delay_in_seconds / smart_limits_enabled; at least one field OR reset_hold:true required). status is recomputed atomically. A spent daily budget shows as status \"held\" (there is no \"saturated\" status). Raising daily_limit does NOT by itself clear that hold. Pass reset_hold:true IN THE SAME CALL to raise the cap AND resume now (the atomic \"raise + resume\"). The hold only actually clears if the new daily_limit is above done_today_count; otherwise the saturation-latch immediately re-holds it. On a smart-managed row the persistent lever is target_limit (a manual daily_limit below smart_limit is only transient until the next snapshot). System-managed fields (done_today_count, smart_limit, hold_till, linkedin_quota_hit_till, status, …) are rejected as fields. Use reset_hold to clear the hold. A LinkedIn-side lock (linkedin_quota_hit_till) is never resettable.\n\nContract:\n- MCP tool `update_linkedin_account_smart_limit`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `update`, response envelope `update`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "kb/account-health",
+          "chars_full": 1035,
+          "chars_sent": 1035,
+          "truncated": false,
+          "hash": "2eacd6d7",
+          "article_title": "How health drives smart limits",
+          "section": "How health drives smart limits",
+          "score": 0.25,
+          "content": "## How health drives smart limits\n\nOn each snapshot the score becomes a ceiling per action type (`platform_max[bucket] * warmup_score / 100`,\nrounded) and the budget walks toward it. Up is gradual, down is instant: each recompute moves a budget up\nby about **20%** of the gap to its ceiling (at least 1), so recovery takes several snapshots, while a\nceiling below the current budget drops it at once, and the upward step is held while the bucket's\nLinkedIn lock (`linkedin_quota_hit_till`) is still in the future, that is after a recent limit hit or a\ncaptcha. A prospect block holds nothing directly; it lowers the next snapshot's score, and the score\nlowers the ceiling. A fresh refusal does not recompute budgets by itself: it writes the temporary\nlock, and its presence in the 30-day count changes the score at the next capture. Your own configured\nceiling is never touched. Budgets, holds, the `active` / `held` / `linkedin_blocked` statuses and how to\nrelease a hold are in [smart limits and warmup](/kb/smart-limits-and-warmup)."
+        },
+        {
+          "article_id": "api-reference/orchestration/mass_actions/release-mass-action-canary",
+          "chars_full": 708,
+          "chars_sent": 708,
+          "truncated": false,
+          "hash": "71f4c607",
+          "article_title": "Release mass-action canary",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Release mass-action canary\nOpen the canary gate by hand: stamps canary_satisfied_at and releases every remaining item, the same sweep the canary would have triggered by succeeding. Use it when the first item failed for a reason you accept, or when you do not want to wait for it. Valid only while the run is live, canary_mode=first_item and the gate is still closed, else 409 invalid_transition. Releasing a PAUSED run stamps the gate but dispatches nothing until resume_mass_action: the pause dominates.\n\nContract:\n- MCP tool `release_mass_action_canary`, registry package `mcp.orchestration/mass_actions`, mount `orchestration.mass_actions`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        }
+      ]
+    },
+    {
+      "id": "account-signed-out",
+      "query": "sender signed out of LinkedIn how to log in again",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 1240,
+      "hits": [
+        {
+          "article_id": "kb/account-health",
+          "chars_full": 1315,
+          "chars_sent": 1315,
+          "truncated": false,
+          "hash": "0e975949",
+          "article_title": "Signed in at all: check the browser first",
+          "section": "Signed in at all: check the browser first",
+          "score": 1,
+          "content": "## Signed in at all: check the browser first\n\nA warmup score is meaningless for a sender that is signed out of LinkedIn, so every health read\nstarts with the login state, and the login state lives on the account's **browser**, not on the\naccount itself.\n\n<Warning>\n  The account's `status` field is platform lifecycle (`new`, `initial_syncing`, `active`, `sync_failed`,\n  `shared_out`, `subscription_required`). It is not health and not login state: a sender whose LinkedIn\n  session died still reads `status: \"active\"`. The signed-out fact is the bound browser's\n  `status: \"login_issue\"`, which is the platform's only \"signed out of LinkedIn\" state. There is no\n  separate `logged_out` value.\n</Warning>\n\nIn the app the signal is the red **Signed out of LinkedIn** state on the sender row and in the\ndrawer. Over the API it is two things on `/api/linkedin-accounts/search`: the always-present\n`counts.signed_out_count` (how many matching senders have a signed-out browser), and per row the\n`include[]=antidetect_browser` relation, whose `status`, `error_reason`, `logout_count` and\n`last_logout_at` say who is out, since when, and what LinkedIn answered. A signed-out browser is\npowered off, sticky, and never woken automatically; re-login is the only fix\n([browser troubleshooting](/kb/browser-troubleshooting))."
+        },
+        {
+          "article_id": "kb/browser-troubleshooting",
+          "chars_full": 1778,
+          "chars_sent": 1441,
+          "truncated": true,
+          "hash": "24365301",
+          "article_title": "login_issue: LinkedIn asks to log in again",
+          "section": "`login_issue`: LinkedIn asks to log in again",
+          "score": 0.5,
+          "content": "## `login_issue`: LinkedIn asks to log in again\n\nThe drawer shows **Signed out of LinkedIn**. During an initial sync the sync box shows\n**Sync paused, action needed**, with `browser:logged_out` next to the **Reason:** label\nand the reason line **LinkedIn session lost**. That code is a fixed display string in the\napp, not the sync run's `wait_reason`. There is no separate \"logged out\" status, and three\nproperties of this one explain almost every ticket in this category:\n\n* **It is sticky.** Later runtime errors, proxy errors and repeat logout reports are\n  recorded in the log but cannot reclassify the status or bump the counters. Only a\n  successful re-login moves the row off it.\n* **The browser is already powered off**, which is why the row action reads **Start**\n  rather than **Restart**.\n* **Nothing will wake it.** Automatic wake covers `idle` browsers only.\n\nA logout is almost always noticed at the next start, not mid-run: the post-start check is\nwhat probes the LinkedIn session, so a session LinkedIn invalidated while the browser sat\nidle only surfaces when the browser comes back up.\n\n<Note>\n  The ACCOUNT row does not change when this happens: its `status` is platform lifecycle and\n  keeps reading `active` while the browser sits in `login_issue`. Any health read, human or\n  API, must look at the browser: over the API that is `include[]=antidetect_browser` on the\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_accounts/search-linkedin-accounts",
+          "chars_full": 1199,
+          "chars_sent": 1199,
+          "truncated": false,
+          "hash": "ae858d94",
+          "article_title": "Search LinkedIn accounts",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Search LinkedIn accounts\nList LinkedIn accounts (senders) on the team with operator filters, sort and cursor pagination, plus an always-present counts block (total, premium / SN / Recruiter, active_today, stale, signed_out). Also the way to find an account sid before calling account-scoped tools. For ANY health or availability question, request include antidetect_browser: login state lives on the bound browser row, whose status login_issue means the sender is signed out of LinkedIn. The item status field is platform lifecycle and stays active through a logout, so never read it as health. counts.signed_out_count flags signed-out senders even without the include; per-row attribution needs it. A full sender health summary combines antidetect_browser with linkedin_account_smart_limits, linkedin_account_snapshot (warmup score) and linkedin_account_block_log_counts. Items with includes are large: page a fleet with page_size 10 or less and follow next_cursor instead of asking for one big page.\n\nContract:\n- MCP tool `search_linkedin_accounts`, registry package `mcp.linkedin/linkedin_accounts`, mount `linkedin.accounts`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "kb/connect-a-linkedin-account",
+          "chars_full": 6104,
+          "chars_sent": 374,
+          "truncated": true,
+          "hash": "5fe9c483",
+          "article_title": "1. Connect in the app",
+          "section": "1. Connect in the app",
+          "score": 0.25,
+          "content": "## 1. Connect in the app\n\n<Steps>\n  <Step title=\"Open Senders and click Connect account\">\n    On [app.gtm-api.com](https://app.gtm-api.com/login), open **Senders** and click\n    **Connect account** in the top right.\n\n    <Frame caption=\"The Senders page: every connected account with its browser, health and sync state.\">\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "kb/proxy-troubleshooting",
+          "chars_full": 949,
+          "chars_sent": 949,
+          "truncated": false,
+          "hash": "5a47bf1c",
+          "article_title": "Check 6: if it is the session, not the proxy",
+          "section": "Check 6: if it is the session, not the proxy",
+          "score": 0.2,
+          "content": "## Check 6: if it is the session, not the proxy\n\nA browser in **login issue** is not a network problem. LinkedIn invalidated the session, the status\nis sticky, and no proxy swap, restart or wait will clear it. During the initial sync the drawer\nshows **Sync paused, action needed** with the reason `browser:logged_out`; after the initial sync\nit shows **Signed out of LinkedIn** with a **Log in via cloud browser** button. Re-login is the\nonly fix, in the app or through\n**Generate re-login link** for the account's owner ([how](/kb/browser-troubleshooting)).\n\nMeanwhile a sync run parked on a broken browser re-checks every **30 minutes** and holds its place\nin the queue, and a run waiting on an `idle` browser to cold-start re-checks every **60 seconds**.\nOnly `running` and `idle` browsers are woken automatically: one in `running_issue`, `start_issue`,\n`login_issue`, `error_investigation` or `maintenance` waits for an explicit start, forever."
+        }
+      ]
+    },
+    {
+      "id": "browser-wont-start",
+      "query": "antidetect browser will not start",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 607,
+      "hits": [
+        {
+          "article_id": "kb/browser-troubleshooting",
+          "chars_full": 246,
+          "chars_sent": 246,
+          "truncated": false,
+          "hash": "d0a42fa4",
+          "article_title": "Browser will not start",
+          "section": "Intro",
+          "score": 1,
+          "content": "Browser will not start\nThe antidetect browser sits in an issue status, the session dies right after starting, or LinkedIn keeps asking to log in. How to read the status, what the platform already did on its own, and when re-login is the only fix."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/run-antidetect-browser",
+          "chars_full": 555,
+          "chars_sent": 555,
+          "truncated": false,
+          "hash": "41a56260",
+          "article_title": "Run antidetect browser",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Run antidetect browser\nStart an antidetect browser session by sid. Two-phase: transitions to queued_to_start, dispatches to an automation server, then settles into initializing / running / start_issue. Identify the browser by its ab_br_ sid in the body.\n\nContract:\n- MCP tool `run_antidetect_browser`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/get-antidetect-browser",
+          "chars_full": 294,
+          "chars_sent": 294,
+          "truncated": false,
+          "hash": "a292d382",
+          "article_title": "Get antidetect browser",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Get antidetect browser\nFetch a single antidetect browser by sid, with optional eager-loaded relations.\n\nContract:\n- MCP tool `get_antidetect_browser`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `get`, response envelope `get`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browser_logs/search-antidetect-browser-logs",
+          "chars_full": 592,
+          "chars_sent": 592,
+          "truncated": false,
+          "hash": "48314488",
+          "article_title": "Search antidetect browser logs",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Search antidetect browser logs\nList antidetect-browser runtime log rows for the team with filters, sorting and cursor pagination. This is the operational trail behind a browser's status (start/stop, runtime errors, proxy issues, logouts). Returns a counts block of predicate tallies; include[] can eager-load the antidetect_browser. Scope to one browser with antidetect_browser_sid.\n\nContract:\n- MCP tool `search_antidetect_browser_logs`, registry package `mcp.linkedin/antidetect_browser_logs`, mount `linkedin.browsers`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/stop-antidetect-browser",
+          "chars_full": 579,
+          "chars_sent": 579,
+          "truncated": false,
+          "hash": "b30bff0a",
+          "article_title": "Stop antidetect browser",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Stop antidetect browser\nStop an antidetect browser session by sid. Default is graceful (queued_to_stop → stopped on the node teardown confirmation); now:true commits stopped immediately and dispatches a best-effort teardown. Identify the browser by its ab_br_ sid in the body.\n\nContract:\n- MCP tool `stop_antidetect_browser`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        }
+      ]
+    },
+    {
+      "id": "browser-lifecycle-statuses",
+      "query": "cloud browser statuses running stopped suspended",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 720,
+      "hits": [
+        {
+          "article_id": "kb/antidetect-browsers-and-proxies",
+          "chars_full": 736,
+          "chars_sent": 736,
+          "truncated": false,
+          "hash": "cb354003",
+          "article_title": "Browser lifecycle",
+          "section": "Browser lifecycle",
+          "score": 1,
+          "content": "## Browser lifecycle\n\nA browser is **created** (cloud-minted or bring-your-own), **run** when work needs it,\nand **stopped** when idle.\n\n<Note>\n  An idle running browser is suspended automatically after about 15 minutes without\n  activity, and due syncs or actions wake it on their own. See\n  [Sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend).\n</Note>\n\nIf a running browser becomes unhealthy (its LinkedIn tab dies, the profile crashes), the\nplatform marks it with an issue status and powers it off instead of leaving it running\nblind. Fix the underlying problem, most often the proxy, then run it again. Deleting a\nbrowser removes the profile; the bound LinkedIn account can be reconnected later through\na new browser."
+        },
+        {
+          "article_id": "kb/browser-troubleshooting",
+          "chars_full": 1688,
+          "chars_sent": 1319,
+          "truncated": true,
+          "hash": "9aeef03f",
+          "article_title": "Read the status first",
+          "section": "Read the status first",
+          "score": 0.5,
+          "content": "## Read the status first\n\nOpen **Senders**, click the account row, open the **Browser** tab of the drawer. The first\nfour statuses below are exactly what the **Browser issue** filter chip on the list selects.\n\n| Status                  | Pill  | What happened                                                        | What clears it                            |\n| ----------------------- | ----- | -------------------------------------------------------------------- | ----------------------------------------- |\n| `start_issue`           | amber | The launch was reported as failed. The browser is not running.       | Run it again                              |\n| `running_issue`         | amber | The session started, then hit a runtime or proxy error. Powered off. | Run it again, then check the proxy        |\n| `error_investigation`   | amber | Repeated failures crossed the escalation threshold. Powered off.     | Manual inspection inside the browser      |\n| `login_issue`           | red   | LinkedIn invalidated the session. Powered off, and sticky.           | Re-login inside the browser, nothing else |\n| `shared_out`            | grey  | Not a fault. The browser is lent to another workspace.               | The share ending                          |\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "kb/sync-windows-and-auto-suspend",
+          "chars_full": 515,
+          "chars_sent": 515,
+          "truncated": false,
+          "hash": "20995c0a",
+          "article_title": "Browser auto-suspend and wake",
+          "section": "Browser auto-suspend and wake",
+          "score": 0.3333333333333333,
+          "content": "## Browser auto-suspend and wake\n\nA running antidetect browser costs resources, so idle browsers suspend automatically:\nafter about 15 minutes without activity the platform stops the browser.\n\nWaking is automatic too:\n\n* an **action** waits for the browser to start, then runs;\n* a due **sync** wakes the browser in the background.\n\n<Note>\n  You never need to start browsers manually for scheduled work. A browser you stopped\n  yourself stays stopped for manual use, but due syncs and actions still wake it.\n</Note>"
+        },
+        {
+          "article_id": "kb/proxy-troubleshooting",
+          "chars_full": 2409,
+          "chars_sent": 1390,
+          "truncated": true,
+          "hash": "d02ed5a5",
+          "article_title": "Check 1: read the two statuses",
+          "section": "Check 1: read the two statuses",
+          "score": 0.25,
+          "content": "## Check 1: read the two statuses\n\nThe browser and the proxy carry separate statuses, and a dead proxy does **not** show up as a\nproxy-named browser status. Read both on the **Browser** tab of the account drawer (**Senders**,\nclick the row): the proxy block shows residential or datacenter, country, latency and a **Proxy\nuptime** row. Hover the **Proxy uptime** row to read `Proxy status: active | no connection |\ncountry mismatch | fraud flagged | replaced`.\n\nOnly two browser statuses point at the proxy: **running issue**, a runtime fault and where a\nproxy failure lands, and **start issue**, frequently a proxy that timed out. **login issue** is a\nlost session (Check 6); `idle` is auto-suspend; **subscription required** is billing; **shared\nout** leaves the proxy with the owning team ([full list](/kb/browser-troubleshooting)).\n\n<Warning>\n  A browser escalates to **investigating** after more than 10 failures with more than 10 errors in\n  48 hours, and that state emails the account owner. The failure counter is cleared only when the\n  browser comes back up and reports `running`, never by time; the 48 hour window applies to the error\n  rows, so once old errors age out the browser stops escalating even though the counter still\n  stands. Proxy failures do **not** increment it, so proxy errors alone never escalate a browser.\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "kb/account-sharing-and-handover",
+          "chars_full": 1216,
+          "chars_sent": 1216,
+          "truncated": false,
+          "hash": "b06369c2",
+          "article_title": "What happens on your side",
+          "section": "What happens on your side",
+          "score": 0.2,
+          "content": "## What happens on your side\n\nAccount status and browser status both become `shared_out` (the Senders list shows the browser as\n`shared out`, hold reason \"Lent to another workspace\"), the browser session is stopped and its\nautomation server is released. The account leaves every scheduler, dispatcher and stale-heartbeat\nsweep, so silence from a parked account is expected, not a fault.\n\n<Warning>\n  Parking stops in-flight work: running sync runs are **cancelled** with the reason\n  `account_shared_out`, auto-scrapes and mass-action runs are **paused** with the reason\n  `account_unavailable`. On recall only what the park paused is resumed, so a manual pause or a limit\n  hold you set survives the round trip. Cancelled sync runs are never recreated: the scheduler mints\n  fresh ones once the account is back.\n</Warning>\n\nYou keep two things while the account is away: a cloud-browser session on the parked original, and\nits proxy. That session is how you fix a LinkedIn logout mid-loan, and nobody is notified when one\nhappens, so the borrower has to tell you. You cannot delete the parked account or re-connect the\nsame LinkedIn member to work around the share: both answer `409 conflict`, `account_shared_out`."
+        }
+      ]
+    },
+    {
+      "id": "proxy-check-failed",
+      "query": "proxy connectivity check failed what to do",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 797,
+      "hits": [
+        {
+          "article_id": "kb/proxy-troubleshooting",
+          "chars_full": 2267,
+          "chars_sent": 1429,
+          "truncated": true,
+          "hash": "6fd08e39",
+          "article_title": "Check 3: run the connectivity check",
+          "section": "Check 3: run the connectivity check",
+          "score": 1,
+          "content": "## Check 3: run the connectivity check\n\nThis is the answer to \"is the proxy actually dead\". It performs a real HTTPS request through the\nproxy and times it. Take the proxy sid (`ab_px_...`) off the browser row by searching\n`antidetect-browsers` with `\"include\": [\"antidetect_browser_proxy\"]`. This check and the location\none run over the API and MCP only, with no button in the app, and both require the\n`can_change_proxy` permission: a member without it gets a `403`.\n\n```bash curl theme={null}\ncurl -X POST \"https://app.gtm-api.com/linkedin/v4/api/antidetect-browser-proxies/check-proxy-connectivity\" \\\n  -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"sid\": \"ab_px_YOUR_PROXY\"}'\n```\n\nThe result carries `total_checked`, `ok`, `avg_connection_time_ms` (the mean over the rows that\nanswered, `null` when none did) and `failed[]`, where each entry has an `error_kind`:\n\n| `error_kind` | Meaning                                                                  |\n| ------------ | ------------------------------------------------------------------------ |\n| `timeout`    | The proxy accepted nothing within the probe budget                       |\n| `tls`        | The TLS handshake through the proxy failed                               |\n| `network`    | The connection could not be established at all                           |\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browser_proxies/check-proxy-connectivity",
+          "chars_full": 582,
+          "chars_sent": 582,
+          "truncated": false,
+          "hash": "13aad86f",
+          "article_title": "Check proxy connectivity",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Check proxy connectivity\nProbe connectivity + latency for one or many proxies. Target EXACTLY ONE of sid (ab_px_) or filter; filter mode checks up to an inline cap and reports total_matched (truncated:true when the cap was hit). Read-only probe, no row mutation.\n\nContract:\n- MCP tool `check_antidetect_browser_proxy_connectivity`, registry package `mcp.linkedin/antidetect_browser_proxies`, mount `linkedin.browsers`.\n- Operation `action`, response envelope `action`.\n- Flags: mass action: this verb's own request accepts a filter or targets[] set, which the owning service drains."
+        },
+        {
+          "article_id": "kb/antidetect-browsers-and-proxies",
+          "chars_full": 589,
+          "chars_sent": 589,
+          "truncated": false,
+          "hash": "2df3f484",
+          "article_title": "Diagnose a proxy",
+          "section": "Diagnose a proxy",
+          "score": 0.3333333333333333,
+          "content": "## Diagnose a proxy\n\nTwo checks are available per browser in the drawer:\n\n| Check              | What it verifies                                      |\n| ------------------ | ----------------------------------------------------- |\n| Connectivity check | The proxy actually answers                            |\n| Location check     | The proxy's real-world geo matches what is configured |\n\nIf LinkedIn does not load inside the browser, run the connectivity check first. A\nbrowser whose proxy is dead cannot sync or act; parked work resumes automatically once\nthe browser is healthy again."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/check-custom-proxy",
+          "chars_full": 754,
+          "chars_sent": 754,
+          "truncated": false,
+          "hash": "444dfa9c",
+          "article_title": "Check custom proxy",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Check custom proxy\nProbe a customer-supplied proxy tuple and report the exit it reaches: country, IP and round-trip latency. Nothing is written, and no browser is named: call it for a proxy you are about to pass as custom_proxy_config, on create or on update-proxy. A proxy that refuses is a SUCCESSFUL call with ok:false plus error_kind (timeout | tls | network | http_error); only a malformed tuple is a 422. The write paths run the same probe themselves, so this verb is for showing the operator what a tuple resolves to BEFORE committing to it.\n\nContract:\n- MCP tool `check_antidetect_browser_proxy`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `action`, response envelope `action`.\n- Flags: read only."
+        },
+        {
+          "article_id": "kb/browser-troubleshooting",
+          "chars_full": 1192,
+          "chars_sent": 1192,
+          "truncated": false,
+          "hash": "d45f3bbd",
+          "article_title": "Ordered checks",
+          "section": "Ordered checks",
+          "score": 0.2,
+          "content": "## Ordered checks\n\nStop as soon as one of these explains what you see.\n\n1. **Confirm it is a fault, not a hold.** `shared_out` and `subscription_required` are\n   parked on purpose, and no lifecycle action is available.\n2. **If the pill is red, go straight to [re-login](#re-login-is-the-only-fix).**\n   Restarting a `login_issue` browser will not help.\n3. **Read the reason.** On the **Browser** tab, scroll to **Browser event log**. The\n   newest `error` row names the cause in its `event_type`, `code` and message.\n4. **Restart once.** For `start_issue` or `running_issue`, use **Restart now** on the\n   drawer banner, or **Restart** in the row action menu. Most clear on a fresh start, so\n   give it one attempt and watch the status.\n5. **Only then look at the proxy.** If the restart lands back in `running_issue`, run the\n   connectivity and location checks over the API\n   (`antidetect-browser-proxies/check-proxy-connectivity` and `check-proxy-location`). See\n   [proxy troubleshooting](/kb/proxy-troubleshooting).\n6. **Escalate.** `error_investigation` is the platform saying it has stopped guessing:\n   open the browser and look at it manually, or send us the artifacts listed below."
+        }
+      ]
+    },
+    {
+      "id": "byo-proxy",
+      "query": "use my own proxy for the browser",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 632,
+      "hits": [
+        {
+          "article_id": "kb/antidetect-browsers-and-proxies",
+          "chars_full": 708,
+          "chars_sent": 708,
+          "truncated": false,
+          "hash": "712a1bd1",
+          "article_title": "Proxies: cloud and BYO",
+          "section": "Proxies: cloud and BYO",
+          "score": 1,
+          "content": "## Proxies: cloud and BYO\n\n* **Cloud-minted browsers require a proxy.** You pick the country when creating the\n  browser; the platform attaches the least-loaded active proxy from the pool in that\n  country automatically.\n* **Bring-your-own browsers keep their own.** An existing vendor profile (for example\n  GoLogin) arrives with its proxy; the platform reads the session and never changes the\n  proxy.\n\n<Warning>\n  Choose the proxy country to match where the account genuinely operates. A sudden country\n  change is a classic trigger for LinkedIn verification challenges, and changing the proxy\n  of a live browser restarts it: a running session keeps the old proxy until the browser\n  respawns.\n</Warning>"
+        },
+        {
+          "article_id": "kb/proxy-troubleshooting",
+          "chars_full": 1579,
+          "chars_sent": 1321,
+          "truncated": true,
+          "hash": "1fa00e28",
+          "article_title": "Swap refusals",
+          "section": "Swap refusals",
+          "score": 0.5,
+          "content": "### Swap refusals\n\nSwitch on `error.field_errors` for `422` and on `error.context.reason` for `409` and `503`: the\ntop-level `error.code` is only `validation_failed`, `conflict` or `service_unavailable`.\n\n| HTTP  | Value                               | Meaning                                                                            |\n| ----- | ----------------------------------- | ---------------------------------------------------------------------------------- |\n| `422` | `proxy_not_managed`                 | This browser has no managed proxy to rotate. Pick a country instead to give it one |\n| `422` | `proxy_pool_empty`                  | No active proxy exists in the country you asked for                                |\n| `422` | `proxy_replacement_unavailable`     | The current country has no other active proxy to rotate onto                       |\n| `422` | `proxy_country_mismatch`            | The proxy you pinned is in a different country than the browser                    |\n| `422` | `managed_proxy_forbidden_for_owner` | This is a bring-your-own browser; its proxy is not ours to change                  |\n| `409` | `proxy_managed_by_owner`            | This is a shared copy. Proxy management stays with the owner                       |\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/change-antidetect-browser-proxy",
+          "chars_full": 1350,
+          "chars_sent": 1350,
+          "truncated": false,
+          "hash": "4894917e",
+          "article_title": "Change antidetect browser proxy",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Change antidetect browser proxy\nChange the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. EVERY arm needs browser_owner=platform: a profile bound by id keeps its proxy in the vendor (422 managed_proxy_forbidden_for_owner / 422 custom_proxy_forbidden_for_owner). custom_proxy_config is probed first (422 custom_proxy_unreachable_* changes nothing), takes the exit country measured there, and RELEASES any armed 5G slot. Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty, 5G on a BYO proxy 422 proxy_5g_requires_managed_proxy. proxy_5g alone is a valid body: it moves the add-on binding only. DANGEROUS twice over: a location flip mid-campaign can trip a LinkedIn risk check, and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.\n\nContract:\n- MCP tool `update_antidetect_browser_proxy`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browser_proxies/check-proxy-location",
+          "chars_full": 581,
+          "chars_sent": 581,
+          "truncated": false,
+          "hash": "098a214d",
+          "article_title": "Check proxy location",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Check proxy location\nRun a multi-vendor geo + fraud check on one or many proxies. Target EXACTLY ONE of sid (ab_px_) or filter; filter mode checks up to an inline cap and reports total_matched (truncated:true when the cap was hit). Read-only probe, no row mutation.\n\nContract:\n- MCP tool `check_antidetect_browser_proxy_location`, registry package `mcp.linkedin/antidetect_browser_proxies`, mount `linkedin.browsers`.\n- Operation `action`, response envelope `action`.\n- Flags: mass action: this verb's own request accepts a filter or targets[] set, which the owning service drains."
+        },
+        {
+          "article_id": "api-reference/linkedin/antidetect_browsers/rotate-antidetect-browser-proxy",
+          "chars_full": 991,
+          "chars_sent": 991,
+          "truncated": false,
+          "hash": "c20e23c6",
+          "article_title": "Rotate antidetect browser proxy",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Rotate antidetect browser proxy\nRotate an antidetect browser onto another MANAGED proxy of the SAME country. Geo-binding is preserved, so this is the safe way to drop a flagged IP. Omit antidetect_browser_proxy_sid to take the least-loaded active proxy of that country, or pin one (a pin from another country is refused, 422 proxy_country_mismatch). Platform-owned browsers only, 422 managed_proxy_forbidden_for_owner; a platform row that never got a proxy is 422 proxy_not_managed; a country with no other active proxy is 422 proxy_replacement_unavailable. A running browser is stopped and started again so the new IP takes effect; result.restarted reports whether it came back.\n\nContract:\n- MCP tool `replace_antidetect_browser_proxy`, registry package `mcp.linkedin/antidetect_browsers`, mount `linkedin.browsers`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        }
+      ]
+    },
+    {
+      "id": "messages-not-appearing",
+      "query": "message not appearing in inbox sync delay",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 724,
+      "hits": [
+        {
+          "article_id": "kb/inbox-and-message-sync",
+          "chars_full": 208,
+          "chars_sent": 208,
+          "truncated": false,
+          "hash": "458a9492",
+          "article_title": "Inbox and message sync",
+          "section": "Intro",
+          "score": 1,
+          "content": "Inbox and message sync\nHow conversations and messages reach the platform: what the initial backfill imports, how often each surface re-syncs, what realtime push covers, and why a message may not be there yet."
+        },
+        {
+          "article_id": "kb/index",
+          "chars_full": 251,
+          "chars_sent": 251,
+          "truncated": false,
+          "hash": "316057c3",
+          "article_title": "Conversations",
+          "section": "Conversations",
+          "score": 0.5,
+          "content": "## Conversations\n\n<CardGroup cols={2}>\n  <Card title=\"Inbox and message sync\" href=\"/kb/inbox-and-message-sync\" icon=\"inbox\">\n    What the backfill imports, how often each surface refreshes, and why a reply may not be there yet.\n  </Card>\n</CardGroup>"
+        },
+        {
+          "article_id": "kb/sync-windows-and-auto-suspend",
+          "chars_full": 1833,
+          "chars_sent": 396,
+          "truncated": true,
+          "hash": "e35cb466",
+          "article_title": "Sync windows and auto-suspend",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Each LinkedIn account has a **sync window**: the days and hours during which recurring\nsynchronizations (inbox, connections, invitations, followers) are created and picked\nup. Outside the window no new recurring sync starts.\n\n<Frame caption=\"The Account Sync tab: sync days and hours at the top, per-kind sync intervals below, each editable.\">\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_conversations/sync-my-linkedin-conversations",
+          "chars_full": 570,
+          "chars_sent": 570,
+          "truncated": false,
+          "hash": "ba167942",
+          "article_title": "Sync my LinkedIn conversations",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Sync my LinkedIn conversations\nStart a background sync run that reconciles the full basic-LinkedIn-messenger thread directory for one account. ASYNC: returns a pending ref (sync_run_sid) to poll; changed threads have their messages pulled inline. Use for initial backfill / full reconciliation; for a fresh inbox head use get_my_latest_linkedin_conversations.\n\nContract:\n- MCP tool `sync_my_linkedin_conversations`, registry package `mcp.linkedin/linkedin_conversations`, mount `linkedin.messaging`.\n- Operation `action`, response envelope `action_async`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_connection_requests/sync-connection-requests",
+          "chars_full": 8523,
+          "chars_sent": 1411,
+          "truncated": true,
+          "hash": "4cb80e93",
+          "article_title": "Sync connection requests",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "REST Endpoint POST /api/linkedin-connection-requests/sync-linkedin-connection-requests\nSummary: Sync connection requests\nDescription: Refresh the outbound sent-invitations snapshot for one account by inserting a sync_run (upsert-only). ASYNC: returns pending refs to poll or await the linkedin-connection-requests.sync-completed webhook.\n\nContract:\n- MCP tool `sync_linkedin_connection_requests`, registry package `mcp.linkedin/linkedin_connection_requests`, mount `linkedin.network`.\n- Operation `action`, response envelope `action_async`.\n- Flags: none.\nRequest body:\nContent type: application/json\n- linkedin_account_sid: type string; required; description LinkedIn account sid (ln_ac_…) of the sending account.\nResponses:\n200: `action_async` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required\n- async: type enum<boolean>; required; enum true\n- item: type object | null; required\n- item.sid: type string; required\n- item.team_sid: type string; required\n- item.linkedin_account_sid: type string; required\n- item.ln_member_id: type string; required\n- item.ln_id: type string | null; required\n- item.sn_id: type string | null; required\n- item.nickname: type string | null; required\n- item.note: type string | null; required\n[truncated: fetch the full page with get_kb_article]"
+        }
+      ]
+    },
+    {
+      "id": "force-refresh-conversations",
+      "query": "force refresh conversations sync now",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 793,
+      "hits": [
+        {
+          "article_id": "kb/inbox-and-message-sync",
+          "chars_full": 1494,
+          "chars_sent": 1451,
+          "truncated": true,
+          "hash": "cd244ed8",
+          "article_title": "Force a refresh now",
+          "section": "Force a refresh now",
+          "score": 1,
+          "content": "## Force a refresh now\n\nA **head refresh** reads the newest page of one thread or account synchronously and returns the\nrows themselves; use it in almost every case. A **full sync** reconciles the head of the\ndirectory in the background and returns a sync run to poll; like every recurring run it stops\nonce a page holds 10 threads it already knows, so it will not reach an old thread that is\nmissing locally. Only a sync reset re-walks the directory end to end.\n\n```bash curl theme={null}\ncurl -X POST \"https://app.gtm-api.com/linkedin/v4/api/linkedin-messages/get-my-latest\" \\\n  -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"linkedin_conversation_sid\": \"ln_cv_YOUR_THREAD\", \"page_size\": 50}'\n```\n\nThe response carries a `refresh` block with counters and a `stop_reason` of `overlap`,\n`covered`, `page_cap` or `exhausted`. A head refresh never stamps the account's sync clock and\nnever emits `linkedin-conversations.sync-completed`, so it does not postpone the next drain.\n\n<Note>\n  Every head refresh page and every background message pull spends one call from the account's\n  `self_account_sync` budget: **200 calls per day**, with a **6 second** pacing delay and bursts\n  of **5**. When it is spent, reads answer `429 rate_limited` with `limit_type:\n    \"self_account_sync\"` and a `retry_after`, and parked runs resume at the next daily reset or\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_conversations/sync-my-sales-navigator-conversations",
+          "chars_full": 514,
+          "chars_sent": 514,
+          "truncated": false,
+          "hash": "d58d15ff",
+          "article_title": "Sync my Sales Navigator conversations",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Sync my Sales Navigator conversations\nStart a background sync run that reconciles the full Sales Navigator thread directory for one account. ASYNC: returns a pending ref to poll. Separate sync_type and cadence from the basic-LinkedIn sync so SN-only lanes never touch basic-messenger rate limits.\n\nContract:\n- MCP tool `sync_my_sales_navigator_conversations`, registry package `mcp.linkedin/linkedin_conversations`, mount `linkedin.messaging`.\n- Operation `action`, response envelope `action_async`.\n- Flags: none."
+        },
+        {
+          "article_id": "kb/sync-windows-and-auto-suspend",
+          "chars_full": 686,
+          "chars_sent": 686,
+          "truncated": false,
+          "hash": "2a3f3936",
+          "article_title": "What the window gates, and what it does not",
+          "section": "What the window gates, and what it does not",
+          "score": 0.3333333333333333,
+          "content": "## What the window gates, and what it does not\n\n* **Recurring syncs are window-gated.** Conversations, connections, invitations,\n  followers and profile refreshes are scheduled only inside the configured hours.\n* **Actions are not.** Sending a message or a connection request runs whenever you or\n  an automation triggers it, at any hour, subject to\n  [smart limits](/kb/smart-limits-and-warmup).\n* **Onboarding respects the window.** The initial import of a freshly connected account\n  runs within the configured hours.\n\nEdit the window and the per-kind intervals on the **Account Sync** tab of the account\ndrawer. Each sync kind shows its interval, the last run and the next due time."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_conversations/get-my-latest-linkedin-conversations",
+          "chars_full": 594,
+          "chars_sent": 594,
+          "truncated": false,
+          "hash": "24e9076f",
+          "article_title": "Get my latest LinkedIn conversations",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Get my latest LinkedIn conversations\nAlways-fresh head read of the basic-LinkedIn-messenger thread list for one account (§5.8 foreground refresh, then the last N threads from the refreshed DB, last_activity_at DESC). Never serves stale data: it 429s with bucket_saturated / sync_in_progress instead. Use before an inbox decision; use sync_my_linkedin_conversations for full backfill.\n\nContract:\n- MCP tool `get_my_latest_linkedin_conversations`, registry package `mcp.linkedin/linkedin_conversations`, mount `linkedin.messaging`.\n- Operation `action`, response envelope `search`.\n- Flags: none."
+        },
+        {
+          "article_id": "kb/index",
+          "chars_full": 251,
+          "chars_sent": 251,
+          "truncated": false,
+          "hash": "316057c3",
+          "article_title": "Conversations",
+          "section": "Conversations",
+          "score": 0.2,
+          "content": "## Conversations\n\n<CardGroup cols={2}>\n  <Card title=\"Inbox and message sync\" href=\"/kb/inbox-and-message-sync\" icon=\"inbox\">\n    What the backfill imports, how often each surface refreshes, and why a reply may not be there yet.\n  </Card>\n</CardGroup>"
+        }
+      ]
+    },
+    {
+      "id": "sync-window",
+      "query": "sync window schedule when does the account sync",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 588,
+      "hits": [
+        {
+          "article_id": "kb/sync-windows-and-auto-suspend",
+          "chars_full": 686,
+          "chars_sent": 686,
+          "truncated": false,
+          "hash": "2a3f3936",
+          "article_title": "What the window gates, and what it does not",
+          "section": "What the window gates, and what it does not",
+          "score": 1,
+          "content": "## What the window gates, and what it does not\n\n* **Recurring syncs are window-gated.** Conversations, connections, invitations,\n  followers and profile refreshes are scheduled only inside the configured hours.\n* **Actions are not.** Sending a message or a connection request runs whenever you or\n  an automation triggers it, at any hour, subject to\n  [smart limits](/kb/smart-limits-and-warmup).\n* **Onboarding respects the window.** The initial import of a freshly connected account\n  runs within the configured hours.\n\nEdit the window and the per-kind intervals on the **Account Sync** tab of the account\ndrawer. Each sync kind shows its interval, the last run and the next due time."
+        },
+        {
+          "article_id": "kb/inbox-and-message-sync",
+          "chars_full": 1711,
+          "chars_sent": 1422,
+          "truncated": true,
+          "hash": "cae6672a",
+          "article_title": "How often each surface re-syncs",
+          "section": "How often each surface re-syncs",
+          "score": 0.5,
+          "content": "## How often each surface re-syncs\n\n| Surface                         | Default interval | Editable per account |\n| ------------------------------- | ---------------- | -------------------- |\n| `conversations`                 | 180 minutes      | yes                  |\n| `sales_navigator_conversations` | 120 minutes      | yes                  |\n| `connections`                   | 180 minutes      | yes                  |\n| `connection_requests`           | 720 minutes      | yes                  |\n| `connection_invitations`        | 720 minutes      | yes                  |\n| `premium_check`                 | 360 minutes      | yes                  |\n| `snapshot`                      | 1320 minutes     | no                   |\n| `followers`                     | 1440 minutes     | no                   |\n\nThree things change the effective interval: your per-account setting on the **Account Sync**\ntab, the [sync window](/kb/sync-windows-and-auto-suspend) (a run due outside the configured\nhours parks with `schedule:closed` until it reopens), and the free plan floor.\n\n<Warning>\n  On the free plan every surface is floored to **once per 1440 minutes (daily)**: the effective\n  interval is the larger of the two. Free plan accounts also get **no realtime push**, so a\n  reply can sit for up to a day. Initial backfills are exempt from the floor.\n</Warning>\n\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_accounts/update-account-sync-config",
+          "chars_full": 769,
+          "chars_sent": 769,
+          "truncated": false,
+          "hash": "94ba7032",
+          "article_title": "Update account sync config",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Update account sync config\nSet the account's weekly sync schedule: the timezone, the allowed per-weekday time windows, and per-track cadence entries. Replaces the stored sync_config wholesale (send the full desired config, not a delta). Returns the updated account. SINGLE account: to reschedule a fleet, author a mass action on /mcp/orchestration/mass-actions with the step `linkedin-accounts.update-sync-config` (scope objects) so the whole change rides ONE approval.\n\nContract:\n- MCP tool `update_linkedin_account_sync_config`, registry package `mcp.linkedin/linkedin_accounts`, mount `linkedin.accounts`.\n- Operation `action`, response envelope `action`.\n- Flags: step eligible: gtm.service.orchestration can run this verb as a mass-action plan step, once per item."
+        },
+        {
+          "article_id": "kb/proxy-troubleshooting",
+          "chars_full": 377,
+          "chars_sent": 377,
+          "truncated": false,
+          "hash": "01fc2bcf",
+          "article_title": "Is this even broken?",
+          "section": "Is this even broken?",
+          "score": 0.25,
+          "content": "## Is this even broken?\n\n**Idle browsers power off after 15 minutes without activity** and wake on the next due sync or\naction, and recurring syncs only start inside the account's\n[sync window](/kb/sync-windows-and-auto-suspend). The power-off and a closed sync window write\nnothing to the browser event log; the wake writes a `started_by_user` row, `Starting by user:\nsystem`."
+        },
+        {
+          "article_id": "kb/account-health",
+          "chars_full": 194,
+          "chars_sent": 194,
+          "truncated": false,
+          "hash": "1fa14daf",
+          "article_title": "Related",
+          "section": "Related",
+          "score": 0.2,
+          "content": "## Related\n\n* [Smart limits and warmup](/kb/smart-limits-and-warmup)\n* [Sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend)\n* [Browser troubleshooting](/kb/browser-troubleshooting)"
+        }
+      ]
+    },
+    {
+      "id": "auto-suspend-wake",
+      "query": "browser auto-suspend and wake",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 509,
+      "hits": [
+        {
+          "article_id": "kb/sync-windows-and-auto-suspend",
+          "chars_full": 515,
+          "chars_sent": 515,
+          "truncated": false,
+          "hash": "20995c0a",
+          "article_title": "Browser auto-suspend and wake",
+          "section": "Browser auto-suspend and wake",
+          "score": 1,
+          "content": "## Browser auto-suspend and wake\n\nA running antidetect browser costs resources, so idle browsers suspend automatically:\nafter about 15 minutes without activity the platform stops the browser.\n\nWaking is automatic too:\n\n* an **action** waits for the browser to start, then runs;\n* a due **sync** wakes the browser in the background.\n\n<Note>\n  You never need to start browsers manually for scheduled work. A browser you stopped\n  yourself stays stopped for manual use, but due syncs and actions still wake it.\n</Note>"
+        },
+        {
+          "article_id": "kb/browser-troubleshooting",
+          "chars_full": 2302,
+          "chars_sent": 1370,
+          "truncated": true,
+          "hash": "c2829e6a",
+          "article_title": "What the platform already did",
+          "section": "What the platform already did",
+          "score": 0.5,
+          "content": "## What the platform already did\n\n| Behaviour           | Exact rule                                                                                                                                                                                  |\n| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Auto-suspend        | A `running` browser with no activity for 15 minutes is powered off and committed as `idle`. The reaper runs every 1 minute.                                                                 |\n| Wake on demand      | Only an `idle` browser wakes by itself. An action waits for it to come up; a due sync defers and resumes. See [sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend).           |\n| Power-off on fault  | Landing in `running_issue` or `error_investigation` triggers a best-effort stop of the session. The stored status stays at the fault value so you can still see it.                         |\n| Power-off on logout | The `login_issue` branch tears the session down immediately, and the row stays `login_issue`.                                                                                               |\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "kb/antidetect-browsers-and-proxies",
+          "chars_full": 736,
+          "chars_sent": 736,
+          "truncated": false,
+          "hash": "cb354003",
+          "article_title": "Browser lifecycle",
+          "section": "Browser lifecycle",
+          "score": 0.3333333333333333,
+          "content": "## Browser lifecycle\n\nA browser is **created** (cloud-minted or bring-your-own), **run** when work needs it,\nand **stopped** when idle.\n\n<Note>\n  An idle running browser is suspended automatically after about 15 minutes without\n  activity, and due syncs or actions wake it on their own. See\n  [Sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend).\n</Note>\n\nIf a running browser becomes unhealthy (its LinkedIn tab dies, the profile crashes), the\nplatform marks it with an issue status and powers it off instead of leaving it running\nblind. Fix the underlying problem, most often the proxy, then run it again. Deleting a\nbrowser removes the profile; the bound LinkedIn account can be reconnected later through\na new browser."
+        },
+        {
+          "article_id": "kb/index",
+          "chars_full": 604,
+          "chars_sent": 604,
+          "truncated": false,
+          "hash": "753768bc",
+          "article_title": "Safety and pacing",
+          "section": "Safety and pacing",
+          "score": 0.25,
+          "content": "## Safety and pacing\n\n<CardGroup cols={2}>\n  <Card title=\"Smart limits and warmup\" href=\"/kb/smart-limits-and-warmup\" icon=\"shield\">\n    Per-action daily budgets, the warmup ramp, holds and how to release them.\n  </Card>\n\n  <Card title=\"Sync windows and auto-suspend\" href=\"/kb/sync-windows-and-auto-suspend\" icon=\"clock\">\n    When recurring syncs run, what ignores the window, and how browsers sleep and wake.\n  </Card>\n\n  <Card title=\"Account health\" href=\"/kb/account-health\" icon=\"heart-pulse\">\n    The signals behind the score, what each state means, and which ones self-heal.\n  </Card>\n</CardGroup>"
+        },
+        {
+          "article_id": "kb/smart-limits-and-warmup",
+          "chars_full": 202,
+          "chars_sent": 202,
+          "truncated": false,
+          "hash": "8757835d",
+          "article_title": "Related",
+          "section": "Related",
+          "score": 0.2,
+          "content": "## Related\n\n* [Sync windows and auto-suspend](/kb/sync-windows-and-auto-suspend)\n* [Antidetect browsers and proxies](/kb/antidetect-browsers-and-proxies)\n* [Run a mass action](/guides/run-a-mass-action)"
+        }
+      ]
+    },
+    {
+      "id": "free-plan-sandbox",
+      "query": "free plan what is included limits",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 508,
+      "hits": [
+        {
+          "article_id": "kb/billing-and-plans",
+          "chars_full": 213,
+          "chars_sent": 213,
+          "truncated": false,
+          "hash": "cbe4d677",
+          "article_title": "Billing and plans",
+          "section": "Intro",
+          "score": 1,
+          "content": "You start on Sandbox, the forever free plan: one connected LinkedIn account, the\nfull product, no card and no time limit. This page covers what each plan grants,\nwhat changes at each boundary, and where to see it."
+        },
+        {
+          "article_id": "kb/workspaces-and-team-members",
+          "chars_full": 696,
+          "chars_sent": 696,
+          "truncated": false,
+          "hash": "456727b1",
+          "article_title": "The free plan is single-user",
+          "section": "The free plan is single-user",
+          "score": 0.5,
+          "content": "## The free plan is single-user\n\n<Warning>\n  On the free plan both inviting and accepting answer **HTTP 402** `payment_required`, with\n  `context.reason = \"team_members_not_available_on_free\"` and\n  `context.suggested_action = \"upgrade_subscription\"`. The error is recoverable: upgrade and the same\n  call succeeds.\n</Warning>\n\nBecause the gate runs on acceptance as well as on the invite, a workspace that was paid, invited\npeople, and then fell to the free plan keeps its pending invitations **frozen** rather than losing\nthem: the invitee gets the 402, and the same link works again once a plan is applied. Paid and\npartner plans are multi-user: see [billing and plans](/kb/billing-and-plans)."
+        },
+        {
+          "article_id": "kb/enrichment",
+          "chars_full": 666,
+          "chars_sent": 666,
+          "truncated": false,
+          "hash": "2173cd00",
+          "article_title": "Daily budget",
+          "section": "Daily budget",
+          "score": 0.3333333333333333,
+          "content": "## Daily budget\n\nEnrichment spends one shared bucket per account called `enrichment`. Read it before a\nbatch, on the Smart Limits tab of the account drawer or through\n[smart limits and warmup](/kb/smart-limits-and-warmup) filtered on `limit_type`.\n\n<Warning>\n  Default budget: 80 enrichment actions per day per account, with a 240 second gap enforced\n  between counted actions. When the budget is spent or the gap has not elapsed the call\n  returns `429 rate_limited`, reason `bucket_saturated`, with a `retry_after` value; retry\n  after that timestamp, not on a fixed schedule. The free plan clamps this to 12 enrichments\n  per day per connected account.\n</Warning>"
+        },
+        {
+          "article_id": "kb/account-sharing-and-handover",
+          "chars_full": 2981,
+          "chars_sent": 1301,
+          "truncated": true,
+          "hash": "5669535b",
+          "article_title": "What the receiving side gets",
+          "section": "What the receiving side gets",
+          "score": 0.25,
+          "content": "## What the receiving side gets\n\n| Crosses with the copy                                                                | Does not cross                                                                                                                                                                                                       |\n| ------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| The same LinkedIn identity and browser profile, so no re-login                       | Every synced child record (connections, conversations, messages, invitations), all ten timestamp clocks, including `initial_sync_completed_at`, so the copy runs its own initial sync before it may do outbound work |\n| LinkedIn member ids, name, avatar, premium and Sales Navigator flags, InMail credits | Warmup and smart limits, re-derived from scratch on the receiving side                                                                                                                                               |\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "guides/receive-webhooks",
+          "chars_full": 1256,
+          "chars_sent": 1256,
+          "truncated": false,
+          "hash": "3672c0ab",
+          "article_title": "1. Register an endpoint",
+          "section": "1. Register an endpoint",
+          "score": 0.2,
+          "content": "## 1. Register an endpoint\n\n`POST /api/webhooks` takes a `name`, your `target_url` and the `events[]` you want:\n\n```json theme={null}\n{\n  \"name\": \"Mass action outcomes\",\n  \"target_url\": \"https://example.com/hooks/gtm\",\n  \"events\": [\"mass-actions.settled\", \"mass-actions.paused\"]\n}\n```\n\n* `name` is required (1 to 255 characters). Omitting it fails validation.\n* `target_url` must be `https://` and must not resolve to a loopback, private or link-local address. DNS names are resolved and checked too, not just IP literals.\n* Each `events[]` value is validated against the platform event catalog, which currently carries 94 types across the services.\n* The same `target_url` cannot be registered twice in one team.\n* `events: [\"*\"]` subscribes to the entire catalog, including event types added later.\n\nThe response returns the webhook's `secret`, a 32-character hex string, exactly once. Store it: every later read masks it, and it is what you verify signatures with.\n\n<Note>\n  Webhooks are capped per plan. Creating one past the cap answers `402` with `webhook_limit_reached` and a body carrying `used`, `limit` and a suggested action. The free Sandbox plan's cap is 0, so webhooks need a paid plan. See [billing and plans](/kb/billing-and-plans).\n</Note>"
+        }
+      ]
+    },
+    {
+      "id": "change-plan",
+      "query": "upgrade or change subscription plan",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 554,
+      "hits": [
+        {
+          "article_id": "api-reference/id/billing_subscriptions/change-subscription",
+          "chars_full": 794,
+          "chars_sent": 794,
+          "truncated": false,
+          "hash": "a997d855",
+          "article_title": "Change subscription",
+          "section": "Intro",
+          "score": 1,
+          "content": "Change subscription\nCommit a quantity / bracket-price change. DANGEROUS: an UPGRADE charges the owner's card immediately (prorated); a downgrade applies next period (no immediate charge). Server-side preview→commit gate applies; call preview_billing_subscription_change first. manual (sales) subscriptions are not re-bracketed (422). The committed state arrives via webhook; the response returns the optimistic post-change row. Provide at least one of quantity / price_sid. Requires billing.manage.\n\nContract:\n- MCP tool `change_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/id/billing_subscriptions/preview-subscription-change",
+          "chars_full": 674,
+          "chars_sent": 674,
+          "truncated": false,
+          "hash": "a1b949be",
+          "article_title": "Preview subscription change",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Preview subscription change\nRead-only proration preview for a quantity / bracket-price change BEFORE committing. Calls Paddle Pricing Preview and returns the immediate charge (upgrade) or next-period credit (downgrade), the resolved new bracket price, and whether it crosses a bracket boundary. No state change, no charge. This is the confirmation gate to show the user before change_billing_subscription. Provide at least one of quantity / price_sid. Requires billing.view.\n\nContract:\n- MCP tool `preview_billing_subscription_change`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: read only."
+        },
+        {
+          "article_id": "kb/billing-and-plans",
+          "chars_full": 1948,
+          "chars_sent": 1380,
+          "truncated": true,
+          "hash": "6279a46e",
+          "article_title": "Changing plan over the API",
+          "section": "Changing plan over the API",
+          "score": 0.3333333333333333,
+          "content": "## Changing plan over the API\n\nSeat count is the subscription's `quantity`, and it is what the account cap follows.\nChanging it re-brackets the price automatically. The change is a two-step flow, and the\nfirst step charges nothing:\n\n<CodeGroup>\n  ```bash preview theme={null}\n  # What would this cost? Read-only: no charge, no change.\n  curl -X POST \"https://app.gtm-api.com/id/v4/api/billing-subscriptions/bl_sb_YOUR_SUB/preview-change\" \\\n    -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n    -H \"Content-Type: application/json\" \\\n    -d '{\"quantity\": 12}'\n  ```\n\n  ```bash apply theme={null}\n  # Commit the same change\n  curl -X POST \"https://app.gtm-api.com/id/v4/api/billing-subscriptions/bl_sb_YOUR_SUB/change\" \\\n    -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n    -H \"Content-Type: application/json\" \\\n    -d '{\"quantity\": 12}'\n  ```\n\n  ```bash read theme={null}\n  # The workspace's current subscription and its status\n  curl -X POST \"https://app.gtm-api.com/id/v4/api/billing-subscriptions/search\" \\\n    -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n    -H \"Content-Type: application/json\" \\\n    -d '{\"page_size\": 5}'\n  ```\n</CodeGroup>\n\nBuying the first paid subscription is `POST /api/billing-subscriptions/create-checkout`,\nwhich returns a `checkout_url` for a human to complete. The subscription exists once the\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "kb/workspaces-and-team-members",
+          "chars_full": 696,
+          "chars_sent": 696,
+          "truncated": false,
+          "hash": "456727b1",
+          "article_title": "The free plan is single-user",
+          "section": "The free plan is single-user",
+          "score": 0.25,
+          "content": "## The free plan is single-user\n\n<Warning>\n  On the free plan both inviting and accepting answer **HTTP 402** `payment_required`, with\n  `context.reason = \"team_members_not_available_on_free\"` and\n  `context.suggested_action = \"upgrade_subscription\"`. The error is recoverable: upgrade and the same\n  call succeeds.\n</Warning>\n\nBecause the gate runs on acceptance as well as on the invite, a workspace that was paid, invited\npeople, and then fell to the free plan keeps its pending invitations **frozen** rather than losing\nthem: the invitee gets the 402, and the same link works again once a plan is applied. Paid and\npartner plans are multi-user: see [billing and plans](/kb/billing-and-plans)."
+        },
+        {
+          "article_id": "api-reference/id/billing_subscriptions/resume-subscription",
+          "chars_full": 553,
+          "chars_sent": 553,
+          "truncated": false,
+          "hash": "0c5bc291",
+          "article_title": "Resume subscription",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Resume subscription\nResume a paused subscription; billing continues from the next period and the applied team re-derives active. DANGEROUS state change (server-side confirm gate). No charge. The committed status arrives via webhook. Requires billing.manage.\n\nContract:\n- MCP tool `resume_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        }
+      ]
+    },
+    {
+      "id": "payment-failed",
+      "query": "payment failed subscription status past due",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 2090,
+      "hits": [
+        {
+          "article_id": "kb/billing-and-plans",
+          "chars_full": 696,
+          "chars_sent": 696,
+          "truncated": false,
+          "hash": "5f575b9e",
+          "article_title": "Subscription statuses",
+          "section": "Subscription statuses",
+          "score": 1,
+          "content": "## Subscription statuses\n\n| Status     | What it means                                                    |\n| ---------- | ---------------------------------------------------------------- |\n| `active`   | Paid and current, or the free Sandbox plan                       |\n| `past_due` | A payment failed; a grace window is running                      |\n| `paused`   | Billing stopped by request; the workspace is gated, data is kept |\n| `canceled` | Ended. Terminal: a new subscription is a new purchase            |\n\nThe workspace itself is either active or suspended, derived from the above: `active` is\nactive, `paused` is suspended, and `past_due` stays active until the grace window closes."
+        },
+        {
+          "article_id": "mcp/agent-signup",
+          "chars_full": 852,
+          "chars_sent": 852,
+          "truncated": false,
+          "hash": "0a39c2fc",
+          "article_title": "When Sandbox is not enough",
+          "section": "When Sandbox is not enough",
+          "score": 0.5,
+          "content": "## When Sandbox is not enough\n\nSandbox never expires, but verbs answer `402` with `subscription_required` the moment the workspace needs more than the free plan grants, for example a second connected account or a webhook. That moment is handleable by the agent, not just reportable:\n\n1. Read the state: search `billing-subscriptions` for the workspace and see `status`.\n2. Mint a payment link: create a checkout for the plan through the billing tools (or a Paddle portal link for an existing subscription). Both return a URL a human can open.\n3. Hand the URL to your operator with the one-line reason, and retry the blocked action after the `billing-subscriptions.activated` webhook, or on your next run.\n\nThe agent never touches payment credentials: the link opens Paddle's checkout in the operator's browser, and the platform unblocks on the webhook."
+        },
+        {
+          "article_id": "api-reference/id/billing_subscriptions/unapply-subscription",
+          "chars_full": 11650,
+          "chars_sent": 1420,
+          "truncated": true,
+          "hash": "f5c45855",
+          "article_title": "Unapply subscription",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "REST Endpoint POST /api/billing-subscriptions/{sid}/unapply\nSummary: Unapply subscription\nDescription: Detach a subscription from its team, returning it to floating on the buyer's balance. DANGEROUS: removes the team's capacity (the team goes suspended if this was its only applied subscription); does NOT cancel billing or refund. Used to move a subscription to another team. Requires billing.manage.\n\nContract:\n- MCP tool `unapply_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API.\nPath parameters:\n- sid: type string; required; description Billing subscription sid (bl_sb_…).\nResponses:\n200: `action` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required; description kebab-case verb; matches the route segment.\n- item: type object | null; required\n- item.sid: type string; required\n- item.owner_user_sid: type string; required\n- item.team_sid: type string | null; required\n- item.paddle_subscription_id: type string | null; required\n- item.status: type enum<string>; required; enum active, past_due, paused, canceled\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/id/billing_subscriptions/pause-subscription",
+          "chars_full": 632,
+          "chars_sent": 632,
+          "truncated": false,
+          "hash": "aa3a63f8",
+          "article_title": "Pause subscription",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Pause subscription\nPause the subscription effective the next billing period. DANGEROUS state change (server-side confirm gate); while paused the applied team is gated like suspended, slots/data retained, billing stops. No charge. The committed status arrives via webhook. Resume with resume_billing_subscription. Requires billing.manage.\n\nContract:\n- MCP tool `pause_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/id/billing_subscriptions/change-subscription",
+          "chars_full": 12065,
+          "chars_sent": 1440,
+          "truncated": true,
+          "hash": "dcf529d2",
+          "article_title": "Change subscription",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "REST Endpoint POST /api/billing-subscriptions/{sid}/change\nSummary: Change subscription\nDescription: Commit a quantity / bracket-price change. DANGEROUS: an UPGRADE charges the owner's card immediately (prorated); a downgrade applies next period (no immediate charge). Server-side preview→commit gate applies; call preview_billing_subscription_change first. manual (sales) subscriptions are not re-bracketed (422). The committed state arrives via webhook; the response returns the optimistic post-change row. Provide at least one of quantity / price_sid. Requires billing.manage.\n\nContract:\n- MCP tool `change_billing_subscription`, registry package `mcp.id/billing_subscriptions`, mount `id.billing`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API.\nPath parameters:\n- sid: type string; required; description Billing subscription sid (bl_sb_…).\nRequest body:\nContent type: application/json\n- quantity: type integer; description New slot count (re-bracketed). Omit for a price-only change.\n- price_sid: type string; description Explicit target bracket; usually derived from quantity.\nResponses:\n200: `action` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n[truncated: fetch the full page with get_kb_article]"
+        }
+      ]
+    },
+    {
+      "id": "invite-teammate",
+      "query": "invite a teammate to the workspace",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 1108,
+      "hits": [
+        {
+          "article_id": "kb/workspaces-and-team-members",
+          "chars_full": 2114,
+          "chars_sent": 1364,
+          "truncated": true,
+          "hash": "2f36851e",
+          "article_title": "Invite a teammate",
+          "section": "Invite a teammate",
+          "score": 1,
+          "content": "## Invite a teammate\n\nOpen **Settings**, then **Teammates** under the **Workspace** group in the left rail. The panel is\ntitled **Members and invites**, and its path is in the URL, so the page is linkable. Click\n**Invite**, enter the email (max 255 characters) and send: a row appears immediately with status\n**Invited**, carrying a permission chip that pops the member's full token list.\n\nThe invitee receives an email with subject **\"You are invited to `{workspace name}`\"** and an **Accept\ninvitation** button carrying a single-use code. Accepting requires a signed-in session, because a\nmembership binds to the authenticated user and never to an address in a request body, so somebody\nwithout an account signs up first. On acceptance the row flips from `invited` to `active`, the code\nis cleared, and if the person had no working team yet this workspace becomes it.\n\nAn invitation link is valid for **7 days**, after which a daily job clears the stored code and the\nold link stops working. The row stays on the list: press **Resend** to re-roll the code and give\nanother 7 days, which only works on rows in status `invited`. Inviting an email already on the list\nis not an error and sends no second email, so use **Resend** to genuinely re-send; inviting an\naddress you removed earlier creates a fresh row.\n\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/id/team_members/invite-team-member",
+          "chars_full": 565,
+          "chars_sent": 565,
+          "truncated": false,
+          "hash": "05914428",
+          "article_title": "Invite team member",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Invite team member\nInvite a person by email. Born status=invited, user_sid=null, with a one-time code (+7d expiry); dispatches the invite email. permissions is the explicit token list (expand a UI preset in code first); account_sids is the optional profile slice (null/omitted = all team profiles). Natural key (team, email) over live rows; re-inviting a live member returns already_exists:true.\n\nContract:\n- MCP tool `create_team_member`, registry package `mcp.id/team_members`, mount `id.identity`.\n- Operation `create`, response envelope `create`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/id/account_shares/lend-an-account-to-another-workspace",
+          "chars_full": 1193,
+          "chars_sent": 1193,
+          "truncated": false,
+          "hash": "6c9f0fe1",
+          "article_title": "Lend an account to another workspace",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Lend an account to another workspace\nLend ONE of your connected accounts to another workspace, temporarily and revocably. This is a loan, not a handover: permanent ownership transfer has no MCP tool at all. Target exactly one of to_email (resolved to that user's working team) or to_team_sid; neither, both, a bad email or a self-target is 422. account_sid is prefix agnostic (ln_ac_); `channel` says which service owns it. ALWAYS ASYNC: returns 201 with status pending, and the loan has NOT started. Poll search_account_shares with filter { sid: { eq } } until status is active (the holder can work) or failed (read failure_reason); rolling_back means it is being undone, so do not re-issue. holder_over_slot true means the copy landed in the holder's subscription hold and they cannot work until they upgrade; a share never fails on slots. One row is one account with no bulk arm, so N accounts is N calls. planned_return_at only emails the owner a recall link; there is no auto return. Needs can_manage_account_shares.\n\nContract:\n- MCP tool `create_account_share`, registry package `mcp.id/account_shares`, mount `id.access`.\n- Operation `create`, response envelope `create`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/id/team_members/accept-team-member-invitation",
+          "chars_full": 779,
+          "chars_sent": 779,
+          "truncated": false,
+          "hash": "a6f6d511",
+          "article_title": "Accept team-member invitation",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Accept team-member invitation\nAccept a pending invite by its one-time code. Public REST: code-bearer, no team scope. Hashes the code, matches the row it belongs to and branches on that row: invited → flips invited → active, binds the authenticated user_sid, and sets users.default_team_sid if the user had none; already active for the SAME user → 200 already_accepted:true naming that same invite; already redeemed by another account → 409 invitation_already_redeemed; no row (unknown, cancelled, or the membership was removed) → 404. An expired code is 409 invitation_expired, a seatless plan 402.\n\nContract:\n- MCP tool `accept_team_member_invitation`, registry package `mcp.id/team_members`, mount `id.identity`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/id/teams/create-team",
+          "chars_full": 450,
+          "chars_sent": 450,
+          "truncated": false,
+          "hash": "be2f591c",
+          "article_title": "Create team",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Create team\nCreate a new workspace. The caller becomes the owner AND the first member; the free \"Sandbox\" plan (forever free, 1 account slot, no card) is applied automatically where the owner does not already run a free workspace. Names are not unique: every call creates a new team (no dedup).\n\nContract:\n- MCP tool `create_team`, registry package `mcp.id/teams`, mount `id.identity`.\n- Operation `create`, response envelope `create`.\n- Flags: none."
+        }
+      ]
+    },
+    {
+      "id": "share-account-team",
+      "query": "share a connected LinkedIn account with another workspace",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 539,
+      "hits": [
+        {
+          "article_id": "kb/account-sharing-and-handover",
+          "chars_full": 257,
+          "chars_sent": 257,
+          "truncated": false,
+          "hash": "5773e904",
+          "article_title": "Share or transfer a connected account",
+          "section": "Intro",
+          "score": 1,
+          "content": "Share or transfer a connected account\nLend a connected LinkedIn account to another workspace and get it back, or hand ownership over permanently. Covers what the receiving side gets, what happens to the browser and the sync, and every status both sides see."
+        },
+        {
+          "article_id": "api-reference/id/account_shares/lend-an-account-to-another-workspace",
+          "chars_full": 1193,
+          "chars_sent": 1193,
+          "truncated": false,
+          "hash": "6c9f0fe1",
+          "article_title": "Lend an account to another workspace",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Lend an account to another workspace\nLend ONE of your connected accounts to another workspace, temporarily and revocably. This is a loan, not a handover: permanent ownership transfer has no MCP tool at all. Target exactly one of to_email (resolved to that user's working team) or to_team_sid; neither, both, a bad email or a self-target is 422. account_sid is prefix agnostic (ln_ac_); `channel` says which service owns it. ALWAYS ASYNC: returns 201 with status pending, and the loan has NOT started. Poll search_account_shares with filter { sid: { eq } } until status is active (the holder can work) or failed (read failure_reason); rolling_back means it is being undone, so do not re-issue. holder_over_slot true means the copy landed in the holder's subscription hold and they cannot work until they upgrade; a share never fails on slots. One row is one account with no bulk arm, so N accounts is N calls. planned_return_at only emails the owner a recall link; there is no auto return. Needs can_manage_account_shares.\n\nContract:\n- MCP tool `create_account_share`, registry package `mcp.id/account_shares`, mount `id.access`.\n- Operation `create`, response envelope `create`.\n- Flags: none."
+        },
+        {
+          "article_id": "kb/workspaces-and-team-members",
+          "chars_full": 1201,
+          "chars_sent": 1201,
+          "truncated": false,
+          "hash": "dbb6cbdc",
+          "article_title": "What a workspace owns",
+          "section": "What a workspace owns",
+          "score": 0.3333333333333333,
+          "content": "## What a workspace owns\n\nA workspace id starts with `ts_tm_`, and each of these belongs to exactly one of them:\n\n* Connected LinkedIn accounts, their browsers, conversations, searches, mass actions, auto scrapes.\n* API keys, login sessions and OAuth grants. **A key is workspace-wide**: it reaches every account\n  in that workspace, and no key can be scoped to one account.\n* The plan, the account-slot cap and the billing history.\n* The member list, including invitations nobody has accepted yet.\n\nExactly one person is the **owner** (`owner_user_sid`), the only structural role on the platform.\nEverything else is a permission list, which is why the app shows an **Access** column rather than a\nrole column. Two workspace fields are editable: `name` (1 to 255 characters) and `config.timezone`\n(an IANA zone such as `Europe/Berlin`); `status`, `plan`, `limits` and the owner are\nderived, and the API drops them silently if you send them.\n\nMembership does not share accounts: being a member of workspace A and B does not let you drive A's\nLinkedIn account from B. Moving an account across workspaces is a share or a transfer, both in\n[account sharing and handover](/kb/account-sharing-and-handover)."
+        },
+        {
+          "article_id": "kb/index",
+          "chars_full": 639,
+          "chars_sent": 639,
+          "truncated": false,
+          "hash": "6007f63a",
+          "article_title": "Accounts and browsers",
+          "section": "Accounts and browsers",
+          "score": 0.25,
+          "content": "## Accounts and browsers\n\n<CardGroup cols={2}>\n  <Card title=\"Connect a LinkedIn account\" href=\"/kb/connect-a-linkedin-account\" icon=\"plug\">\n    Connect in the app, wait out the initial sync, then work with it anywhere.\n  </Card>\n\n  <Card title=\"Antidetect browsers and proxies\" href=\"/kb/antidetect-browsers-and-proxies\" icon=\"globe\">\n    One account, one isolated browser, one proxy. Lifecycle, checks, diagnostics.\n  </Card>\n\n  <Card title=\"Share or transfer an account\" href=\"/kb/account-sharing-and-handover\" icon=\"handshake\">\n    Lend an account to another workspace and take it back, or hand it over for good.\n  </Card>\n</CardGroup>"
+        },
+        {
+          "article_id": "kb/connect-a-linkedin-account",
+          "chars_full": 1309,
+          "chars_sent": 1309,
+          "truncated": false,
+          "hash": "da6e64ba",
+          "article_title": "2. Watch the initial sync",
+          "section": "2. Watch the initial sync",
+          "score": 0.2,
+          "content": "## 2. Watch the initial sync\n\nThe account enters onboarding: an initial import of the profile, conversations,\nconnections and invitations, in a strict order. Outbound actions are held until it\ncompletes.\n\n```bash theme={null}\ncurl -X POST \"https://app.gtm-api.com/linkedin/v4/api/linkedin-accounts/search\" \\\n  -H \"Authorization: Bearer gtm_live_YOUR_KEY\" \\\n  -H \"Content-Type: application/json\" \\\n  -d '{\"filter\": {\"q\": \"cooper\"}}'\n```\n\nThe `status` field is the account lifecycle:\n\n| Status                  | Meaning                                              |\n| ----------------------- | ---------------------------------------------------- |\n| `new`                   | Connected, sync not started                          |\n| `initial_syncing`       | First sync in progress                               |\n| `active`                | Usable; outbound actions allowed                     |\n| `sync_failed`           | The sync hit a problem; check the account in the app |\n| `shared_out`            | Lent to another team via account sharing             |\n| `subscription_required` | The plan lapsed; renew to reactivate                 |\n\nUntil the account reaches `active`, outbound endpoints (connection requests, messages)\nanswer with a `conflict` error. Read endpoints work as soon as data lands."
+        }
+      ]
+    },
+    {
+      "id": "find-email-profile",
+      "query": "find email address or phone for a LinkedIn profile",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 680,
+      "hits": [
+        {
+          "article_id": "kb/enrichment",
+          "chars_full": 1926,
+          "chars_sent": 1259,
+          "truncated": true,
+          "hash": "bbba14d1",
+          "article_title": "Find an email or phone number for a profile",
+          "section": "Contact info is the exception",
+          "score": 1,
+          "content": "### Contact info is the exception\n\n`person-contact-info` requires a connected executor: LinkedIn reveals contact details to\n1st-degree connections only, so the pick is narrowed to accounts that actually hold the\nedge.\n\n| Situation                                                          | Result                                                                                                                                                                        |\n| ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| One of your accounts holds the 1st-degree edge and has budget left | Runs there                                                                                                                                                                    |\n| Your accounts hold the edge but all of them are out of budget      | `429 rate_limited`, reason `bucket_saturated`, with `retry_after` and a `connected_accounts` count                                                                            |\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_enrichment/enrich-person-contact-info",
+          "chars_full": 870,
+          "chars_sent": 870,
+          "truncated": false,
+          "hash": "2353470c",
+          "article_title": "Enrich person contact info",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Enrich person contact info\nContact details for ONE person: email, phones (typed, so HOME/WORK is kept, unlike the lossy flat `phone` on person-full-profile), websites and twitter handles. Cached 24h. IMPORTANT: LinkedIn reveals contacts to 1st-degree connections ONLY, so this runs from whichever of YOUR accounts is connected to the target (picked automatically, respecting limits; linkedin_account_sid is only a preference). If none of your accounts is connected it refuses 422 no_connected_account, so connect first (linkedin_connection_requests send), then retry after the invite is accepted. An empty block means the connected account still cannot see them.\n\nContract:\n- MCP tool `enrich_linkedin_person_contact_info`, registry package `mcp.linkedin/linkedin_enrichment`, mount `linkedin.enrichment`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_scraping/scrape-similar-profiles",
+          "chars_full": 740,
+          "chars_sent": 740,
+          "truncated": false,
+          "hash": "57a9d33b",
+          "article_title": "Scrape similar profiles",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Scrape similar profiles\nLinkedIn’s \"people also viewed\" browsemap for ONE seed profile: lookalike expansion from a known-good persona. IMPORTANT: address by profile.nickname (the vanity slug) ONLY, because the wire navigates by vanityName, so a ln_id/sn_id URN is refused not_dispatchable (resolve it via enrich_linkedin_person_lite_profile first, then pass the nickname). Returns ~20 cards; rows carry ln_member_id + nickname + full_name + headline (no ACoAA id, no avatar, no degree). One-shot list (no pagination); limit caps the cards.\n\nContract:\n- MCP tool `scrape_linkedin_similar_profiles`, registry package `mcp.linkedin/linkedin_scraping`, mount `linkedin.scraping`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        },
+        {
+          "article_id": "kb/people-and-company-search",
+          "chars_full": 2174,
+          "chars_sent": 1442,
+          "truncated": true,
+          "hash": "6493a0cc",
+          "article_title": "Two ways to address a search",
+          "section": "Two ways to address a search",
+          "score": 0.25,
+          "content": "## Two ways to address a search\n\nThe five list searches take **either** a pasted `url` **or** a structured `filters` object. Same route, same parser,\nsame price: the structured half composes the same LinkedIn URL and runs the same page. Send `filters` when a program or\nan agent composes the search, `url` when a human built it in LinkedIn or the vocabulary cannot express it.\n\n<Warning>\n  Exactly one of them is mandatory. Sending both returns `422 validation_failed` with a field error on each, and sending\n  neither returns the same `422`. Sending `filters` where every member is empty (including an empty `` `{}` ``) returns\n  `422` with the message `At least one filter member is required.` A `false` counts as empty, so a lone\n  `\"hiring_on_linkedin\": false` is a 422 too. An explicit `\"url\": null` beside a filled `filters` is fine, and the reverse.\n</Warning>\n\nWhich half you sent only changes the label in the ledger: `input_kind` is `url` or `params`, and **Data Requests** shows\n\"Search people by URL\" or \"Search people by params\" accordingly.\n\nA pasted URL is prefix-checked first: a URL from another LinkedIn screen would scrape the wrong thing. On\n`https://www.linkedin.com`, the regular engines take `/search/results/people/`, `/search/results/companies/` and\n`/search/results/services/`; the Sales Navigator pair takes `/sales/search/people` and `/sales/search/company`, no\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_accounts/search-linkedin-accounts",
+          "chars_full": 1199,
+          "chars_sent": 1199,
+          "truncated": false,
+          "hash": "ae858d94",
+          "article_title": "Search LinkedIn accounts",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Search LinkedIn accounts\nList LinkedIn accounts (senders) on the team with operator filters, sort and cursor pagination, plus an always-present counts block (total, premium / SN / Recruiter, active_today, stale, signed_out). Also the way to find an account sid before calling account-scoped tools. For ANY health or availability question, request include antidetect_browser: login state lives on the bound browser row, whose status login_issue means the sender is signed out of LinkedIn. The item status field is platform lifecycle and stays active through a logout, so never read it as health. counts.signed_out_count flags signed-out senders even without the include; per-row attribution needs it. A full sender health summary combines antidetect_browser with linkedin_account_smart_limits, linkedin_account_snapshot (warmup score) and linkedin_account_block_log_counts. Items with includes are large: page a fleet with page_size 10 or less and follow next_cursor instead of asking for one big page.\n\nContract:\n- MCP tool `search_linkedin_accounts`, registry package `mcp.linkedin/linkedin_accounts`, mount `linkedin.accounts`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        }
+      ]
+    },
+    {
+      "id": "auto-scrape-recurring",
+      "query": "schedule a recurring scrape to collect leads automatically",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 539,
+      "hits": [
+        {
+          "article_id": "kb/auto-scrapes",
+          "chars_full": 1026,
+          "chars_sent": 1026,
+          "truncated": false,
+          "hash": "87f090b2",
+          "article_title": "Collect leads with an auto-scrape",
+          "section": "Intro",
+          "score": 1,
+          "content": "An auto-scrape is a saved job that paginates one LinkedIn or Sales Navigator list surface through one of your own accounts'\nbrowsers, files every unique person or company into its own registry, and appends every never-seen-before lead to a standing\nmass action as one item. A [search](/kb/people-and-company-search) returns a page; an auto-scrape keeps returning on a cadence.\n\n<Tip>\n  **Give this to your AI agent** and keep the go-ahead for yourself:\n\n  \"On gtm-api (MCP connector at [https://mcp.gtm-api.com/mcp](https://mcp.gtm-api.com/mcp), or REST at app.gtm-api.com with my key): create an auto-scrape from\n  the search URL I give you, using account `ln_ac_...` as the executor and a weekly cadence. Show me the create payload and wait\n  for my approval before calling it, because run 1 starts real LinkedIn automation immediately. After it runs, report the run\n  counters and pull the leads with search\\_linkedin\\_auto\\_scrape\\_results filtered on the parent sid. Do not link a mass action\n  unless I name one.\"\n</Tip>"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_auto_scrapes/get-linkedin-auto-scrape",
+          "chars_full": 605,
+          "chars_sent": 605,
+          "truncated": false,
+          "hash": "23825ca9",
+          "article_title": "Get LinkedIn auto-scrape",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Get LinkedIn auto-scrape\nFetch one collector by sid: status and paused_reason, next_run_at and last_run_at, runs_count and total_new_results, and mass_action_sid (null = collect-only). include: linkedin_account (the executor row), last_run (the newest run, null when the job has never run). Executions and leads are separate reads: search_linkedin_auto_scrape_runs and search_linkedin_auto_scrape_results.\n\nContract:\n- MCP tool `get_linkedin_auto_scrape`, registry package `mcp.linkedin/linkedin_auto_scrapes`, mount `linkedin.auto-scrapes`.\n- Operation `get`, response envelope `get`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_auto_scrapes/search-linkedin-auto-scrapes",
+          "chars_full": 1035,
+          "chars_sent": 1035,
+          "truncated": false,
+          "hash": "98026abd",
+          "article_title": "Search LinkedIn auto-scrapes",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Search LinkedIn auto-scrapes\nList the team's collectors: saved jobs that paginate one LinkedIn or Sales Navigator list surface on a cadence and file deduped leads. Use for: which collectors are live or paused and why (status, paused_reason), what a given account collects (linkedin_account_sid), which ones feed outreach (mass_action_sid, is_null:true = collect-only), what runs next (sort next_run_at asc), and which produce (total_new_results). NOT for the leads themselves (search_linkedin_auto_scrape_results) or for one execution (search_linkedin_auto_scrape_runs). No q. include: linkedin_account (the executor row) and last_run (the newest run, the only place an in-flight run shows up). Sort: created_at (default desc) | updated_at | next_run_at | last_run_at | total_new_results. page_size:0 returns the count alone.\n\nContract:\n- MCP tool `search_linkedin_auto_scrapes`, registry package `mcp.linkedin/linkedin_auto_scrapes`, mount `linkedin.auto-scrapes`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_auto_scrapes/create-linkedin-auto-scrape",
+          "chars_full": 1353,
+          "chars_sent": 1353,
+          "truncated": false,
+          "hash": "5536eea1",
+          "article_title": "Create LinkedIn auto-scrape",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Create LinkedIn auto-scrape\nSave a scraping source as a collector and start it. Give the source EXACTLY one way: a bare url (people and company searches only) or the pair source_method plus source_input. Anything else is 422.\n\nUse for the standing ask, \"keep pulling everyone behind this link\". To wire outreach, author the plan FIRST on the mass-actions mount (preview_mass_action, then create_mass_action with scope kind none) and pass its ma_ac_ sid here: every new lead is appended to that run as one item. Omit mass_action_sid to collect only, omit replay_frequency for a one-shot.\n\nRun 1 dispatches AT ONCE: real LinkedIn automation starts, and a linked run begins enrolling. Watch it with search_linkedin_auto_scrape_runs, read the leads with search_linkedin_auto_scrape_results. Rejections are all pre-flight 422: invalid_url, invalid_source_method, method_not_available, source_input_incomplete, account_not_in_team, sales_nav_required (sales-nav sources and company-decision-makers need Sales Navigator), mass_action_incompatible.\n\nContract:\n- MCP tool `create_linkedin_auto_scrape`, registry package `mcp.linkedin/linkedin_auto_scrapes`, mount `linkedin.auto-scrapes`.\n- Operation `create`, response envelope `create`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_auto_scrapes/run-linkedin-auto-scrape-now",
+          "chars_full": 768,
+          "chars_sent": 768,
+          "truncated": false,
+          "hash": "690e551b",
+          "article_title": "Run LinkedIn auto-scrape now",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Run LinkedIn auto-scrape now\nMint a manual run immediately, off schedule, and return its run_sid in result. Asynchronous: a worker drives the page loop, so poll get_linkedin_auto_scrape_run for status, new_count and enrolled_count. Use when the operator will not wait for the next slot. Only one run may be in flight per collector: 409 run_in_progress while one is pending or in_progress, and 409 auto_scrape_not_active on a paused job (resume it first).\n\nContract:\n- MCP tool `run_linkedin_auto_scrape_now`, registry package `mcp.linkedin/linkedin_auto_scrapes`, mount `linkedin.auto-scrapes`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        }
+      ]
+    },
+    {
+      "id": "search-people-filters",
+      "query": "search people with filters Sales Navigator",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 640,
+      "hits": [
+        {
+          "article_id": "api-reference/linkedin/linkedin_scraping/scrape-sales-navigator-people-search",
+          "chars_full": 863,
+          "chars_sent": 863,
+          "truncated": false,
+          "hash": "e66b4987",
+          "article_title": "Scrape Sales Navigator people search",
+          "section": "Intro",
+          "score": 1,
+          "content": "Scrape Sales Navigator people search\nOne page of a Sales Navigator people search: richer facets than the regular engine (seniority, function, tenure, headcount, company type), no commercial-use limit, SN URNs (sn_id) on the rows. Addressed EITHER by `filters`, which carry the COMPLETE SN facet vocabulary, OR by a pasted /sales/search/people `url`: exactly one of the two. Typeahead members take [{id, text, exclude}] values from scrape_linkedin_sales_nav_param_id_lookup; the static-enum members list their ids inline and need no lookup. Needs an SN-capable executor (a non-SN own account gets 422 sales_nav_required; the auto-pick filters to SN seats).\n\nContract:\n- MCP tool `scrape_linkedin_search_sales_nav_people`, registry package `mcp.linkedin/linkedin_scraping`, mount `linkedin.scraping`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_scraping/scrape-sales-navigator-company-search",
+          "chars_full": 745,
+          "chars_sent": 745,
+          "truncated": false,
+          "hash": "bf9ad374",
+          "article_title": "Scrape Sales Navigator company search",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Scrape Sales Navigator company search\nOne page of a Sales Navigator ACCOUNT search, the one engine here that filters on annual revenue, company and per-department headcount growth, department headcount, follower buckets, Fortune tier and buying signals (leadership changes, funding events). Addressed EITHER by `filters`, whose typeahead members take ids from scrape_linkedin_sales_nav_param_id_lookup while the static enums are inline, OR by a pasted /sales/search/company `url`: exactly one of the two. SN-capable executor required.\n\nContract:\n- MCP tool `scrape_linkedin_search_sales_nav_companies`, registry package `mcp.linkedin/linkedin_scraping`, mount `linkedin.scraping`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        },
+        {
+          "article_id": "kb/people-and-company-search",
+          "chars_full": 219,
+          "chars_sent": 219,
+          "truncated": false,
+          "hash": "612e6395",
+          "article_title": "People and company search",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "People and company search\nRun one live page of a LinkedIn or Sales Navigator people or company search: the pasted-URL and structured-filter input styles, how ids are resolved, what a row contains, and what a page costs."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_scraping/look-up-sales-navigator-facet-id",
+          "chars_full": 1097,
+          "chars_sent": 1097,
+          "truncated": false,
+          "hash": "f63fd12b",
+          "article_title": "Look up Sales Navigator facet id",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Look up Sales Navigator facet id\nSales Navigator facet-id typeahead: resolve one SN facet (type) into the opaque ids the SN search filters need. type is a node salesApiFacetTypeahead kind passed through verbatim; the seven text facets resolve query, the rest return their fixed / account-scoped list. Type → target filter member: TITLE → current_titles/past_titles; BING_GEO → locations/company_headquarters; INDUSTRY → industries; COMPANY_WITH_LIST → current_companies/past_companies; GROUP → groups; SCHOOL → schools; CONNECTION_OF → connections_of; ACCOUNT_LIST → account_lists (company search). Skip it for the static kinds (COMPANY_SIZE/FUNCTION/SENIORITY_V2/RELATIONSHIP/COMPANY_TYPE/TENURE/PROFILE_LANGUAGE): their full id sets are inlined in the search filter schemas. PERSONA/LEAD_LIST/LEAD_INTERACTIONS/SAVED_LEADS_AND_ACCOUNTS have no filters member yet. SN executor required.\n\nContract:\n- MCP tool `scrape_linkedin_sales_nav_param_id_lookup`, registry package `mcp.linkedin/linkedin_scraping`, mount `linkedin.scraping`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_scraping/scrape-linkedin-people-search",
+          "chars_full": 789,
+          "chars_sent": 789,
+          "truncated": false,
+          "hash": "e365a7f0",
+          "article_title": "Scrape LinkedIn people search",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Scrape LinkedIn people search\nOne page of a regular LinkedIn people search, addressed EITHER by `filters` OR by a pasted search `url`: exactly one of the two, never both, never neither. Use filters when the agent composes the search itself, url for a search already built in the LinkedIn UI or for anything the filter vocabulary cannot express. Same engine and the same person rows either way; page on with paging.has_more. commercial_use_limit_hit true means LinkedIn's monthly search paywall fired and rows may be truncated: switch to the Sales Navigator people tool or wait for the reset.\n\nContract:\n- MCP tool `scrape_linkedin_search_people`, registry package `mcp.linkedin/linkedin_scraping`, mount `linkedin.scraping`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        }
+      ]
+    },
+    {
+      "id": "webhooks-receive",
+      "query": "receive webhooks subscribe to events verify signature",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 477,
+      "hits": [
+        {
+          "article_id": "guides/receive-webhooks",
+          "chars_full": 1256,
+          "chars_sent": 1256,
+          "truncated": false,
+          "hash": "3672c0ab",
+          "article_title": "1. Register an endpoint",
+          "section": "1. Register an endpoint",
+          "score": 1,
+          "content": "## 1. Register an endpoint\n\n`POST /api/webhooks` takes a `name`, your `target_url` and the `events[]` you want:\n\n```json theme={null}\n{\n  \"name\": \"Mass action outcomes\",\n  \"target_url\": \"https://example.com/hooks/gtm\",\n  \"events\": [\"mass-actions.settled\", \"mass-actions.paused\"]\n}\n```\n\n* `name` is required (1 to 255 characters). Omitting it fails validation.\n* `target_url` must be `https://` and must not resolve to a loopback, private or link-local address. DNS names are resolved and checked too, not just IP literals.\n* Each `events[]` value is validated against the platform event catalog, which currently carries 94 types across the services.\n* The same `target_url` cannot be registered twice in one team.\n* `events: [\"*\"]` subscribes to the entire catalog, including event types added later.\n\nThe response returns the webhook's `secret`, a 32-character hex string, exactly once. Store it: every later read masks it, and it is what you verify signatures with.\n\n<Note>\n  Webhooks are capped per plan. Creating one past the cap answers `402` with `webhook_limit_reached` and a body carrying `used`, `limit` and a suggested action. The free Sandbox plan's cap is 0, so webhooks need a paid plan. See [billing and plans](/kb/billing-and-plans).\n</Note>"
+        },
+        {
+          "article_id": "api-reference/orchestration/webhooks/test-webhook",
+          "chars_full": 740,
+          "chars_sent": 740,
+          "truncated": false,
+          "hash": "bfe2ee55",
+          "article_title": "Test webhook",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Test webhook\nSynchronously POST a synthetic payload to the webhook target_url and return the receiver response (HTTP status, duration, error kind). Verifies endpoint health / signature handling without waiting for a real event; does NOT write to webhook_logs and does NOT affect the consecutive-failure counter. Allowed while status=failed (revival flow); rejected while status=off. Rate-limited to 10 calls/min per webhook. Outward live HTTP probe.\n\nContract:\n- MCP tool `test_webhook`, registry package `mcp.orchestration/webhooks`, mount `orchestration.webhooks`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/orchestration/webhooks/create-webhook",
+          "chars_full": 695,
+          "chars_sent": 695,
+          "truncated": false,
+          "hash": "e4bb2c82",
+          "article_title": "Create webhook",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Create webhook\nCreate a webhook subscription endpoint. The server generates a 32-char hex secret and returns it ONCE in this response (masked on every subsequent read). Store it client-side for HMAC verification. target_url must be https:// and public (non-RFC1918); each events[] value is validated against WebhookEventTypeEnum; the same target_url cannot be registered twice per team. State-changing.\n\nContract:\n- MCP tool `create_webhook`, registry package `mcp.orchestration/webhooks`, mount `orchestration.webhooks`.\n- Operation `create`, response envelope `create`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "api-reference/orchestration/webhooks/search-webhooks",
+          "chars_full": 567,
+          "chars_sent": 567,
+          "truncated": false,
+          "hash": "0cc15024",
+          "article_title": "Search webhooks",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Search webhooks\nList webhook subscriptions owned by the caller's team with filter, sort and cursor pagination. Filter by status, subscribed event types (events.contains / contains_any), account narrowing or name; include=latest_webhook_logs for the recent-delivery view. secret is masked (null) on every read. Use this to find a webhook sid before calling webhook-scoped tools.\n\nContract:\n- MCP tool `search_webhooks`, registry package `mcp.orchestration/webhooks`, mount `orchestration.webhooks`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "kb/auto-scrapes",
+          "chars_full": 1218,
+          "chars_sent": 1218,
+          "truncated": false,
+          "hash": "94edd567",
+          "article_title": "Watch it with webhooks",
+          "section": "Watch it with webhooks",
+          "score": 0.2,
+          "content": "## Watch it with webhooks\n\n| Event                                 | Fires when                                                                                                                         |\n| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |\n| `linkedin-auto-scrape-runs.completed` | A run finished. Payload: `run_number`, `trigger`, `new_count`, `seen_count`, `enrolled_count`, `pages_applied`, `duration_seconds` |\n| `linkedin-auto-scrape-runs.failed`    | A run went terminal. Payload: `page_cursor`, `new_count`, `enrolled_count`, `error_message`                                        |\n| `linkedin-auto-scrapes.paused`        | A job paused. Payload: `status`, `paused_reason`, `consecutive_failures`                                                           |\n\nThere is deliberately no per-page and no per-lead event. Subscribe to both run events, because a failed run's already-applied\npages wrote durable rows, then call the results search on the payload's `sid` unconditionally, whatever the counters said.\nEndpoint setup is in [Receive webhooks](/guides/receive-webhooks)."
+        }
+      ]
+    },
+    {
+      "id": "mass-action-run",
+      "query": "run a mass action preview and commit",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 487,
+      "hits": [
+        {
+          "article_id": "guides/run-a-mass-action",
+          "chars_full": 799,
+          "chars_sent": 799,
+          "truncated": false,
+          "hash": "430ca118",
+          "article_title": "Run a mass action",
+          "section": "Intro",
+          "score": 1,
+          "content": "A mass action is a bulk dispatch on the Orchestration service: up to 100 items, each run through a plan of 1 to 3 steps, paced by a randomized schedule. The API forces a two-phase flow so nothing bulk ever fires from a single call: first a preview that validates everything and mints a consent token, then a commit that consumes it.\n\n<Tip>\n  **Give this to your AI agent** and keep the go-ahead for yourself:\n\n  \"On gtm-api (MCP connector at [https://mcp.gtm-api.com/mcp](https://mcp.gtm-api.com/mcp), or REST at app.gtm-api.com with my key): build a mass-action plan for the targets I give you, run the preview, and show me the findings and the consent summary. Wait for my explicit approval before committing. After the commit, monitor the run and report per-item outcomes when it settles.\"\n</Tip>"
+        },
+        {
+          "article_id": "api-reference/orchestration/mass_actions/preview-mass-action-plan",
+          "chars_full": 1227,
+          "chars_sent": 1227,
+          "truncated": false,
+          "hash": "20bece07",
+          "article_title": "Preview mass-action plan",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Preview mass-action plan\nValidate a whole bulk plan without running anything and mint the consent token create_mass_action consumes. ALWAYS the first call of a bulk dispatch.\n\nValidates in one pass, reporting all findings at once: plan shape (1..3 steps), step-eligibility of each tool, scope shape and size (1..100), the generate-scope rule (step 1 must mint an object) and the send-class schedule mandate. A tool outside the step vocabulary comes back 422 validation_failed with error.field_errors[\"plan.steps.{i}.tool\"] = [\"not_step_eligible: ...\"], naming the authorable set so the plan is repairable in one turn. Nothing is persisted, charged or created.\n\nOn success the result carries preview (items_count, steps_per_item, dangerous_steps, eta, warnings), commit_token and expires_at. Show the preview to the user, then pass the token to create_mass_action UNCHANGED with the exact same inputs: it is an HMAC over them plus the caller, so any edit invalidates it (422) and needs a fresh preview. Tokens live 15 minutes.\n\nContract:\n- MCP tool `preview_mass_action`, registry package `mcp.orchestration/mass_actions`, mount `orchestration.mass_actions`.\n- Operation `action`, response envelope `action`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/orchestration/mass_actions/create-mass-action",
+          "chars_full": 1228,
+          "chars_sent": 1228,
+          "truncated": false,
+          "hash": "45d257cd",
+          "article_title": "Create mass-action",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Create mass-action\nCommit a previewed plan into a running bulk dispatch. Requires the commit_token from preview_mass_action over EXACTLY these inputs: the server re-derives the HMAC, so an edited plan, a changed scope or a different caller is 422 invalid_commit_token, and a token older than 15 minutes is 422 commit_token_expired. Re-preview in either case.\n\nRe-runs the full preview validation, then inserts the run plus its items and starts dispatching in one transaction. Always asynchronous, even for one item: the returned sid IS the monitoring handle. Poll get_mass_action with include=metrics or get_mass_actions_metrics, or subscribe to the mass-actions.settled / .paused webhooks.\n\nWith canary_mode=first_item only item 1 runs until it succeeds; a canary failure pauses the run with paused_reason=canary_failed. A none-scope run is created empty (total_count 0) and dispatches nothing until an auto-scrape appends leads into it. Replaying a still-valid token creates a SECOND identical run, so discard the token after use.\n\nContract:\n- MCP tool `create_mass_action`, registry package `mcp.orchestration/mass_actions`, mount `orchestration.mass_actions`.\n- Operation `create`, response envelope `create`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/orchestration/mass_actions/stop-and-delete-mass-action",
+          "chars_full": 833,
+          "chars_sent": 833,
+          "truncated": false,
+          "hash": "0eb0d916",
+          "article_title": "Stop and delete mass-action",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Stop and delete mass-action\nSTOP a bulk run. This is the cancel path and it works at any status: pending and queued items are swept to cancelled, running items finish their current step and stop at the boundary, an auto-scrape feeding a standing run stops being able to append, and the run is soft-deleted. The cascade block reports how many were cancelled and how many were still in flight. Items stay queryable; there is no undo through MCP, and a plan cannot be edited, so restarting means a fresh preview and create.\n\nContract:\n- MCP tool `delete_mass_action`, registry package `mcp.orchestration/mass_actions`, mount `orchestration.mass_actions`.\n- Operation `delete`, response envelope `delete_cascade`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "quickstart",
+          "chars_full": 549,
+          "chars_sent": 549,
+          "truncated": false,
+          "hash": "ae5f2d67",
+          "article_title": "Next steps",
+          "section": "Next steps",
+          "score": 0.2,
+          "content": "## Next steps\n\n<CardGroup cols={2}>\n  <Card title=\"Authentication\" href=\"/authentication\">\n    Key rotation, permissions and the Team-SID header.\n  </Card>\n\n  <Card title=\"Envelopes and errors\" href=\"/concepts/envelopes-and-errors\">\n    The response contract and the 16 error codes.\n  </Card>\n\n  <Card title=\"Run a mass action\" href=\"/guides/run-a-mass-action\">\n    Preview, commit and monitor a bulk dispatch.\n  </Card>\n\n  <Card title=\"Connect the MCP server\" href=\"/mcp/connect\">\n    The same tools, callable by an AI agent.\n  </Card>\n</CardGroup>"
+        }
+      ]
+    },
+    {
+      "id": "pagination-cursor",
+      "query": "cursor pagination page_size filter operators",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 815,
+      "hits": [
+        {
+          "article_id": "concepts/pagination-and-filtering",
+          "chars_full": 854,
+          "chars_sent": 854,
+          "truncated": false,
+          "hash": "43539021",
+          "article_title": "Paging",
+          "section": "Paging",
+          "score": 1,
+          "content": "## Paging\n\n* `page_size` defaults to 50. The ceiling is per endpoint, 100, 200, 500 or 1000 depending on how heavy the table is; each endpoint's reference states its own range, and asking for more than it allows is a `validation_failed` rather than a clamp.\n* Responses return `pagination.next_cursor`, an opaque string. Pass it back as `cursor` to get the next page; `null` means the last page. Cursors are forward-only, and there is no offset or page number.\n* `page_size: 0` is count-only mode: `items` comes back empty and you read `counts.total_count`. It is the cheapest way to answer \"how many match\".\n* `page_size: 1` is the get-first idiom: one row plus a cursor, for \"does anything match, and what is the newest one\".\n\n```json theme={null}\n{\n  \"filter\": { \"status\": { \"eq\": \"active\" } },\n  \"page_size\": 100,\n  \"cursor\": \"eyJpZCI6MTAwfQ==\"\n}\n```"
+        },
+        {
+          "article_id": "api-reference/id/billing_products/search-billing-products",
+          "chars_full": 565,
+          "chars_sent": 565,
+          "truncated": false,
+          "hash": "e54e33df",
+          "article_title": "Search billing products",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Search billing products\nList the Paddle-synced product catalog (the base plan + add-ons) with filtering, sorting and cursor pagination. Filter by type to split plan vs add-on, is_active for the live catalog, or q for an infix match over name/slug. Each row carries the per-unit limits grant. Read-only: the catalog is authored in Paddle, never here. page_size:0 returns counts only.\n\nContract:\n- MCP tool `search_billing_products`, registry package `mcp.id/billing_products`, mount `id.billing`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/orchestration/mass_actions/search-mass-actions",
+          "chars_full": 724,
+          "chars_sent": 724,
+          "truncated": false,
+          "hash": "b1c77de8",
+          "article_title": "Search mass-actions",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Search mass-actions\nList the team's bulk runs with filter, sort and cursor pagination. Filter by status (active / paused), paused_reason, target_entity, canary_satisfied_at (is_null:true = the canary gate is still closed), or the created / updated / started / settled time ranges. status is a CONTROL axis, not an outcome: to learn how a run went call get_mass_actions_metrics or get_mass_action with include=metrics. Stopped runs are excluded unless deleted_at is filtered explicitly. page_size:0 returns the count alone.\n\nContract:\n- MCP tool `search_mass_actions`, registry package `mcp.orchestration/mass_actions`, mount `orchestration.mass_actions`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_accounts/search-linkedin-accounts",
+          "chars_full": 1199,
+          "chars_sent": 1199,
+          "truncated": false,
+          "hash": "ae858d94",
+          "article_title": "Search LinkedIn accounts",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Search LinkedIn accounts\nList LinkedIn accounts (senders) on the team with operator filters, sort and cursor pagination, plus an always-present counts block (total, premium / SN / Recruiter, active_today, stale, signed_out). Also the way to find an account sid before calling account-scoped tools. For ANY health or availability question, request include antidetect_browser: login state lives on the bound browser row, whose status login_issue means the sender is signed out of LinkedIn. The item status field is platform lifecycle and stays active through a logout, so never read it as health. counts.signed_out_count flags signed-out senders even without the include; per-row attribution needs it. A full sender health summary combines antidetect_browser with linkedin_account_smart_limits, linkedin_account_snapshot (warmup score) and linkedin_account_block_log_counts. Items with includes are large: page a fleet with page_size 10 or less and follow next_cursor instead of asking for one big page.\n\nContract:\n- MCP tool `search_linkedin_accounts`, registry package `mcp.linkedin/linkedin_accounts`, mount `linkedin.accounts`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_scraping/scrape-post-search",
+          "chars_full": 741,
+          "chars_sent": 741,
+          "truncated": false,
+          "hash": "5e1fe736",
+          "article_title": "Scrape post search",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Scrape post search\nLinkedIn content search: find POSTS by keywords, recency or author. The discovery front door for post-engagement plays (feed the returned post_ln_id into the commenters / reactors / resharers tools). Addressed EITHER by `filters` (keywords REQUIRED) OR by a pasted /search/results/content/ `url`, which the node parses back into the same filter object: exactly one of the two, never both, never neither. CURSOR paginated, unlike every other search here: feed paging.next_cursor back verbatim and size the page with page_size.\n\nContract:\n- MCP tool `scrape_linkedin_search_posts`, registry package `mcp.linkedin/linkedin_scraping`, mount `linkedin.scraping`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        }
+      ]
+    },
+    {
+      "id": "error-envelope-codes",
+      "query": "error envelope error codes meaning",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 784,
+      "hits": [
+        {
+          "article_id": "concepts/envelopes-and-errors",
+          "chars_full": 2229,
+          "chars_sent": 1371,
+          "truncated": true,
+          "hash": "d2ef1942",
+          "article_title": "The 16 error codes",
+          "section": "The 16 error codes",
+          "score": 1,
+          "content": "## The 16 error codes\n\n| Code                  | HTTP | Meaning                                                                  |\n| --------------------- | ---- | ------------------------------------------------------------------------ |\n| `validation_failed`   | 422  | Invalid input; details in `field_errors`                                 |\n| `nothing_to_update`   | 422  | PATCH with no real changes                                               |\n| `not_found`           | 404  | The sid does not exist in this team's scope                              |\n| `relation_not_found`  | 422  | A referenced entity (for example a `*_sid` field) does not exist         |\n| `invalid_transition`  | 409  | The state machine forbids this move                                      |\n| `limit_exceeded`      | 429  | A business limit was hit (daily budgets, plan caps)                      |\n| `payment_required`    | 402  | The plan does not include this                                           |\n| `duplicate_rejected`  | 409  | An entity with the same natural key already exists                       |\n| `conflict`            | 409  | The request conflicts with current state; editing fields will not fix it |\n| `delete_blocked`      | 409  | Blockers exist; see `error.blockers[]`                                   |\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/id/team_members/accept-team-member-invitation",
+          "chars_full": 9004,
+          "chars_sent": 1421,
+          "truncated": true,
+          "hash": "10f9b8f7",
+          "article_title": "Accept team-member invitation",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "REST Endpoint POST /api/team-members/accept-invitation\nSummary: Accept team-member invitation\nDescription: Accept a pending invite by its one-time code. Public REST: code-bearer, no team scope. Hashes the code, matches the row it belongs to and branches on that row: invited → flips invited → active, binds the authenticated user_sid, and sets users.default_team_sid if the user had none; already active for the SAME user → 200 already_accepted:true naming that same invite; already redeemed by another account → 409 invitation_already_redeemed; no row (unknown, cancelled, or the membership was removed) → 404. An expired code is 409 invitation_expired, a seatless plan 402.\n\nContract:\n- MCP tool `accept_team_member_invitation`, registry package `mcp.id/team_members`, mount `id.identity`.\n- Operation `action`, response envelope `action`.\n- Flags: none.\nRequest body:\nContent type: application/json\n- code: type string; required; description Raw one-time invite code from the email link.\nResponses:\n200: `action` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required; description kebab-case verb; matches the route segment.\n- item: type object | null; required\n- item.sid: type string; required\n- item.team_sid: type string; required\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/orchestration/webhook_logs/search-webhook-logs",
+          "chars_full": 13547,
+          "chars_sent": 1432,
+          "truncated": true,
+          "hash": "92f3b76c",
+          "article_title": "Search webhook logs",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "REST Endpoint POST /api/webhook-logs/search\nSummary: Search webhook logs\nDescription: List webhook delivery rows for the caller's team with filter, sort, include and group-counts. Deliveries from every producer service (LinkedIn, email, …) land in this one log; filter per webhook, per account_sid, per source_service, per event type, per HTTP code or status; include=webhook. Returns a counts block (groups by status / event_type / response_code / webhook_sid / account_sid). Use for delivery auditing and integrator-outage debugging. For period-bound success rates use get_webhook_logs_metrics; single-row lookup is a filter on sid.\n\nContract:\n- MCP tool `search_webhook_logs`, registry package `mcp.orchestration/webhook_logs`, mount `orchestration.webhooks`.\n- Operation `search`, response envelope `search`.\n- Flags: read only.\nRequest body:\nContent type: application/json\n- filter: type object\n- filter.sid: type object\n- filter.sid.eq: type string\n- filter.sid.in: type string[]\n- filter.sid.in[]: type string\n- filter.webhook_sid: type object\n- filter.webhook_sid.eq: type string\n- filter.webhook_sid.in: type string[]\n- filter.webhook_sid.in[]: type string\n- filter.account_sid: type object; description Account the event belongs to, any channel (ln_ac_… / em_ac_…). is_null:true selects team-wide events (benchmarks, webhooks-meta).\n- filter.account_sid.eq: type string\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/id/notifications/get-notification",
+          "chars_full": 8144,
+          "chars_sent": 1426,
+          "truncated": true,
+          "hash": "f81677a4",
+          "article_title": "Get notification",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "REST Endpoint GET /api/notifications/{sid}\nSummary: Get notification\nDescription: Fetch a single notification by sid: the rendered subject / body, delivery state, and failure reason if any. Useful in post-call analysis: follow a notification's event_sid back through observability to explain \"why did I get this email\".\n\nContract:\n- MCP tool `get_notification`, registry package `mcp.id/notifications`, mount `id.platform`.\n- Operation `get`, response envelope `get`.\n- Flags: read only.\nPath parameters:\n- sid: type string; required; description Path segment `{sid}`.\nQuery parameters:\n- include[]: type string[]; description Query parameter `include`.\nResponses:\n200: `get` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum get\n- item: type object; required\n- item.sid: type string; required\n- item.team_sid: type string; required\n- item.user_sid: type string | null; required\n- item.event_name: type string; required\n- item.event_sid: type string; required\n- item.entity_sid: type string | null; required\n- item.channel: type enum<string>; required; enum email, in_app\n- item.status: type enum<string>; required; enum pending, delivered, failed\n- item.subject: type string; required\n- item.rate_limit_bucket: type string; required\n- item.scheduled_at: type string; required\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/id/team_members/resend-team-member-invitation",
+          "chars_full": 8579,
+          "chars_sent": 1393,
+          "truncated": true,
+          "hash": "61460ebf",
+          "article_title": "Resend team-member invitation",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "REST Endpoint POST /api/team-members/{sid}/resend-invitation\nSummary: Resend team-member invitation\nDescription: Re-roll the one-time code on a pending invite, push its expiry (+7d), and re-send the invite email. Only valid on a status=invited row (else 409 invalid_transition).\n\nContract:\n- MCP tool `resend_team_member_invitation`, registry package `mcp.id/team_members`, mount `id.identity`.\n- Operation `action`, response envelope `action`.\n- Flags: none.\nPath parameters:\n- sid: type string; required; description Team-member (membership/invite) sid (ts_mb_…).\nResponses:\n200: `action` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required; description kebab-case verb; matches the route segment.\n- item: type object | null; required\n- item.sid: type string; required\n- item.team_sid: type string; required\n- item.user_sid: type string | null; required\n- item.email: type string; required\n- item.status: type enum<string>; required; enum invited, active, revoked\n- item.permissions: type string[]; required\n- item.permissions[]: type string\n- item.account_sids: type string[] | null; required\n- item.account_sids[]: type string\n- item.account_sids[]: type string\n- item.created_by: type object; required\n[truncated: fetch the full page with get_kb_article]"
+        }
+      ]
+    },
+    {
+      "id": "mcp-connect-claude",
+      "query": "connect Claude MCP client to the platform",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 496,
+      "hits": [
+        {
+          "article_id": "mcp/connect",
+          "chars_full": 242,
+          "chars_sent": 242,
+          "truncated": false,
+          "hash": "5c5c7a3f",
+          "article_title": "Claude Code",
+          "section": "Claude Code",
+          "score": 1,
+          "content": "### Claude Code\n\n```bash theme={null}\nclaude mcp add --transport http gtm-api https://mcp.gtm-api.com/mcp\n```\n\nThen run `/mcp` in any session and authenticate when prompted. `claude mcp list` shows\n`gtm-api` as connected once consent is done."
+        },
+        {
+          "article_id": "mcp/overview",
+          "chars_full": 466,
+          "chars_sent": 466,
+          "truncated": false,
+          "hash": "e8bd6409",
+          "article_title": "Where to go",
+          "section": "Where to go",
+          "score": 0.5,
+          "content": "## Where to go\n\n<CardGroup cols={2}>\n  <Card title=\"Connect a client\" href=\"/mcp/connect\">\n    Claude, Cursor, and anything else that speaks MCP.\n  </Card>\n\n  <Card title=\"Search these docs from AI tools\" href=\"/mcp/use-docs-with-ai\">\n    The documentation's own MCP endpoint.\n  </Card>\n</CardGroup>\n\nThe public interface, connect examples and safety notes also live in the open repository: [github.com/gtm-api/linkedin-mcp](https://github.com/gtm-api/linkedin-mcp)."
+        },
+        {
+          "article_id": "changelog",
+          "chars_full": 995,
+          "chars_sent": 995,
+          "truncated": false,
+          "hash": "3cf74159",
+          "article_title": "2026-07-28",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "<Update label=\"2026-07-28\" description=\"Initial public release of the reference\">\n  **The public API contract is published.** 248 operations across three services: LinkedIn (150), ID\n  and Teams (77), Orchestration (21). The reference is generated from the MCP tool registry, one\n  endpoint per tool, and regenerates with it.\n\n  **The MCP server is live** at `mcp.gtm-api.com/mcp`, exposing the same contract as 160+ typed\n  tools across 10 toolsets. Connect guides for Claude, Cursor and Docker-based clients are in the\n  [MCP tab](/mcp/overview).\n\n  **Webhooks are platform-wide.** Subscriptions, signed deliveries (`X-Webhook-Signature`,\n  HMAC-SHA256 with a timestamp), a queryable delivery log, and a test endpoint live on the\n  Orchestration service.\n\n  **Mass actions ship with a two-phase consent flow.** Preview validates the whole plan and mints a\n  15-minute commit token; commit consumes it. Canary mode, randomized pacing and per-item retry are\n  part of the same surface.\n</Update>"
+        },
+        {
+          "article_id": "api-reference/id/oauth_clients/create-oauth-client",
+          "chars_full": 811,
+          "chars_sent": 811,
+          "truncated": false,
+          "hash": "de56a68e",
+          "article_title": "Create OAuth client",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Create OAuth client\nRegister a new OAuth application; the server generates client_id. v1 clients are public/PKCE (no secret). A confidential client (fast-follow) returns client_secret in the create envelope ONCE. Tell the user to store it; it is unrecoverable and must never be logged. permissions is the ceiling the client may request; redirect_uris is an exact-match https allow-list (closes open-redirect). Dedup (team_sid, name) → already_exists. Set platform:true (admin only) to register a platform client with no owning team.\n\nContract:\n- MCP tool `create_oauth_client`, registry package `mcp.id/oauth_clients`, mount `id.access`.\n- Operation `create`, response envelope `create`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API."
+        },
+        {
+          "article_id": "mcp/agent-signup",
+          "chars_full": 3096,
+          "chars_sent": 1429,
+          "truncated": true,
+          "hash": "b64ffdec",
+          "article_title": "Start a signup for your operator",
+          "section": "Start a signup for your operator",
+          "score": 0.2,
+          "content": "## Start a signup for your operator\n\nThe agent submits the operator's email plus its own OAuth client identity and a PKCE challenge. The human gets one email and clicks one link; that click is the consent screen and the abuse boundary at once. Nothing provisions before it.\n\n<Steps>\n  <Step title=\"Register your client (once)\">\n    Standard RFC 7591 dynamic client registration:\n\n    ```bash theme={null}\n    curl -X POST \"https://app.gtm-api.com/id/v4/oauth/register\" \\\n      -H \"Content-Type: application/json\" \\\n      -d '{\"client_name\": \"My Agent\", \"redirect_uris\": [\"http://127.0.0.1:8976/callback\"]}'\n    ```\n\n    Keep the returned `client_id`. Clients born this way are stamped `actor_kind: agent`, so every token they mint is attributable as agent activity.\n  </Step>\n\n  <Step title=\"Start the registration\">\n    ```bash theme={null}\n    curl -X POST \"https://app.gtm-api.com/id/v4/auth/register-agent\" \\\n      -H \"Content-Type: application/json\" \\\n      -d '{\n        \"email\": \"operator@company.com\",\n        \"client_id\": \"YOUR_CLIENT_ID\",\n        \"redirect_uri\": \"http://127.0.0.1:8976/callback\",\n        \"code_challenge\": \"BASE64URL_S256_OF_YOUR_VERIFIER\",\n        \"code_challenge_method\": \"S256\"\n      }'\n    ```\n\n    The answer carries `registration_sid` and a one-time `poll_secret`. The operator receives a verification email; tell them it is coming.\n  </Step>\n\n[truncated: fetch the full page with get_kb_article]"
+        }
+      ]
+    },
+    {
+      "id": "api-authentication",
+      "query": "API key authentication bearer token Team-SID header",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 623,
+      "hits": [
+        {
+          "article_id": "authentication",
+          "chars_full": 1306,
+          "chars_sent": 1306,
+          "truncated": false,
+          "hash": "bcfc4b70",
+          "article_title": "API keys (recommended for integrations)",
+          "section": "API keys (recommended for integrations)",
+          "score": 1,
+          "content": "## API keys (recommended for integrations)\n\nAn API key is an opaque bearer token of the form `gtm_live_` plus 40 characters. There is no OAuth handshake: you paste it into your runtime and send it as the bearer token on every call.\n\n* **The secret is shown once.** `POST /api/api-keys` returns the full token in `plaintext_token` in that one response. Afterwards the API returns only `token_prefix` and `token_last4` for display. The server stores a SHA-256 hash, not the key.\n* **Rotation replaces the secret.** `POST /api/api-keys/{sid}/rotate` mints a new `gtm_live_` secret for the same key record and invalidates the old one. Rotate on any suspicion of a leak, or on a schedule.\n* **Keys expire.** Default expiry is 3 years from creation; pass `expires_at: null` on create for a perpetual key.\n* **Keys carry permissions.** A key created by another key can only hold a subset of the parent's permissions. Downscoping is allowed, escalation is a `forbidden` error.\n* **Keys are team-scoped.** A key belongs to the team it was created in and acts on that team's data.\n\nManage keys in the app or over the [ID and Teams API](/api-reference/id): search them for an access audit (`last_used_at` shows stale keys worth revoking), check `expires_at` for keys about to lapse, and revoke what you no longer use."
+        },
+        {
+          "article_id": "api-reference/id/api_keys/get-api-key",
+          "chars_full": 7783,
+          "chars_sent": 1419,
+          "truncated": true,
+          "hash": "cfd846b7",
+          "article_title": "Get API key",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "REST Endpoint GET /api/api-keys/{sid}\nSummary: Get API key\nDescription: Fetch a single API key by sid, with optional metrics include. Returns token_prefix + token_last4 for display; the secret is unrecoverable (use rotate_api_key to mint a new one).\n\nContract:\n- MCP tool `get_api_key`, registry package `mcp.id/api_keys`, mount `id.access`.\n- Operation `get`, response envelope `get`.\n- Flags: read only.\nPath parameters:\n- sid: type string; required; description Path segment `{sid}`.\nQuery parameters:\n- include[]: type enum<string>[]; description Query parameter `include`.\nResponses:\n200: `get` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum get\n- item: type object; required\n- item.sid: type string; required\n- item.team_sid: type string; required\n- item.name: type string; required\n- item.token_prefix: type string; required\n- item.token_last4: type string; required\n- item.permissions: type string[]; required\n- item.permissions[]: type string\n- item.status: type enum<string>; required; enum active, revoked, expired\n- item.expires_at: type string | null; required\n- item.last_used_at: type string | null; required\n- item.created_by: type object; required\n- item.created_by.actor_type: type enum<string>; required; enum user, support, api_key, system, agent\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/id/team_members/accept-team-member-invitation",
+          "chars_full": 779,
+          "chars_sent": 779,
+          "truncated": false,
+          "hash": "a6f6d511",
+          "article_title": "Accept team-member invitation",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Accept team-member invitation\nAccept a pending invite by its one-time code. Public REST: code-bearer, no team scope. Hashes the code, matches the row it belongs to and branches on that row: invited → flips invited → active, binds the authenticated user_sid, and sets users.default_team_sid if the user had none; already active for the SAME user → 200 already_accepted:true naming that same invite; already redeemed by another account → 409 invitation_already_redeemed; no row (unknown, cancelled, or the membership was removed) → 404. An expired code is 409 invitation_expired, a seatless plan 402.\n\nContract:\n- MCP tool `accept_team_member_invitation`, registry package `mcp.id/team_members`, mount `id.identity`.\n- Operation `action`, response envelope `action`.\n- Flags: none."
+        },
+        {
+          "article_id": "api-reference/id/api_keys/rotate-api-key",
+          "chars_full": 9197,
+          "chars_sent": 1444,
+          "truncated": true,
+          "hash": "256c6cab",
+          "article_title": "Rotate API key",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "REST Endpoint POST /api/api-keys/{sid}/rotate\nSummary: Rotate API key\nDescription: Swap the key's secret IN PLACE and return the new plaintext in result.plaintext_token EXACTLY ONCE: hand it to the user, never log it, unrecoverable. The key's sid / name / permissions / expires_at are unchanged. The previous secret stays valid until result.previous_token_expires_at (now + grace_seconds, default 24h) so the agent can update config without downtime. Use when a secret leaks or before offboarding. NOT idempotent: each call mints a brand-new secret. Rotating a revoked/expired key → 409.\n\nContract:\n- MCP tool `rotate_api_key`, registry package `mcp.id/api_keys`, mount `id.access`.\n- Operation `action`, response envelope `action`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API.\nPath parameters:\n- sid: type string; required; description API key sid (id_ak_…).\nRequest body:\nContent type: application/json\n- grace_seconds: type integer; description 0..604800 (≤7d); omit = 24h default; 0 = immediate cutover.\nResponses:\n200: `action` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum action\n- action: type string; required; description kebab-case verb; matches the route segment.\n- item: type object | null; required\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/id/api_keys/revoke-api-key",
+          "chars_full": 6877,
+          "chars_sent": 1428,
+          "truncated": true,
+          "hash": "b2b664d2",
+          "article_title": "Revoke API key",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "REST Endpoint DELETE /api/api-keys/{sid}\nSummary: Revoke API key\nDescription: Revoke a key (simple soft-delete): status=revoked, deleted_at set. Verify rejects it from the next request (cache invalidated). Irreversible: a revoked key never re-activates; issue a fresh one. Idempotent: re-deleting → already_deleted.\n\nContract:\n- MCP tool `delete_api_key`, registry package `mcp.id/api_keys`, mount `id.access`.\n- Operation `delete`, response envelope `delete_simple`.\n- Flags: dangerous: the MCP layer gates it behind a preview/commit token, and the effect cannot be undone through this API.\nPath parameters:\n- sid: type string; required; description Path segment `{sid}`.\nResponses:\n200: `delete_simple` success envelope.\nContent type: application/json\n- success: type enum<boolean>; required; enum true\n- operation: type enum<string>; required; enum delete\n- item: type object; required\n- item.*: type any\n- already_deleted: type boolean; required\n- soft_deleted: type boolean; required\n- retained: type string[]; required\n- retained[]: type string\n- meta: type object; required\n- meta.trace_id: type string; required; description UUID v7; same 128-bit value as the X-Trace-Id header.\n- meta.span_id: type string; required; description 16 hex chars, root span of this request.\n- meta.timestamp: type string; required; description ISO 8601 UTC (Y-m-dTH:i:sZ), response time.\n[truncated: fetch the full page with get_kb_article]"
+        }
+      ]
+    },
+    {
+      "id": "api-search-accounts-endpoint",
+      "query": "search linkedin accounts API endpoint request parameters",
+      "outcome": "pass",
+      "failures": [],
+      "received_count": 10,
+      "duration_ms": 555,
+      "hits": [
+        {
+          "article_id": "kb/people-and-company-search",
+          "chars_full": 2174,
+          "chars_sent": 1442,
+          "truncated": true,
+          "hash": "6493a0cc",
+          "article_title": "Two ways to address a search",
+          "section": "Two ways to address a search",
+          "score": 1,
+          "content": "## Two ways to address a search\n\nThe five list searches take **either** a pasted `url` **or** a structured `filters` object. Same route, same parser,\nsame price: the structured half composes the same LinkedIn URL and runs the same page. Send `filters` when a program or\nan agent composes the search, `url` when a human built it in LinkedIn or the vocabulary cannot express it.\n\n<Warning>\n  Exactly one of them is mandatory. Sending both returns `422 validation_failed` with a field error on each, and sending\n  neither returns the same `422`. Sending `filters` where every member is empty (including an empty `` `{}` ``) returns\n  `422` with the message `At least one filter member is required.` A `false` counts as empty, so a lone\n  `\"hiring_on_linkedin\": false` is a 422 too. An explicit `\"url\": null` beside a filled `filters` is fine, and the reverse.\n</Warning>\n\nWhich half you sent only changes the label in the ledger: `input_kind` is `url` or `params`, and **Data Requests** shows\n\"Search people by URL\" or \"Search people by params\" accordingly.\n\nA pasted URL is prefix-checked first: a URL from another LinkedIn screen would scrape the wrong thing. On\n`https://www.linkedin.com`, the regular engines take `/search/results/people/`, `/search/results/companies/` and\n`/search/results/services/`; the Sales Navigator pair takes `/sales/search/people` and `/sales/search/company`, no\n[truncated: fetch the full page with get_kb_article]"
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_accounts/search-linkedin-accounts",
+          "chars_full": 1199,
+          "chars_sent": 1199,
+          "truncated": false,
+          "hash": "ae858d94",
+          "article_title": "Search LinkedIn accounts",
+          "section": "Intro",
+          "score": 0.5,
+          "content": "Search LinkedIn accounts\nList LinkedIn accounts (senders) on the team with operator filters, sort and cursor pagination, plus an always-present counts block (total, premium / SN / Recruiter, active_today, stale, signed_out). Also the way to find an account sid before calling account-scoped tools. For ANY health or availability question, request include antidetect_browser: login state lives on the bound browser row, whose status login_issue means the sender is signed out of LinkedIn. The item status field is platform lifecycle and stays active through a logout, so never read it as health. counts.signed_out_count flags signed-out senders even without the include; per-row attribution needs it. A full sender health summary combines antidetect_browser with linkedin_account_smart_limits, linkedin_account_snapshot (warmup score) and linkedin_account_block_log_counts. Items with includes are large: page a fleet with page_size 10 or less and follow next_cursor instead of asking for one big page.\n\nContract:\n- MCP tool `search_linkedin_accounts`, registry package `mcp.linkedin/linkedin_accounts`, mount `linkedin.accounts`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_account_smart_limits/search-linkedin-account-smart-limits",
+          "chars_full": 991,
+          "chars_sent": 991,
+          "truncated": false,
+          "hash": "53b62f5a",
+          "article_title": "Search LinkedIn account smart limits",
+          "section": "Intro",
+          "score": 0.3333333333333333,
+          "content": "Search LinkedIn account smart limits\nList per-limit_type policy rows (one account owns 15 public buckets: send_connection_requests, send_messages, send_inmails, scraping, enrichment, custom_request, …) with filters, sorting, cursor pagination and a counts block (status / limit_type / smart_limits_enabled breakdowns). Use for: \"which limits are at their daily cap / held / blocked by LinkedIn\" (status filter; held means the daily budget is spent), \"can account X still send InMails today\" (filter linkedin_account_sid + limit_type, read status + daily_limit − done_today_count), fleet capacity, smart-limit adoption rate. Single-row case = search(filter:{linkedin_account_sid, limit_type}, page_size:1). No q. include[]: linkedin_account, linkedin_account_quota_hits.\n\nContract:\n- MCP tool `search_linkedin_account_smart_limits`, registry package `mcp.linkedin/linkedin_account_smart_limits`, mount `linkedin.accounts`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_connection_requests/search-connection-requests",
+          "chars_full": 532,
+          "chars_sent": 532,
+          "truncated": false,
+          "hash": "224248f6",
+          "article_title": "Search connection requests",
+          "section": "Intro",
+          "score": 0.25,
+          "content": "Search connection requests\nList outbound LinkedIn connection requests (invitations we sent) with filters, sorting, cursor pagination and full-text q over the note. Pending rows have removal_kind IS NULL; terminal rows are accepted / withdrawn / expired (deleted_at set). include[] can eager-load linkedin_account.\n\nContract:\n- MCP tool `search_linkedin_connection_requests`, registry package `mcp.linkedin/linkedin_connection_requests`, mount `linkedin.network`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        },
+        {
+          "article_id": "api-reference/linkedin/linkedin_connections/search-linkedin-connections",
+          "chars_full": 599,
+          "chars_sent": 599,
+          "truncated": false,
+          "hash": "6b71b2fb",
+          "article_title": "Search LinkedIn connections",
+          "section": "Intro",
+          "score": 0.2,
+          "content": "Search LinkedIn connections\nList an account's 1st-degree LinkedIn connections with filters, sorting, cursor pagination and full-text q over the contact name. Live rows by default (deleted_at.is_null:true); pass is_null:false for churn analysis. Returns a counts block of predicate tallies; include[] can eager-load linkedin_account, the source request/invitation, conversations and last_messages.\n\nContract:\n- MCP tool `search_linkedin_connections`, registry package `mcp.linkedin/linkedin_connections`, mount `linkedin.network`.\n- Operation `search`, response envelope `search`.\n- Flags: read only."
+        }
+      ]
+    }
+  ]
+}
