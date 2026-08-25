@@ -129,6 +129,20 @@ describe('chunk cap', () => {
   });
 });
 
+describe('hub-page drop', () => {
+  it('never serves kb/index, backfills its slot from the tail, keeps the honest received_count', async () => {
+    const rows = [
+      { path: 'kb/a', content: 'a' },
+      { path: 'kb/index', content: 'link hub' },
+      { path: 'kb/b', content: 'b' },
+      { path: 'kb/c', content: 'c' },
+    ];
+    const { hits, io } = await searchKbMintlify({ ...EXT, fetchImpl: fakeFetch(200, rows) }, 'q', 3);
+    expect(hits.map((h) => h.article_id)).toEqual(['kb/a', 'kb/b', 'kb/c']);
+    expect(io.received_count).toBe(4);
+  });
+});
+
 describe('fetchArticleMd', () => {
   it('fetches the .md variant and lifts the H1 as the title', async () => {
     const page = await fetchArticleMd(

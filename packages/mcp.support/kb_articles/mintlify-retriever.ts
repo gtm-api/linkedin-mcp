@@ -148,9 +148,16 @@ export async function searchKbMintlify(
     throw new Error('mintlify search returned a non-array body');
   }
 
+  // The kb/index hub page is navigation, not answer content, and the
+  // 2026-08-25 golden run showed it eating a top-5 slot in 6 of 30 queries.
+  // Drop it BEFORE the slice: the API's default 10-row page (it also accepts
+  // pageSize, deliberately unused) leaves a tail that backfills the slot,
+  // while received_count keeps recording what the index actually served.
+  const served = results.filter((r) => r.path !== 'kb/index');
+
   const hits: KbHit[] = [];
   const hitMeta: KbHitIoMeta[] = [];
-  results.slice(0, topK).forEach((r, rank) => {
+  served.slice(0, topK).forEach((r, rank) => {
     const path = typeof r.path === 'string' ? r.path : 'unknown';
     const content = typeof r.content === 'string' ? r.content : '';
     const metaTitle = typeof r.metadata?.title === 'string' ? r.metadata.title : null;
