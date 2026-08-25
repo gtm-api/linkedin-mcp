@@ -8,8 +8,8 @@ import { renderSuccess } from './envelope';
 // but the tool's route metadata. Never throws - every failure is an
 // isError:true tool result.
 export async function dispatch(ctx: DispatchContext): Promise<ToolResult> {
-  // Local tools (bundled knowledge index) execute in-worker; same middleware
-  // chain and envelope contract, no backend hop.
+  // Local tools (the support knowledge base) execute in-worker; same
+  // middleware chain and envelope contract, no backend hop.
   if (ctx.tool.localHandler) {
     try {
       return renderSuccess(ctx, await ctx.tool.localHandler(ctx));

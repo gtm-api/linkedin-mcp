@@ -21,6 +21,44 @@ export interface KbHit {
   help_url: string | null;
 }
 
+/**
+ * Per-hit meta for the caller's `rest.io` log line: sizes around the cap and
+ * an FNV-1a hash of the FULL (pre-cap) section text. The hash is the drift
+ * detector: replaying the same query later and comparing hashes tells "the
+ * index content changed" apart from "the ranking changed", without ever
+ * logging bodies.
+ */
+export interface KbHitIoMeta {
+  article_id: string;
+  chars_full: number;
+  chars_sent: number;
+  truncated: boolean;
+  hash: string;
+}
+
+/** What the one outbound Mintlify call did; feeds the caller's rest.io line. */
+export interface KbSearchIo {
+  url: string;
+  status: number;
+  duration_ms: number;
+  /** Rows the index returned BEFORE the top_k slice. */
+  received_count: number;
+  hits: KbHitIoMeta[];
+}
+
+/**
+ * FNV-1a 32-bit, hex. Dependency-free and identical across runs and runtimes,
+ * which is all a drift detector needs; this is not a security hash.
+ */
+export function contentHash(text: string): string {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < text.length; i += 1) {
+    h ^= text.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h.toString(16).padStart(8, '0');
+}
+
 // The package compiles without DOM/workers libs on purpose (same constraint the
 // vector retriever works under), so the fetch surface is declared structurally:
 // the worker passes its global fetch in, tests pass a stub.
@@ -88,43 +126,63 @@ export async function searchKbMintlify(
   ext: MintlifySearchExtension,
   query: string,
   topK: number,
-): Promise<KbHit[]> {
+): Promise<{ hits: KbHit[]; io: KbSearchIo }> {
   const doFetch = ext.fetchImpl ?? (globalThis as { fetch?: FetchLike }).fetch;
   if (!doFetch) throw new Error('no fetch available');
-  const response = await doFetch(
-    `https://api.mintlify.com/discovery/v1/search/${ext.domain}`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${ext.key}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
+  const url = `https://api.mintlify.com/discovery/v1/search/${ext.domain}`;
+  const startedAt = Date.now();
+  const response = await doFetch(url, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${ext.key}`,
+      'Content-Type': 'application/json',
     },
-  );
+    body: JSON.stringify({ query }),
+  });
   if (!response.ok) {
     throw new Error(`mintlify search ${response.status}`);
   }
   const results = (await response.json()) as MintlifyResult[];
+  const durationMs = Date.now() - startedAt;
   if (!Array.isArray(results)) {
     throw new Error('mintlify search returned a non-array body');
   }
 
-  return results.slice(0, topK).map((r, rank) => {
+  const hits: KbHit[] = [];
+  const hitMeta: KbHitIoMeta[] = [];
+  results.slice(0, topK).forEach((r, rank) => {
     const path = typeof r.path === 'string' ? r.path : 'unknown';
     const content = typeof r.content === 'string' ? r.content : '';
     const metaTitle = typeof r.metadata?.title === 'string' ? r.metadata.title : null;
-    return {
+    const sent = capChunk(content);
+    hits.push({
       article_id: path,
       article_title: metaTitle ?? titleFromPath(path),
       section: sectionOf(content),
-      content: capChunk(content),
+      content: sent,
       // The API returns relevance order without scores; encode the rank so
       // downstream consumers keep a monotone axis.
       score: 1 / (rank + 1),
       help_url: `https://docs.gtm-api.com/${path}`,
-    };
+    });
+    hitMeta.push({
+      article_id: path,
+      chars_full: content.length,
+      chars_sent: sent.length,
+      truncated: content.length > CHUNK_CHAR_CAP,
+      hash: contentHash(content),
+    });
   });
+  return {
+    hits,
+    io: {
+      url,
+      status: response.status,
+      duration_ms: durationMs,
+      received_count: results.length,
+      hits: hitMeta,
+    },
+  };
 }
 
 /**

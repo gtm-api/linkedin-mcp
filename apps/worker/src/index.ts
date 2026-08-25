@@ -99,20 +99,39 @@ const logger: Logger = {
 function summarizeCall(
   msg: unknown,
   resp: unknown,
-): { method?: string; tool?: string; ok: boolean } {
+): { method?: string; tool?: string; ok: boolean; kbQuery?: string } {
   const m = msg as
-    | { method?: string; params?: { name?: string; arguments?: { name?: string } } }
+    | {
+        method?: string;
+        params?: {
+          name?: string;
+          arguments?: { name?: string; query?: unknown; arguments?: { query?: unknown } };
+        };
+      }
     | null;
   const r = resp as { error?: unknown; result?: { isError?: boolean } } | null;
   const method = m?.method;
   let tool: string | undefined;
+  let kbQuery: string | undefined;
   if (method === 'tools/call') {
     tool = m?.params?.name;
     const inner = m?.params?.arguments?.name;
     if (tool === 'call_tool' && inner) tool = `call_tool→${inner}`;
+    // search_knowledge is the one tool whose argument is a product question,
+    // not account data: with the query on the wide event, external sessions
+    // (which have no copilot-side log) become diagnosable, and the query
+    // stream feeds the kb-eval golden set. Every other tool's args stay
+    // unlogged.
+    if (tool === 'search_knowledge' || tool === 'call_tool→search_knowledge') {
+      const raw =
+        tool === 'search_knowledge'
+          ? m?.params?.arguments?.query
+          : m?.params?.arguments?.arguments?.query;
+      if (typeof raw === 'string') kbQuery = raw.slice(0, 200);
+    }
   }
   const ok = r == null ? true : r.error == null && r.result?.isError !== true;
-  return { method, tool, ok };
+  return { method, tool, ok, kbQuery };
 }
 
 export default {
@@ -300,7 +319,7 @@ export default {
         const server = factory(mount, DOMAIN_MOUNTS);
         const t0 = Date.now();
         const resp = await handleMcpMessage(server, msg as never);
-        const { method, tool, ok } = summarizeCall(msg, resp);
+        const { method, tool, ok, kbQuery } = summarizeCall(msg, resp);
         // One wide-event line per JSON-RPC message - the always-on "what did the
         // MCP receive" record (tool resolved through the facade's call_tool).
         logger.info({
@@ -308,6 +327,7 @@ export default {
           mount: mount.config.path,
           method,
           ...(tool ? { tool } : {}),
+          ...(kbQuery ? { query: kbQuery } : {}),
           ok,
           dur_ms: Date.now() - t0,
           team: scope.teamSid ? 'set' : 'token',

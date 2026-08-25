@@ -105,9 +105,10 @@ export const WAVE2_MOUNTS: SmokeMount[] = [
   // read smoke goes through the parent search, since that is the entry point an
   // agent uses before it drills into items.
   { path: '/mcp/orchestration/mass-actions', name: 'gtm-orchestration-mass-actions', search: 'search_mass_actions' },
-  // The KB runs on a bundled index behind a localHandler, so this row proves
-  // something none of the others do: that the mount serves without any backend
-  // hop. Its search takes a query, not a page.
+  // The KB runs behind a localHandler over the Mintlify docs index, so this
+  // row proves something none of the others do: that the mount serves without
+  // a backend-service hop (it does need the Mintlify key configured). Its
+  // search takes a query, not a page.
   {
     path: '/mcp/support/knowledge',
     name: 'gtm-support-knowledge',

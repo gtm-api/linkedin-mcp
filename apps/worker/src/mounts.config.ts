@@ -272,7 +272,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/support/knowledge',
     name: 'gtm-support-knowledge',
     instructions:
-      'GTM support knowledge base: product help articles and Q&A, served from a bundled index. search_knowledge first (English query, help-article wording; read ALL returned chunks), get_kb_article for a full article. Knowledge only, so pair with platform tools for the user\'s own account state.',
+      'GTM support knowledge base: help articles, guides and the API reference, searched over the published docs site. search_knowledge first (English query, help-article wording; read ALL returned chunks), get_kb_article for a full page. Knowledge only, so pair with platform tools for the user\'s own account state.',
     selectors: [{ kind: 'package', id: 'mcp.support/kb_articles' }],
     maxTools: 25,
     facade: 'none',
@@ -292,9 +292,9 @@ export const MOUNTS: MountConfig[] = [
     // drive is the declared surface: the /health tool count for this path and
     // the number quoted in PACKAGES.md. Listing three services made both
     // under-report by 2. `support` is a ServiceId like any other; that the KB
-    // runs on a bundled index instead of a backend service is a dispatch
-    // detail (localHandler), not a reason to leave it out of the one endpoint
-    // that is supposed to be the whole platform.
+    // runs in-worker against the Mintlify docs index instead of on a backend
+    // service is a dispatch detail (localHandler), not a reason to leave it
+    // out of the one endpoint that is supposed to be the whole platform.
     selectors: [
       { kind: 'service', service: 'linkedin' },
       { kind: 'service', service: 'id' },

@@ -97,10 +97,35 @@ const searchKnowledge: ToolDefinition = {
     }
     let hits;
     try {
-      hits = await searchKbMintlify(mintlify, query, topK);
+      const outcome = await searchKbMintlify(mintlify, query, topK);
+      hits = outcome.hits;
+      // The durable "what did Mintlify return" record: meta, not bodies.
+      // Enough to replay the query later and compare paths + hashes. (The
+      // discovery index always answers with a full page of nearest
+      // neighbours - there is no zero-hit state - so KB gaps are found by
+      // replaying logged queries against the kb-eval golden suite, not by
+      // counting empty results.) Shape mirrors the backend OutboundIoLogger's
+      // kind=rest.io lines; trace_id is explicit because the worker logger
+      // carries no shared context.
+      ctx.deps.logger.info({
+        kind: 'rest.io',
+        dep: 'mintlify',
+        method: 'POST',
+        url: outcome.io.url,
+        status: outcome.io.status,
+        duration_ms: outcome.io.duration_ms,
+        trace_id: ctx.scope.traceId,
+        tool: 'search_knowledge',
+        query,
+        top_k: topK,
+        received_count: outcome.io.received_count,
+        returned_count: hits.length,
+        articles: outcome.io.hits,
+      });
     } catch (err) {
       ctx.deps.logger.error({
         event: 'support_kb_search_unavailable',
+        trace_id: ctx.scope.traceId,
         detail: String((err as { message?: string })?.message ?? err),
       });
       throw new Error(
@@ -165,6 +190,19 @@ const getArticle: ToolDefinition = {
       );
     }
     const page = await fetchArticleMd(mintlify, id);
+    // Same rest.io convention as the search: which pages get pulled in full,
+    // and whether the id resolved, joined to the session by trace_id.
+    ctx.deps.logger.info({
+      kind: 'rest.io',
+      dep: 'mintlify',
+      method: 'GET',
+      trace_id: ctx.scope.traceId,
+      tool: 'get_kb_article',
+      article_id: id,
+      found: page != null,
+      chars: page?.content.length ?? 0,
+      duration_ms: Date.now() - startedAt,
+    });
     if (!page) {
       throw new Error(`KB article '${id}' not found; ids come from search_knowledge results.`);
     }

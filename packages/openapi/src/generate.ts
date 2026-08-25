@@ -13,7 +13,7 @@
 // tool definition is wrong; fix it there and regenerate.
 //
 // Exclusions, in the order they are applied (all are reported, never silent):
-//   - a tool with a localHandler (the bundled support knowledge base: it runs
+//   - a tool with a localHandler (the support knowledge base: it runs
 //     inside the worker and has no backend route to publish);
 //   - a route outside `/api/` (the `/internal` and `/local` surfaces);
 //   - a route the contract oracle marks internal (belt and braces: the registry

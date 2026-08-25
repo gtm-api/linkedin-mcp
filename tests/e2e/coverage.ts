@@ -63,8 +63,9 @@ export function buildReport(readToolNames: string[], buckets: ContractBuckets) {
   const calledSet = new Set([...readSet, ...smokeSet]);
 
   const uncalled = ALL_TOOLS.filter((t) => !calledSet.has(t.name));
-  // Support runs on a bundled index (localHandler), so its two tools have no
-  // backend response to hold an outputSchema against. They are still CALLED
+  // Support runs in-worker against the Mintlify docs index (localHandler), so
+  // its two tools have no backend response to hold an outputSchema against.
+  // They are still CALLED
   // (the knowledge mount has a smoke row), just not contract-checked here.
   const localTools = ALL_TOOLS.filter((t) => t.service === 'support');
 

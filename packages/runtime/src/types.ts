@@ -74,8 +74,8 @@ export interface ToolDefinition {
   annotations: ToolAnnotations;
   docsPath?: string;
   /**
-   * In-worker execution instead of a backend HTTP call (e.g. the bundled
-   * support knowledge index). Returns a SUCCESS envelope object; throwing maps
+   * In-worker execution instead of a backend HTTP call (e.g. the support
+   * knowledge tools). Returns a SUCCESS envelope object; throwing maps
    * to an internal_error result. `route` stays as inert metadata for tooling.
    */
   localHandler?: (ctx: DispatchContext) => Promise<unknown>;
