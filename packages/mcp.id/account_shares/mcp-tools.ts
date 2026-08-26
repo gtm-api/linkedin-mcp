@@ -98,6 +98,8 @@ const AccountShare = z.object({
   holder_account_sid: z.string().nullable()
     .describe('The holder\'s copy. NULL until the copy phase lands, so it is null on every pre-active row.'),
   holder_channel_ref: z.string().nullable(),
+  owner_account_label: z.string().nullable()
+    .describe('The channel\'s display name for the lent account, e.g. "Jane Roe (jane-roe)". Use it to tell one share from another when reporting to a human. Null when the channel had no name to give. Display only: never filter, match or reason on it.'),
   status: AccountShareStatus
     .describe('The durable phase, and the answer to "did the loan start". Only active means the holder can work.'),
   holder_over_slot: z.boolean()

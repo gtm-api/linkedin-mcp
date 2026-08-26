@@ -84,6 +84,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "owner_account_label",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "holder_over_slot",
                         "type": "bool",
                         "nullable": false,
@@ -234,6 +240,12 @@
                     },
                     {
                         "name": "holder_channel_ref",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "owner_account_label",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -416,6 +428,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "source_account_label",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "receiver_over_slot",
                         "type": "bool",
                         "nullable": false,
@@ -548,6 +566,12 @@
                     },
                     {
                         "name": "target_channel_ref",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "source_account_label",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -5584,8 +5608,24 @@
             "backing": "string",
             "cases": [
                 {
+                    "name": "SignUp",
+                    "value": "sign_up"
+                },
+                {
+                    "name": "EmailVerified",
+                    "value": "email_verified"
+                },
+                {
+                    "name": "SetupCompleted",
+                    "value": "setup_completed"
+                },
+                {
                     "name": "LinkedinConnected",
                     "value": "linkedin_connected"
+                },
+                {
+                    "name": "Purchase",
+                    "value": "purchase"
                 }
             ]
         },
@@ -16444,6 +16484,22 @@
                     "in": null,
                     "min": null,
                     "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.ga_session_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 }
