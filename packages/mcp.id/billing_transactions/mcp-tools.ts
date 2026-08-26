@@ -131,7 +131,7 @@ export const billingTransactionsTools: ToolDefinition[] = [
     ...base,
     name: 'get_billing_transaction_invoice',
     description:
-      "Fetch a temporary, time-limited download URL for this transaction's invoice PDF from Paddle (never stored on our side; expires ~1h). Works for self-serve card charges and sales-issued manual invoices. Returns invoice_not_ready if the transaction is not yet billed. Read-only, mutates nothing. Requires billing.view.",
+      "Fetch a temporary, time-limited URL for this transaction's invoice PDF from Paddle (never stored here; expires ~1h, opens inline). Works for self-serve card charges and sales-issued manual invoices. Returns invoice_not_ready before the transaction is billed, and invoice_not_available when Paddle issued no invoice for it (a $0 payment-method-change charge, a canceled checkout): the rows with a PDF are the ones carrying invoice_number. Read-only, mutates nothing. Requires billing.view.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-transactions/{sid}/get-invoice', sidParam: 'sid' },
     operation: 'action',
