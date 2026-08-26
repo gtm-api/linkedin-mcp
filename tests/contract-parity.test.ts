@@ -282,11 +282,12 @@ const numberOr = (value: number | string | null): number | null => (typeof value
 // ToolDefinition.entity is the snake_case plural route group ('api_keys');
 // oracle keys are the PascalCase Domain class name minus the Domain suffix
 // ('ApiKey'). The mapping is NOT one-to-one: one PHP entity FOLDER can hold
-// several Domains, and one MCP package covers the whole folder. Id/Observability
-// holds ObservabilityRequestDomain + ObservabilityAgentSessionDomain, and the
-// single `observability_requests` package has a tool for each. Resolving the
-// tool's entity to one Domain by name therefore checks half the tools against
-// the wrong Domain and invents drift that is not there.
+// several Domains, and one MCP package covers the whole folder, with a tool for
+// each. Resolving the tool's entity to one Domain by name therefore checks part
+// of the tools against the wrong Domain and invents drift that is not there.
+// (The case that forced this was Id/Observability, two Domains behind one
+// `observability_requests` package; that folder was deleted on 2026-08-26, but
+// the mapping is still not one-to-one and the candidate-set resolution stays.)
 //
 // So: resolve the entity to the CANDIDATE SET of every Domain in its folder,
 // then attribute each TOOL to one candidate by fit (fewest keys the PHP side
@@ -300,7 +301,7 @@ const singularize = (value: string) =>
       : value.endsWith('s') && !value.endsWith('ss') ? value.slice(0, -1)
         : value;
 
-/** 'Gtm\Lib\Common\Microservices\Id\Observability\ObservabilityRequestDomain' -> 'Observability'. */
+/** 'Gtm\Lib\Common\Microservices\Id\ApiKey\ApiKeyDomain' -> 'ApiKey'. */
 const folderOf = (domainClass: string) => domainClass.split('\\').slice(-2, -1)[0] ?? '';
 
 const words = (value: string) =>

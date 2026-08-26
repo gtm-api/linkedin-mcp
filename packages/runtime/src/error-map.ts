@@ -13,13 +13,12 @@ interface ErrorEnvelope {
     blockers?: Array<Record<string, unknown>>;
     context?: Record<string, unknown>;
   };
-  meta?: { trace_id?: string; debug_url?: string };
+  meta?: { trace_id?: string };
 }
 
 function traceFooter(env: ErrorEnvelope): string[] {
   const out: string[] = [];
   if (env.meta?.trace_id) out.push(`trace: ${env.meta.trace_id}`);
-  if (env.meta?.debug_url) out.push(`debug: ${env.meta.debug_url}`);
   return out;
 }
 
@@ -40,7 +39,12 @@ export function mapErrorEnvelope(
       lines.push(`Validation failed for ${tool}:`);
       for (const [field, errs] of Object.entries(e.field_errors ?? {})) {
         for (const fe of errs) {
-          const text = typeof fe === 'string' ? fe : `${fe.message ?? ''}${fe.rule ? ` [${fe.rule}]` : ''}`;
+          // `rule` is the machine code, `message` the copy. A throw site that wrote no
+          // copy leaves the two IDENTICAL (McpException fills message from the reason),
+          // and echoing `x [x]` at the model is noise, not a second signal.
+          const rule = typeof fe === 'string' ? undefined : fe.rule;
+          const message = typeof fe === 'string' ? fe : (fe.message ?? '');
+          const text = rule && rule !== message ? `${message} [${rule}]` : (message || rule || '');
           lines.push(`  • ${field}: ${text}`);
         }
       }

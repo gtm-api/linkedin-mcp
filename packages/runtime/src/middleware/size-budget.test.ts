@@ -98,7 +98,6 @@ function searchEnvelope(rows: number): Record<string, unknown> {
       span_id: '0123456789abcdef',
       timestamp: ISO,
       duration_ms: 412,
-      debug_url: 'https://app.gtm-api.com/debug/01920000-0000-7000-8000-000000000000',
     },
   };
 }
@@ -233,7 +232,7 @@ describe('size budget', () => {
       total: 400,
       applied_filters: {},
       available_fields: ['status', 'has_premium', 'share_role'],
-      meta: { trace_id: 't', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 3, debug_url: 'https://x' },
+      meta: { trace_id: 't', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 3 },
     };
     const out = applySizeBudget(rendered(envelope), 8_000);
     expect(resultChars(out)).toBeLessThanOrEqual(8_000);
@@ -259,7 +258,7 @@ describe('size budget', () => {
           resolution_hint: `Call stop_linkedin_flow with sid flw_fl_${String(i).padStart(11, '0')} first.`,
         })),
       },
-      meta: { trace_id: 't', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 9, debug_url: 'https://x' },
+      meta: { trace_id: 't', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 9 },
     };
     const result: ToolResult = { ...rendered(envelope), isError: true };
     const out = applySizeBudget(result, 4_000);
@@ -277,7 +276,7 @@ describe('size budget', () => {
       item: accountRow(1).item,
       included: { history: Array.from({ length: 300 }, (_, i) => ({ at: ISO, event: `event-number-${i}` })) },
       includes: ['history'],
-      meta: { trace_id: 't', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 9, debug_url: 'https://x' },
+      meta: { trace_id: 't', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 9 },
     };
     const out = applySizeBudget(rendered(envelope), 4_000);
 

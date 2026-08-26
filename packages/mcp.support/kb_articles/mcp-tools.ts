@@ -41,7 +41,6 @@ function envelopeMeta(ctx: DispatchContext, startedAt: number) {
     span_id: spanId(),
     timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
     duration_ms: Math.max(0, Math.round(Date.now() - startedAt)),
-    debug_url: 'local://support-knowledge',
   };
 }
 

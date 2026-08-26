@@ -124,7 +124,7 @@ aggregation is the parent's `metrics` tool.
 | identity | `/mcp/id/identity` | users (2), teams (6), team_members (6), sessions (2) | 16 | ✅ |
 | access | `/mcp/id/access` | api_keys (7), oauth_clients (5), oauth_authorizations (3), account_shares (5) | 20 | ✅ |
 | billing | `/mcp/id/billing` | billing_products (1), billing_subscriptions (13), billing_transactions (4), billing_payment_methods (3) | 21 | ✅ |
-| platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), observability_requests (2), support_requests (3) | 16 | ✅ |
+| platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), support_requests (3) | 14 | ✅ |
 
 2026-08-16 - the `credits` mount and the `credit_transactions` package were removed with the
 platform-wide credits exit; data-bus reads are no longer metered.
@@ -144,7 +144,7 @@ through this team's connected account. All three are granted and revocable, whic
 `return` read naturally next to `rotate` and `revoke`. The alternatives were worse for
 discoverability: `/mcp/id/identity` is the org roster (users, teams, members, sessions) and a share
 crosses tenants rather than adding one to yours; `/mcp/id/platform` is the leftovers drawer
-(notifications, certificates, observability, support) and nothing about delegation belongs there; and
+(notifications, certificates, support) and nothing about delegation belongs there; and
 a standalone 5-tool mount would mean a client that mounted `/mcp/id/access` to manage delegated
 access silently could not see the one grant that hands over a live LinkedIn identity. It fits without
 a budget change: 15 + 5 = **20 / 25**.

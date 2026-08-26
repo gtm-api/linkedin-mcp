@@ -3085,392 +3085,6 @@
                 ]
             }
         },
-        "ObservabilityAgentSession": {
-            "domain": {
-                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\ObservabilityAgentSessionDomain",
-                "fields": [
-                    {
-                        "name": "sid",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "agent_session_id",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "started_at",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "last_activity_at",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "duration_ms",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "total_turns",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "total_tool_calls",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "debug_url",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "turns",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "team_sid",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "actor",
-                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
-                        "nullable": true,
-                        "has_default": true
-                    }
-                ]
-            },
-            "response": {
-                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\Responses\\ObservabilityAgentSessionResponse",
-                "fields": [
-                    {
-                        "name": "sid",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "agent_session_id",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "started_at",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "last_activity_at",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "duration_ms",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "total_turns",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "total_tool_calls",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "debug_url",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "turns",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "team_sid",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "actor",
-                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
-                        "nullable": true,
-                        "has_default": true
-                    }
-                ]
-            },
-            "filter": null
-        },
-        "ObservabilityRequest": {
-            "domain": {
-                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\ObservabilityRequestDomain",
-                "fields": [
-                    {
-                        "name": "sid",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "trace_id",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "tool",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "status",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "started_at",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "duration_ms",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "debug_url",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "agent_session_id",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "agent_turn_id",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "team_sid",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "actor",
-                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "input",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "output",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "errors",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "events_emitted",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "permission_decisions",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "child_calls",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "db_queries",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "span_tree",
-                        "type": "?array",
-                        "nullable": true,
-                        "has_default": true
-                    }
-                ]
-            },
-            "response": {
-                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\Responses\\ObservabilityRequestResponse",
-                "fields": [
-                    {
-                        "name": "sid",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "trace_id",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "tool",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "status",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "started_at",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "duration_ms",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "debug_url",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "agent_session_id",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "agent_turn_id",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "team_sid",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "actor",
-                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "input",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "output",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "errors",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "events_emitted",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "permission_decisions",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "child_calls",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "db_queries",
-                        "type": "array",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
-                        "name": "span_tree",
-                        "type": "?array",
-                        "nullable": true,
-                        "has_default": true
-                    }
-                ]
-            },
-            "filter": null
-        },
         "Session": {
             "domain": {
                 "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Session\\SessionDomain",
@@ -6079,99 +5693,6 @@
                 {
                     "name": "Dynamic",
                     "value": "dynamic"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\Enums\\ObservabilityDbOperationEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Select",
-                    "value": "SELECT"
-                },
-                {
-                    "name": "Insert",
-                    "value": "INSERT"
-                },
-                {
-                    "name": "Update",
-                    "value": "UPDATE"
-                },
-                {
-                    "name": "Delete",
-                    "value": "DELETE"
-                },
-                {
-                    "name": "Other",
-                    "value": "OTHER"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\Enums\\ObservabilityPermissionDecisionEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Allow",
-                    "value": "allow"
-                },
-                {
-                    "name": "Deny",
-                    "value": "deny"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\Enums\\ObservabilityRequestStatusEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Ok",
-                    "value": "ok"
-                },
-                {
-                    "name": "Error",
-                    "value": "error"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\Enums\\ObservabilitySpanKindEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Server",
-                    "value": "server"
-                },
-                {
-                    "name": "Client",
-                    "value": "client"
-                },
-                {
-                    "name": "Producer",
-                    "value": "producer"
-                },
-                {
-                    "name": "Consumer",
-                    "value": "consumer"
-                },
-                {
-                    "name": "Internal",
-                    "value": "internal"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Id\\Observability\\Enums\\ObservabilitySpanStatusEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Ok",
-                    "value": "ok"
-                },
-                {
-                    "name": "Error",
-                    "value": "error"
-                },
-                {
-                    "name": "Unset",
-                    "value": "unset"
                 }
             ]
         },
@@ -13203,83 +12724,6 @@
         },
         {
             "method": "POST",
-            "uri": "api/observability/get-request",
-            "controller": "App\\Entities\\Observability\\ObservabilityController",
-            "action": "getRequest",
-            "operation": "get",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_view_observability_requests",
-            "internal": false,
-            "request_class": "App\\Entities\\Observability\\Requests\\ObservabilityGetRequestRequest",
-            "rules": [
-                {
-                    "field": "trace_id",
-                    "rules": [
-                        "required",
-                        "string",
-                        "regex:/^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
-                        "[0-9a-fA-F]{32})$/"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/observability/get-session",
-            "controller": "App\\Entities\\Observability\\ObservabilityController",
-            "action": "getSession",
-            "operation": "get",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_view_observability_requests",
-            "internal": false,
-            "request_class": "App\\Entities\\Observability\\Requests\\ObservabilityGetSessionRequest",
-            "rules": [
-                {
-                    "field": "agent_session_id",
-                    "rules": [
-                        "required",
-                        "string",
-                        "uuid"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
             "uri": "api/sessions/search",
             "controller": "App\\Entities\\Session\\SessionController",
             "action": "search",
@@ -14370,12 +13814,58 @@
                     "field": "permissions.*",
                     "rules": [
                         "string",
-                        "max:128"
+                        "max:128",
+                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_act_linkedin_custom_requests\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
-                    "in": null,
+                    "in": [
+                        "can_view_teams",
+                        "can_manage_teams",
+                        "can_view_team_members",
+                        "can_manage_team_members",
+                        "can_view_api_keys",
+                        "can_manage_api_keys",
+                        "can_view_oauth_clients",
+                        "can_manage_oauth_clients",
+                        "can_view_sessions",
+                        "can_manage_sessions",
+                        "can_view_account_shares",
+                        "can_manage_account_shares",
+                        "can_manage_account_transfers",
+                        "can_view_billing",
+                        "can_manage_billing",
+                        "can_view_ssl_certificates",
+                        "can_manage_ssl_certificates",
+                        "can_view_notifications",
+                        "can_manage_notifications",
+                        "can_view_support_requests",
+                        "can_manage_support_requests",
+                        "can_view_linkedin_connections",
+                        "can_act_linkedin_connections",
+                        "can_view_linkedin_messages",
+                        "can_act_linkedin_messages",
+                        "can_act_linkedin_engagements",
+                        "can_view_linkedin_searches",
+                        "can_act_linkedin_searches",
+                        "can_view_linkedin_enrichment",
+                        "can_act_linkedin_enrichment",
+                        "can_view_linkedin_accounts",
+                        "can_update_linkedin_accounts",
+                        "can_manage_linkedin_accounts",
+                        "can_open_cloud_browser",
+                        "can_change_proxy",
+                        "can_edit_schedule",
+                        "can_manage_smart_limits",
+                        "can_manage_cloud_browser_external_links",
+                        "can_act_linkedin_custom_requests",
+                        "can_view_mass_actions",
+                        "can_manage_mass_actions",
+                        "can_view_webhooks",
+                        "can_manage_webhooks",
+                        "*"
+                    ],
                     "min": null,
                     "max": 128,
                     "size": null,
@@ -14385,13 +13875,14 @@
                     "field": "account_sids",
                     "rules": [
                         "nullable",
-                        "array"
+                        "array",
+                        "min:1"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "array",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": null,
                     "size": null,
                     "between": null
@@ -14786,12 +14277,58 @@
                     "field": "permissions.*",
                     "rules": [
                         "string",
-                        "max:128"
+                        "max:128",
+                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_act_linkedin_custom_requests\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
-                    "in": null,
+                    "in": [
+                        "can_view_teams",
+                        "can_manage_teams",
+                        "can_view_team_members",
+                        "can_manage_team_members",
+                        "can_view_api_keys",
+                        "can_manage_api_keys",
+                        "can_view_oauth_clients",
+                        "can_manage_oauth_clients",
+                        "can_view_sessions",
+                        "can_manage_sessions",
+                        "can_view_account_shares",
+                        "can_manage_account_shares",
+                        "can_manage_account_transfers",
+                        "can_view_billing",
+                        "can_manage_billing",
+                        "can_view_ssl_certificates",
+                        "can_manage_ssl_certificates",
+                        "can_view_notifications",
+                        "can_manage_notifications",
+                        "can_view_support_requests",
+                        "can_manage_support_requests",
+                        "can_view_linkedin_connections",
+                        "can_act_linkedin_connections",
+                        "can_view_linkedin_messages",
+                        "can_act_linkedin_messages",
+                        "can_act_linkedin_engagements",
+                        "can_view_linkedin_searches",
+                        "can_act_linkedin_searches",
+                        "can_view_linkedin_enrichment",
+                        "can_act_linkedin_enrichment",
+                        "can_view_linkedin_accounts",
+                        "can_update_linkedin_accounts",
+                        "can_manage_linkedin_accounts",
+                        "can_open_cloud_browser",
+                        "can_change_proxy",
+                        "can_edit_schedule",
+                        "can_manage_smart_limits",
+                        "can_manage_cloud_browser_external_links",
+                        "can_act_linkedin_custom_requests",
+                        "can_view_mass_actions",
+                        "can_manage_mass_actions",
+                        "can_view_webhooks",
+                        "can_manage_webhooks",
+                        "*"
+                    ],
                     "min": null,
                     "max": 128,
                     "size": null,
@@ -14802,13 +14339,14 @@
                     "rules": [
                         "sometimes",
                         "nullable",
-                        "array"
+                        "array",
+                        "min:1"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "array",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": null,
                     "size": null,
                     "between": null
@@ -16342,6 +15880,38 @@
                     "in": null,
                     "min": 1,
                     "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "last_name",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "company_domain",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 },

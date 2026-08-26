@@ -189,16 +189,6 @@ const MANUAL_BRIDGE: BridgeEntry[] = [
   { service: 'id', entity: 'billing_transactions', at: 'collection_mode', enumClass: 'BillingSubscriptionCollectionModeEnum' },
   // Line items on a transaction are products, and the class names the product.
   { service: 'id', entity: 'billing_transactions', at: 'items.*.product_type', enumClass: 'BillingProductTypeEnum' },
-  // The observability tree is spans, not requests: a SPAN status has a third
-  // case (unset) the request status does not, and name resolution would silently
-  // pick ObservabilityRequestStatusEnum for both.
-  { service: 'id', entity: 'observability_requests', at: 'span_tree.status', enumClass: 'ObservabilitySpanStatusEnum' },
-  { service: 'id', entity: 'observability_requests', at: 'span_tree.children.*.status', enumClass: 'ObservabilitySpanStatusEnum' },
-  { service: 'id', entity: 'observability_requests', at: 'span_tree.kind', enumClass: 'ObservabilitySpanKindEnum' },
-  { service: 'id', entity: 'observability_requests', at: 'span_tree.children.*.kind', enumClass: 'ObservabilitySpanKindEnum' },
-  // Both classes name the subject of the sub-record rather than its JSON key.
-  { service: 'id', entity: 'observability_requests', at: 'db_queries.*.operation', enumClass: 'ObservabilityDbOperationEnum' },
-  { service: 'id', entity: 'observability_requests', at: 'permission_decisions.*.decision', enumClass: 'ObservabilityPermissionDecisionEnum' },
 
   // ── orchestration ──
   // A step_log row is a STEP outcome, a strict 5-case subset vocabulary of the
@@ -222,8 +212,6 @@ const CLASS_PREFIX_ALIAS: Record<string, string[]> = {
   // shared by both OAuth entities and prefixed with the protocol, not the entity.
   'id|OauthClient': ['Oauth'],
   'id|OauthAuthorization': ['Oauth'],
-  // The Observability folder prefixes its enums with the folder, not the Domain.
-  'id|ObservabilityRequest': ['Observability'],
 };
 
 // ─── Zod introspection ──────────────────────────────────────────────────
@@ -270,8 +258,8 @@ const enumSites = (schema: unknown): EnumSite[] => {
   const found = new Map<string, EnumSite>();
 
   const walk = (node: unknown, path: string, depth: number) => {
-    // A self-recursive schema (the observability span tree is one) is reached
-    // through a ZodLazy whose getter hands back a fresh object every call, so
+    // A self-recursive schema is reached through a ZodLazy whose getter hands
+    // back a fresh object every call, so
     // identity cannot terminate the walk. The depth cap does, and the collapsed
     // path below folds the repeated levels into one site.
     if (depth > 24) return;

@@ -329,7 +329,7 @@ export const massActionsTools: ToolDefinition[] = [
       [
         'Validate a whole bulk plan without running anything and mint the consent token create_mass_action consumes. ALWAYS the first call of a bulk dispatch.',
         '',
-        'Validates in one pass, reporting all findings at once: plan shape (1..3 steps), step-eligibility of each tool, scope shape and size (1..100), the generate-scope rule (step 1 must mint an object) and the send-class schedule mandate. A tool outside the step vocabulary comes back 422 validation_failed with error.field_errors["plan.steps.{i}.tool"] = ["not_step_eligible: ..."], naming the authorable set so the plan is repairable in one turn. Nothing is persisted, charged or created.',
+        'Validates in one pass, reporting all findings at once: plan shape (1..3 steps), step-eligibility of each tool, scope shape and size (1..100), the generate-scope rule (step 1 must mint an object) and the send-class schedule mandate. A tool outside the step vocabulary comes back 422 validation_failed with error.field_errors["plan.steps.{i}.tool"][0].rule = "not_step_eligible", naming the authorable set so the plan is repairable in one turn. Nothing is persisted, charged or created.',
         '',
         'On success the result carries preview (items_count, steps_per_item, dangerous_steps, eta, warnings), commit_token and expires_at. Show the preview to the user, then pass the token to create_mass_action UNCHANGED with the exact same inputs: it is an HMAC over them plus the caller, so any edit invalidates it (422) and needs a fresh preview. Tokens live 15 minutes.',
       ].join('\n'),

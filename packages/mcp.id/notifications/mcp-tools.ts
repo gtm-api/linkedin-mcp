@@ -140,7 +140,7 @@ export const notificationsTools: ToolDefinition[] = [
     ...base,
     name: 'get_notification',
     description:
-      'Fetch a single notification by sid: the rendered subject / body, delivery state, and failure reason if any. Useful in post-call analysis: follow a notification\'s event_sid back through observability to explain "why did I get this email".',
+      'Fetch a single notification by sid: the rendered subject / body, delivery state, and failure reason if any.',
     toolClass: 'trivial',
     route: { service: 'id', method: 'GET', pathTemplate: '/api/notifications/{sid}', sidParam: 'sid' },
     operation: 'get',

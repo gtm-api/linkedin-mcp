@@ -78,7 +78,46 @@ const base = {
   mount: 'id.identity',
 } as const;
 
+/**
+ * The grantable vocabulary, mirroring `PermissionCatalog::gtmSurface()` (43
+ * tokens) plus the wildcard - the backend validates `permissions.*` with
+ * Rule::in over exactly this list, and the contract-parity gate holds this
+ * enum equal to that rule, so a catalog change fails the build here instead
+ * of leaving agents to guess.
+ */
+const PERMISSION_TOKEN = z.enum([
+  'can_view_teams', 'can_manage_teams',
+  'can_view_team_members', 'can_manage_team_members',
+  'can_view_api_keys', 'can_manage_api_keys',
+  'can_view_oauth_clients', 'can_manage_oauth_clients',
+  'can_view_sessions', 'can_manage_sessions',
+  'can_view_account_shares', 'can_manage_account_shares',
+  'can_manage_account_transfers',
+  'can_view_billing', 'can_manage_billing',
+  'can_view_ssl_certificates', 'can_manage_ssl_certificates',
+  'can_view_notifications', 'can_manage_notifications',
+  'can_view_support_requests', 'can_manage_support_requests',
+  'can_view_linkedin_connections', 'can_act_linkedin_connections',
+  'can_view_linkedin_messages', 'can_act_linkedin_messages',
+  'can_act_linkedin_engagements',
+  'can_view_linkedin_searches', 'can_act_linkedin_searches',
+  'can_view_linkedin_enrichment', 'can_act_linkedin_enrichment',
+  'can_view_linkedin_accounts',
+  'can_update_linkedin_accounts',
+  'can_manage_linkedin_accounts',
+  'can_open_cloud_browser',
+  'can_change_proxy',
+  'can_edit_schedule',
+  'can_manage_smart_limits',
+  'can_manage_cloud_browser_external_links',
+  'can_act_linkedin_custom_requests',
+  'can_view_mass_actions', 'can_manage_mass_actions',
+  'can_view_webhooks', 'can_manage_webhooks',
+  '*',
+]);
+
 export const teamMembersTools: ToolDefinition[] = [
+
   {
     ...base,
     name: 'search_team_members',
@@ -115,7 +154,7 @@ export const teamMembersTools: ToolDefinition[] = [
     ...base,
     name: 'create_team_member',
     description:
-      'Invite a person by email. Born status=invited, user_sid=null, with a one-time code (+7d expiry); dispatches the invite email. permissions is the explicit token list (expand a UI preset in code first); account_sids is the optional profile slice (null/omitted = all team profiles). Natural key (team, email) over live rows; re-inviting a live member returns already_exists:true.',
+      "Invite a person by email. Born status=invited, user_sid=null, with a one-time code (+7d expiry); dispatches the invite email. permissions is the explicit token list validated against the catalog (403 grant_exceeds_ceiling when it exceeds the CALLER's own grant; '*' is grantable only by the owner or a wildcard holder; can_view_teams is always added - the membership floor). account_sids is the optional profile slice (null/omitted = all team profiles; an explicit empty list is refused, and a sliced caller cannot grant beyond their own slice). Natural key (team, email) over live rows; re-inviting a live member returns already_exists:true.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/team-members' },
     operation: 'create',
@@ -124,9 +163,9 @@ export const teamMembersTools: ToolDefinition[] = [
     dangerous: false,
     inputSchema: z.object({
       email: z.string().email().max(255),
-      permissions: z.array(z.string().max(128)).describe('Unified permission tokens; [] = membership only.'),
-      account_sids: z.array(ACCOUNT_SID).nullable().optional()
-        .describe('Profile slice; null/omitted = all team profiles.'),
+      permissions: z.array(PERMISSION_TOKEN).describe('Unified catalog tokens; the can_view_teams floor is always unioned in.'),
+      account_sids: z.array(ACCOUNT_SID).min(1).nullable().optional()
+        .describe('Profile slice; null/omitted = all team profiles. An empty list is refused (422).'),
       ...usageMetaField,
     }),
     outputSchema: McpCreateResponse(TeamMember),
@@ -136,7 +175,7 @@ export const teamMembersTools: ToolDefinition[] = [
     ...base,
     name: 'update_team_member',
     description:
-      "Re-scope an existing member: replace permissions and/or account_sids. email / status / user_sid / team_sid are read-only (rejected silently). At least one field required. Updating the owner's permissions is allowed but cannot strip ownership (use transfer_team_ownership).",
+      "Re-scope an existing member: replace permissions and/or account_sids. email / status / user_sid / team_sid are read-only (rejected silently). At least one field with an ACTUAL change required (a value-identical PATCH answers 422 nothing_to_update). The change applies immediately: the member's live tokens are invalidated and re-minted with the new grant on their next request (agents re-exchange). Bounded by the caller's own grant (403 grant_exceeds_ceiling); the structural owner's seat is not re-scopable (409 owner_cannot_be_rescoped - move ownership via transfer_team_ownership).",
     toolClass: 'typical',
     route: { service: 'id', method: 'PATCH', pathTemplate: '/api/team-members/{sid}', sidParam: 'sid' },
     operation: 'update',
@@ -145,9 +184,10 @@ export const teamMembersTools: ToolDefinition[] = [
     dangerous: false,
     inputSchema: z.object({
       sid: SID,
-      permissions: z.array(z.string().max(128)).optional(),
-      account_sids: z.array(ACCOUNT_SID).nullable().optional()
-        .describe('null resets to "all profiles".'),
+      permissions: z.array(PERMISSION_TOKEN).optional()
+        .describe('Full replacement; the can_view_teams floor is always unioned in.'),
+      account_sids: z.array(ACCOUNT_SID).min(1).nullable().optional()
+        .describe('null resets to "all profiles"; an empty list is refused (422).'),
       ...usageMetaField,
     }),
     outputSchema: McpUpdateResponse(TeamMember),

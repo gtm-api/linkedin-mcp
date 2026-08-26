@@ -24,8 +24,6 @@ export const McpEnvelopeMeta = z.object({
     .describe('ISO 8601 UTC (Y-m-dTH:i:sZ), response time.'),
   duration_ms: z.number().int().nonnegative()
     .describe('Server-side wall clock.'),
-  debug_url: z.string()
-    .describe('Deep link to the post-call analysis UI.'),
   team_sid: z.string().nullable().optional()
     .describe('The team this call ran in (the token team, or the team_sid override). Null when unauthenticated; absent from pre-2026-08-20 backends.'),
   actor_type: z.string().nullable().optional()
@@ -280,9 +278,11 @@ export const McpErrorResponse = z.object({
     message: z.string(),
     recoverable: z.boolean(),
     suggestion: z.string().optional(),
-    // Two backend shapes: FormRequest validation → [{rule, message}]; a manual
-    // McpException::invalidInput(field, reason) → [reason:string]. Accept both.
-    field_errors: z.record(z.array(z.union([z.string(), McpFieldError]))).optional(),
+    // ONE shape. It used to be two - FormRequest validation sent [{rule, message}]
+    // while a manual McpException::invalidInput(field, reason) sent [reason:string] -
+    // and a client could only read one of them. McpException's constructor normalizes
+    // every producer into the contract shape now, so the string branch is gone.
+    field_errors: z.record(z.array(McpFieldError)).optional(),
     blockers: z.array(DeleteBlocker).optional(),
     context: z.record(z.unknown()).optional(),
   }),

@@ -193,7 +193,7 @@ export const apiKeysTools: ToolDefinition[] = [
     ...base,
     name: 'get_api_keys_metrics',
     description:
-      "Period-bound counts of the team's keys by status, plus issuance / expiry tallies inside the window (created_in_period, expired_in_period). Requires period {from, to}. Optional filter. Counts key rows, not key traffic; for per-key request usage use observability.",
+      "Period-bound counts of the team's keys by status, plus issuance / expiry tallies inside the window (created_in_period, expired_in_period). Requires period {from, to}. Optional filter. Counts key rows, not key traffic.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/api-keys/metrics' },
     operation: 'metrics',

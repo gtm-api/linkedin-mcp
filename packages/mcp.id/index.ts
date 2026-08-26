@@ -13,7 +13,6 @@ import { billingPaymentMethodsTools } from './billing_payment_methods/mcp-tools'
 import { notificationsTools } from './notifications/mcp-tools';
 import { supportRequestsTools } from './support_requests/mcp-tools';
 import { sslCertificatesTools } from './ssl_certificates/mcp-tools';
-import { observabilityTools } from './observability_requests/mcp-tools';
 import { accountSharesTools } from './account_shares/mcp-tools';
 
 const pkg = (entity: string, tools: ToolPackage['tools']): ToolPackage => ({
@@ -38,6 +37,5 @@ export const idPackages: ToolPackage[] = [
   pkg('notifications', notificationsTools),
   pkg('support_requests', supportRequestsTools),
   pkg('ssl_certificates', sslCertificatesTools),
-  pkg('observability_requests', observabilityTools),
   pkg('account_shares', accountSharesTools),
 ];

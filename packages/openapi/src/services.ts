@@ -42,7 +42,7 @@ export const SERVICE_META: Record<PublicServiceId, ServiceMeta> = {
   id: {
     title: 'GTM API public contract: gtm.service.id',
     summary:
-      'Identity, access and money: users, teams and members, API keys, OAuth clients and authorizations, billing products, subscriptions, transactions and payment methods, notifications, TLS certificates, observability and support requests.',
+      'Identity, access and money: users, teams and members, API keys, OAuth clients and authorizations, billing products, subscriptions, transactions and payment methods, notifications, TLS certificates and support requests.',
     servers: [
       { url: 'https://app.gtm-api.com/id/v4', description: 'Production, through the app.gtm-api.com gateway' },
     ],
