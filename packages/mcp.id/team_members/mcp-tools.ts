@@ -113,6 +113,13 @@ const PERMISSION_TOKEN = z.enum([
   'can_act_linkedin_custom_requests',
   'can_view_mass_actions', 'can_manage_mass_actions',
   'can_view_webhooks', 'can_manage_webhooks',
+  // Email-channel tokens (catalog grew with the email account slice, 2026-08-27).
+  'can_view_email_accounts', 'can_update_email_accounts', 'can_manage_email_accounts',
+  'can_view_email_messages', 'can_act_email_messages',
+  'can_view_email_engagements',
+  'can_view_email_suppressions', 'can_manage_email_suppressions',
+  'can_view_email_tracking_domains', 'can_manage_email_tracking_domains',
+  'can_view_email_sending_domains', 'can_manage_email_sending_domains',
   '*',
 ]);
 

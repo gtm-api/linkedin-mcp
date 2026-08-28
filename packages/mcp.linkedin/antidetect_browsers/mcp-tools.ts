@@ -1,7 +1,7 @@
 // Entity: Antidetect Browser (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/antidetect_browsers.md
 // Format: registry v2, where each tool carries route metadata so the generic
-// dispatcher can drive it. 11 tools (the antidetect-browsers route group),
+// dispatcher can drive it. 12 tools (the antidetect-browsers route group),
 // mounted on linkedin.browsers alongside proxies / logs / cloud-browsers /
 // cloud-browser-sessions.
 
@@ -28,6 +28,25 @@ const PROXY_SID = z.string().length(18).startsWith('ab_px_')
   .describe('Antidetect browser proxy sid (ab_px_…).');
 const ACCESS_KEY = z.string().length(18).startsWith('cb_ak_')
   .describe('Cloud-browser access key (cb_ak_…).');
+
+// One entry in the browser's `cloud_browser_access` array: a minted smart-link key
+// plus the envelope validated at connect. Declared once because `search` returns the
+// whole array and `generate_cloud_browser_access_key` returns a single fresh entry.
+// There is no connect counter on it: `max_connects` is checked against LIVE
+// cloud-browser sessions, and a stored counter that no writer maintained was deleted
+// on 2026-08-27 after every reader of it had seen 0 forever.
+const CloudBrowserAccessEntry = z.object({
+  key: ACCESS_KEY
+    .describe('The bearer token itself. Readable in full here, and only here: on cloud-browser-sessions it is masked to the last 4.'),
+  expires_at: z.string().nullable()
+    .describe('ISO 8601 expiry; null means it never expires. Checked at connect and never again, so a session can outlive its own key.'),
+  max_connects: z.number().nullable()
+    .describe('Cap on CONCURRENT sessions on this key; null means unlimited.'),
+  allowed_ips: z.array(z.string()).nullable(),
+  allowed_countries: z.array(z.string()).nullable(),
+  purpose: z.enum(['relogin', 'share']).optional()
+    .describe('What the public page behind the link does. Stamped at mint and never re-negotiated at connect, because the visitor is unauthenticated. Absent on keys minted before the field existed, which the backend reads as relogin.'),
+});
 
 // Owner + vendor enums mirror the create FormRequest (only `gologin` is wired).
 const BrowserOwner = z.enum(['platform', 'customer', 'mirror_profiles']);
@@ -122,13 +141,8 @@ const AntidetectBrowser = z.object({
   proxy_5g: z.boolean()
     .describe('5G Proxy add-on: the browser runs on the dedicated 5G mobile route (faster command execution, fewer retries). Each flagged browser occupies one add-on slot.'),
   // Cloud-browser access
-  cloud_browser_access: z.array(z.object({
-    key: z.string(),
-    till: z.string(),
-    max_connects: z.number().nullable(),
-    allowed_ips: z.array(z.string()).nullable(),
-    allowed_countries: z.array(z.string()).nullable(),
-  })),
+  cloud_browser_access: z.array(CloudBrowserAccessEntry)
+    .describe('The smart links minted on this browser, keys included in full. Each console open used to leave a throwaway entry here; minting now sweeps entries that expired over 24h ago, so this is the live link list rather than a log.'),
   // Audit
   created_by: AccessIdentityValue,
   deleted_by: AccessIdentityValue.nullable(),
@@ -276,6 +290,32 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
   },
   {
     ...base,
+    name: 'get_antidetect_browser_seat_usage',
+    description:
+      'Seats and 5G proxy slots the workspace occupies: every live browser row, whatever its status and whether a LinkedIn account is bound. Team-wide; compare against limits.accounts and limits.proxy_5g.',
+    toolClass: 'trivial',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/seat-usage' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    // No body: the question is about the workspace, not about any one row. Unlike
+    // search, the answer is NOT narrowed by the caller's allowed_account_sids slice
+    // - a capacity number may only be scoped by the team, which is why counting a
+    // search instead showed a sliced teammate a full workspace as empty.
+    inputSchema: z.object({ ...usageMetaField }),
+    outputSchema: McpActionResponse(z.null(), z.object({
+      accounts_used: z.number().int().nonnegative()
+        .describe('Live browser rows the team holds. This is the count the create gate refuses on (402 insufficient_slots).'),
+      proxy_5g_used: z.number().int().nonnegative()
+        .describe('Of those, the ones carrying the 5G Proxy add-on.'),
+    })),
+    annotations: { title: 'Get seat usage', ...RO },
+  },
+  {
+    ...base,
     name: 'create_antidetect_browser',
     description:
       'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code is the default, custom_proxy_config routes that minted profile through a proxy the caller supplies (probed first, 422 custom_proxy_unreachable_* when dead, never with proxy_5g). Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the BYO-PROFILE path instead, with no proxy source: that profile carries its own. DANGEROUS: creates real vendor + proxy infrastructure. For SEVERAL browsers under ONE approval, do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key), then read the connect links off each row when it finishes.',
@@ -345,7 +385,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'generate_cloud_browser_access_key',
     description:
-      'Mint a cloud-browser access key (smart-link) on a browser so a user can sign into LinkedIn through the cloud browser. Returns the raw cb_ak_ key in result.access_key (shown once) AND result.public_connect_url, the ready-to-share link to hand to whoever signs the account in (no platform account needed on their side). Optional ttl_hours / max_connects / allowed_ips / allowed_countries scope the key. DANGEROUS: the link is a bearer secret granting remote browser access.',
+      'Mint a cloud-browser access key (smart-link) on a browser. Returns the whole minted entry in result.access_key, whose `key` field is the raw cb_ak_ token (shown once), AND result.public_connect_url, the ready-to-share link to hand to whoever opens it (no platform account needed on their side). Pass result.access_key.key, never result.access_key, to revoke_cloud_browser_access_key. `purpose` decides what the page behind the link does: `relogin` walks them through signing the LinkedIn session back in and re-binds the browser once they confirm, `share` just hands them the browser to drive. Optional ttl_hours / max_connects / allowed_ips / allowed_countries scope the key. DANGEROUS: both the key and the link are bearer secrets granting remote browser access.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/generate-cloud-browser-access-key' },
     operation: 'action',
@@ -356,18 +396,23 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      ttl_hours: z.number().int().min(1).max(720).optional().describe('Key lifetime in hours (default 8; the link is a bearer secret, keep it short).'),
-      max_connects: z.number().int().min(1).max(1000).optional().describe('Max connect count before the key is spent.'),
+      ttl_hours: z.number().int().min(1).max(720).optional().describe('Key lifetime in hours (default 8; the link is a bearer secret, keep it short). Sets expires_at on the entry.'),
+      max_connects: z.number().int().min(1).max(1000).optional().describe('Cap on CONCURRENT sessions held on this key, counted live at connect. Not a lifetime quota: a key does not spend itself and never becomes exhausted. Omit for unlimited.'),
       allowed_ips: z.array(z.string().max(45)).optional().describe('IP allow-list checked at connect time.'),
       allowed_countries: z.array(z.string().length(2)).optional().describe('ISO country allow-list checked at connect time.'),
+      purpose: z
+        .enum(['relogin', 'share'])
+        .optional()
+        .describe('What the page behind the link does: relogin = sign the LinkedIn session back in and re-bind the browser on confirm (default); share = drive the browser, no sign-in step.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(
       AntidetectBrowser,
       z
         .object({
-          access_key: z.string(),
-          public_connect_url: z.string().describe('Shareable smart link carrying the key. Give this to the person signing the account in.'),
+          access_key: CloudBrowserAccessEntry
+            .describe('The minted entry, key included. Shown once: the key is a bearer secret and is never read back in full from any other surface.'),
+          public_connect_url: z.string().describe('Shareable smart link carrying the key. Give this to the person who will open it.'),
         })
         .passthrough(),
     ),

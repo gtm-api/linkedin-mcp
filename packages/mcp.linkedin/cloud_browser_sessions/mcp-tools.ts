@@ -16,7 +16,11 @@ import {
 
 // Tight item projection: every CloudBrowserSessionDomain field (research §Domain),
 // correct type + nullability. Append-only log: no updated_at / deleted_at columns.
-// access_key is masked to null on the public read surface (never exposed as a string).
+// access_key is masked on the public read surface to cb_ak_ + stars + the key's
+// last 4, never the raw token. Null only means there was no key at all (an
+// internal session). The tail is what makes a session attributable to one of the
+// parent browser's cloud_browser_access[] keys, which ride that entity's read
+// unmasked; nulling the field outright removed the attribution entirely.
 const CloudBrowserSession = z.object({
   sid: z.string(),
   team_sid: z.string(),
@@ -26,7 +30,7 @@ const CloudBrowserSession = z.object({
   linkedin_account_sid: z.string().nullable(),
   // Connecting identity
   connected_user_sid: z.string().nullable(),
-  access_key: z.string().nullable(),
+  access_key: z.string().nullable().describe("Masked smart-link key: cb_ak_ followed by asterisks and the key's last 4 characters. Null when the session used no key at all (access_type internal). Join it to antidetect_browsers.cloud_browser_access[].key on the last 4 characters, never on equality."),
   access_type: z.enum(['internal', 'external']),
   // Connecting context
   ip: z.string(),
@@ -113,7 +117,7 @@ export const cloudBrowserSessionsTools: ToolDefinition[] = [
     ...base,
     name: 'search_cloud_browser_sessions',
     description:
-      'List cloud-browser sessions on the team with filters, sorting and cursor pagination. This is the audit trail of who connected to which browser, from where, and how each login attempt resolved. The smart-link access_key is masked to null and is not a public filter.',
+      'List cloud-browser sessions on the team with filters, sorting and cursor pagination. This is the audit trail of who connected to which browser, from where, and how each login attempt resolved. The smart-link access_key is redacted to cb_ak_ followed by asterisks and the key\'s last 4 characters, so a session can be attributed to one of the browser\'s access keys without exposing a redeemable token; it is null only when there was no key at all (an internal session). It is not a public filter.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/cloud-browser-sessions/search' },
     operation: 'search',

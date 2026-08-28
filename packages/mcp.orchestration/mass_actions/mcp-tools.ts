@@ -100,11 +100,18 @@ const MassActionStepToolCanonical = z.enum([
   'antidetect-browsers.stop',
   'antidetect-browsers.delete',
   'antidetect-browsers.create',
+  // Args: ttl_hours (1..720), max_connects, allowed_ips, allowed_countries, and
+  // `purpose`: 'relogin' (default) or 'share'. Say `share` for links people are
+  // meant to just drive the browser with: a relogin link ends in a confirm that
+  // re-binds the browser to the account, and the two are indistinguishable from
+  // the URL, so an omitted `purpose` hands out N re-login links silently.
   'antidetect-browsers.generate-cloud-browser-access-key',
   'antidetect-browsers.revoke-cloud-browser-access-key',
   // Linkedin-account mass-edit. Only update-sync-config is a mass operation;
-  // display-field `update` and `reset-sync` are single-account (public verbs +
-  // update_linkedin_account / reset_linkedin_account_sync tools), not mass steps.
+  // the label `update` and `reset-sync` are single-account (public verbs +
+  // set_linkedin_account_label / reset_linkedin_account_sync tools), not mass
+  // steps. There is no `linkedin-accounts.update` step and there never was: the
+  // label tool's own description used to send authors here to look for one.
   'linkedin-accounts.update-sync-config',
   // Smart-limit mass-edit.
   'linkedin-account-smart-limits.update',
@@ -126,7 +133,7 @@ const MassActionStepTool = z.union([
 const MassActionPlanStep = z.object({
   tool: MassActionStepTool,
   args: z.record(z.unknown()).optional()
-    .describe("The verb's own arguments, EXCLUDING the target: the target is injected per item from the object cursor or the item payload. Shared across every item of the run."),
+    .describe("The verb's own arguments, EXCLUDING the target: the target is injected per item from the object cursor or the item payload. Shared across every item of the run. One arg is worth stating explicitly because its default is silent and not what a bulk hand-out usually wants: on 'antidetect-browsers.generate-cloud-browser-access-key', `purpose` is 'relogin' unless you pass 'share'. A relogin link ends in a confirm that re-binds the browser to the account; a share link just lets the visitor drive it. The two links look identical, so an omitted `purpose` mints N re-login links without complaining."),
 }).passthrough();
 
 const MassActionPlan = z.object({

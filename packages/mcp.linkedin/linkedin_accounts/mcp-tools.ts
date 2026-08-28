@@ -89,8 +89,11 @@ const LinkedinAccount = z.object({
   full_name: z.string().nullable(),
   avatar_url: z.string().nullable(),
 
-  // Operator display fields - team-authored, never synced from LinkedIn.
-  display_name: z.string().nullable(),
+  // The operator tag. Team-authored, never synced from LinkedIn (no snapshot
+  // apply and no enrich path writes it), and PRIVATE to the owning workspace:
+  // a share hands over the ACCOUNT, not the owner's private note, so a
+  // borrowing team reads null here whatever the owner wrote. Its one writer is
+  // set_linkedin_account_label. Null means unset, not empty string.
   label: z.string().nullable(),
 
   // Premium / Sales-Navigator flags
@@ -182,7 +185,7 @@ const LinkedinAccountCounts = z.object({
 }).passthrough();
 
 const LinkedinAccountFilter = z.object({
-  q: z.string().optional().describe('Full-text LIKE over full_name + nickname. Identity ids (ln_member_id, sn_id) are exact-match fields, not q targets.'),
+  q: z.string().optional().describe('Full-text LIKE over full_name + nickname + label, so it is the substring path for the operator tag too. Identity ids (ln_member_id, sn_id) are exact-match fields, not q targets.'),
 
   // Lifecycle state. This filter (and the item field) used to be absent, under a
   // comment claiming the account carried no status enum and that its state was
@@ -204,6 +207,13 @@ const LinkedinAccountFilter = z.object({
   full_name: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   avatar_url: filterOp(z.string(), ['is_null']).optional()
     .describe('Display-completeness predicate only (is_null); the URL value is not a filter axis.'),
+
+  // The operator tag. Exact-match only, the same way full_name and nickname are:
+  // substring matching over it is what q does. Filterable but NOT sortable:
+  // LinkedinAccountSortableFieldEnum deliberately leaves it out, because the tag
+  // is sparse and a page ordered by it would be mostly the untagged rows.
+  label: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe("The owning team's private tag on the account (pod, campaign, owner). eq / in for whole-tag matches, is_null:true for the untagged senders and is_null:false for the tagged ones; for a substring use q."),
 
   // Premium / Sales-Navigator flags.
   has_premium: filterOp(z.boolean(), ['eq']).optional(),
@@ -1078,11 +1088,20 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     outputSchema: McpActionResponse(LinkedinAccount),
     annotations: { title: 'Update account sync config', ...ACT },
   },
+  // The narrow label verb. It was `update_linkedin_account` until 2026-08-27,
+  // when the second field it carried (`display_name`) was dropped from the
+  // account row for good: it was honoured on a few tenant read sites, ignored on
+  // every sender-facing one, and the same account answered to two names
+  // depending on which screen asked. What is left is one field, so the tool is
+  // named for it rather than for the row. `label` is `present` on the backend
+  // FormRequest, which is why it is required here: with one editable field, an
+  // absent key is a caller asking for nothing, and a schema error naming the
+  // field beats a 422 the agent has to guess the cause of.
   {
     ...base,
-    name: 'update_linkedin_account',
+    name: 'set_linkedin_account_label',
     description:
-      "Set the account's operator display fields: display_name and label. These are team-authored (never synced from LinkedIn) and are the only editable fields on the account row - sync cadence has its own tool (update_linkedin_account_sync_config), premium flags have their checks, and lifecycle is driven by the browser. Send only the fields to change; an explicit null clears a field. Returns the updated account. To edit these across many accounts at once, author a mass action with the linkedin-accounts.update step instead.",
+      "Set the private operator tag on one sender. `label` is team-authored free text (pod, campaign, owner) stored on the account row and visible only inside the owning workspace: LinkedIn never sees it and no recipient sees it. It is not the sender's name, which is LinkedIn's own (full_name) and is not editable by any tool. Send label to replace the tag, null to clear it; the key is required, so an empty call is a schema error. Filter on it with search_linkedin_accounts filter.label.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'PATCH', pathTemplate: '/api/linkedin-accounts/{sid}', sidParam: 'sid' },
     operation: 'update',
@@ -1093,11 +1112,10 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      display_name: z.string().max(255).nullable().optional().describe('Team-facing display name for the account; null clears it.'),
-      label: z.string().max(255).nullable().optional().describe('Free-form label/tag for the account (e.g. a pod or campaign name); null clears it.'),
+      label: z.string().max(255).nullable().describe("The owning team's private tag on the sender; null clears it. Required: send the field on every call."),
       ...usageMetaField,
     }),
     outputSchema: McpUpdateResponse(LinkedinAccount),
-    annotations: { title: 'Update account display fields', ...ACT },
+    annotations: { title: 'Set account label', ...ACT },
   },
 ];

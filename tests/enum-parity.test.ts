@@ -158,6 +158,12 @@ const MANUAL_BRIDGE: BridgeEntry[] = [
   // Field is browser_owner, class is AntidetectBrowserOwnerEnum: the entity name
   // already ends in the word the field repeats.
   { service: 'linkedin', entity: 'antidetect_browsers', at: 'browser_owner', enumClass: 'AntidetectBrowserOwnerEnum' },
+  // generate-cloud-browser-access-key echoes the whole minted entry under
+  // result.access_key, so the site's parent segment is the RESULT KEY rather than
+  // the array the same shape sits in on the item (cloud_browser_access, which the
+  // convention resolves on its own). No class is named AccessKeyPurposeEnum, so
+  // the two identical shapes would otherwise resolve differently.
+  { service: 'linkedin', entity: 'antidetect_browsers', at: 'result.access_key.purpose', enumClass: 'AntidetectBrowserCloudBrowserAccessPurposeEnum' },
   // limit_type on a LinkedinAccountSmartLimit row is the entity's own identity
   // axis, and its class is {Entity}TypeEnum with the `limit` word not repeated.
   // (Mirror-identical by contract with the automation-side LinkedinLimitTypeEnum,

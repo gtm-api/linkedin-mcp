@@ -77,7 +77,12 @@ export const WAVE1_MOUNTS: SmokeMount[] = [
   // Same correction: enrich_linkedin_person_contact_info is GA and spends the
   // account's enrichment bucket, and that row was reaching the live backend on
   // every run.
-  { path: '/mcp/linkedin/enrichment', name: 'gtm-linkedin-enrichment', stub: 'enrich_linkedin_person_languages' },
+  //
+  // No `stub` since 2026-08-27: enrich_linkedin_person_languages, the mount's
+  // last §5.9 stub, went GA (node get-languages + the row-56 backend un-stub),
+  // and calling a GA enrichment tool from here would spend a real bucket slot.
+  // Re-add the field when a future enrichment tool lands contract-first.
+  { path: '/mcp/linkedin/enrichment', name: 'gtm-linkedin-enrichment' },
 ];
 
 export const WAVE2_MOUNTS: SmokeMount[] = [

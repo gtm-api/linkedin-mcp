@@ -13,11 +13,12 @@
 // SYNC inline (≤120 s, §9.6); every response is a sync action envelope
 // (`async: true` never appears here: the controller uses mcpAction for all 22).
 //
-// 21 methods are live (GA); 1 still ships as a §5.9 blocked-on-plugin 501 stub
-// (route + full validation, contract locked), availability: 'stub_501': person
-// languages (post details went live 2026-08-14 with node get-post). The stub 501 is raised by
+// All 22 methods are live (GA) as of 2026-08-27: person-languages, the last
+// §5.9 blocked-on-plugin 501 stub, went live with node get-languages (post
+// details had gone live 2026-08-14 with node get-post). The §5.9 mechanism
+// stays for future reserved rows: the 501 is raised by
 // DataRequestExecutionService when the method enum's wireGetter() is null
-// (DataRequestMethodEnum::isImplemented()).
+// (DataRequestMethodEnum::isImplemented()), availability: 'stub_501'.
 //
 // 2026-08-06, rows 60 / 61 / 62 (reaction-activity, interests, services) went
 // live and their reserved shapes were rewritten to the node's own, per the
@@ -283,13 +284,13 @@ const ContactInfoResult = z.object({
   twitter_handles: z.array(z.string()),
 }).passthrough();
 
-// person-languages item (row 56 stub; reserved shape).
+// person-languages item (row 56, LIVE 2026-08-27; shape finalized against the wire).
 const LanguageItem = z.object({
   name: z.string(),
   proficiency: z.string().nullable(),
 }).passthrough();
 
-// person-certifications item (row 57 stub; reserved shape).
+// person-certifications item (row 57, live; shape finalized against the wire).
 const CertificationItem = z.object({
   name: z.string(),
   authority: z.string().nullable(),
@@ -640,18 +641,18 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_languages',
     description:
-      STUB + 'The Languages section: spoken languages with self-declared proficiency. Cheap localization signal: write the opener in the prospect\'s native language. cached 7d.',
+      'The Languages section: spoken languages with self-declared proficiency. Cheap localization signal: write the opener in the prospect\'s native language. cached 7d. Most profiles declare NONE, so an empty list is a real answer about the person rather than a failed read. proficiency is the RAW string LinkedIn renders, suffix included ("Native or bilingual proficiency", "Full professional proficiency", ...), localized on non-English sessions and null when the member declared the language without a level. Address by profile_id XOR public_identifier; like certifications, the screen behind this one needs the vanity slug AND the member urn at once, so the backend resolves whichever half you did not send.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-languages' },
     operation: 'action',
     envelope: 'action',
-    availability: 'stub_501',
+    availability: 'ga',
     dangerous: false,
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
     outputSchema: McpActionResponse(NullItem, z.object({ languages: z.array(LanguageItem), data_request: DataRequestRow }).passthrough()),
-    annotations: { title: 'Enrich person languages (not shipped)', ...LIVE },
+    annotations: { title: 'Enrich person languages', ...LIVE },
   },
   {
     ...base,
@@ -832,7 +833,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
       post_urn: z.string().max(128).optional()
         .describe('The post handle, in any family the wire takes: urn:li:activity:<id>, urn:li:share:<id>, urn:li:ugcPost:<id>, urn:li:groupPost:<group>-<post>, or a bare id (digits = activity, digits-digits = groupPost). Provide post_urn XOR url.'),
       url: z.string().max(2048).optional()
-        .describe('Any post URL. A feed permalink or a share link carrying the id resolves locally, one round trip. A linkedin.com link with NO id in it is fetched by the link itself, also one round trip. Only a shortlink (lnkd.in) still costs two, because it has to be opened to be read. Provide url XOR post_urn.'),
+        .describe('Any post URL, a lnkd.in shortlink included. A feed permalink or a slug link carrying the id (activity or ugcPost family) resolves locally, one round trip; a shortlink is expanded server-side first (this is the form Copy link to post mints) and then resolves the same way; a linkedin.com link with NO id in it is fetched by the link itself, also one round trip. Provide url XOR post_urn.'),
       ...executorFields,
       ...usageMetaField,
     }),
@@ -843,7 +844,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_get_activity_urn_by_url',
     description:
-      'Resolve any linkedin.com post URL (feed permalink, /posts/ slug, shortlink) to its stable activity URN (urn:li:activity:…). The URN never changes, so this is a cacheable enrichment lookup at cached 7d. It is the resolver the get-post-* / tracked-post flows build on. Returns activity_urn (null if the URL could not be resolved).',
+      'Resolve any linkedin.com post URL (feed permalink, /posts/ slug) or lnkd.in shortlink to its stable activity URN (urn:li:activity:…). A shortlink is expanded server-side before the page is opened. The URN never changes, so this is a cacheable enrichment lookup at cached 7d. It is the resolver the get-post-* / tracked-post flows build on. Returns activity_urn (null if the URL could not be resolved - notably a shortlink of a ugcPost-threaded post, whose page exposes no activity urn at all; address such posts by post_urn via enrich_linkedin_post_details instead, which takes the shortlink directly).',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/get-activity-urn-by-url' },
     operation: 'action',

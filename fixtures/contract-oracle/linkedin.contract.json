@@ -1822,12 +1822,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "display_name",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
                         "name": "label",
                         "type": "?string",
                         "nullable": true,
@@ -2031,12 +2025,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "display_name",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
                         "name": "label",
                         "type": "?string",
                         "nullable": true,
@@ -2160,6 +2148,7 @@
                     "nickname",
                     "full_name",
                     "avatar_url",
+                    "label",
                     "has_premium",
                     "has_sn",
                     "has_recruiter",
@@ -6728,6 +6717,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowser\\Enums\\AntidetectBrowserCloudBrowserAccessPurposeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Relogin",
+                    "value": "relogin"
+                },
+                {
+                    "name": "Share",
+                    "value": "share"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowser\\Enums\\AntidetectBrowserOwnerEnum": {
             "backing": "string",
             "cases": [
@@ -6936,6 +6938,10 @@
                 {
                     "name": "GetRecommendations",
                     "value": "get_recommendations"
+                },
+                {
+                    "name": "GetLanguages",
+                    "value": "get_languages"
                 },
                 {
                     "name": "GetProfileComments",
@@ -9813,6 +9819,25 @@
                     "max": null,
                     "size": 2,
                     "between": null
+                },
+                {
+                    "field": "purpose",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "in:\"relogin\",\"share\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": [
+                        "relogin",
+                        "share"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -10189,6 +10214,28 @@
                 }
             ],
             "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/antidetect-browsers/seat-usage",
+            "controller": "App\\Entities\\AntidetectBrowser\\AntidetectBrowserController",
+            "action": "seatUsage",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_accounts",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
         },
         {
             "method": "POST",
@@ -12784,6 +12831,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.label",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.has_premium",
                     "rules": [
                         "nullable"
@@ -13249,26 +13310,9 @@
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountUpdateRequest",
             "rules": [
                 {
-                    "field": "display_name",
-                    "rules": [
-                        "sometimes",
-                        "nullable",
-                        "string",
-                        "max:255"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 255,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "label",
                     "rules": [
-                        "sometimes",
+                        "present",
                         "nullable",
                         "string",
                         "max:255"
@@ -18563,7 +18607,8 @@
                         "required",
                         "string",
                         "max:2048",
-                        "regex:~^https?://([a-z0-9-]+\\.)*linkedin\\.com/~i"
+                        "regex:~^https?://(([a-z0-9-]+\\.)*linkedin\\.com",
+                        "lnkd\\.in)/~i"
                     ],
                     "required": true,
                     "nullable": false,
@@ -30041,21 +30086,6 @@
                     "between": null
                 },
                 {
-                    "field": "is_login_case",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "connecting_ip",
                     "rules": [
                         "required",
@@ -30220,7 +30250,25 @@
             "required_permission": null,
             "internal": false,
             "request_class": "App\\Entities\\CloudBrowser\\Requests\\ExternalCloudBrowserDisconnectRequest",
-            "rules": [],
+            "rules": [
+                {
+                    "field": "reason",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:250"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 250,
+                    "size": null,
+                    "between": null
+                }
+            ],
             "rules_reason": null
         },
         {
@@ -30697,14 +30745,14 @@
                         "nullable",
                         "integer",
                         "min:1",
-                        "max:8760"
+                        "max:720"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "integer",
                     "in": null,
                     "min": 1,
-                    "max": 8760,
+                    "max": 720,
                     "size": null,
                     "between": null
                 },
@@ -30782,6 +30830,26 @@
                     "min": null,
                     "max": null,
                     "size": 2,
+                    "between": null
+                },
+                {
+                    "field": "purpose",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "in:relogin,share"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "relogin",
+                        "share"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 }
             ],

@@ -5512,6 +5512,10 @@
                     "value": "linkedin_sync_failed"
                 },
                 {
+                    "name": "LinkedinHeldProfilesDeletionWarning",
+                    "value": "linkedin_held_profiles_deletion_warning"
+                },
+                {
                     "name": "AccountShareReceived",
                     "value": "account_share_received"
                 },
@@ -13815,7 +13819,7 @@
                     "rules": [
                         "string",
                         "max:128",
-                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_act_linkedin_custom_requests\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
+                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_act_linkedin_custom_requests\",\"can_view_email_messages\",\"can_act_email_messages\",\"can_view_email_engagements\",\"can_view_email_accounts\",\"can_update_email_accounts\",\"can_manage_email_accounts\",\"can_view_email_suppressions\",\"can_manage_email_suppressions\",\"can_view_email_tracking_domains\",\"can_manage_email_tracking_domains\",\"can_view_email_sending_domains\",\"can_manage_email_sending_domains\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -13860,6 +13864,18 @@
                         "can_manage_smart_limits",
                         "can_manage_cloud_browser_external_links",
                         "can_act_linkedin_custom_requests",
+                        "can_view_email_messages",
+                        "can_act_email_messages",
+                        "can_view_email_engagements",
+                        "can_view_email_accounts",
+                        "can_update_email_accounts",
+                        "can_manage_email_accounts",
+                        "can_view_email_suppressions",
+                        "can_manage_email_suppressions",
+                        "can_view_email_tracking_domains",
+                        "can_manage_email_tracking_domains",
+                        "can_view_email_sending_domains",
+                        "can_manage_email_sending_domains",
                         "can_view_mass_actions",
                         "can_manage_mass_actions",
                         "can_view_webhooks",
@@ -13891,7 +13907,7 @@
                     "field": "account_sids.*",
                     "rules": [
                         "string",
-                        "starts_with:ln_ac_",
+                        "starts_with:ln_ac_,em_ac_",
                         "size:18"
                     ],
                     "required": false,
@@ -14278,7 +14294,7 @@
                     "rules": [
                         "string",
                         "max:128",
-                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_act_linkedin_custom_requests\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
+                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_act_linkedin_custom_requests\",\"can_view_email_messages\",\"can_act_email_messages\",\"can_view_email_engagements\",\"can_view_email_accounts\",\"can_update_email_accounts\",\"can_manage_email_accounts\",\"can_view_email_suppressions\",\"can_manage_email_suppressions\",\"can_view_email_tracking_domains\",\"can_manage_email_tracking_domains\",\"can_view_email_sending_domains\",\"can_manage_email_sending_domains\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -14323,6 +14339,18 @@
                         "can_manage_smart_limits",
                         "can_manage_cloud_browser_external_links",
                         "can_act_linkedin_custom_requests",
+                        "can_view_email_messages",
+                        "can_act_email_messages",
+                        "can_view_email_engagements",
+                        "can_view_email_accounts",
+                        "can_update_email_accounts",
+                        "can_manage_email_accounts",
+                        "can_view_email_suppressions",
+                        "can_manage_email_suppressions",
+                        "can_view_email_tracking_domains",
+                        "can_manage_email_tracking_domains",
+                        "can_view_email_sending_domains",
+                        "can_manage_email_sending_domains",
                         "can_view_mass_actions",
                         "can_manage_mass_actions",
                         "can_view_webhooks",
@@ -14355,7 +14383,7 @@
                     "field": "account_sids.*",
                     "rules": [
                         "string",
-                        "starts_with:ln_ac_",
+                        "starts_with:ln_ac_,em_ac_",
                         "size:18"
                     ],
                     "required": false,

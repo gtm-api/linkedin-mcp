@@ -42,8 +42,11 @@ const MassActionItemStepStatus = z.enum([
   'running', 'deferred', 'succeeded', 'failed', 'skipped',
 ]);
 
-// Closed single-value enum: the only mid-cascade wait is an async task in flight.
-const MassActionItemWaitReason = z.enum(['task_pending']);
+// Why an item is parked mid-cascade. 'task_pending': an async plugin task is in
+// flight. 'maintenance' (backend 2026-08-24): the owning service answered the
+// planned-window 503, so the item is pending with scheduled_at at the window's
+// retry_after and the minutely tick redispatches it. Closed by design pass.
+const MassActionItemWaitReason = z.enum(['task_pending', 'maintenance']);
 
 // ─── step_log[] entry: the forensic record of one plan step ───
 //
@@ -132,7 +135,7 @@ const MassActionItemFilter = z.object({
   current_step: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional()
     .describe('Which plan step the row sits on: "everyone stuck at step 2".'),
   wait_reason: filterOp(MassActionItemWaitReason, ['eq', 'is_null']).optional()
-    .describe("eq:'task_pending' selects the items deferred on an async task."),
+    .describe("eq:'task_pending' selects the items deferred on an async task; eq:'maintenance' the ones parked by a planned maintenance window."),
   retry_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
   scheduled_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
     .describe('Due horizon: what runs next and when.'),
