@@ -905,6 +905,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "account_sids",
+                        "type": "?array",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "expires_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -986,6 +992,12 @@
                         "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array",
                         "nullable": false,
                         "has_default": false
+                    },
+                    {
+                        "name": "account_sids",
+                        "type": "?array",
+                        "nullable": true,
+                        "has_default": true
                     },
                     {
                         "name": "expires_at",
@@ -8528,6 +8540,39 @@
                     "between": null
                 },
                 {
+                    "field": "account_sids",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "account_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ln_ac_,em_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
                     "field": "expires_at",
                     "rules": [
                         "sometimes",
@@ -9104,6 +9149,39 @@
                     "min": null,
                     "max": 128,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "account_sids",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "account_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ln_ac_,em_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
