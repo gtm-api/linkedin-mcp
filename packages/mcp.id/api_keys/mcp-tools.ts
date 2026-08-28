@@ -5,6 +5,10 @@
 // id.access alongside oauth-clients / oauth-authorizations.
 
 import { z } from 'zod';
+
+// Mirrors lib.common ChannelAccountSid::startsWithRule(): one flat vocabulary
+// for every channel's account sids (email senders joined 2026-08-27).
+const CHANNEL_ACCOUNT_SID = z.string().length(18).regex(/^(ln_ac_|em_ac_)/);
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
 import {
   filterOp,
@@ -38,6 +42,7 @@ const ApiKey = z.object({
   token_prefix: z.string(),
   token_last4: z.string(),
   permissions: z.array(z.string()),         // Permission[] (unified token list)
+  account_sids: z.array(z.string()).nullable(), // channel-account slice (ln_ac_*/em_ac_*); null = all team accounts
   status: ApiKeyStatus,
   expires_at: z.string().nullable(),        // null = perpetual
   last_used_at: z.string().nullable(),
@@ -134,7 +139,7 @@ export const apiKeysTools: ToolDefinition[] = [
     ...base,
     name: 'create_api_key',
     description:
-      'Issue a new API key and return the full secret in the create envelope\'s plaintext_token EXACTLY ONCE. It is unrecoverable, so hand it to the user immediately and never log or echo it; if lost, rotate. Callable by a human (api_keys.manage) or by a parent api_key, in which case the issued permissions MUST be a subset of the parent\'s (downscoping only; escalation → 403). Default expires_at = now + 3 years; pass null for a perpetual key. Natural key (team_sid, name) among non-revoked keys → a duplicate returns already_exists with the existing key (and NO secret).',
+      'Issue a new API key and return the full secret in the create envelope\'s plaintext_token EXACTLY ONCE. It is unrecoverable, so hand it to the user immediately and never log or echo it; if lost, rotate. BOTH grant axes are clamped to the ISSUER\'s own current authority (403, reason grant_exceeds_ceiling): permissions must sit inside the caller\'s token set (\'*\' only for an unrestricted issuer; on delegation, inside the parent key\'s set), and account_sids inside the caller\'s account slice - a sliced caller cannot pass null ("all accounts") and must send an explicit list within their slice. Verify re-intersects both axes with the issuer\'s CURRENT authority, so narrowing the issuer narrows every key they minted. Default expires_at = now + 3 years; pass null for a perpetual key. Natural key (team_sid, name) among non-revoked keys → a duplicate returns already_exists with the existing key (and NO secret).',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/api-keys' },
     operation: 'create',
@@ -146,6 +151,8 @@ export const apiKeysTools: ToolDefinition[] = [
       name: z.string().min(1).max(255).describe('Human-readable key name; unique among the team\'s non-revoked keys.'),
       permissions: z.array(z.string().max(128))
         .describe('Unified permission list; must be ⊆ the parent key on delegation.'),
+      account_sids: z.array(CHANNEL_ACCOUNT_SID).min(1).nullable().optional()
+        .describe('Channel-account slice the key reaches (ln_ac_*/em_ac_*); null/omitted = all team accounts, grantable only by an issuer whose own slice is unrestricted. An empty list is refused (422).'),
       expires_at: z.string().nullable().optional()
         .describe('ISO 8601 UTC; omit = now + 3 years; null = perpetual.'),
       ...usageMetaField,
@@ -157,7 +164,7 @@ export const apiKeysTools: ToolDefinition[] = [
     ...base,
     name: 'update_api_key',
     description:
-      'Partial update of name / permissions only (the key\'s identity and secret are untouched; use rotate_api_key to change the secret). permissions is a FULL replacement. When the caller is a parent api_key, the new permissions must still be a subset of the parent\'s (→ 403). At least one field is required.',
+      'Partial update of name / permissions / account_sids (the key\'s identity and secret are untouched; use rotate_api_key to change the secret). Each list is a FULL replacement, clamped to the STORED issuer\'s current authority on its axis (403, reason grant_exceeds_ceiling): permissions inside their token set, account_sids inside their slice (null = all accounts, grantable only under an unrestricted issuer slice). At least one field is required.',
     toolClass: 'typical',
     route: { service: 'id', method: 'PATCH', pathTemplate: '/api/api-keys/{sid}', sidParam: 'sid' },
     operation: 'update',
@@ -169,6 +176,8 @@ export const apiKeysTools: ToolDefinition[] = [
       name: z.string().min(1).max(255).optional(),
       permissions: z.array(z.string().max(128)).optional()
         .describe('FULL replacement of the key\'s permission list.'),
+      account_sids: z.array(CHANNEL_ACCOUNT_SID).min(1).nullable().optional()
+        .describe('FULL replacement of the key\'s account slice; null = all team accounts. An empty list is refused (422).'),
       ...usageMetaField,
     }),
     outputSchema: McpUpdateResponse(ApiKey),
