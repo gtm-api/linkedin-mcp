@@ -48,6 +48,16 @@ describe('mapErrorEnvelope', () => {
     expect(r.content[0].text).not.toMatch(/workspace admin/i);
   });
 
+  it('renders forbidden(not_a_user_actor) as a dead end, not a missing scope', () => {
+    const r = mapErrorEnvelope(403, { success: false, error: { code: 'forbidden', message: 'An API key is a standalone identity with its own permissions, not a person, so there is no current user behind this request.', recoverable: false, suggestion: 'Authenticate as a user (sign in to the app, or connect through OAuth) when you need the profile of the person behind a request.', context: { reason: 'not_a_user_actor', actor_type: 'api_key', actor_sid: 'id_ak_GAU6zPYwbVf9' } } }, ctx);
+    const text = r.content[0].text;
+    expect(text).toMatch(/standalone identity/);
+    expect(text).toMatch(/connect through OAuth/);
+    expect(text).toMatch(/do not switch tools/i);
+    // Not a permission problem: the scope_missing copy must not leak in here.
+    expect(text).not.toMatch(/workspace admin/i);
+  });
+
   it('renders any other forbidden with its context and a do-not-retry', () => {
     const r = mapErrorEnvelope(403, { success: false, error: { code: 'forbidden', message: 'Access denied: user is not a member of this team', recoverable: false, context: { reason: 'wrong_team' } } }, ctx);
     expect(r.content[0].text).toMatch(/wrong_team/);

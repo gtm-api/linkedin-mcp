@@ -115,6 +115,16 @@ export function mapErrorEnvelope(
           `Two ways to fix it, both needing a human: ask a workspace admin to add '${required}' to the member's permissions, or reconnect the GTM connector and consent to a scope that includes it.`,
         );
         lines.push('Do not retry with the same credentials, and do not try a different tool to get the same data: the answer will not change until the permission is granted.');
+      } else if (reason === 'not_a_user_actor') {
+        // The caller is authenticated as something that is not a person (an API
+        // key, the system identity), so there is no profile to return and no
+        // permission that would create one. Saying so stops the model hunting for
+        // a missing scope or a substitute tool. Client report via Peter,
+        // 2026-08-26: the old answer was a 422 about a `sid` field the caller
+        // never sent, on a route that takes no sid.
+        lines.push(e.message);
+        if (e.suggestion) lines.push(e.suggestion);
+        lines.push('Do not retry and do not switch tools: nothing granted to this credential will produce a user. Reconnect through OAuth, or use a signed-in session, if the profile is genuinely needed.');
       } else if (reason === 'route_not_declared') {
         lines.push(`${tool} was refused by the server's permission gate because the route it calls declares no required permission.`);
         lines.push('This is a server-side configuration gap, not a missing permission on your side. Nothing the caller can grant will unblock it. Report it with the trace id below.');

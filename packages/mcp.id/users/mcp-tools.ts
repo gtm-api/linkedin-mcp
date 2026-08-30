@@ -77,7 +77,7 @@ export const usersTools: ToolDefinition[] = [
     ...base,
     name: 'get_current_user',
     description:
-      "Return the authenticated user's own profile: the JWT subject, self only (no {sid} form). include[]=default_team hydrates the working team; include[]=accessible_teams returns the owner + active-membership union (workspace switcher / OAuth consent multiselect). Reads email, name, timezone, default_team_sid.",
+      "Return the authenticated user's own profile: the JWT subject, self only (no {sid} form). include[]=default_team hydrates the working team; include[]=accessible_teams returns the owner + active-membership union (workspace switcher / OAuth consent multiselect). Reads email, name, timezone, default_team_sid. Needs a credential with a person behind it (an app session or an OAuth connector). An API key authenticates as itself, not as a user, so on a key this answers 403 with context.reason=not_a_user_actor and no permission changes that.",
     toolClass: 'trivial',
     route: { service: 'id', method: 'GET', pathTemplate: '/api/users/current' },
     operation: 'get',
@@ -95,7 +95,7 @@ export const usersTools: ToolDefinition[] = [
     ...base,
     name: 'update_current_user',
     description:
-      "Patch the authenticated user's own profile: first_name / last_name / avatar_url / phone / timezone / country / config only. email (change-email flow), password (change-password flow), auth_provider, email_status and all sids are rejected if sent. At least one field required. config merges key-by-key.",
+      "Patch the authenticated user's own profile: first_name / last_name / avatar_url / phone / timezone / country / config only. email (change-email flow), password (change-password flow), auth_provider, email_status and all sids are rejected if sent. At least one field required. config merges key-by-key. Same subject as get_current_user: an API key has no user to patch and answers 403 with context.reason=not_a_user_actor.",
     toolClass: 'typical',
     route: { service: 'id', method: 'PATCH', pathTemplate: '/api/users/current' },
     operation: 'update',
