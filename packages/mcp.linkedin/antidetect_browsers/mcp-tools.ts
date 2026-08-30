@@ -49,7 +49,12 @@ const CloudBrowserAccessEntry = z.object({
 });
 
 // Owner + vendor enums mirror the create FormRequest (only `gologin` is wired).
-const BrowserOwner = z.enum(['platform', 'customer', 'mirror_profiles']);
+// DERIVED server-side from vendor_profile_id, never an input: a bound profile is the
+// customer's, a minted one is ours. Read-only on the row and filterable; it is NOT on
+// create (removed 2026-08-28 with the `mirror_profiles` case, which stood for a closed
+// vendor integration that does not exist - MCP has no business knowing about vendor
+// integrations at all).
+const BrowserOwner = z.enum(['platform', 'customer']);
 const VendorProvider = z.enum(['gologin', 'multilogin', 'adspower', 'dolphin']);
 
 // AntidetectBrowserStatusEnum, in its PHP order. Named once and reused by the
@@ -326,11 +331,9 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     inputSchema: z.object({
-      browser_owner: BrowserOwner.optional()
-        .describe('Omit to infer: vendor_profile_id present ⇒ customer, absent ⇒ platform.'),
       vendor_provider: VendorProvider.optional().describe('Default gologin (the only wired vendor).'),
-      vendor_profile_id: z.string().max(128).nullable().optional()
-        .describe('Bind an EXISTING vendor profile (BYO). Omit to mint a fresh one.'),
+      vendor_profile_id: z.string().regex(/^[0-9a-f]{24}$/i).nullable().optional()
+        .describe('Bind an EXISTING vendor profile (BYO): the GoLogin profile id, 24 hex characters. NOT a profile URL, share link or LinkedIn slug. Omit to mint a fresh one. The profile must be shared with our GoLogin account, or the create is 422 vendor_profile_not_found; if the owning GoLogin account is over its plan the create is 402 vendor_profile_plan_limit and retrying will not help.'),
       os: z.enum(['win', 'mac', 'lin', 'android']).optional().describe('OS for a freshly-minted profile (default win).'),
       antidetect_browser_proxy_sid: PROXY_SID.optional()
         .describe('Assign an already-chosen pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),

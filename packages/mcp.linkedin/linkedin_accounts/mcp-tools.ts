@@ -1072,7 +1072,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
           day_of_week: z.number().int().min(1).max(7).describe('ISO weekday: 1=Mon … 7=Sun.'),
           start_minute: z.number().int().min(0).max(1439).describe('Window start, minutes from local midnight (0..1439).'),
           end_minute: z.number().int().min(1).max(1440).describe('Window end, minutes from local midnight (1..1440); must be after start_minute.'),
-        })).optional().describe('Allowed sync hours per weekday; omit to sync around the clock.'),
+        })).optional().describe('Allowed sync hours per weekday. Omit it, or send an empty list, to sync around the clock; an empty window never means off.'),
         entries: z.object({
           connections: z.object({ interval_minutes: z.number().int().min(5) }),
           conversations: z.object({ interval_minutes: z.number().int().min(5) }),

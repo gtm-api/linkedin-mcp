@@ -6740,10 +6740,6 @@
                 {
                     "name": "Customer",
                     "value": "customer"
-                },
-                {
-                    "name": "MirrorProfiles",
-                    "value": "mirror_profiles"
                 }
             ]
         },
@@ -9347,26 +9343,6 @@
             "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserCreateRequest",
             "rules": [
                 {
-                    "field": "browser_owner",
-                    "rules": [
-                        "sometimes",
-                        "string",
-                        "in:\"platform\",\"customer\",\"mirror_profiles\""
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": [
-                        "platform",
-                        "customer",
-                        "mirror_profiles"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "vendor_provider",
                     "rules": [
                         "sometimes",
@@ -9393,14 +9369,14 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "regex:/^[0-9a-f]{24}$/i"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 128,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -30461,15 +30437,14 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "in:\"platform\",\"customer\",\"mirror_profiles\""
+                        "in:\"platform\",\"customer\""
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": [
                         "platform",
-                        "customer",
-                        "mirror_profiles"
+                        "customer"
                     ],
                     "min": null,
                     "max": null,
