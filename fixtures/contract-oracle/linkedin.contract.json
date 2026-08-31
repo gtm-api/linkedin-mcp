@@ -7268,6 +7268,10 @@
                     "value": "delete_message"
                 },
                 {
+                    "name": "DeleteConversation",
+                    "value": "delete_conversation"
+                },
+                {
                     "name": "AddParticipants",
                     "value": "add_participants"
                 },
@@ -17707,6 +17711,28 @@
                     "between": null
                 }
             ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-conversations/{sid}/delete-on-linkedin",
+            "controller": "App\\Entities\\LinkedinConversation\\LinkedinConversationController",
+            "action": "deleteOnLinkedin",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationDeleteOnLinkedinRequest",
+            "rules": [],
             "rules_reason": null
         },
         {

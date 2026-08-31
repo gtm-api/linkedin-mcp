@@ -1,7 +1,7 @@
 // Entity: LinkedIn Conversation (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/linkedin_conversations.md
 // Format: registry v2, where each tool carries route metadata so the generic
-// dispatcher can drive it. 10 tools (the linkedin-conversations route group);
+// dispatcher can drive it. 14 tools (the linkedin-conversations route group);
 // they share the /mcp/linkedin/messaging mount with linkedin-messages.
 
 import { z } from 'zod';
@@ -378,5 +378,25 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(LinkedinConversation),
     annotations: { title: 'Rename conversation', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'delete_linkedin_conversation_on_linkedin',
+    description:
+      'Delete one thread from the acting account\'s OWN LinkedIn mailbox (outward action). Only our side is affected: every other participant keeps their full copy and no message is recalled - the opposite blast radius of delete_linkedin_message_on_linkedin. Irreversible on the wire, so confirm the thread first; LinkedIn resurrects it only if a counterpart messages again. Basic messenger only: a Sales Navigator thread, a thread whose conversation_hash has not synced to the real 2-… form yet, or an already-deleted row is refused before dispatch, with nothing spent. On success the stored row is soft-deleted (returned as the tombstoned item; its message rows stay). Spends the messaging_general bucket.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/{sid}/delete-on-linkedin', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinConversation),
+    annotations: { title: 'Delete conversation on LinkedIn', ...DANGER },
   },
 ];
