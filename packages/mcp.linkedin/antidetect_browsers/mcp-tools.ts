@@ -497,7 +497,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'delete_antidetect_browser',
     description:
-      'Decommission (soft-delete) a single antidetect browser by sid: outward, destructive, one-way through MCP. Variant B cascade: the bound linkedin-account is soft-deleted and pending plugin tasks transition to failed; the cascade block reports the counts. A platform-minted GoLogin profile is reclaimed (deleted) at the vendor unless another live browser row still holds it; customer BYO vendor profiles are left intact.',
+      'Decommission (soft-delete) a single antidetect browser by sid: outward, destructive, one-way through MCP. A browser in an active-run status is stopped FIRST and the node must confirm: the call can take up to ~20s waiting for that confirm, and if it does not arrive the delete is refused with 409 conflict (context.reason=browser_stop_unconfirmed) and NOTHING is deleted - retry in a minute rather than assuming success. Variant B cascade: the bound linkedin-account is soft-deleted and pending plugin tasks transition to failed; the cascade block reports the counts. A platform-minted GoLogin profile is reclaimed (deleted) at the vendor unless another live browser row still holds it; customer BYO vendor profiles are left intact.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'DELETE', pathTemplate: '/api/antidetect-browsers/{sid}', sidParam: 'sid' },
     operation: 'delete',
