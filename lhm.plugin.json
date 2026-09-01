@@ -7,7 +7,7 @@
   "cloudEndpoint": "https://mcp.gtm-api.com/mcp",
   "homepage": "https://gtm-api.com/linkedin-mcp-server/",
   "icon": "https://gtm-api.com/wp-content/themes/gtm-api/assets/img/icon-512.png",
-  "description": "The LinkedIn API and MCP server for AI agents: search, connect, message and enrich on accounts you own, with safety enforced server-side. One key exposes 250+ typed actions behind 3 meta-tools; outward actions support preview and confirm. gtm-api reports 20,000+ connected accounts at under a 1% ban rate.",
+  "description": "The LinkedIn API and MCP server for AI agents: search, connect, message and enrich on accounts you own, with safety enforced server-side. One key exposes 250+ typed actions behind 3 meta-tools; outward actions support preview and confirm. On that stack, gtm-api reports 20,000+ connected accounts at under a 1% ban rate.",
   "tags": ["linkedin", "outreach", "sales", "automation", "enrichment", "api"],
   "tools": [
     {

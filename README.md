@@ -42,7 +42,15 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 }
 ```
 
-There is no key to paste. The endpoint authenticates with OAuth: your client gets a `WWW-Authenticate` challenge on the first call, registers itself with the authorization server (dynamic client registration), and opens a consent page in your browser. An API key (`gtm_live_...`) authenticates the [REST API](https://docs.gtm-api.com/api-reference/overview) instead, and answers `401 invalid_token` here.
+There is no key to paste. The endpoint authenticates with OAuth: your client gets a `WWW-Authenticate` challenge on the first call, registers itself with the authorization server (dynamic client registration), and opens a consent page in your browser.
+
+Headless clients can skip the browser. The same API key (`gtm_live_...`) that authenticates the [REST API](https://docs.gtm-api.com/api-reference/overview) also works on this endpoint as a plain bearer token, which is what makes it usable from CI and servers:
+
+```bash
+claude mcp add --transport http gtm-api https://mcp.gtm-api.com/mcp --header "Authorization: Bearer gtm_live_..."
+```
+
+For command-spawning clients, the launcher below reads the key from `GTM_API_KEY` instead (1.3.0 or newer; older pins ignore it and do OAuth only). Pick one mode per connection: with a key attached, the OAuth flow never starts. Interactive clients such as claude.ai connectors have no header field and always use OAuth. Full matrix: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
 
 Client can only spawn a command, not open a URL? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint and runs the same OAuth flow (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
 
@@ -120,7 +128,7 @@ The server exposes exactly three MCP tools. Discovery is progressive: an agent l
 
 ## What the agent can do
 
-160+ typed actions across 10 LinkedIn toolsets, grouped here into seven areas:
+160+ typed actions across 11 LinkedIn toolsets, grouped here into seven areas:
 
 | Toolset | What it covers |
 |---|---|
@@ -131,6 +139,8 @@ The server exposes exactly three MCP tools. Discovery is progressive: an agent l
 | **Search** | people, company and post search, similar profiles, employees, decision-makers, saved searches |
 | **Account health** | smart limits, health snapshots, quota-hit, block and activity logs |
 | **Infrastructure** | anti-detect cloud browsers, dedicated proxies, webhooks |
+
+The same endpoint also serves the account, billing and orchestration toolsets, 250+ typed actions in total. This repo documents the LinkedIn half.
 
 LinkedIn is the live channel today. Email (Gmail, Outlook, IMAP), messengers (WhatsApp, Telegram, Instagram DMs) and calendars (Google, Microsoft) are on the roadmap on the same typed contract.
 
@@ -145,7 +155,7 @@ Safety is enforced by the server itself, under every tool call. Six mechanisms:
 - **Randomized pacing.** Bulk work is spread with per-gap randomized intervals, because a fixed cadence is itself a detectable pattern.
 - **Preview then confirm.** Outward actions return a preview and require confirmation, so an over-eager agent cannot burn an account.
 
-On this setup gtm-api reports 20,000+ LinkedIn accounts running at under 1% monthly ban. Full method: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
+On this setup, gtm-api reports 20,000+ LinkedIn accounts at under a 1% ban rate. Full method: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
 
 ## How it compares to open-source LinkedIn MCP servers
 
@@ -157,9 +167,9 @@ Cookie-driven servers such as [`stickerdaniel/linkedin-mcp-server`](https://gith
 | Safety layer | Anti-detect browser, dedicated proxy, limits | Not built in |
 | Limit enforcement | Server side, before every action | You build it |
 | Sends (connect, message, InMail) | Yes, with preview then confirm | Partial or none |
-| Published ban rate | Self-reported: under 1% monthly across 20,000+ accounts | Not published |
+| Published ban rate | Self-reported: under 1% across 20,000+ accounts | Not published |
 | Support | Managed | Community |
-| Price | From $19 per connected account per month | Free, run it yourself |
+| Price | From $39 per connected account per month, $10 at volume | Free, run it yourself |
 | Self-hosted, auditable code | No, managed service | Yes |
 
 ## Pricing
