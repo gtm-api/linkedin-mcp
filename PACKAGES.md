@@ -11,7 +11,7 @@ Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below 
 a plan. Every row below is ✅ shipped: three services are at full MCP coverage and the only remaining
 gap is `gtm.service.email`, which has no package and therefore no row.
 
-## mcp.linkedin: 11 mounts / 159 tools
+## mcp.linkedin: 11 mounts / 168 tools
 
 > 2026-07-24 service split: `linkedin-tracked-posts` / `-comments` / `-engagements` / `-searches` /
 > `-search-results` left this backend for `gs.service.signals`, and the outbound authoring verbs
@@ -24,14 +24,14 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 |---|---|---|---|---|
 | accounts | `/mcp/linkedin/accounts` | linkedin_accounts (22), linkedin_account_smart_limits (3) | 25 | ✅ (at cap) |
 | account_monitor | `/mcp/linkedin/account-monitor` | linkedin_account_snapshots (1), linkedin_benchmarks (1), linkedin_account_quota_hits (1), linkedin_account_block_log (1), linkedin_account_activity_log (2), linkedin_account_sync_runs (3) | 9 | ✅ |
-| messaging | `/mcp/linkedin/messaging` | linkedin_conversations (13), linkedin_messages (12) | 25 | ✅ (budget **28**, 3 free) |
+| messaging | `/mcp/linkedin/messaging` | linkedin_conversations (13), linkedin_messages (13) | 26 | ✅ (budget **28**, 2 free) |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (6), linkedin_connection_invitations (6), linkedin_followers (3) | 21 | ✅ |
-| content | `/mcp/linkedin/content` | linkedin_posting (3: create-post, comment, react) | 3 | ✅ |
+| content | `/mcp/linkedin/content` | linkedin_posting (8: create-post, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post) | 8 | ✅ |
 | scraping | `/mcp/linkedin/scraping` | linkedin_scraping (21) | 21 | ✅ (budget 25, 4 free) |
 | auto_scrapes | `/mcp/linkedin/auto-scrapes` | linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2), linkedin_auto_scrape_results (1) | 13 | ✅ |
 | enrichment | `/mcp/linkedin/enrichment` | linkedin_enrichment (22) | 22 | ✅ |
 | data | `/mcp/linkedin/data` | data_requests (2) | 2 | ✅ |
-| browsers | `/mcp/linkedin/browsers` | antidetect_browsers (10), antidetect_browser_proxies (3), antidetect_browser_logs (1), cloud_browsers (1), cloud_browser_sessions (2) | 17 | ✅ |
+| browsers | `/mcp/linkedin/browsers` | antidetect_browsers (13), antidetect_browser_proxies (3), antidetect_browser_logs (1), cloud_browsers (1), cloud_browser_sessions (2) | 20 | ✅ |
 | platform | `/mcp/linkedin/platform` | linkedin_custom_requests (1, admin-gated escape hatch) | 1 | ✅ |
 
 `/mcp/linkedin/auto-scrapes` shipped 2026-07-27 and is a **new mount, not a tenant of an existing
@@ -58,13 +58,25 @@ parent. Neither existing candidate was honest:
 It sits at **13 / 25**, which leaves room for the surface to grow (the research defers a
 pool-executor mode and a v2 signals consumer) without another budget conversation.
 
-⚠️ `/mcp/linkedin/messaging` is the one mount off the default budget: **25 / 28**, raised from 25 on
+⚠️ `/mcp/linkedin/messaging` is the one mount off the default budget: **26 / 28**, raised from 25 on
 2026-07-27 (Eugene). The 28 is a product decision, not a test fix. The inbox is a single job to a
 client (find the thread, read it, answer it), so the alternative - splitting `linkedin_conversations`
 from `linkedin_messages` onto two URLs - would make a client mount twice to do one thing.
 `resolveMounts` throws at module scope on the 29th tool, which kills the worker isolate rather than
 degrading one mount, and `tests/worker-boot.test.ts` is the only thing that catches it: read its
 headroom table before authoring a messaging tool.
+
+2026-09-01 - the linkedin counts here went 159 to 168, which is this file catching up rather than
+the surface changing. The table was last regenerated on 2026-08-12 and three packages grew under it:
+`linkedin_posting` 3 to 8 (the undo half of every write verb on 2026-08-20, then the scheduled-queue
+pair on 2026-08-21: `delete_linkedin_post`, `delete_linkedin_comment`, `unreact_linkedin_post`,
+`get_linkedin_scheduled_posts`, `delete_linkedin_scheduled_post` - the group is still stateless, the
+queue lives on LinkedIn and nothing is stored on this service), `antidetect_browsers` 10 to 13
+(`list_antidetect_browser_proxy_countries` and `check_antidetect_browser_proxy` on 2026-08-20,
+`get_antidetect_browser_seat_usage` on 2026-08-28) and `linkedin_messages` 12 to 13
+(`delete_linkedin_message_on_linkedin`, the recall verb, on 2026-08-20). Every budget absorbed it
+without a raise: `content` sits at 8 / 25 and `browsers` at 20 / 25, and messaging spent one of its
+three free slots.
 
 ## mcp.orchestration: 2 mounts / 22 tools
 
@@ -117,17 +129,22 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 4 mounts / 73 tools
+## mcp.id: 4 mounts / 72 tools
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
 | identity | `/mcp/id/identity` | users (2), teams (6), team_members (6), sessions (2) | 16 | ✅ |
 | access | `/mcp/id/access` | api_keys (7), oauth_clients (5), oauth_authorizations (3), account_shares (5) | 20 | ✅ |
-| billing | `/mcp/id/billing` | billing_products (1), billing_subscriptions (13), billing_transactions (4), billing_payment_methods (3) | 21 | ✅ |
+| billing | `/mcp/id/billing` | billing_products (1), billing_subscriptions (14), billing_transactions (4), billing_payment_methods (3) | 22 | ✅ |
 | platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), support_requests (3) | 14 | ✅ |
 
 2026-08-16 - the `credits` mount and the `credit_transactions` package were removed with the
 platform-wide credits exit; data-bus reads are no longer metered.
+
+2026-09-01 - the id counts were stale in both directions and are now read off the registry: billing
+21 to 22 (`undo_cancel_billing_subscription` landed 2026-08-20), and the section header and the
+totals came DOWN, because the 2026-08-26 observability retirement edited the platform row (16 to 14,
+one package gone) without touching either. 16 + 20 + 22 + 14 = 72 tools over 15 packages.
 
 ⚠️ `account_shares` moved here from `mcp.linkedin/platform` at the 2026-07-26 handover cutover: a
 handover binds TWO tenants that may live in different clusters, so the record and its tools belong on
@@ -184,8 +201,8 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **256 tools**
-(linkedin 159 + id 73 + orchestration 22 + support 2).
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **264 tools**
+(linkedin 168 + id 72 + orchestration 22 + support 2).
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
 service". That was wrong twice over. `support` is a `ServiceId` like the other three, and the
@@ -200,8 +217,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **48 registry packages / 256 tools**, served over **18 mounts + 1 facade**. By service:
-linkedin 159 (27 packages), id 73 (16), orchestration 22 (4), support 2 (1). Every number in this
+Totals: **47 registry packages / 264 tools**, served over **18 mounts + 1 facade**. By service:
+linkedin 168 (27 packages), id 72 (15), orchestration 22 (4), support 2 (1). Every number in this
 file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
 `MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
 run, so re-run it rather than editing a count by hand.
