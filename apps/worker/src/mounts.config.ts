@@ -15,13 +15,10 @@ export const MOUNTS: MountConfig[] = [
     instructions:
       'GTM LinkedIn account management & pacing. Find an account sid with search_linkedin_accounts, then call account-scoped tools by sid (checks, self-profile reads, endorse/visit, reset-sync, smart-limits). "NOT SHIPPED YET" tools return not_implemented, so do not retry.',
     selectors: [p('linkedin_accounts'), p('linkedin_account_smart_limits')],
-    // 27, not the default 25. The three self-account feeds added on 2026-08-07
-    // (profile views, catch-up cards, Sales Navigator alerts) took this mount
-    // from 24 to 27, and resolveMounts throws at module scope, so the worker
-    // would not boot at 25.
-    //
-    // NO maxTools: the platform default of 25 applies, and the mount sits exactly
-    // on it.
+    // 27, not the default 25: an UNSIGNED raise from 2026-09-02 (the
+    // explicit-skill endorse pair). Full story below, oldest first - this is
+    // the mount's SECOND unsigned raise, and the first one was resolved by
+    // removing tools, not by signing the number.
     //
     // This mount carried an UNSIGNED `maxTools: 27` from 2026-08-07, taken when the
     // three self-account feeds (profile views, catch-up cards, Sales Navigator
@@ -49,8 +46,20 @@ export const MOUNTS: MountConfig[] = [
     // the wrong trade; moving the selection into the BODY of one real route was the
     // right one. Do not re-attempt the templated-path version.
     //
-    // The mount is on the default with no headroom bought, so the next tool trips the
-    // gate and somebody has to think rather than inherit slack nobody argued for.
+    // The mount was then back on the default with no headroom bought, so the next
+    // tool would trip the gate and somebody would have to think rather than
+    // inherit slack nobody argued for.
+    //
+    // That gate tripped on 2026-09-02: the explicit-skill endorse pair
+    // (endorse_linkedin_account_skill_by_id + unendorse_linkedin_account_skill,
+    // research linkedin_accounts.md rows 111 / 112) took the mount 25 -> 27.
+    // Neither tool is one action addressed several ways, so the 2026-08-09
+    // collapse trick does not apply: the -by-id endorse is explicit addressing
+    // of a live verb, and the unendorse is a NEW wire action (?action=unendorse)
+    // with its own action_type. Raised to exactly 27, no slack. UNSIGNED like
+    // the 2026-08-07 raise was: it needs Eugene/Michael sign-off (or the tool
+    // set re-decided) before it counts as settled.
+    maxTools: 27,
     facade: 'none',
   },
   {

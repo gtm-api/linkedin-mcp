@@ -1,19 +1,22 @@
 // Entity: LinkedIn Account (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/linkedin_accounts.md
 // Format: registry v2, where each tool carries route metadata so the generic
-// dispatcher can drive it. 24 tools: 22 on the linkedin-accounts route group,
-// plus the 2 follow-edge writes that sit on /api/linkedin-followings/ and are
-// filed here because this file is the research file that owns that edge (see
-// the block above follow_linkedin_member). Smart-limits (3 more) share the
+// dispatcher can drive it. 24 tools: 22 on the linkedin-accounts route group
+// (incl. the explicit-skill endorse pair, 2026-09-02), plus the 2 follow-edge
+// writes that sit on /api/linkedin-followings/ and are filed here because this
+// file is the research file that owns that edge (see the block above
+// follow_linkedin_member). Smart-limits (3 more) share the
 // /mcp/linkedin/accounts mount from their own entity file, so the mount stands
 // at 27 of its 27 budget: the NEXT tool added to either package breaks worker
 // boot, since resolveMounts throws at module scope. Count before you add.
 //
-// That budget was 25 until the three self-account feeds landed on 2026-08-07
-// and pushed the mount to 27. The raise is recorded, with its alternatives and
-// the reason it is still unsigned, in apps/worker/src/mounts.config.ts. Read it
-// before adding the 28th tool: the answer there may well be a split, not
-// another raise.
+// That budget was 25 until the explicit-skill endorse pair landed on
+// 2026-09-02 and pushed the mount to 27. (An earlier unsigned raise to 27, by
+// the 2026-08-07 self-account feeds, was resolved back to the default 25 on
+// 2026-08-09 by collapsing tools.) The current raise is recorded, with that
+// history and the reason it is still unsigned, in
+// apps/worker/src/mounts.config.ts. Read it before adding the 28th tool: the
+// answer there may well be a collapse or a split, not another raise.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -502,6 +505,22 @@ const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: fal
 // alongside dangerous: true, so the file convention wins.
 const DANGER_IDEM = { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false };
 
+// Shared result of the explicit-skill endorsement pair (endorse-skill-by-id /
+// unendorse-skill). Wire truth, live-captured 2026-09-02: both voyager actions
+// answer 200 with a { value: {entityUrn, endorsedByViewer, endorsementCount,
+// ...} } envelope, surfaced here null-tolerant.
+const SkillVerbResult = z.object({
+  activity_log: z.object({}).passthrough()
+    .describe('The dispatch row (linkedin-account-activity-log), action_type endorse_skills or unendorse_skills.'),
+  skill_id: z.string().describe("Echoes the caller's skill_id."),
+  endorsed_skill_urn: z.string().nullable()
+    .describe('The echoed request skill urn urn:li:fsd_profileEndorsedSkill:(<profileId>,<skillId>), read from value.entityUrn; null when LinkedIn omitted it.'),
+  endorsed_by_viewer: z.boolean().nullable()
+    .describe('The authoritative post-action state of THIS viewer\'s endorsement: true after endorse, false after unendorse; null when absent. A stronger verification signal than the urn echo, needs no cache-busting read.'),
+  endorsement_count: z.number().int().nullable()
+    .describe('The global endorser counter for the skill. Moves with everyone\'s endorsements, so assert direction not an absolute; null when absent.'),
+}).passthrough();
+
 const base = {
   service: 'linkedin',
   entity: 'linkedin_accounts',
@@ -963,6 +982,50 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(LinkedinAccount),
     annotations: { title: 'Endorse skills', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'endorse_linkedin_account_skill_by_id',
+    description:
+      "Endorse ONE explicit skill, by skill_id, on a 1st-degree connection as this account. The explicit twin of endorse_linkedin_account_skill: same LinkedIn action and the same shared endorse_skills budget (30 a day, 360 s pacing, bursts of 2), but you name the skill instead of letting the backend auto-pick, so there is no discovery read and exactly one wire call. Skill ids exist ONLY on skills that already have at least one endorsement, so read them from a person-skills lookup first; a skill with zero endorsements cannot be addressed. Re-endorsing an already-endorsed skill is a LinkedIn-side no-op, so a repeat is safe. Returns the echoed skill urn plus endorsed_by_viewer (true after this endorse - the authoritative state, no read-back needed) and endorsement_count (the global counter). Retract with unendorse_linkedin_account_skill.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/endorse-skill-by-id', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      target: Target,
+      skill_id: z.string().min(1).max(64).describe('The numeric id from the skill urn (plain string, e.g. "327093021"). Ids exist only on endorsed skills; get them from a person-skills read.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, SkillVerbResult),
+    annotations: { title: 'Endorse skill by id', ...DANGER_IDEM },
+  },
+  {
+    ...base,
+    name: 'unendorse_linkedin_account_skill',
+    description:
+      "Retract ONE skill endorsement, by skill_id, that this account holds on a 1st-degree connection - the undo of the endorse tools. Spends the SAME endorse_skills budget as the endorse it retracts (30 a day, 360 s pacing, bursts of 2, so an endorse and its undo fire back-to-back). Skill ids exist only on endorsed skills; read them from a person-skills lookup, or reuse the id the endorse call returned. Retracting the LAST endorsement of a skill collapses that skill to name-only in later person-skills reads (no id, no count), after which it can no longer be addressed by id. Returns endorsed_by_viewer (false after this retraction - the authoritative state, no read-back needed) and endorsement_count (the global counter, now lower). Unendorsing a skill this account never endorsed has UNVERIFIED behavior (may refuse), so do not repeat blindly.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/unendorse-skill', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      target: Target,
+      skill_id: z.string().min(1).max(64).describe('The numeric id from the skill urn (plain string). Ids exist only on endorsed skills; get them from a person-skills read or from the endorse call being undone.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, SkillVerbResult),
+    annotations: { title: 'Unendorse skill', ...DANGER },
   },
   {
     ...base,
