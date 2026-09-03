@@ -141,6 +141,7 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     description:
       'List per-limit_type policy rows (one account owns 15 public buckets: send_connection_requests, send_messages, send_inmails, scraping, enrichment, custom_request, …) with filters, sorting, cursor pagination and a counts block (status / limit_type / smart_limits_enabled breakdowns). ' +
       'Use for: "which limits are at their daily cap / held / blocked by LinkedIn" (status filter; held means the daily budget is spent), "can account X still send InMails today" (filter linkedin_account_sid + limit_type, read status + daily_limit − done_today_count), fleet capacity, smart-limit adoption rate. ' +
+      'Every row also carries recommended_daily_limit / recommended_delay_in_seconds (what the platform would run this bucket at for THIS account) and risk_level (none | elevated | ban_likely) for the values currently set. ' +
       'Single-row case = search(filter:{linkedin_account_sid, limit_type}, page_size:1). No q. include[]: linkedin_account, linkedin_account_quota_hits.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-account-smart-limits/search' },
@@ -156,9 +157,9 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     ...base,
     name: 'update_linkedin_account_smart_limit',
     description:
-      'Patch the operator-tunable policy of one limit row (daily_limit / target_limit / delay_in_seconds / smart_limits_enabled; at least one field OR reset_hold:true required). status is recomputed atomically. ' +
-      'A spent daily budget shows as status "held" (there is no "saturated" status). Raising daily_limit does NOT by itself clear that hold. Pass reset_hold:true IN THE SAME CALL to raise the cap AND resume now (the atomic "raise + resume"). The hold only actually clears if the new daily_limit is above done_today_count; otherwise the saturation-latch immediately re-holds it. ' +
-      'On a smart-managed row the persistent lever is target_limit (a manual daily_limit below smart_limit is only transient until the next snapshot). System-managed fields (done_today_count, smart_limit, hold_till, linkedin_quota_hit_till, status, …) are rejected as fields. Use reset_hold to clear the hold. A LinkedIn-side lock (linkedin_quota_hit_till) is never resettable.',
+      'Patch the operator-tunable policy of one limit row (daily_limit / target_limit / delay_in_seconds / smart_limits_enabled / learning_enabled; at least one field OR reset_hold:true). status recomputes atomically. ' +
+      'RISK RULE: read the row\'s recommended_daily_limit and recommended_delay_in_seconds first. Up to twice the recommendation (or a delay down to half) is dangerous and answers risk_level "elevated"; more than twice (or under half) gets the account restricted by LinkedIn and answers "ban_likely". Nothing is refused: warn the user in those words before committing, and flag turning smart_limits_enabled off. ' +
+      'A spent daily budget is status "held"; raising daily_limit alone does not clear it, pass reset_hold:true in the same call (clears only when the new cap exceeds done_today_count). On a smart-managed row the persistent lever is target_limit. System-managed fields (counters, smart_limit, clocks, status, recommended_* / risk_level) are rejected as inputs; a LinkedIn-side lock is never resettable.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'PATCH', pathTemplate: '/api/linkedin-account-smart-limits/{sid}', sidParam: 'sid' },
     operation: 'update',
