@@ -35,6 +35,7 @@ const LinkedinAccountSyncRun = z.object({
     'connection_invitations',
     'conversations',
     'sales_navigator_conversations',
+    'recruiter_conversations',
     'messages',
     'sales_navigator_messages',
     'followers',

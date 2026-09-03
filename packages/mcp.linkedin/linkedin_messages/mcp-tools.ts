@@ -22,8 +22,8 @@ const ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
 const CONVERSATION_SID = z.string().length(18).startsWith('ln_cv_')
   .describe('LinkedIn conversation sid (ln_cv_…).');
 
-const MessengerType = z.enum(['linkedin', 'sales_navigator'])
-  .describe('Messenger surface: basic LinkedIn messenger or Sales Navigator.');
+const MessengerType = z.enum(['linkedin', 'sales_navigator', 'recruiter'])
+  .describe('Messenger surface: the basic LinkedIn messenger, Sales Navigator, or the LinkedIn Recruiter inbox.');
 const LinkedinMessageLinkedinType = z.enum(['message', 'inmail', 'connection_note'])
   .describe('Channel sub-kind: regular DM / premium InMail / system-seeded connection note.');
 const LinkedinMessageDirection = z.enum(['inbox', 'outbox'])
@@ -94,6 +94,8 @@ const LinkedinMessage = z.object({
   ln_member_id: z.string(),
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
+  talent_id: z.string().nullable()
+    .describe("The counterpart's LinkedIn Recruiter (talent) profile id, denormalized from the parent recruiter thread. Null off the recruiter surface."),
   nickname: z.string().nullable(),
   subject: z.string().nullable(),
   text: z.string(),
@@ -192,6 +194,7 @@ const LinkedinMessageFilter = z.object({
   ln_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   ln_member_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']),
   sn_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
+  talent_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']),
   message_hash: filterOp(z.string(), ['eq', 'in']),
   q: z.string().max(128).describe('FULLTEXT over message text + inmail subject.'),
@@ -303,6 +306,29 @@ export const linkedinMessagesTools: ToolDefinition[] = [
   },
   {
     ...base,
+    mount: 'linkedin.recruiter',
+    name: 'get_my_latest_linkedin_messages_recruiter',
+    description:
+      "LinkedIn Recruiter variant of get_my_latest_linkedin_messages: always-fresh head read of ONE recruiter thread's messages (§5.8 refresh-then-return over the talent wire, dispatched with the account's seat). Requires a messenger_type='recruiter' conversation (a 422 messenger_type_mismatch names the right tool otherwise) and a Recruiter seat with its stamped seat number; same hard-429 guards. Rows: linkedin_type='inmail', type outbox for the seat's own messages and inbox for the candidate's.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/get-my-latest-recruiter' },
+    operation: 'action',
+    envelope: 'search',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_conversation_sid: CONVERSATION_SID.describe("REQUIRED; must be a messenger_type='recruiter' thread."),
+      page_size: z.number().int().min(1).max(100).optional().describe('N returned, 1..100, default 50.'),
+      cursor: z.string().nullable().optional().describe('Opaque; pagination over the refreshed tail.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpSearchResponse(LinkedinMessage, undefined, LinkedinMessageCounts).extend({ refresh: LatestRefresh }),
+    annotations: { title: 'Get my latest Recruiter messages', ...ACT },
+  },
+  {
+    ...base,
     name: 'send_linkedin_message',
     description:
       'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id. Guards run first: in-flight dedup, send_messages daily cap, 8000-char body cap, connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row is inserted only on terminal success. When NOT: InMail to a non-connection → send_linkedin_inmail; voice note → send_linkedin_voice_message; Sales Navigator thread → send_linkedin_sales_nav_message; the connection-request note lives on linkedin-connection-requests. Bulk send: loop client-side and respect the daily cap.',
@@ -403,6 +429,38 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
     annotations: { title: 'Send Sales Navigator message', ...DANGER },
+  },
+  {
+    ...base,
+    mount: 'linkedin.recruiter',
+    name: 'send_linkedin_recruiter_message',
+    description:
+      "Send one LinkedIn Recruiter InMail (outward action): open a NEW recruiter thread to a member via talent_id (the AEMAA… id a recruiter thread's participants carry; ln_id / sn_id work too), or reply INTO an existing thread via linkedin_conversation_sid (messenger_type='recruiter'). subject is required on both (≤ 200), text ≤ 1900. Rich-text runs (attributes) work on a NEW thread only: the reply wire takes a plain body and refuses them. Guards: Recruiter seat (422 recruiter_required), the stamped seat number on a reply (422 recruiter_seat_unresolvable), recruiter surface guard on an explicit thread. Spends send_inmails and a Recruiter InMail credit. Fire-on-success: the stored outbox row carries a synthetic rc_ message_hash until the next thread refresh adopts LinkedIn's id. When NOT: basic threads → send_linkedin_message; SN threads → send_linkedin_sales_nav_message; check linkedin-accounts.has_recruiter first.",
+    toolClass: 'complex',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send-recruiter' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing recruiter thread (messenger_type='recruiter'); provide this OR a recipient. A reply dispatches with the thread's own counterpart as the recipient."),
+      talent_id: z.string().max(64).nullable().optional().describe('The recipient\'s Recruiter (talent) profile id (AEMAA…), from a recruiter thread\'s talent_id or participants[].talent_id. New-thread mode.'),
+      ln_id: z.string().max(128).nullable().optional().describe('A regular-profile URN (ACoAA…) for a new thread; the wire resolves it too.'),
+      sn_id: z.string().max(64).nullable().optional().describe('A Sales Navigator URN (ACwAA…) for a new thread; the wire resolves it too.'),
+      subject: z.string().min(1).max(200).describe('InMail subject; 1..200 chars, required on both wires.'),
+      text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars, \\n line breaks.'),
+      attributes: z.array(z.object({
+        start: z.number().int().min(0).describe('Offset into text in UTF-16 code units (JS String offsets).'),
+        length: z.number().int().min(1).describe('Run length in UTF-16 code units; start + length must fit inside text.'),
+        kind: z.record(z.unknown()).describe('The formatting, an object with exactly one key: {"bold":{}}, {"italic":{}}, {"listItem":{}}, {"list":{"ordered":false}}, {"hyperlink":{"url":"https://..."}}.'),
+      })).max(200).optional().describe('Rich-text runs over text. NEW THREAD ONLY: a reply with attributes is refused 422 attributes_not_supported_in_thread.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinMessage),
+    annotations: { title: 'Send Recruiter InMail', ...DANGER },
   },
   {
     ...base,

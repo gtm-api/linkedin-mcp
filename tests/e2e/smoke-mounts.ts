@@ -98,6 +98,12 @@ export const WAVE2_MOUNTS: SmokeMount[] = [
   // initialize + tools/list smoke, the same shape /mcp/linkedin/platform has;
   // re-add a stub if a future content tool lands contract-first.
   { path: '/mcp/linkedin/content', name: 'gtm-linkedin-content' },
+  // The Recruiter (talent) messenger's six tools (2026-09-03), declared in the
+  // accounts / conversations / messages packages and mounted here by selector.
+  // Every tool is refused 422 recruiter_required on an account without a seat;
+  // the live path is the e2e scenario (recruiter-messaging.e2e.ts), which skips
+  // itself cleanly without one.
+  { path: '/mcp/linkedin/recruiter', name: 'gtm-linkedin-recruiter' },
   { path: '/mcp/linkedin/auto-scrapes', name: 'gtm-linkedin-auto-scrapes', search: 'search_linkedin_auto_scrapes' },
   { path: '/mcp/linkedin/browsers', name: 'gtm-linkedin-browsers', search: 'search_antidetect_browsers' },
   { path: '/mcp/linkedin/data', name: 'gtm-linkedin-data', search: 'search_data_requests' },

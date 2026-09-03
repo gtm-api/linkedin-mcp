@@ -1810,6 +1810,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "recruiter_seat_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "full_name",
                         "type": "?string",
                         "nullable": true,
@@ -1853,6 +1859,12 @@
                     },
                     {
                         "name": "last_sales_navigator_conversations_sync_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_recruiter_conversations_sync_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
@@ -2013,6 +2025,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "recruiter_seat_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "full_name",
                         "type": "?string",
                         "nullable": true,
@@ -2056,6 +2074,12 @@
                     },
                     {
                         "name": "last_sales_navigator_conversations_sync_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_recruiter_conversations_sync_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
@@ -2146,6 +2170,7 @@
                     "ln_member_id",
                     "sn_id",
                     "nickname",
+                    "recruiter_seat_id",
                     "full_name",
                     "avatar_url",
                     "label",
@@ -2157,6 +2182,7 @@
                     "last_connections_sync_at",
                     "last_conversations_sync_at",
                     "last_sales_navigator_conversations_sync_at",
+                    "last_recruiter_conversations_sync_at",
                     "last_connection_requests_sync_at",
                     "last_connection_invitations_sync_at",
                     "last_snapshot_at",
@@ -2937,6 +2963,24 @@
                         "type": "?int",
                         "nullable": true,
                         "has_default": true
+                    },
+                    {
+                        "name": "recommended_daily_limit",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "recommended_delay_in_seconds",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "risk_level",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
                     }
                 ]
             },
@@ -3090,6 +3134,24 @@
                     {
                         "name": "done_7d_count",
                         "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "recommended_daily_limit",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "recommended_delay_in_seconds",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "risk_level",
+                        "type": "?string",
                         "nullable": true,
                         "has_default": true
                     }
@@ -5477,6 +5539,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "talent_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "nickname",
                         "type": "?string",
                         "nullable": true,
@@ -5596,6 +5664,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "talent_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "nickname",
                         "type": "?string",
                         "nullable": true,
@@ -5668,6 +5742,7 @@
                     "ln_member_id",
                     "ln_id",
                     "sn_id",
+                    "talent_id",
                     "nickname",
                     "is_muted",
                     "unread_count",
@@ -6141,6 +6216,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "talent_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "nickname",
                         "type": "?string",
                         "nullable": true,
@@ -6284,6 +6365,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "talent_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "nickname",
                         "type": "?string",
                         "nullable": true,
@@ -6347,6 +6434,7 @@
                     "ln_member_id",
                     "ln_id",
                     "sn_id",
+                    "talent_id",
                     "nickname",
                     "subject",
                     "message_hash",
@@ -6896,6 +6984,14 @@
                     "value": "get_sn_messages_page"
                 },
                 {
+                    "name": "GetRecruiterConversationsPage",
+                    "value": "get_recruiter_conversations_page"
+                },
+                {
+                    "name": "GetRecruiterMessagesPage",
+                    "value": "get_recruiter_messages_page"
+                },
+                {
                     "name": "GetMyFollowersPage",
                     "value": "get_my_followers_page"
                 },
@@ -7156,6 +7252,14 @@
                     "value": "get_schools_search_by_url"
                 },
                 {
+                    "name": "GetRecruiterSeatInfo",
+                    "value": "get_recruiter_seat_info"
+                },
+                {
+                    "name": "GetHiringProjects",
+                    "value": "get_hiring_projects"
+                },
+                {
                     "name": "EditMyProfile",
                     "value": "edit_my_profile"
                 },
@@ -7212,6 +7316,10 @@
                     "value": "endorse_skills"
                 },
                 {
+                    "name": "UnendorseSkills",
+                    "value": "unendorse_skills"
+                },
+                {
                     "name": "LikePost",
                     "value": "like_post"
                 },
@@ -7266,6 +7374,18 @@
                 {
                     "name": "DeleteMessage",
                     "value": "delete_message"
+                },
+                {
+                    "name": "DeleteConversation",
+                    "value": "delete_conversation"
+                },
+                {
+                    "name": "SendRecruiterInitialMessage",
+                    "value": "send_recruiter_initial_message"
+                },
+                {
+                    "name": "SendRecruiterMessageInConversation",
+                    "value": "send_recruiter_message_in_conversation"
                 },
                 {
                     "name": "AddParticipants",
@@ -8096,6 +8216,23 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccountSmartLimit\\Enums\\LinkedinAccountSmartLimitRiskLevelEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "None",
+                    "value": "none"
+                },
+                {
+                    "name": "Elevated",
+                    "value": "elevated"
+                },
+                {
+                    "name": "BanLikely",
+                    "value": "ban_likely"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccountSmartLimit\\Enums\\LinkedinAccountSmartLimitStatusEnum": {
             "backing": "string",
             "cases": [
@@ -8269,6 +8406,10 @@
                     "value": "sales_navigator_conversations"
                 },
                 {
+                    "name": "RecruiterConversations",
+                    "value": "recruiter_conversations"
+                },
+                {
                     "name": "Messages",
                     "value": "messages"
                 },
@@ -8358,6 +8499,10 @@
                 {
                     "name": "SalesNavigatorConversations",
                     "value": "sales_navigator_conversations"
+                },
+                {
+                    "name": "RecruiterConversations",
+                    "value": "recruiter_conversations"
                 }
             ]
         },
@@ -8395,6 +8540,10 @@
                 {
                     "name": "LastSalesNavigatorConversationsSyncAt",
                     "value": "last_sales_navigator_conversations_sync_at"
+                },
+                {
+                    "name": "LastRecruiterConversationsSyncAt",
+                    "value": "last_recruiter_conversations_sync_at"
                 },
                 {
                     "name": "LastConnectionRequestsSyncAt",
@@ -8476,6 +8625,10 @@
                     "value": "sales_navigator_conversations"
                 },
                 {
+                    "name": "RecruiterConversations",
+                    "value": "recruiter_conversations"
+                },
+                {
                     "name": "ConnectionRequests",
                     "value": "connection_requests"
                 },
@@ -8515,6 +8668,10 @@
                 {
                     "name": "SalesNavigatorConversations",
                     "value": "sales_navigator_conversations"
+                },
+                {
+                    "name": "RecruiterConversations",
+                    "value": "recruiter_conversations"
                 },
                 {
                     "name": "Messages",
@@ -8846,6 +9003,10 @@
                 {
                     "name": "SalesNavigator",
                     "value": "sales_navigator"
+                },
+                {
+                    "name": "Recruiter",
+                    "value": "recruiter"
                 }
             ]
         },
@@ -12779,6 +12940,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.recruiter_seat_id",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.full_name",
                     "rules": [
                         "nullable"
@@ -12920,6 +13095,20 @@
                 },
                 {
                     "field": "filter.last_sales_navigator_conversations_sync_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.last_recruiter_conversations_sync_at",
                     "rules": [
                         "nullable"
                     ],
@@ -13106,7 +13295,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "in:\"created_at\",\"updated_at\",\"last_premium_check_at\",\"last_snapshot_at\",\"last_heartbeat_at\",\"last_connections_sync_at\",\"last_conversations_sync_at\",\"last_sales_navigator_conversations_sync_at\",\"last_connection_requests_sync_at\",\"last_connection_invitations_sync_at\",\"initial_sync_completed_at\",\"inmail_credits\",\"full_name\""
+                        "in:\"created_at\",\"updated_at\",\"last_premium_check_at\",\"last_snapshot_at\",\"last_heartbeat_at\",\"last_connections_sync_at\",\"last_conversations_sync_at\",\"last_sales_navigator_conversations_sync_at\",\"last_recruiter_conversations_sync_at\",\"last_connection_requests_sync_at\",\"last_connection_invitations_sync_at\",\"initial_sync_completed_at\",\"inmail_credits\",\"full_name\""
                     ],
                     "required": false,
                     "nullable": true,
@@ -13120,6 +13309,7 @@
                         "last_connections_sync_at",
                         "last_conversations_sync_at",
                         "last_sales_navigator_conversations_sync_at",
+                        "last_recruiter_conversations_sync_at",
                         "last_connection_requests_sync_at",
                         "last_connection_invitations_sync_at",
                         "initial_sync_completed_at",
@@ -13575,6 +13765,111 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/endorse-skill-by-id",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "endorseSkillById",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountEndorseSkillByIdRequest",
+            "rules": [
+                {
+                    "field": "target",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "skill_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-accounts/{sid}/get-my-analytics",
             "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
             "action": "getMyAnalytics",
@@ -13787,6 +14082,81 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/get-my-hiring-projects",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "getMyHiringProjects",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountGetMyHiringProjectsRequest",
+            "rules": [
+                {
+                    "field": "keyword",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-accounts/{sid}/get-my-lite-profile",
             "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
             "action": "getMyLiteProfile",
@@ -13862,6 +14232,28 @@
                     "between": null
                 }
             ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/get-my-recruiter-seat",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "getMyRecruiterSeat",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
+            "rules": [],
             "rules_reason": null
         },
         {
@@ -14315,7 +14707,7 @@
                     "field": "types.*",
                     "rules": [
                         "string",
-                        "in:\"connections\",\"connection_requests\",\"connection_invitations\",\"conversations\",\"sales_navigator_conversations\""
+                        "in:\"connections\",\"connection_requests\",\"connection_invitations\",\"conversations\",\"sales_navigator_conversations\",\"recruiter_conversations\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -14325,10 +14717,116 @@
                         "connection_requests",
                         "connection_invitations",
                         "conversations",
-                        "sales_navigator_conversations"
+                        "sales_navigator_conversations",
+                        "recruiter_conversations"
                     ],
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/unendorse-skill",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "unendorseSkill",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountUnendorseSkillRequest",
+            "rules": [
+                {
+                    "field": "target",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "skill_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 }
@@ -17230,6 +17728,80 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-conversations/get-my-latest-recruiter",
+            "controller": "App\\Entities\\LinkedinConversation\\LinkedinConversationController",
+            "action": "getMyLatestRecruiterConversations",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationGetMyLatestRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-conversations/get-my-latest-sales-nav",
             "controller": "App\\Entities\\LinkedinConversation\\LinkedinConversationController",
             "action": "getMyLatestSalesNavConversations",
@@ -17578,6 +18150,46 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-conversations/sync-my-recruiter-conversations",
+            "controller": "App\\Entities\\LinkedinConversation\\LinkedinConversationController",
+            "action": "syncRecruiter",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationSyncRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-conversations/sync-my-sales-navigator-conversations",
             "controller": "App\\Entities\\LinkedinConversation\\LinkedinConversationController",
             "action": "syncSalesNavigator",
@@ -17707,6 +18319,28 @@
                     "between": null
                 }
             ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-conversations/{sid}/delete-on-linkedin",
+            "controller": "App\\Entities\\LinkedinConversation\\LinkedinConversationController",
+            "action": "deleteOnLinkedin",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinConversation\\Requests\\LinkedinConversationDeleteOnLinkedinRequest",
+            "rules": [],
             "rules_reason": null
         },
         {
@@ -21635,6 +22269,80 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-messages/get-my-latest-recruiter",
+            "controller": "App\\Entities\\LinkedinMessage\\LinkedinMessageController",
+            "action": "getMyLatestRecruiterMessages",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageGetMyLatestRequest",
+            "rules": [
+                {
+                    "field": "linkedin_conversation_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_cv_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-messages/get-my-latest-sales-nav",
             "controller": "App\\Entities\\LinkedinMessage\\LinkedinMessageController",
             "action": "getMyLatestSalesNavMessages",
@@ -22382,6 +23090,227 @@
                     "type": "integer",
                     "in": null,
                     "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-messages/send-recruiter",
+            "controller": "App\\Entities\\LinkedinMessage\\LinkedinMessageController",
+            "action": "sendRecruiterMessage",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageSendRecruiterRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_conversation_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_cv_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "talent_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "subject",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "text",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:1900"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 1900,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attributes",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attributes.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attributes.*.start",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:0"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attributes.*.length",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attributes.*.kind",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
                     "max": null,
                     "size": null,
                     "between": null

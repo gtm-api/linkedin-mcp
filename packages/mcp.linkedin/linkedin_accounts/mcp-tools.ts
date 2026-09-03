@@ -84,6 +84,8 @@ const LinkedinAccount = z.object({
   ln_member_id: z.string().nullable(),
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
+  recruiter_seat_id: z.string().nullable()
+    .describe("The account's own LinkedIn Recruiter seat number (the talent ts_seat), stamped by the premium check when the recruiter probe says yes and cleared when it says no. Every recruiter sync / thread read / reply dispatches with it; null with has_recruiter true means the seat is not stamped yet: run check_linkedin_account_premium_subscription with checks: ['recruiter']."),
 
   // Display essentials
   full_name: z.string().nullable(),
@@ -107,6 +109,7 @@ const LinkedinAccount = z.object({
   last_connections_sync_at: z.string().nullable(),
   last_conversations_sync_at: z.string().nullable(),
   last_sales_navigator_conversations_sync_at: z.string().nullable(),
+  last_recruiter_conversations_sync_at: z.string().nullable(),
   last_connection_requests_sync_at: z.string().nullable(),
   last_connection_invitations_sync_at: z.string().nullable(),
   last_followers_sync_at: z.string().nullable(),
@@ -124,6 +127,7 @@ const LinkedinAccount = z.object({
       connections: z.object({ interval_minutes: z.number() }),
       conversations: z.object({ interval_minutes: z.number() }),
       sales_navigator_conversations: z.object({ interval_minutes: z.number() }),
+      recruiter_conversations: z.object({ interval_minutes: z.number() }),
       connection_requests: z.object({ interval_minutes: z.number() }),
       connection_invitations: z.object({ interval_minutes: z.number() }),
       premium_check: z.object({ interval_minutes: z.number() }),
@@ -142,6 +146,7 @@ const LinkedinAccount = z.object({
     connection_invitations: z.object({ enabled: z.boolean(), since: z.string().nullable() }),
     conversations: z.object({ enabled: z.boolean(), since: z.string().nullable() }),
     sales_navigator_conversations: z.object({ enabled: z.boolean(), since: z.string().nullable() }),
+    recruiter_conversations: z.object({ enabled: z.boolean(), since: z.string().nullable() }),
     messages: z.object({ enabled: z.boolean(), since: z.string().nullable() }),
     followers: z.object({ enabled: z.boolean(), since: z.string().nullable() }),
     snapshot: z.object({ enabled: z.boolean(), since: z.string().nullable() }),
@@ -203,6 +208,8 @@ const LinkedinAccountFilter = z.object({
   ln_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional(),
   ln_member_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional(),
   sn_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional(),
+  recruiter_seat_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('is_null:false = the Recruiter seat number is stamped, so the recruiter sync and thread tools can run on this account.'),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   full_name: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   avatar_url: filterOp(z.string(), ['is_null']).optional()
@@ -227,6 +234,7 @@ const LinkedinAccountFilter = z.object({
   last_connections_sync_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
   last_conversations_sync_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
   last_sales_navigator_conversations_sync_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
+  last_recruiter_conversations_sync_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
   last_connection_requests_sync_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
   last_connection_invitations_sync_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
   last_snapshot_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
@@ -332,6 +340,61 @@ const SelfFeedPaging = (pageSizeNote: string) => z.object({
   next_page_cursor: z.string().nullable().optional()
     .describe('Pass back as `cursor` to get the next page. ABSENT means the feed is over, and that is the ONLY end signal: there is deliberately no total and no has-more flag.'),
 });
+
+// The Recruiter (talent) seat read, talent/api/talentMe: a decorated singleton
+// where any field may be absent, so every scalar is nullable and stays PRESENT
+// (a fixed-shape object, not a feed row). The identity tokens the wire also
+// carries are credentials and are never surfaced.
+const LinkedinAccountRecruiterSeat = z.object({
+  owner_seat_id: z.string().nullable()
+    .describe('The ts_seat number of this session: what the recruiter sync and thread tools dispatch with. Null when talentMe carried no seat decoration.'),
+  contract_id: z.string().nullable().describe('The ts_contract number.'),
+  contract_seat_urn: z.string().nullable().describe('urn:li:ts_contract_seat:(urn:li:ts_contract:N,urn:li:ts_seat:M), verbatim.'),
+  profile_id: z.string().nullable().describe('The talent (AEMAA…) id of the logged-in recruiter.'),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  headline: z.string().nullable(),
+  public_profile_url: z.string().nullable(),
+  picture_url: z.string().nullable().describe('Largest avatar artifact.'),
+  using_multiple_contracts: z.boolean().nullable()
+    .describe('True when the recruiter holds seats on several contracts; the sync uses the session default seat.'),
+  seat_state: z.string().nullable().describe('"ACTIVE" observed. Open vocabulary.'),
+  contract_name: z.string().nullable(),
+  contract_type: z.string().nullable().describe('"AGENCY2" observed. Open vocabulary.'),
+  account_name: z.string().nullable(),
+  company_name: z.string().nullable(),
+  credits: z.array(z.object({
+    granted: z.number().int(),
+    left: z.number().int(),
+    type: z.string().describe('The credit kind, e.g. PROFILE_UNLOCK. Open vocabulary.'),
+  }).passthrough()).describe('Contract credit grants. Empty when the wire carried none.'),
+  can_access_mailbox: z.boolean().nullable().describe('Seat entitlement. Null when the entitlement list itself was absent, which is not the same as false.'),
+  can_send_paid_inmail: z.boolean().nullable().describe('Seat entitlement: the cheapest pre-flight before send_linkedin_recruiter_message. Null when the entitlement list was absent.'),
+}).passthrough();
+
+const LinkedinAccountRecruiterSeatResult = z.object({
+  recruiter_seat: LinkedinAccountRecruiterSeat,
+}).passthrough();
+
+// The one recruiter list with a real total: hiring projects. Optional paging
+// keys are ABSENT, never null.
+const LinkedinAccountHiringProjectsResult = z.object({
+  hiring_projects: z.object({
+    elements: z.array(z.object({
+      urn: z.string()
+        .describe('The compound urn:li:ts_hiring_project:(urn:li:ts_contract:<c>,<p>), verbatim.'),
+      project_id: z.string().nullable().describe('Parsed from the urn; null when the shape did not match (the urn stays authoritative).'),
+      contract_id: z.string().nullable(),
+      name: z.string().describe("Free-form project name, verbatim: unicode bold and leading spaces are the recruiter's own text, never trimmed."),
+    }).passthrough()).describe('Most recently accessed first.'),
+    paging: z.object({
+      page_size: z.number().int().nullable().describe('Rows asked for on this page (the wire default when the call omitted page_size).'),
+      page_cursor: z.string().optional().describe('The offset of the page just read, as a string. Treat it as opaque.'),
+      next_page_cursor: z.string().optional().describe('Pass back as `cursor` to get the next page. ABSENT means the list is over.'),
+      total: z.number().int().optional().describe('Exact total of projects.'),
+    }).passthrough(),
+  }).passthrough(),
+}).passthrough();
 
 // A profile-views row. `position` and `is_anonymous` are the only two fields
 // LinkedIn always fills; everything else depends on what the card rendered.
@@ -487,6 +550,16 @@ const LinkedinAccountSalesNavNotificationsResult = z.object({
   }),
 }).passthrough();
 
+// The explicit-skill endorse pair's result (LinkedinAccountSkillVerbResult):
+// the wire's `value` envelope read back after ?action=endorse / ?action=unendorse.
+const SkillVerbResult = z.object({
+  activity_log: z.object({}).passthrough().describe('Full dispatch row (linkedin-account-activity-log) per §4.12a.'),
+  skill_id: z.string().describe('Echo of the skill_id you passed.'),
+  endorsed_skill_urn: z.string().nullable().describe('urn:li:fsd_profileEndorsedSkill:(<profileId>,<skillId>), from value.entityUrn; null when absent from the wire body.'),
+  endorsed_by_viewer: z.boolean().nullable().describe('The authoritative post-action state of THIS account\'s endorsement: true after endorse, false after unendorse; null when absent.'),
+  endorsement_count: z.number().int().nullable().describe('The global endorser counter, which moves with everyone\'s endorsements: assert direction, never an absolute.'),
+}).passthrough();
+
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
@@ -534,6 +607,7 @@ const LinkedinAccountSortable = z.enum([
   'last_connections_sync_at',
   'last_conversations_sync_at',
   'last_sales_navigator_conversations_sync_at',
+  'last_recruiter_conversations_sync_at',
   'last_connection_requests_sync_at',
   'last_connection_invitations_sync_at',
   'initial_sync_completed_at',
@@ -904,6 +978,48 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   },
   {
     ...base,
+    mount: 'linkedin.recruiter',
+    name: 'get_linkedin_account_my_recruiter_seat',
+    description:
+      "This account's own LinkedIn Recruiter seat, contract, profile and entitlements (the talentMe read). NEEDS A RECRUITER SEAT on the account (422 recruiter_required otherwise). Every field can be null: the wire may omit any of them. owner_seat_id is the seat number the recruiter sync and thread tools dispatch with; the premium check stamps it onto the account itself (recruiter_seat_id), this read persists nothing. Call it to check can_send_paid_inmail and credits before send_linkedin_recruiter_message, or to see using_multiple_contracts. Spends one self_account_sync unit.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-recruiter-seat', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ sid: SID, ...usageMetaField }),
+    outputSchema: McpActionResponse(LinkedinAccount, LinkedinAccountRecruiterSeatResult),
+    annotations: { title: 'Get my Recruiter seat', ...RO },
+  },
+  {
+    ...base,
+    mount: 'linkedin.recruiter',
+    name: 'get_linkedin_account_my_hiring_projects',
+    description:
+      "One page of this account's own LinkedIn Recruiter hiring projects, most recently accessed first, optionally filtered by a name keyword. NEEDS A RECRUITER SEAT (422 recruiter_required otherwise). The one recruiter list with an exact paging.total. Omit page_size to get the wire default of 10; pass paging.next_page_cursor back as `cursor` for the next page. Read-only, persists nothing, one self_account_sync unit.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-hiring-projects', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      keyword: z.string().max(200).optional().describe('Project-name search. Omit for every project.'),
+      page_size: z.number().int().min(1).max(100).optional().describe('Rows per page, 1..100; the wire default is 10.'),
+      cursor: z.string().max(64).optional().describe('Pass paging.next_page_cursor of the previous page back verbatim. Omit to start at the top.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, LinkedinAccountHiringProjectsResult),
+    annotations: { title: 'Get my Recruiter hiring projects', ...RO },
+  },
+  {
+    ...base,
     name: 'edit_linkedin_account_my_profile',
     description: "Edit the connected account's OWN LinkedIn profile intro card: name, headline, additional name, industry, location, the current position/education pins and their visibility, website, and pronouns. Send only what changes; the backend reads the current card first and submits the complete form, because the LinkedIn form is a REPLACE and anything omitted would be blanked. The About section is NOT editable here (LinkedIn uses a separate form), so passing summary is rejected rather than ignored. Industry, city, position and education take LinkedIn's own numeric ids, which this API does not resolve: omit them and their current values are kept. Spends the tight edit_profile budget (10/day, 600 s apart), because rapid profile churn is a bot signal. LinkedIn returns no confirmation of what it saved, so updated_fields reflects what was ASKED for; read the profile back to confirm.",
     toolClass: 'typical',
@@ -963,6 +1079,62 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(LinkedinAccount),
     annotations: { title: 'Endorse skills', ...DANGER },
+  },
+  // The explicit-skill endorse pair (backend 2026-09-02, matrix rows 111 / 112).
+  // Same package as the auto-pick endorse above (the routes live under
+  // /api/linkedin-accounts/{sid}/), but MOUNTED on linkedin.content, not
+  // linkedin.accounts: the accounts mount sits exactly on its 25-tool default
+  // with a standing note that the next tool has to be argued for, and these
+  // two are engagement writes (can_act_linkedin_engagements, the react /
+  // comment permission) that read naturally next to react / unreact. The
+  // mount override here is informational; the binding is the selectors in
+  // apps/worker/src/mounts.config.ts (exclude on accounts, tool on content).
+  // Moving them back is a two-line change there plus this field.
+  {
+    ...base,
+    mount: 'linkedin.content',
+    name: 'endorse_linkedin_account_skill_by_id',
+    description:
+      "Endorse ONE explicit skill on a 1st-degree connection as this account (wire endorse-skill, ?action=endorse). Unlike endorse_linkedin_account_skill there is no discovery read and no auto-pick: you supply skill_id, exactly one dispatch. Skill ids exist only on skills that already carry at least one endorsement (a zero-endorsement skill is not addressable), so take them from the enrichment person-skills read. Requires a 1st-degree connection (409 not_connected). Spends the endorse_skills bucket (30/day at 360 s, bursts 2 so an endorse and its undo fire back to back). Returns the echoed skill urn, endorsed_by_viewer (true after endorse) and the global endorsement_count, plus the activity-log row. Re-endorsing is a LinkedIn-side no-op; undo with unendorse_linkedin_account_skill.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/endorse-skill-by-id', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      target: Target,
+      skill_id: z.string().min(1).max(64).describe('The skill id from a person-skills read (a numeric string on every proven id; LinkedIn owns the namespace).'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, SkillVerbResult),
+    annotations: { title: 'Endorse skill by id', ...DANGER },
+  },
+  {
+    ...base,
+    mount: 'linkedin.content',
+    name: 'unendorse_linkedin_account_skill',
+    description:
+      "Retract ONE skill endorsement this account holds on a 1st-degree connection (wire unendorse-skill, ?action=unendorse): the undo of endorse_linkedin_account_skill / endorse_linkedin_account_skill_by_id, addressed by the same skill_id. Spends the SAME endorse_skills bucket as the endorse it reverses (verb-pair rule; the bucket bursts 2 so a do/undo pair fires back to back). Returns the echoed skill urn, endorsed_by_viewer (false after unendorse) and the global endorsement_count, plus the activity-log row. Retracting the LAST endorsement of a skill collapses its person-skills row to name only (no skill_id, no count). Retracting one this account never made is unverified on the wire.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/unendorse-skill', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      target: Target,
+      skill_id: z.string().min(1).max(64).describe('The skill id this account endorsed (from a person-skills read, or the skill_id the endorse answered).'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, SkillVerbResult),
+    annotations: { title: 'Unendorse skill', ...DANGER },
   },
   {
     ...base,
@@ -1044,6 +1216,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
         'connection_invitations',
         'conversations',
         'sales_navigator_conversations',
+        'recruiter_conversations',
       ])).min(1).describe('Sync tracks to reset (LinkedinAccountResetSyncTypeEnum values).'),
       ...usageMetaField,
     }),
@@ -1077,6 +1250,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
           connections: z.object({ interval_minutes: z.number().int().min(5) }),
           conversations: z.object({ interval_minutes: z.number().int().min(5) }),
           sales_navigator_conversations: z.object({ interval_minutes: z.number().int().min(5) }),
+          recruiter_conversations: z.object({ interval_minutes: z.number().int().min(5) }),
           connection_requests: z.object({ interval_minutes: z.number().int().min(5) }),
           connection_invitations: z.object({ interval_minutes: z.number().int().min(5) }),
           premium_check: z.object({ interval_minutes: z.number().int().min(5) }),

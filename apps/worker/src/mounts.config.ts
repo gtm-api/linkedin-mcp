@@ -14,7 +14,24 @@ export const MOUNTS: MountConfig[] = [
     name: 'gtm-linkedin-accounts',
     instructions:
       'GTM LinkedIn account management & pacing. Find an account sid with search_linkedin_accounts, then call account-scoped tools by sid (checks, self-profile reads, endorse/visit, reset-sync, smart-limits). "NOT SHIPPED YET" tools return not_implemented, so do not retry.',
-    selectors: [p('linkedin_accounts'), p('linkedin_account_smart_limits')],
+    selectors: [
+      p('linkedin_accounts'),
+      p('linkedin_account_smart_limits'),
+      // The explicit-skill endorse pair (backend 2026-09-02) is declared in the
+      // linkedin_accounts package (its routes are /api/linkedin-accounts/{sid}/*)
+      // but RIDES ON /mcp/linkedin/content: this mount sits exactly on the
+      // default 25 with no headroom, and the pair is an engagement write
+      // (can_act_linkedin_engagements, the react / comment permission). The
+      // exclusion here and the tool selectors on the content mount are the
+      // whole binding; the tools' own `mount` field says the same thing.
+      { kind: 'exclude', name: 'endorse_linkedin_account_skill_by_id' },
+      { kind: 'exclude', name: 'unendorse_linkedin_account_skill' },
+      // The two Recruiter (talent) self reads (2026-09-03) ride on
+      // /mcp/linkedin/recruiter with the rest of the recruiter inbox, for the
+      // same no-headroom reason; the tools' own `mount` field says so.
+      { kind: 'exclude', name: 'get_linkedin_account_my_recruiter_seat' },
+      { kind: 'exclude', name: 'get_linkedin_account_my_hiring_projects' },
+    ],
     // 27, not the default 25. The three self-account feeds added on 2026-08-07
     // (profile views, catch-up cards, Sales Navigator alerts) took this mount
     // from 24 to 27, and resolveMounts throws at module scope, so the worker
@@ -74,12 +91,51 @@ export const MOUNTS: MountConfig[] = [
     name: 'gtm-linkedin-messaging',
     instructions:
       'GTM LinkedIn conversations & messages: sync the inbox, search history, send messages / voice / InMail / Sales Navigator. Sends are protected (preview → confirm).',
-    selectors: [p('linkedin_conversations'), p('linkedin_messages')],
+    selectors: [
+      p('linkedin_conversations'),
+      p('linkedin_messages'),
+      // The Recruiter (talent) messenger's four verbs (2026-09-03) are declared
+      // in these two packages (the recruiter inbox is the third messenger_type
+      // of the same conversations / messages tables) but RIDE ON
+      // /mcp/linkedin/recruiter: this mount sits at 27 of its signed 28, and the
+      // recruiting inbox is one job to an agent, so the six recruiter tools
+      // mount together. Stored recruiter rows are still reachable here through
+      // search_linkedin_conversations / search_linkedin_messages
+      // (filter.messenger_type = 'recruiter').
+      { kind: 'exclude', name: 'sync_my_recruiter_conversations' },
+      { kind: 'exclude', name: 'get_my_latest_linkedin_conversations_recruiter' },
+      { kind: 'exclude', name: 'get_my_latest_linkedin_messages_recruiter' },
+      { kind: 'exclude', name: 'send_linkedin_recruiter_message' },
+    ],
     // 28, not the default 25: the inbox is one job to an LLM (find the thread,
     // read it, answer it), so splitting conversations from messages would make
     // the client mount two URLs to do one thing. Eugene raised the budget for
     // this mount alone on 2026-07-27; every other mount stays at 25.
     maxTools: 28,
+    facade: 'none',
+  },
+  {
+    // The Recruiter (talent) inbox, 2026-09-03: the THIRD messenger_type of the
+    // conversations / messages tables, whose six tools are declared in their
+    // entity packages (accounts x2, conversations x2, messages x2) and mounted
+    // HERE by tool selectors rather than on /mcp/linkedin/accounts (exactly on
+    // the 25 default, no headroom) or /mcp/linkedin/messaging (27 of its signed
+    // 28). A recruiting inbox is one job to an agent (find the thread, read it,
+    // answer it), the same argument the messaging mount made, so the six tools
+    // ride together. The placement is Eugene's to overrule. See PACKAGES.md.
+    path: '/mcp/linkedin/recruiter',
+    name: 'gtm-linkedin-recruiter',
+    instructions:
+      'GTM LinkedIn Recruiter inbox, the third messenger next to LinkedIn and Sales Navigator: read a team account\'s own Recruiter seat and hiring projects, sync its recruiter inbox into the shared conversations / messages tables (messenger_type recruiter, candidates known by talent_id), read the latest threads and one thread\'s messages, and send Recruiter InMails (a new thread, or a reply into one). Needs a Recruiter seat on the account (search accounts with has_recruiter: true) and its stamped seat number; the tools answer 422 recruiter_required / recruiter_seat_unresolvable otherwise. Stored history is searchable on the messaging mount with filter.messenger_type = recruiter. Sends are protected (preview then confirm) and spend InMail credits.',
+    selectors: [
+      { kind: 'tool', name: 'get_linkedin_account_my_recruiter_seat' },
+      { kind: 'tool', name: 'get_linkedin_account_my_hiring_projects' },
+      { kind: 'tool', name: 'sync_my_recruiter_conversations' },
+      { kind: 'tool', name: 'get_my_latest_linkedin_conversations_recruiter' },
+      { kind: 'tool', name: 'get_my_latest_linkedin_messages_recruiter' },
+      { kind: 'tool', name: 'send_linkedin_recruiter_message' },
+    ],
+    maxTools: 25,
     facade: 'none',
   },
   {
@@ -100,9 +156,14 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/content',
     name: 'gtm-linkedin-content',
     instructions:
-      'GTM LinkedIn content authoring: publish a post, comment on a post, react to a post, from one of the team accounts. Posts are addressed by activity URN and need no prior tracking. Every verb is protected (preview then confirm). Reading a post and who engaged with it lives on the scraping and enrichment mounts.',
+      'GTM LinkedIn content authoring and engagement: publish a post, comment on a post, react to a post, endorse or unendorse a connection\'s skill by id, from one of the team accounts. Posts are addressed by activity URN and need no prior tracking. Every verb is protected (preview then confirm). Reading a post and who engaged with it lives on the scraping and enrichment mounts.',
     selectors: [
       p('linkedin_posting'),
+      // The explicit-skill endorse pair from the linkedin_accounts package (see
+      // the accounts mount for why it lives here): endorse by skill id, and
+      // its undo. Engagement writes next to react / unreact.
+      { kind: 'tool', name: 'endorse_linkedin_account_skill_by_id' },
+      { kind: 'tool', name: 'unendorse_linkedin_account_skill' },
     ],
     maxTools: 25,
     facade: 'none',
