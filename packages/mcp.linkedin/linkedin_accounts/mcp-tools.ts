@@ -86,6 +86,10 @@ const LinkedinAccount = z.object({
   nickname: z.string().nullable(),
   recruiter_seat_id: z.string().nullable()
     .describe("The account's own LinkedIn Recruiter seat number (the talent ts_seat), stamped by the premium check when the recruiter probe says yes and cleared when it says no. Every recruiter sync / thread read / reply dispatches with it; null with has_recruiter true means the seat is not stamped yet: run check_linkedin_account_premium_subscription with checks: ['recruiter']."),
+  recruiter_contract_id: z.string().nullable()
+    .describe('The Recruiter contract (talent ts_contract number) the stamped seat belongs to, from the same seat read. A seat only means something inside its contract: hiring-project urns embed it, and a member on several contracts holds a different seat on each.'),
+  recruiter_session_expires_at: z.string().nullable()
+    .describe("When the Recruiter (enterprise) session of the bound browser profile runs out (ISO 8601): the expiry of LinkedIn's li_a cookie, read from the antidetect vendor's cookie store by the premium check (the clock, never the value). LinkedIn issues that session for 30 days when the seat holder enters the LinkedIn password on the Recruiter sign-in page; past this clock every recruiter tool answers 409 recruiter_reauth_required until the seat holder signs in to Recruiter again in the account's browser. Null = not read (no seat, or a vendor without a readable cookie store)."),
 
   // Display essentials
   full_name: z.string().nullable(),
@@ -210,6 +214,10 @@ const LinkedinAccountFilter = z.object({
   sn_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional(),
   recruiter_seat_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
     .describe('is_null:false = the Recruiter seat number is stamped, so the recruiter sync and thread tools can run on this account.'),
+  recruiter_contract_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('Exact match on the Recruiter contract number the stamped seat belongs to.'),
+  recruiter_session_expires_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
+    .describe('lt:<now> = seat holders whose Recruiter session has run out and who must sign in to Recruiter again; is_null:false = the clock was read.'),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   full_name: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   avatar_url: filterOp(z.string(), ['is_null']).optional()
@@ -608,6 +616,7 @@ const LinkedinAccountSortable = z.enum([
   'last_conversations_sync_at',
   'last_sales_navigator_conversations_sync_at',
   'last_recruiter_conversations_sync_at',
+  'recruiter_session_expires_at',
   'last_connection_requests_sync_at',
   'last_connection_invitations_sync_at',
   'initial_sync_completed_at',

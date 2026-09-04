@@ -1816,6 +1816,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "recruiter_contract_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "recruiter_session_expires_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "full_name",
                         "type": "?string",
                         "nullable": true,
@@ -2031,6 +2043,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "recruiter_contract_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "recruiter_session_expires_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "full_name",
                         "type": "?string",
                         "nullable": true,
@@ -2171,6 +2195,8 @@
                     "sn_id",
                     "nickname",
                     "recruiter_seat_id",
+                    "recruiter_contract_id",
+                    "recruiter_session_expires_at",
                     "full_name",
                     "avatar_url",
                     "label",
@@ -8546,6 +8572,10 @@
                     "value": "last_recruiter_conversations_sync_at"
                 },
                 {
+                    "name": "RecruiterSessionExpiresAt",
+                    "value": "recruiter_session_expires_at"
+                },
+                {
                     "name": "LastConnectionRequestsSyncAt",
                     "value": "last_connection_requests_sync_at"
                 },
@@ -12954,6 +12984,34 @@
                     "between": null
                 },
                 {
+                    "field": "filter.recruiter_contract_id",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.recruiter_session_expires_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.full_name",
                     "rules": [
                         "nullable"
@@ -13310,6 +13368,7 @@
                         "last_conversations_sync_at",
                         "last_sales_navigator_conversations_sync_at",
                         "last_recruiter_conversations_sync_at",
+                        "recruiter_session_expires_at",
                         "last_connection_requests_sync_at",
                         "last_connection_invitations_sync_at",
                         "initial_sync_completed_at",

@@ -77,9 +77,15 @@ export function mapErrorEnvelope(
     case 'rate_limited':
     case 'limit_exceeded': {
       lines.push(e.message);
-      const retry = (e.context?.retry_after as number | undefined);
-      if (retry != null) lines.push(`Retryable: retry after ${retry}s.`);
+      // `retry_after` is seconds when a middleware set it and an ISO 8601
+      // timestamp when the backend named the clock it keeps (bucket_saturated,
+      // sync_in_progress, recruiter_inmail_cooldown); both are rendered as
+      // what they are, so the model never reads a date as a number of seconds.
+      const retry = e.context?.retry_after;
+      if (typeof retry === 'number') lines.push(`Retryable: retry after ${retry}s.`);
+      else if (typeof retry === 'string' && retry !== '') lines.push(`Retryable: retry after ${retry}.`);
       else lines.push('Retryable after a short backoff.');
+      if (e.suggestion) lines.push(e.suggestion);
       break;
     }
     // 402. Every one of these is a slot/plan decision (seat cap, add-on headroom,

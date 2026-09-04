@@ -69,6 +69,13 @@ describe('mapErrorEnvelope', () => {
     expect(r.content[0].text).toMatch(/retry after 42s/i);
     expect(r.content[0].text).toMatch(/trace: abc/);
   });
+
+  it('renders a timestamp retry_after as a clock, not as seconds, and keeps the suggestion', () => {
+    const r = mapErrorEnvelope(429, { success: false, error: { code: 'rate_limited', message: 'cooldown', recoverable: true, suggestion: 'Refresh the thread first.', context: { reason: 'recruiter_inmail_cooldown', retry_after: '2026-09-05T10:00:00+00:00' } } }, ctx);
+    expect(r.content[0].text).toMatch(/retry after 2026-09-05T10:00:00\+00:00\./);
+    expect(r.content[0].text).not.toMatch(/00:00s/);
+    expect(r.content[0].text).toMatch(/Refresh the thread first\./);
+  });
 });
 
 describe('httpErrorResult (backend error without the platform envelope)', () => {
