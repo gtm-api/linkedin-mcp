@@ -270,7 +270,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     mount: 'linkedin.recruiter',
     name: 'sync_my_recruiter_conversations',
     description:
-      "Start a background sync run that reconciles the LinkedIn Recruiter inbox (the talent mailbox a recruiter seat owns) for one account: messenger_type='recruiter' threads with the candidate's talent_id, their messages drained inline. ASYNC: returns a pending ref to poll. Needs a Recruiter seat on the account AND its stamped seat number (422 recruiter_required / recruiter_seat_unresolvable otherwise; check_linkedin_account_premium_subscription with checks: ['recruiter'] refreshes both). Walks the INBOX tab only. Separate sync_type and cadence from the two other messengers.",
+      "Start a background sync run that reconciles the LinkedIn Recruiter inbox (the talent mailbox a recruiter seat owns) for one account: messenger_type='recruiter' threads with the candidate's talent_id, their messages drained inline. ASYNC: returns a pending ref to poll. Needs a Recruiter seat on the account AND its stamped seat number (422 recruiter_required / recruiter_seat_unresolvable otherwise; check_linkedin_account_premium_subscription with checks: ['recruiter'] refreshes both). Walks the INBOX tab and then UNRESOLVED (a thread this seat opened sits there until the candidate replies), never ARCHIVED or SCHEDULED. Separate sync_type and cadence from the two other messengers.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/sync-my-recruiter-conversations' },
     operation: 'action',
