@@ -119,6 +119,12 @@ const AntidetectBrowser = z.object({
   // agent that cannot parse them mis-reads a parked browser as a live one.
   status: AntidetectBrowserStatus,
   error_reason: z.string().nullable(),
+  // Who acts on a browser parked in error_investigation: `customer` (their vendor
+  // profile is gone, their LinkedIn session or account, a proxy they supplied) or
+  // `support` (our pool proxy, the node, the host, or a fault nobody classified).
+  // NULL on every row that is not parked. An agent relays a `customer` reason to
+  // the user with error_reason; a `support` one is ours and needs no user action.
+  error_owner: z.enum(['customer', 'support']).nullable(),
   fail_count: z.number(),
   last_fail_at: z.string().nullable(),
   logout_count: z.number(),

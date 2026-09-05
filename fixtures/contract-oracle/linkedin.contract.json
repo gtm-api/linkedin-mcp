@@ -90,6 +90,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "error_owner",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "last_fail_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -264,6 +270,12 @@
                     },
                     {
                         "name": "error_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_owner",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -6865,6 +6877,19 @@
                 {
                     "name": "Share",
                     "value": "share"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowser\\Enums\\AntidetectBrowserErrorOwnerEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Customer",
+                    "value": "customer"
+                },
+                {
+                    "name": "Support",
+                    "value": "support"
                 }
             ]
         },
