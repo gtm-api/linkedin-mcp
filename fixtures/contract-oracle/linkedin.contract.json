@@ -1906,6 +1906,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "initial_sync_held_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "initial_sync_hold_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "last_snapshot_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2129,6 +2141,18 @@
                     {
                         "name": "initial_sync_completed_at",
                         "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "initial_sync_held_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "initial_sync_hold_reason",
+                        "type": "?string",
                         "nullable": true,
                         "has_default": true
                     },
@@ -13223,6 +13247,34 @@
                 },
                 {
                     "field": "filter.initial_sync_completed_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.initial_sync_held_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.initial_sync_hold_reason",
                     "rules": [
                         "nullable"
                     ],

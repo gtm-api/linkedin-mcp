@@ -121,6 +121,8 @@ const LinkedinAccount = z.object({
 
   // Initial-sync gate (one-way latch)
   initial_sync_completed_at: z.string().nullable(),
+  initial_sync_held_at: z.string().nullable().describe('When THIS onboarding first parked on a smart-limit budget (the daily self_account_sync allowance ran out before the initial set was done); null = never held. Kept after the latch, cleared by reset-sync.'),
+  initial_sync_hold_reason: z.string().nullable().describe("The run's park code at that moment: limit:daily_saturation, limit:held or limit:linkedin_quota_hit."),
 
   // Heartbeat
   last_heartbeat_at: z.string().nullable(),
@@ -248,7 +250,9 @@ const LinkedinAccountFilter = z.object({
   last_snapshot_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
 
   // Onboarding gate + heartbeat.
-  initial_sync_completed_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
+  initial_sync_completed_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
+  initial_sync_held_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional().describe('is_null:false = onboardings that parked on the daily budget part-way'),
+  initial_sync_hold_reason: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
     .describe('Onboarding gate; is_null:true = still onboarding, is_null:false = ready.'),
   last_heartbeat_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
 

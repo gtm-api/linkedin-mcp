@@ -34,7 +34,7 @@ const SID = z.string().length(18).startsWith('wh_hk_')
 const WebhookStatus = z.enum(['on', 'off', 'failed']);
 
 // The subscribable event vocabulary, verbatim from the create/update rules()
-// (WebhookEventTypeEnum, 96 values). It has to be a closed set on this side:
+// (WebhookEventTypeEnum, 97 values). It has to be a closed set on this side:
 // an in: rule 422s with "invalid", never with the list, and an agent cannot
 // subscribe to an event it has to guess the name of.
 //
@@ -51,6 +51,7 @@ const WebhookEventType = z.enum([
   'linkedin-accounts.deleted',
   'linkedin-accounts.initial-sync-started',
   'linkedin-accounts.initial-sync-done',
+  'linkedin-accounts.initial-sync-held',
   'linkedin-accounts.sync-reset',
   'linkedin-accounts.sync-config-updated',
   'linkedin-accounts.premium-changed',
