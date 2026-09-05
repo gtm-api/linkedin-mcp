@@ -26530,14 +26530,14 @@
                     "rules": [
                         "nullable",
                         "array",
-                        "max:7"
+                        "max:4"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,
-                    "max": 7,
+                    "max": 4,
                     "size": null,
                     "between": null
                 },
@@ -26546,7 +26546,7 @@
                     "rules": [
                         "required",
                         "string",
-                        "in:F,P,C,T,I,V,O"
+                        "in:F,P,C,I"
                     ],
                     "required": true,
                     "nullable": false,
@@ -26555,10 +26555,7 @@
                         "F",
                         "P",
                         "C",
-                        "T",
-                        "I",
-                        "V",
-                        "O"
+                        "I"
                     ],
                     "min": null,
                     "max": null,
@@ -26750,8 +26747,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:128",
-                        "required_without:filters.job_titles.*.text"
+                        "max:128"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26765,16 +26761,16 @@
                 {
                     "field": "filters.job_titles.*.text",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:256",
-                        "required_without:filters.job_titles.*.id"
+                        "min:1",
+                        "max:256"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": 256,
                     "size": null,
                     "between": null
@@ -26880,15 +26876,16 @@
                 {
                     "field": "filters.occupations.*.text",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
+                        "min:1",
                         "max:256"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": 256,
                     "size": null,
                     "between": null
@@ -26979,8 +26976,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:128",
-                        "required_without:filters.skills.*.text"
+                        "max:128"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26994,16 +26990,16 @@
                 {
                     "field": "filters.skills.*.text",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:256",
-                        "required_without:filters.skills.*.id"
+                        "min:1",
+                        "max:256"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": 256,
                     "size": null,
                     "between": null
@@ -27087,8 +27083,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:128",
-                        "required_without:filters.companies.*.text"
+                        "max:128"
                     ],
                     "required": false,
                     "nullable": true,
@@ -27102,16 +27097,16 @@
                 {
                     "field": "filters.companies.*.text",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:256",
-                        "required_without:filters.companies.*.id"
+                        "min:1",
+                        "max:256"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": 256,
                     "size": null,
                     "between": null
@@ -27420,16 +27415,16 @@
                 {
                     "field": "filters.postal_codes.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.postal_codes.*.text"
+                        "min:1",
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": 128,
                     "size": null,
                     "between": null
@@ -27437,16 +27432,16 @@
                 {
                     "field": "filters.postal_codes.*.text",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:256",
-                        "required_without:filters.postal_codes.*.id"
+                        "min:1",
+                        "max:256"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": 256,
                     "size": null,
                     "between": null

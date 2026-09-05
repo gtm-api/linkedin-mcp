@@ -97,7 +97,7 @@ const DataRequestMethod = z.enum([
   'get_post_resharers', 'search_param_id_lookup',
   'search_sales_nav_param_id_lookup',
   // The Recruiter (talent) search pair (2026-09-05): filters-only, plus its typeahead.
-  'search_recruiter_people_by_params', 'search_recruiter_param_id_lookup',
+  'search_recruiter_people_by_params', 'search_recruiter_people_by_url', 'search_recruiter_param_id_lookup',
 ]);
 
 // Item projection: every field of DataRequestDomain (research §Domain). Base
