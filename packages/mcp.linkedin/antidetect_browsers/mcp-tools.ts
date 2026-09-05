@@ -58,11 +58,17 @@ const BrowserOwner = z.enum(['platform', 'customer']);
 const VendorProvider = z.enum(['gologin', 'multilogin', 'adspower', 'dolphin']);
 
 // AntidetectBrowserStatusEnum, in its PHP order. Named once and reused by the
-// item projection and the status filter so the two cannot drift apart.
+// item projection and the status filter so the two cannot drift apart. The
+// escalation floor is a pair since 2026-09-05: `client_error_investigation` (the
+// customer fixes it: their vendor profile, their LinkedIn session, their proxy -
+// relay error_reason to the user) and `support_error_investigation` (ours, or
+// unclassified - no user action, our team is paged). Both refuse dispatch with
+// 409 browser_error_investigation and are never auto-restarted.
 const AntidetectBrowserStatus = z.enum([
   'stopped', 'queued_to_start', 'initializing', 'running', 'idle',
   'queued_to_stop', 'start_issue', 'running_issue', 'login_issue',
-  'error_investigation', 'maintenance', 'shared_out', 'subscription_required',
+  'client_error_investigation', 'support_error_investigation',
+  'maintenance', 'shared_out', 'subscription_required',
 ]);
 
 // Customer bring-your-own proxy tuple. Allowed on any browser whose vendor
@@ -112,19 +118,13 @@ const AntidetectBrowser = z.object({
   vendor_name: z.string().nullable(),
   vendor_profile_id: z.string().nullable(),
   browser_owner: BrowserOwner,
-  // Operational state: AntidetectBrowserStatusEnum, all 13 cases. The last two
+  // Operational state: AntidetectBrowserStatusEnum, all 14 cases. The last two
   // came with the sharing rework and are not operational states at all: a
   // browser parked for a share reads shared_out, and one whose team lost its
   // plan reads subscription_required. Both are terminal for automation, so an
   // agent that cannot parse them mis-reads a parked browser as a live one.
   status: AntidetectBrowserStatus,
   error_reason: z.string().nullable(),
-  // Who acts on a browser parked in error_investigation: `customer` (their vendor
-  // profile is gone, their LinkedIn session or account, a proxy they supplied) or
-  // `support` (our pool proxy, the node, the host, or a fault nobody classified).
-  // NULL on every row that is not parked. An agent relays a `customer` reason to
-  // the user with error_reason; a `support` one is ours and needs no user action.
-  error_owner: z.enum(['customer', 'support']).nullable(),
   fail_count: z.number(),
   last_fail_at: z.string().nullable(),
   logout_count: z.number(),

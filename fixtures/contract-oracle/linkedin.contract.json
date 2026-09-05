@@ -90,12 +90,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "error_owner",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
                         "name": "last_fail_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -270,12 +264,6 @@
                     },
                     {
                         "name": "error_reason",
-                        "type": "?string",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "error_owner",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -6882,19 +6870,6 @@
                 }
             ]
         },
-        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowser\\Enums\\AntidetectBrowserErrorOwnerEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "Customer",
-                    "value": "customer"
-                },
-                {
-                    "name": "Support",
-                    "value": "support"
-                }
-            ]
-        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowser\\Enums\\AntidetectBrowserOwnerEnum": {
             "backing": "string",
             "cases": [
@@ -6961,8 +6936,12 @@
                     "value": "login_issue"
                 },
                 {
-                    "name": "ErrorInvestigation",
-                    "value": "error_investigation"
+                    "name": "ClientErrorInvestigation",
+                    "value": "client_error_investigation"
+                },
+                {
+                    "name": "SupportErrorInvestigation",
+                    "value": "support_error_investigation"
                 },
                 {
                     "name": "Maintenance",
@@ -7255,6 +7234,10 @@
                 {
                     "name": "GetRecruiterProfilesSearchByParams",
                     "value": "get_recruiter_profiles_search_by_params"
+                },
+                {
+                    "name": "GetRecruiterProfilesSearchByUrl",
+                    "value": "get_recruiter_profiles_search_by_url"
                 },
                 {
                     "name": "GetLinkedinCompaniesSearchByUrl",
@@ -7861,6 +7844,10 @@
                 {
                     "name": "SearchRecruiterPeopleByParams",
                     "value": "search_recruiter_people_by_params"
+                },
+                {
+                    "name": "SearchRecruiterPeopleByUrl",
+                    "value": "search_recruiter_people_by_url"
                 },
                 {
                     "name": "SearchServiceProviders",
@@ -26053,28 +26040,35 @@
                     "between": null
                 },
                 {
-                    "field": "filters",
+                    "field": "url",
                     "rules": [
-                        "required",
-                        "array"
+                        "required_without:filters",
+                        "prohibits:filters",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "starts_with:https://www.linkedin.com/talent/search"
                     ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "array",
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
                 {
-                    "field": "url",
+                    "field": "filters",
                     "rules": [
-                        "prohibited"
+                        "required_without:url",
+                        "prohibits:url",
+                        "nullable",
+                        "array"
                     ],
                     "required": false,
-                    "nullable": false,
-                    "type": null,
+                    "nullable": true,
+                    "type": "array",
                     "in": null,
                     "min": null,
                     "max": null,
@@ -37218,7 +37212,8 @@
                         "start_issue",
                         "running_issue",
                         "login_issue",
-                        "error_investigation",
+                        "client_error_investigation",
+                        "support_error_investigation",
                         "maintenance",
                         "shared_out",
                         "subscription_required"
