@@ -273,7 +273,7 @@ In `~/.gtm-secrets`, create `services/orchestration-beta.env` with this host's o
 `APP_KEY`, `DB_USERNAME=gtm_orch_beta_dbuser_app` (slug `orch`: MySQL caps user names
 at 32 chars), `DB_PASSWORD`,
 `DB_ROOT_PASSWORD`, `DB_RW_PASSWORD`, `AI_DB_PASSWORD`, `RABBIT_LOGIN`, `RABBIT_PASSWORD`,
-`AWS_*`, `AMPLITUDE_API_KEY`, `BUGSNAG_API_KEY`, `ALLOY_CLOUD_TOKEN`,
+`AWS_*`, `AMPLITUDE_API_KEY`, `ALLOY_CLOUD_TOKEN`,
 `BITBUCKET_RUNNER_*`. Make sure `common.beta.env` carries `CLUSTER1_LINKEDIN_ACCESS_KEY`,
 `ORCHESTRATION_ACCESS_KEY`, `ID_ACCESS_KEY`, `INTERNAL_ACCESS_KEY` and `JWT_SECRET`.
 
