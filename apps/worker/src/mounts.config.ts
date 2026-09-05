@@ -126,7 +126,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/recruiter',
     name: 'gtm-linkedin-recruiter',
     instructions:
-      'GTM LinkedIn Recruiter inbox, the third messenger next to LinkedIn and Sales Navigator: read a team account\'s own Recruiter seat and hiring projects, sync its recruiter inbox into the shared conversations / messages tables (messenger_type recruiter, candidates known by talent_id), read the latest threads and one thread\'s messages, and send Recruiter InMails (a new thread, or a reply into one). Needs a Recruiter seat on the account (search accounts with has_recruiter: true) and its stamped seat number; the tools answer 422 recruiter_required / recruiter_seat_unresolvable otherwise. Stored history is searchable on the messaging mount with filter.messenger_type = recruiter. Sends are protected (preview then confirm) and spend InMail credits.',
+      'GTM LinkedIn Recruiter, the third messenger next to LinkedIn and Sales Navigator: search candidates with the Recruiter facets and typeahead, read a team account\'s own Recruiter seat and hiring projects, sync its recruiter inbox into the shared conversations / messages tables (messenger_type recruiter, candidates known by talent_id), read the latest threads and one thread\'s messages, and send Recruiter InMails (a new thread, or a reply into one). Needs a Recruiter seat on the account (search accounts with has_recruiter: true) and its stamped seat number; the tools answer 422 recruiter_required / recruiter_seat_unresolvable otherwise. Stored history is searchable on the messaging mount with filter.messenger_type = recruiter. Sends are protected (preview then confirm) and spend InMail credits.',
     selectors: [
       { kind: 'tool', name: 'get_linkedin_account_my_recruiter_seat' },
       { kind: 'tool', name: 'get_linkedin_account_my_hiring_projects' },
@@ -134,6 +134,10 @@ export const MOUNTS: MountConfig[] = [
       { kind: 'tool', name: 'get_my_latest_linkedin_conversations_recruiter' },
       { kind: 'tool', name: 'get_my_latest_linkedin_messages_recruiter' },
       { kind: 'tool', name: 'send_linkedin_recruiter_message' },
+      // The Recruiter people search + its typeahead (2026-09-05): the seat's
+      // candidate search, sourced from the scraping package (see its excludes).
+      { kind: 'tool', name: 'scrape_linkedin_search_recruiter_people' },
+      { kind: 'tool', name: 'scrape_linkedin_recruiter_param_id_lookup' },
     ],
     maxTools: 25,
     facade: 'none',
@@ -173,7 +177,18 @@ export const MOUNTS: MountConfig[] = [
     name: 'gtm-linkedin-scraping',
     instructions:
       'GTM LinkedIn scraping of people, companies, posts, job postings, events, groups, LinkedIn Learning courses, products and schools, plus lookalikes, company employees, decision-makers, post engagers and the two facet-id typeaheads. Every search verb is ONE tool per vertical taking either a structured filter object or a pasted LinkedIn search URL, never both; runs land on your own connected accounts. These are run-now, one-page pulls that return the rows inline. For a saved job over the same sources that repeats on a schedule, dedupes across runs and feeds new leads to a mass action, use /mcp/linkedin/auto-scrapes instead (people and companies only: posts, job postings, events, groups, courses, products and schools are not saveable sources).',
-    selectors: [p('linkedin_scraping')],
+    selectors: [
+      p('linkedin_scraping'),
+      // The Recruiter search pair (2026-09-05) is declared in this package (it
+      // is a data-request scraping surface like every other search) but RIDES
+      // ON /mcp/linkedin/recruiter: it answers only for a Recruiter seat, and
+      // finding candidates and InMailing them is one job to an agent, the same
+      // reason the recruiter inbox left the conversations mounts. Stays out of
+      // here, so this mount keeps its headroom for a vertical LinkedIn has not
+      // shipped yet.
+      { kind: 'exclude', name: 'scrape_linkedin_search_recruiter_people' },
+      { kind: 'exclude', name: 'scrape_linkedin_recruiter_param_id_lookup' },
+    ],
     // NO maxTools, so the platform default of 25 applies again.
     //
     // This mount carried an UNSIGNED `maxTools: 26` from 2026-08-08, taken when

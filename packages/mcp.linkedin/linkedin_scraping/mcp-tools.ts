@@ -150,6 +150,85 @@ const SalesNavPeopleSearchFilters = z.object({
     .describe('People connected to these members. Tokens (ACwA…) via lookup(type: "CONNECTION_OF").'),
 }).describe(`${XOR} Sales Navigator people-search filters, the COMPLETE SN facet vocabulary. At least one member must be non-empty. lookup = scrape_linkedin_sales_nav_param_id_lookup.`);
 
+// One chip in a Recruiter (talent) search facet - the node RecruiterFacetValue
+// verbatim. id comes from scrape_linkedin_recruiter_param_id_lookup (the member's
+// describe names the kind); text is the chip label (and a free-text search term
+// on the title / skill / company / postal-code facets); exclude negates the chip,
+// required makes it a must-have, scope is the facet's own axis.
+const RecruiterFacetValue = z.object({
+  id: z.string().max(128).nullable().optional().describe('The typeahead row id VERBATIM (urn:li:ts_*:N; the lowercase language name for spoken_languages). A bare numeric id is accepted for the urn kinds.'),
+  text: z.string().max(256).nullable().optional().describe('The chip label. On job_titles / skills / companies / postal_codes a text-only chip is a free-text search term.'),
+  exclude: z.boolean().nullable().optional().describe('true → the chip is a negative filter.'),
+  required: z.boolean().nullable().optional().describe('true → a must-have chip (the Recruiter UI "required" toggle); omitted → nice-to-have.'),
+  scope: z.string().max(32).nullable().optional().describe('The facet\'s own axis - see the member describe for its values.'),
+}).describe('One Recruiter facet chip: at least one of id / text.');
+
+// The scope axes, one per facet family: the backend restricts each facet's
+// `scope` to its own set, so each family is its own chip schema (a bare string
+// would leave the agent guessing the values).
+const RecruiterTimeScope = z.enum(['CURRENT', 'PAST', 'CURRENT_OR_PAST', 'PAST_NOT_CURRENT'])
+  .describe("Where in the career the chip must sit; omitted = CURRENT_OR_PAST.");
+const RecruiterGeoScope = z.enum(['CURRENT', 'PREFERRED_NOT_CURRENT', 'CURRENT_OR_PREFERRED'])
+  .describe("'CURRENT' lives there, 'PREFERRED_NOT_CURRENT' would move there, 'CURRENT_OR_PREFERRED' either.");
+const RecruiterLanguageProficiency = z.enum(['ELEMENTARY', 'LIMITED_WORKING', 'PROFESSIONAL_WORKING', 'FULL_PROFESSIONAL', 'NATIVE_OR_BILINGUAL'])
+  .describe('Minimum proficiency of the spoken language.');
+
+const RecruiterTimeScopedFacetValue = RecruiterFacetValue.extend({ scope: RecruiterTimeScope.nullable().optional() });
+const RecruiterGeoScopedFacetValue = RecruiterFacetValue.extend({ scope: RecruiterGeoScope.nullable().optional() });
+const RecruiterLanguageFacetValue = RecruiterFacetValue.extend({ scope: RecruiterLanguageProficiency.nullable().optional() });
+// The facets with no scope axis: the backend refuses `scope` on them.
+const RecruiterPlainFacetValue = RecruiterFacetValue.omit({ scope: true });
+
+const recruiterChips = (schema: z.ZodTypeAny, desc: string) => z.array(schema).max(20).nullable().optional().describe(desc);
+
+const RECRUITER_TIME_SCOPE = "scope: 'CURRENT' | 'PAST' | 'CURRENT_OR_PAST' (default) | 'PAST_NOT_CURRENT'";
+const RecruiterYearsRange = z.object({
+  min: z.number().int().min(1).max(30),
+  max: z.number().int().min(1).max(30),
+}).describe('Both ends inclusive, 1..30; 30 means 30+.');
+
+const RecruiterPeopleSearchFilters = z.object({
+  keywords: z.string().max(256).nullable().optional(),
+  first_name: z.string().max(100).nullable().optional(),
+  last_name: z.string().max(100).nullable().optional(),
+  // Chip facets - [{id, text, exclude, required, scope}] values; lookup kind named per member.
+  job_titles: recruiterChips(RecruiterTimeScopedFacetValue, `Job titles. Ids via lookup(type: "occupation") (urn:li:ts_title:N) or free text: [{text: "Head of Growth"}]. ${RECRUITER_TIME_SCOPE}.`),
+  occupations: recruiterChips(RecruiterTimeScopedFacetValue, `Standardized titles (LinkedIn\'s title taxonomy), id REQUIRED via lookup(type: "occupation"). ${RECRUITER_TIME_SCOPE}.`),
+  skills: recruiterChips(RecruiterPlainFacetValue, 'Skills. Ids via lookup(type: "skill") (urn:li:ts_skill:N) or free text.'),
+  companies: recruiterChips(RecruiterTimeScopedFacetValue, `Employers, current or past. Ids via lookup(type: "company") (urn:li:ts_company:N) or free text; exclude: true is the classic "not my own company". ${RECRUITER_TIME_SCOPE}.`),
+  current_companies: recruiterChips(RecruiterPlainFacetValue, 'The employer right now (the CURRENT_COMPANY facet). Ids via lookup(type: "company").'),
+  locations: recruiterChips(RecruiterGeoScopedFacetValue, "Geography. Ids via lookup(type: \"geo\") (urn:li:ts_geo:N). scope: 'CURRENT' (lives there) | 'PREFERRED_NOT_CURRENT' (would move there) | 'CURRENT_OR_PREFERRED'."),
+  postal_codes: recruiterChips(RecruiterPlainFacetValue, 'Postal codes. Ids via lookup(type: "zip") (urn:li:ts_geo:N) or free text; pair with postal_code_distance.'),
+  postal_code_distance: z.number().int().min(1).max(500).nullable().optional().describe('Radius around every postal code, miles. Default 50.'),
+  industries: recruiterChips(RecruiterPlainFacetValue, 'Industries. Ids via lookup(type: "industry") (urn:li:ts_industry:N).'),
+  schools: recruiterChips(RecruiterPlainFacetValue, 'Schools attended. Ids via lookup(type: "school") (urn:li:ts_school:N).'),
+  fields_of_study: recruiterChips(RecruiterPlainFacetValue, 'Fields of study. Ids via lookup(type: "fieldOfStudy") (urn:li:ts_field_of_study:N).'),
+  degrees: recruiterChips(RecruiterPlainFacetValue, 'Degrees. Ids via lookup(type: "degree") (urn:li:ts_degree:N).'),
+  spoken_languages: recruiterChips(RecruiterLanguageFacetValue, "Languages the member speaks. Ids via lookup(type: \"language\") - the lowercase language name, e.g. \"danish\". scope = minimum proficiency: 'ELEMENTARY' | 'LIMITED_WORKING' | 'PROFESSIONAL_WORKING' | 'FULL_PROFESSIONAL' | 'NATIVE_OR_BILINGUAL'."),
+  // Closed-enum facets - full code sets inline, NO lookup call needed.
+  network: z.array(z.enum(['F', 'S', 'A', 'O'])).max(4).nullable().optional()
+    .describe("Relationship: 'F' 1st, 'S' 2nd, 'A' group members, 'O' 3rd+ and everyone else."),
+  seniority_levels: z.array(z.enum(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])).max(10).nullable().optional()
+    .describe("Seniority: '1' Unpaid, '2' Training, '3' Entry, '4' Senior, '5' Manager, '6' Director, '7' VP, '8' CXO, '9' Partner, '10' Owner. NOT the Sales Navigator codes."),
+  functions: z.array(z.enum(SN_FUNCTION_IDS)).max(26).nullable().optional().describe(`Job function: ${SN_FUNCTION_LEGEND}.`),
+  company_sizes: z.array(z.enum(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'])).max(9).nullable().optional()
+    .describe("Company size: 'A' Self-employed, 'B' 1-10, 'C' 11-50, 'D' 51-200, 'E' 201-500, 'F' 501-1000, 'G' 1001-5000, 'H' 5001-10000, 'I' 10001+."),
+  company_types: z.array(z.enum(['P', 'C', 'D', 'N', 'G', 'S', 'O', 'E', 'A'])).max(9).nullable().optional()
+    .describe("Company type: 'P' Privately Held, 'C' Public Company, 'D' Educational Institution, 'N' Non Profit, 'G' Government Agency, 'S' Partnership, 'O' Self Owned, 'E' Self Employed, 'A' College Page."),
+  profile_languages: z.array(z.enum(['en', 'es', 'fr', 'pt', 'zh', 'de', 'it', 'in', 'tr', 'pl', 'nl', 'ru', 'ar', 'cs', 'sv', 'ro', 'ko', 'da', 'no', 'uk', 'ms', 'ja', '_o'])).max(23).nullable().optional()
+    .describe("Profile language, ISO 639-1 ('_o' = others)."),
+  recently_joined: z.array(z.enum(['1', '2', '3', '4', '5'])).max(5).nullable().optional()
+    .describe("Joined LinkedIn: '1' 1 day ago, '2' 2-7 days, '3' 8-14 days, '4' 15-30 days, '5' 1-3 months ago."),
+  workplace_preferences: z.array(z.enum(['O', 'R', 'H'])).max(3).nullable().optional()
+    .describe("Workplace: 'O' on-site, 'R' remote, 'H' hybrid."),
+  employment_types: z.array(z.enum(['F', 'P', 'C', 'T', 'I', 'V', 'O'])).max(7).nullable().optional()
+    .describe("Employment type: 'F' full-time, 'P' part-time, 'C' contract, 'T' temporary, 'I' internship, 'V' volunteer, 'O' other."),
+  us_military_background: z.boolean().nullable().optional().describe('true → members with a US military background (IS_VETERAN); false dispatches nothing.'),
+  years_in_current_position: RecruiterYearsRange.nullable().optional().describe('Years in the current position, {min, max} in 1..30 (30 = 30+).'),
+  years_in_current_company: RecruiterYearsRange.nullable().optional().describe('Years at the current company, {min, max} in 1..30.'),
+  years_of_experience: RecruiterYearsRange.nullable().optional().describe('Total years of experience, {min, max} in 1..30.'),
+}).describe('LinkedIn Recruiter people-search filters, the COMPLETE Recruiter facet vocabulary (the ONLY addressing: the Recruiter search has no URL form). At least one member must be non-empty. lookup = scrape_linkedin_recruiter_param_id_lookup; chip facets take [{id, text, exclude, required, scope}], closed enums take flat code arrays (their full sets are inline), the three year sliders take {min, max}.');
+
 const CompanySearchFilters = z.object({
   keywords: z.string().max(256).nullable().optional(),
   geo_ids: z.array(z.string()).max(10).nullable().optional()
@@ -442,6 +521,10 @@ const SalesNavTypeaheadType = z.enum([
 // for forward-compat. The embedded journal row is another entity's Domain
 // (data_requests), so it is left passthrough here, not restated.
 // ═══════════════════════════════════════════════════════════════
+
+const RecruiterTypeaheadType = z.enum([
+  'occupation', 'skill', 'company', 'geo', 'zip', 'industry', 'school', 'fieldOfStudy', 'degree', 'language', 'group',
+]).describe('The Recruiter search-filter typeahead kind (node talentTypeaheads `q`, passed through verbatim). Every kind is a text facet, so `query` is required. Where each id lands in the search_recruiter_people filters: occupation → job_titles / occupations, skill → skills, company → companies / current_companies, geo → locations, zip → postal_codes, industry → industries, school → schools, fieldOfStudy → fields_of_study, degree → degrees, language → spoken_languages (the id is the lowercase language name), group → no search member yet. The closed enums of the search (seniority, function, company size, …) have no typeahead: their code sets are inline in the filters.');
 
 const DataRequestJournalRow = z.object({}).passthrough()
   .describe('The kind="scrape" DataRequest journal row for this call (terminal completed), embedded as result.data_request; served_from_cache always false. Full DataRequestDomain shape owned by ./data_requests.md, so it is left passthrough here.');
@@ -776,6 +859,20 @@ const LinkedinSalesNavParamIdPreview = z.object({
   headline: z.string().nullable(),
   entity_urn: z.string().nullable(),
   image_url: z.string().nullable(),
+}).passthrough();
+
+// The Recruiter search hit: the common LinkedinPersonPreview set, every field
+// filled where LinkedIn Recruiter showed it (unlike the two people-search
+// engines, whose card list exposes only a name and a picture), plus the
+// recruiter-only facts after it. connection_degree spells the talent wire's
+// network distance ('1st' | '2nd' | '3rd' | 'out_of_network').
+const LinkedinRecruiterPersonPreview = LinkedinPersonPreview.extend({
+  talent_id: z.string().describe('The Recruiter (talent) profile id, AEMAA…: what send_linkedin_recruiter_message addresses as recipient_profile_id. Same member as ln_member_id.'),
+  industry: z.string().nullable(),
+  can_send_inmail: z.boolean().nullable().describe('LinkedIn says this seat may InMail the member right now.'),
+  open_to_work: z.boolean().nullable().describe('The member signalled openness to new opportunities.'),
+  connections_count: z.number().int().nullable(),
+  anonymized: z.boolean().describe('LinkedIn hid the name (out-of-network privacy); the names are what it showed.'),
 }).passthrough();
 
 // Result envelope factory: item is always null; the transient list + paging +
@@ -1365,5 +1462,49 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(z.null(), runResult(LinkedinSalesNavParamIdPreview, z.null())),
     annotations: { title: 'Look up Sales Navigator facet id', ...SCRAPE },
+  },
+  {
+    ...base,
+    name: 'scrape_linkedin_search_recruiter_people',
+    description:
+      'One page of a LinkedIn Recruiter (talent) people search from a structured filters object: the Recruiter facet vocabulary (job titles, skills, companies, locations and postal codes, industries, schools, fields of study, degrees, spoken languages, seniority, function, company size and type, the three year sliders, network, open-to-work signals). 25 hits a page, page 1..40 (LinkedIn\'s ceiling), a real total; every row carries talent_id (what send_linkedin_recruiter_message addresses), headline, location, current position and can_send_inmail. Needs an executor with a Recruiter seat whose Recruiter session is alive: 422 recruiter_required otherwise, 409 recruiter_reauth_required past the session clock. LinkedIn throttles the search per seat: a 429 recruiter_search_usage_limit means "wait a minute, then retry" (LinkedIn\'s own words are in the message). Pair with scrape_linkedin_recruiter_param_id_lookup for the chip ids. Costs a scraping-bucket slot per page.',
+    toolClass: 'typical',
+    route: rt('search-recruiter-people'),
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      ...requestBase,
+      filters: RecruiterPeopleSearchFilters,
+      page: z.number().int().min(1).max(40).optional().describe('LinkedIn Recruiter page number, default 1; 25 hits a page, 40 pages at most (1000 hits per search). Re-call with page + 1 while paging.has_more.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), runResult(LinkedinRecruiterPersonPreview, PageNumberPaging.describe('Page-numbered paging with LinkedIn Recruiter\'s own total; has_more is false at the 40-page ceiling even when total says more.'))),
+    annotations: { title: 'Scrape LinkedIn Recruiter people search', ...SCRAPE },
+  },
+  {
+    ...base,
+    name: 'scrape_linkedin_recruiter_param_id_lookup',
+    description:
+      'LinkedIn Recruiter facet-id typeahead: resolve one Recruiter search facet (type) for a typed query into the ids the scrape_linkedin_search_recruiter_people filters take (urn:li:ts_*:N; the lowercase language name for spoken_languages). A THIRD id space: neither the flagship nor the Sales Navigator lookup ids fit here. Eleven kinds, all text facets (query required); LinkedIn answers a fixed 10. Needs a Recruiter-seat executor. Costs a scraping-bucket slot per call.',
+    toolClass: 'trivial',
+    route: rt('recruiter-param-id-lookup'),
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      ...requestBase,
+      type: RecruiterTypeaheadType,
+      query: z.string().min(1).max(100).describe('The typed term - required, every kind is a text facet.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), runResult(LinkedinSalesNavParamIdPreview.describe('Same shape as the Sales Navigator lookup rows: id is what the Recruiter filter takes; entity_urn the typeahead entity urn; headline the ISO country code for geo / zip, the organization urn for school; image_url the company logo.'), z.null())),
+    annotations: { title: 'Look up LinkedIn Recruiter facet id', ...SCRAPE },
   },
 ];
