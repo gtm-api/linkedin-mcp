@@ -99,6 +99,7 @@ const LinkedinMessage = z.object({
   nickname: z.string().nullable(),
   subject: z.string().nullable(),
   text: z.string(),
+  client_reference: z.string().nullable(), // the caller's own key given at send time; null on synced rows
   // JSON array; default [] (never null). TWO shapes land in this column and the
   // row does not say which, so every key is optional:
   //   - synced rows carry the get-messages wire element VERBATIM (the sync
@@ -348,6 +349,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (ACwAA…); interchangeable with ln_id.'),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
+      client_reference: z.string().max(255).nullable().optional()
+        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -400,6 +403,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       subject: z.string().min(1).max(200).describe('REQUIRED InMail subject; 1..200 chars.'),
       text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
+      client_reference: z.string().max(255).nullable().optional()
+        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),

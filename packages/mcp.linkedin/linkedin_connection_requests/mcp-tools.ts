@@ -36,6 +36,7 @@ const LinkedinConnectionRequest = z.object({
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
   note: z.string().nullable(),
+  client_reference: z.string().nullable(), // the caller's own key given at send time; null on sync-picked-up rows
   sent_at: z.string().nullable(), // NULL = send time unknown (sync-picked-up UI invitations; LinkedIn omits the send time)
   invitation_id: z.string().nullable(),
   resend_available_at: z.string().nullable(),
@@ -62,6 +63,8 @@ const LinkedinConnectionRequestFilter = z.object({
   ln_member_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional(),
   sn_id: filterOp(z.string(), ['eq', 'in']).optional(),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
+  client_reference: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('The key the caller gave at send time; exact match, is_null:true = sends made without one.'),
   removal_kind: filterOp(LinkedinConnectionRequestRemovalKind, ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
     .describe('is_null:true = pending; eq to split accepted / withdrawn / expired.'),
   sent_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(), // nullable: sync rows with unknown send time
@@ -156,6 +159,8 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
         .describe('Invitation note; server caps at 200 chars when the sender is not premium. Over the cap it is 422 unless allow_no_note_fallback is set.'),
       allow_no_note_fallback: z.boolean().optional()
         .describe("Default false. When the note is longer than the sender's cap (200 free / 300 premium), send the invite WITHOUT it instead of refusing 422, for campaigns where reaching the person beats personalizing. The response says which happened in result.note_fallback_used, and the stored row carries note=null, so a follow-up does not assume a note the prospect never saw. Scope, stated plainly: this covers the length cap, which the server evaluates itself. LinkedIn's own monthly with-note quota is only visible at send time and arrives untyped, so a refusal there still fails the call rather than being retried blind (a retry after an ambiguous send can invite the person twice)."),
+      client_reference: z.string().max(255).nullable().optional()
+        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinConnectionRequest),
