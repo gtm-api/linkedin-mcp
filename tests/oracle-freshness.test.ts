@@ -37,7 +37,14 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 type OracleRoute = { method: string; uri: string };
 type ContractRoute = OracleRoute & { operation: string | null; internal: boolean };
 type Contract = { service: string; entities: Record<string, unknown>; routes: ContractRoute[] };
-type LedgerEntry = { stale_routes: string[]; uncovered_routes: string[] };
+type LedgerEntry = {
+  stale_routes: string[];
+  uncovered_routes: string[];
+  // Deliberately unpublished surfaces (prefix -> reason): served, gated, and
+  // NEVER to be covered by tools or docs - subtracted from the public surface
+  // before any coverage math. See _keys.hidden_surfaces in the ledger.
+  hidden_surfaces?: Record<string, string>;
+};
 
 const readJson = (path: string) => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'));
 
@@ -67,8 +74,14 @@ for (const svc of SERVICES) {
     const tools = svc.packages.flatMap((p) => p.tools);
     const covered = new Set(tools.map(toolKey));
 
-    // The public MCP surface: /api routes the backend actually serves.
-    const publicRoutes = contract.routes.filter((r) => r.uri.startsWith('api/') && !r.internal);
+    // The public MCP surface: /api routes the backend actually serves, minus
+    // the deliberately unpublished surfaces (hidden_surfaces - a standing
+    // decision, not debt; the shrink-only test below keeps the list honest).
+    const hiddenPrefixes = Object.keys(entry.hidden_surfaces ?? {});
+    const isHidden = (r: OracleRoute) => hiddenPrefixes.some((p) => r.uri.startsWith(p));
+    const publicRoutes = contract.routes.filter(
+      (r) => r.uri.startsWith('api/') && !r.internal && !isHidden(r),
+    );
     const backendKeys = new Set(publicRoutes.map(routeKey));
 
     it('contract oracle fixture is structurally sound', () => {
@@ -102,6 +115,24 @@ for (const svc of SERVICES) {
       expect(
         unlisted,
         `${svc.name}: backend routes with no MCP tool and no ledger entry. ${REFRESH} (ship the tools, or list them in drift-ledger.json). The ratchet in fixtures/contract-oracle/ratchet.json caps how many of these there may be; this list is who they are.`,
+      ).toEqual([]);
+    });
+
+    it('every hidden surface is still served, and no tool ever covers one', () => {
+      // A prefix the backend no longer serves is a stale decision - delete it.
+      const dead = hiddenPrefixes.filter(
+        (p) => !contract.routes.some((r) => r.uri.startsWith(p)),
+      );
+      expect(
+        dead,
+        `${svc.name}: hidden_surfaces lists prefixes the backend no longer serves - delete them from drift-ledger.json`,
+      ).toEqual([]);
+      // Hidden means hidden: a registered tool pointing under a hidden prefix
+      // defeats the whole point (the surface would surface in schemas).
+      const covering = [...covered].filter((k) => hiddenPrefixes.some((p) => k.split(' ')[1]?.startsWith(p)));
+      expect(
+        covering,
+        `${svc.name}: MCP tools cover routes under a hidden surface - that surface is hidden BY DESIGN, retire the tools or unhide the surface deliberately`,
       ).toEqual([]);
     });
 

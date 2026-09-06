@@ -31,12 +31,22 @@ type OracleRoute = { method: string; uri: string };
 const readJson = (path: string) => JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'));
 
 const ratchet = readJson('../fixtures/contract-oracle/ratchet.json');
+const ledger = readJson('../fixtures/contract-oracle/drift-ledger.json');
 
 // The public MCP surface: `api/` routes the backend actually serves. Internal
-// routes are excluded because no MCP tool can reach them.
+// routes are excluded because no MCP tool can reach them; hidden_surfaces
+// prefixes (drift-ledger.json - deliberately unpublished, gated surfaces that
+// must never get tools) are excluded because covering them would be the bug.
+// oracle-freshness.test.ts keeps that list honest (a stale prefix fails).
 const publicRoutes = (service: string): ContractRoute[] => {
   const contract: Contract = readJson(`../fixtures/contract-oracle/${service}.contract.json`);
-  return contract.routes.filter((r) => r.uri.startsWith('api/') && !r.internal);
+  const hiddenPrefixes = Object.keys(ledger[service]?.hidden_surfaces ?? {});
+  return contract.routes.filter(
+    (r) =>
+      r.uri.startsWith('api/') &&
+      !r.internal &&
+      !hiddenPrefixes.some((p) => r.uri.startsWith(p)),
+  );
 };
 
 const routeKey = (r: OracleRoute) => `${r.method} ${r.uri}`;

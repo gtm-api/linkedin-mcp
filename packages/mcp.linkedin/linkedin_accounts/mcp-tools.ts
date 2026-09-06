@@ -760,7 +760,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     inputSchema: z.object({
       sid: SID,
       checks: z.array(z.enum(['premium', 'sales_nav', 'recruiter', 'inmail_credits'])).min(1).max(4).nullable().optional()
-        .describe('Which steps to run. OMIT for all four, which is the normal call. `premium` reads the profile flag and, on a full run, settles both seats when it comes back false. `sales_nav` and `recruiter` probe one seat each and are the cheap ones. `inmail_credits` reads the balance and is never gated on Premium. Asking for a subset skips the rest entirely, so nothing you did not ask for is re-read or re-written.'),
+        .describe('Which steps to run. OMIT for all four, which is the normal call. `premium` reads the profile flag and, on a full run, settles both seats when it comes back false. `sales_nav` and `recruiter` probe one seat each and are the cheap ones. `inmail_credits` reads the Sales Navigator balance (the LSS_INMAIL grant) and needs a Sales Navigator SEAT: on a full run it is skipped for a seatless account (the last known balance is kept), and naming it in `checks` for one is refused with 422 `sales_nav_required`. Asking for a subset skips the rest entirely, so nothing you did not ask for is re-read or re-written.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount),
@@ -839,7 +839,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'get_linkedin_account_my_credits',
-    description: 'Return the InMail / message credit balance for the connected account.',
+    description: 'Return the Sales Navigator InMail credit balance (the LSS_INMAIL grant) for the connected account. Requires a Sales Navigator seat: the balance is read from the Sales Navigator credits API, so an account without a seat is refused with 422 `sales_nav_required` instead of being dispatched into a guaranteed LinkedIn 403.',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-credits', sidParam: 'sid' },
     operation: 'action',

@@ -2,10 +2,14 @@
   "_comment": "Known, accepted disagreements between the machine-generated contract oracle (*.contract.json) and this repo's TypeScript surface. tests/oracle-freshness.test.ts fails on any drift that is NOT listed here, and equally fails on a listed entry that no longer drifts, so these lists can only shrink. Adding an entry is a deliberate, reviewable act: it records debt, it does not excuse it. Regenerate the oracle first (pnpm oracle:refresh) before touching this file.",
   "_keys": {
     "stale_routes": "Route a registered MCP tool points at, which the live backend no longer serves. The coverage gate fails on every one of these; listing it here only records that we know, it does not silence that gate. Burn down by retiring or repointing the tool, then deleting the entry.",
-    "uncovered_routes": "Public /api route the backend serves with an #[ApiMethod] operation, which no MCP tool covers. ratchet.json caps how many there may be per service; this list says which ones they are."
+    "uncovered_routes": "Public /api route the backend serves with an #[ApiMethod] operation, which no MCP tool covers. ratchet.json caps how many there may be per service; this list says which ones they are.",
+    "hidden_surfaces": "Route-prefix -> reason. A DELIBERATELY UNPUBLISHED surface: routes under the prefix are served to a gated caller population and must NEVER get MCP tools, openapi:public entries or docs pages. Both gates subtract these prefixes from the public MCP surface before measuring coverage, and oracle-freshness fails on a listed prefix the backend no longer serves, so the list cannot rot. This is not debt (uncovered_routes is debt); it is a standing decision, recorded here so the next docs sweep does not helpfully document a hidden surface."
   },
   "linkedin": {
     "_note": "Both lists are empty: this service is at FULL MCP coverage. stale_routes is empty because no registered tool points at a route this backend has dropped. The 23 entries that used to sit there (linkedin-searches / -search-results / -tracked-posts / -comments / -engagements, absorbed by the §9.6 linkedin-scraping + data-requests surface) are gone because the tools that pointed at them were retired or repointed; the webhooks + webhook_logs tools moved to mcp.orchestration and now point at gtm.service.orchestration, which serves them. uncovered_routes was the 13 linkedin-auto-scrape* routes, and they came off on 2026-07-27 with mcp.linkedin/linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2) and linkedin_auto_scrape_results (1). The 3 linkedin-posting routes (create-post, comment, react) were covered earlier by mcp.linkedin/linkedin_posting.",
+    "hidden_surfaces": {
+      "api/infra-pool/": "partner-plane pool mirror of the two §9.6 surfaces (research data_requests.md §Infra pool; gs.gtm-integration CONTRACT §3.2), restored 2026-08-31. Gated by InfraPoolSurface to plan=partner (fail-closed 404) and HIDDEN BY DESIGN: no MCP tool, no openapi:public entry, no docs page, ever."
+    },
     "stale_routes": [],
     "uncovered_routes": []
   },
