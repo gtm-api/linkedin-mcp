@@ -1,7 +1,7 @@
 // Entity: Webhook (gtm.service.orchestration)
 // Source of truth: product/research/gtm.service.orchestration/entities/webhooks.md
 // Format: registry v2. Each tool carries route metadata so the generic
-// dispatcher can drive it. 6 tools (the webhooks route group), mounted on
+// dispatcher can drive it. 7 tools (the webhooks route group), mounted on
 // orchestration.webhooks alongside webhook-logs. Routing layer of the
 // three-layer webhook architecture (KNOWLEDGE §4.4).
 //
@@ -225,6 +225,27 @@ const Webhook = z.object({
 const WebhookCounts = z.object({}).passthrough();
 
 // Synchronous test-send outcome (does NOT write to webhook_logs).
+// replay_webhook: the outcomes it may re-arm (default failed + cancelled).
+// Mirrors WebhookReplayStatusEnum (lib.common), bridged in tests/enum-parity.
+const WebhookReplayStatus = z.enum(['failed', 'cancelled', 'success']);
+
+// The catalog without the subscription wildcard: a replay names real types.
+// Built at runtime rather than with `.exclude(['*'])`, which sends tsc into
+// TS2589 on a 100-member enum.
+const WebhookReplayEventType = z.enum(
+  WebhookEventType.options.filter((value) => value !== '*') as [string, ...string[]],
+);
+
+const WebhookReplayResult = z.object({
+  rows: z.number().int().describe('Deliveries re-armed by this call.'),
+  from: z.string(),
+  to: z.string(),
+  statuses: z.array(WebhookReplayStatus),
+  first_scheduled_at: z.string().nullable(),
+  last_scheduled_at: z.string().nullable()
+    .describe('The backlog is fully dispatched by then: rows - 1 seconds after first_scheduled_at.'),
+}).passthrough();
+
 const WebhookTestResult = z.object({
   http_status: z.number().nullable(),
   response_body: z.string().nullable(),
@@ -309,6 +330,29 @@ export const webhooksTools: ToolDefinition[] = [
   },
   {
     ...base,
+    name: 'replay_webhook',
+    description:
+      "Put the deliveries a broken endpoint left behind back on the wire: every webhook_logs row of this webhook created inside [from, to] whose status is in statuses (default failed + cancelled; success re-fires delivered events, opt-in) goes back to pending, oldest first, one row per second, and the normal scheduler delivers it under the same webhook_log_sid. Cancelled rows come back only when the platform cancelled them (webhook_failed / webhook_disabled / webhook_deleted), never an operator's manual cancel; rows in flight are never touched. from is required; the window spans at most 30 days and one call re-arms at most 5000 rows, refused with the cap named beyond either (narrow the window or statuses). Requires status=on: re-enable a failed webhook first (update_webhook status:'on'). Rate-limited to 10 calls/min per webhook. Re-delivers real events; state-changing.",
+    toolClass: 'complex',
+    route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/webhooks/{sid}/replay', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    inputSchema: z.object({
+      sid: SID,
+      from: z.string().describe('ISO 8601: the oldest created_at to re-arm. Required, a replay re-fires real deliveries.'),
+      to: z.string().optional().describe('ISO 8601; default now.'),
+      statuses: z.array(WebhookReplayStatus).min(1).optional()
+        .describe("Default ['failed', 'cancelled']. success is opt-in."),
+      event_types: z.array(WebhookReplayEventType).min(1).optional().describe('Default: every type.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(Webhook, WebhookReplayResult),
+    annotations: { title: 'Replay webhook deliveries', ...DANGER },
+  },
+  {
+    ...base,
     name: 'get_webhook',
     description: 'Fetch a single webhook by sid. Use include=latest_webhook_logs for the recent delivery view. secret is masked (null) on reads.',
     toolClass: 'trivial',
@@ -325,7 +369,7 @@ export const webhooksTools: ToolDefinition[] = [
     ...base,
     name: 'update_webhook',
     description:
-      "Patch a webhook. Editable fields: name, target_url, events, filters, status. status:'on' on a failed webhook resets the consecutive-failure counter and resumes deliveries; status:'failed' cannot be set manually. events and filters are FULL replacements, not merges. secret is NOT writable here (rotation is admin-internal). State-changing.",
+      "Patch a webhook. Editable fields: name, target_url, events, filters, status. status:'on' on a failed webhook resets the consecutive-failure counter and resumes deliveries, but re-issues nothing: the rows the disable cancelled come back with replay_webhook. status:'failed' cannot be set manually. events and filters are FULL replacements, not merges. secret is NOT writable here (rotation is admin-internal). State-changing.",
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'PATCH', pathTemplate: '/api/webhooks/{sid}', sidParam: 'sid' },
     operation: 'update',

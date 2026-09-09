@@ -203,6 +203,11 @@ const MANUAL_BRIDGE: BridgeEntry[] = [
   // retry reports the status the log row held before the retry; same vocabulary
   // as `status`, which the field name alone cannot say.
   { service: 'orchestration', entity: 'webhook_logs', at: 'previous_status', enumClass: 'WebhookLogStatusEnum' },
+  // replay echoes the outcomes it re-armed under result.statuses; the input side
+  // is pinned by the request's own Rule::in, the echo needs the class named:
+  // WebhookReplayStatusEnum is the 3-case terminal subset of the log row's
+  // 6-case status, not a "statuses" enum of the webhook entity.
+  { service: 'orchestration', entity: 'webhooks', at: 'statuses', enumClass: 'WebhookReplayStatusEnum' },
 ];
 
 // Alternative class-name prefixes for one oracle entity, tried after the entity

@@ -28,7 +28,9 @@ const SID = z.string().length(18).startsWith('wh_lg_')
 const WebhookLogStatus = z.enum([
   'pending', 'in_progress', 'retrying', 'success', 'failed', 'cancelled',
 ]);
-const WebhookLogCancelReason = z.enum(['manual', 'webhook_deleted', 'webhook_disabled']);
+// `webhook_failed` = the auto-disable cascade (2026-09-09); replay_webhook re-arms
+// those by default, `manual` never.
+const WebhookLogCancelReason = z.enum(['manual', 'webhook_deleted', 'webhook_disabled', 'webhook_failed']);
 
 // Item schema: full WebhookLogDomain field set (webhook_logs.md #### Domain).
 // Append-only log: no deleted_at. passthrough keeps forward-compat.
@@ -94,7 +96,7 @@ const WebhookLogMetrics = z.object({
 const WebhookLogRetryResult = z.object({
   previous_status: WebhookLogStatus,
   scheduled_at: z.string(),
-  retry_count: z.number(),
+  retry_count: z.number().describe('Attempts executed so far; the re-arm does not move it.'),
 }).passthrough();
 
 const WebhookLogCancelResult = z.object({
@@ -185,7 +187,7 @@ export const webhookLogsTools: ToolDefinition[] = [
     ...base,
     name: 'retry_webhook_log',
     description:
-      'Manually re-arm a webhook delivery row: flips status to pending, sets scheduled_at=now(), increments retry_count. error_message is preserved (cleared only on the next successful terminal outcome). Allowed from pending / retrying / failed / success; rejected on cancelled (422), on a soft-deleted / disabled parent webhook (422), and while the worker holds the row (409 lease_in_progress). Pass expected_status for a CAS write (409 on mismatch). Re-delivers to the integrator; state-changing.',
+      'Manually re-arm a webhook delivery row: flips status to pending, sets scheduled_at=now(), clears cancel_reason. retry_count stays (it counts executed attempts, a re-arm is not one). error_message is preserved (cleared only on the next successful terminal outcome). Allowed from every state but in_progress (409 lease_in_progress), cancelled included whatever the reason; rejected on a soft-deleted / disabled parent webhook (422). Many rows at once: replay_webhook on the parent, paced. Pass expected_status for a CAS write (409 on mismatch). Re-delivers to the integrator; state-changing.',
     toolClass: 'complex',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/webhook-logs/{sid}/retry', sidParam: 'sid' },
     operation: 'action',
