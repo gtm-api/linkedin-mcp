@@ -6522,6 +6522,319 @@
                     "deleted_at"
                 ]
             }
+        },
+        "LinkedinShadowbanCheck": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinShadowbanCheck\\LinkedinShadowbanCheckDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "source",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "canary_linkedin_account_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "canary_team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "expires_at",
+                        "type": "Carbon\\Carbon|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "subject_nickname",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_ln_member_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_full_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_headline",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_avatar_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_enriched_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "linkedin_account_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "linkedin_connection_request_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "linkedin_connection_invitation_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "ip_hash",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "probe_sent_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "polls_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_polled_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "resolved_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "latency_seconds",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "inconclusive_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinShadowbanCheck\\Responses\\LinkedinShadowbanCheckResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "source",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "canary_linkedin_account_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "canary_team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "expires_at",
+                        "type": "Carbon\\Carbon|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "subject_nickname",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_ln_member_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_full_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_headline",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_avatar_url",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subject_enriched_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "linkedin_account_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "linkedin_connection_request_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "linkedin_connection_invitation_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "ip_hash",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "probe_sent_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "polls_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_polled_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "resolved_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "latency_seconds",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "inconclusive_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": null
         }
     },
     "enums": {
@@ -9292,6 +9605,40 @@
                 {
                     "name": "Interested",
                     "value": "interested"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinShadowbanCheck\\Enums\\LinkedinShadowbanCheckSourceEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Public",
+                    "value": "public"
+                },
+                {
+                    "name": "Auto",
+                    "value": "auto"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinShadowbanCheck\\Enums\\LinkedinShadowbanCheckStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pending",
+                    "value": "pending"
+                },
+                {
+                    "name": "Delivered",
+                    "value": "delivered"
+                },
+                {
+                    "name": "NotDelivered",
+                    "value": "not_delivered"
+                },
+                {
+                    "name": "Inconclusive",
+                    "value": "inconclusive"
                 }
             ]
         }
@@ -44108,34 +44455,29 @@
                 {
                     "field": "connecting_ip",
                     "rules": [
-                        "required",
-                        "string",
-                        "max:45"
+                        "prohibited"
                     ],
-                    "required": true,
+                    "required": false,
                     "nullable": false,
-                    "type": "string",
+                    "type": null,
                     "in": null,
                     "min": null,
-                    "max": 45,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
                 {
                     "field": "connecting_country",
                     "rules": [
-                        "sometimes",
-                        "nullable",
-                        "string",
-                        "size:2"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "string",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
-                    "size": 2,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -44143,14 +44485,96 @@
                     "rules": [
                         "sometimes",
                         "nullable",
-                        "array"
+                        "array:user_agent,screen_resolution,timezone,language,platform",
+                        "min:1"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "array",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.user_agent",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.screen_resolution",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:32",
+                        "regex:/^\\d{1,5}x\\d{1,5}$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 32,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.timezone",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.language",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:32"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 32,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.platform",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -45472,14 +45896,96 @@
                     "rules": [
                         "sometimes",
                         "nullable",
-                        "array"
+                        "array:user_agent,screen_resolution,timezone,language,platform",
+                        "min:1"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "array",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.user_agent",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.screen_resolution",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:32",
+                        "regex:/^\\d{1,5}x\\d{1,5}$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 32,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.timezone",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.language",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:32"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 32,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "fingerprint.platform",
+                    "rules": [
+                        "required_with:fingerprint",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -48348,6 +48854,73 @@
             "uri": "ready",
             "controller": "App\\Http\\Controllers\\HealthController",
             "action": "ready",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "tools/linkedin-shadowban-checks",
+            "controller": "App\\Entities\\LinkedinShadowbanCheck\\LinkedinShadowbanCheckPublicController",
+            "action": "create",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinShadowbanCheck\\Requests\\LinkedinShadowbanCheckCreateRequest",
+            "rules": [
+                {
+                    "field": "profile",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:300"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 300,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "turnstile_token",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:4096"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 4096,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
+            "uri": "tools/linkedin-shadowban-checks/{sid}",
+            "controller": "App\\Entities\\LinkedinShadowbanCheck\\LinkedinShadowbanCheckPublicController",
+            "action": "get",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
