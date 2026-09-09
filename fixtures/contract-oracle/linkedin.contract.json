@@ -4218,6 +4218,7 @@
             "filter": {
                 "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAutoScrape\\LinkedinAutoScrapeFilter",
                 "fields": [
+                    "q",
                     "sid",
                     "linkedin_account_sid",
                     "source_method",
@@ -26779,6 +26780,232 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.linkedin_account_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.source_method",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.detected_platform",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.result_kind",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.replay_frequency",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.status",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.paused_reason",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.mass_action_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.next_run_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.last_run_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.total_new_results",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.created_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.updated_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.deleted_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.q",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 },

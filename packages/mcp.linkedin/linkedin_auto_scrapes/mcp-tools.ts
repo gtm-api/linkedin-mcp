@@ -128,9 +128,10 @@ const LinkedinAutoScrapeCounts = z.object({}).passthrough();
 
 // Every key exists on the PHP LinkedinAutoScrapeFilter (15 fields). A key it does
 // not declare is a 500 inside the backend, not a 422, so this list is pinned by
-// the contract-parity gate. No q: title is display-only and source_input is
-// opaque JSON, so there is no free-text column to search.
+// the contract-parity gate. q is the backend's LIKE over title + sid + source_input.url
+// (the auto-scrape search took filter.q on 2026-09-09).
 const LinkedinAutoScrapeFilter = z.object({
+  q: z.string().max(255).optional().describe('Free-text LIKE over title + sid + source_input.url (the pasted list URL of the url-family sources; params, anchor and post sources have no url and match on title + sid only). The executor name and the mass-action title are not searched: slice by linkedin_account_sid / mass_action_sid.'),
   sid: filterOp(z.string(), ['eq', 'in']).optional(),
   linkedin_account_sid: filterOp(z.string(), ['eq', 'in']).optional(),
   source_method: filterOp(SourceMethod, ['eq', 'ne', 'in', 'nin']).optional(),
@@ -210,7 +211,7 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
       "List the team's collectors: saved jobs that paginate one LinkedIn or Sales Navigator list surface on a cadence and file deduped leads. "
       + 'Use for: which collectors are live or paused and why (status, paused_reason), what a given account collects (linkedin_account_sid), which ones feed outreach (mass_action_sid, is_null:true = collect-only), what runs next (sort next_run_at asc), and which produce (total_new_results). '
       + 'NOT for the leads themselves (search_linkedin_auto_scrape_results) or for one execution (search_linkedin_auto_scrape_runs). '
-      + 'No q. include: linkedin_account (the executor row) and last_run (the newest run, the only place an in-flight run shows up). Sort: created_at (default desc) | updated_at | next_run_at | last_run_at | total_new_results. page_size:0 returns the count alone.',
+      + 'q: substring of the title, the ln_as_ sid or the pasted source URL (not the executor name or the mass-action title). include: linkedin_account (the executor row) and last_run (the newest run, the only place an in-flight run shows up). Sort: created_at (default desc) | updated_at | next_run_at | last_run_at | total_new_results. page_size:0 returns the count alone.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-auto-scrapes/search' },
     operation: 'search',
