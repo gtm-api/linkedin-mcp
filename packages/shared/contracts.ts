@@ -485,15 +485,28 @@ export const HandoverRoleEnum = z.enum([
   'receiver',
 ]);
 
-// Live serialization (confirmed against both services): `permissions` is an
-// object map ({ tokens: [...], allowed_account_sids: ... }), NOT a string
-// array; `request_sid` is often absent; and extra keys (cluster_id, trace_id)
-// appear. Permissive + passthrough to match the real envelope everywhere.
+// The stored audit value as a REST read returns it (Core\Values\AccessIdentityValue
+// toArray()): the actor, the team, the grant set the actor held and the request
+// context of the write. `request_sid` was never one of its keys (documented here
+// until 2026-09-09); the keys that do appear beyond the actor are permissions,
+// cluster_id and trace_id, internal context that passthrough keeps rather than
+// promises. Webhook payloads carry the PUBLIC projection only ({ actor_type,
+// actor_sid, actor_name, oauth_client_sid, reason }, AccessIdentityValue::publicShape),
+// never this shape.
 export const AccessIdentityValue = z.object({
   actor_type: AccessIdentityValueActorTypeEnum,
   actor_sid: z.string().nullable(),
   team_sid: z.string(),
-  permissions: z.record(z.unknown()),
-  request_sid: z.string().nullable().optional(),
-  reason: z.string().nullable().optional(),
+  actor_name: z.string().nullable().optional()
+    .describe('The OAuth client that acted ("Claude", "n8n"); null for a user, an API key or a system job.'),
+  oauth_client_sid: z.string().nullable().optional()
+    .describe('The acting OAuth client (id_oc_*); null off the OAuth path.'),
+  reason: z.string().nullable().optional()
+    .describe('Why a system actor wrote the row (snapshot_capture_job, ...); null otherwise.'),
+  permissions: z.record(z.unknown())
+    .describe('Internal audit context: the grant set the actor held at write time. Not a contract.'),
+  cluster_id: z.number().int().nullable().optional()
+    .describe('Internal audit context: the cluster that served the write.'),
+  trace_id: z.string().nullable().optional()
+    .describe('Internal audit context: the trace id of the request that wrote the row.'),
 }).passthrough();
