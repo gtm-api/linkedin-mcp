@@ -103,6 +103,18 @@ const LinkedinAccountActivityLogInclude = z.enum([
 const LinkedinAccountActivityLogSortable = z.enum(['created_at', 'duration_ms']);
 const LinkedinAccountActivityLogGroupable = z.enum(['action_type', 'status', 'linkedin_account_sid']);
 
+// Counts block: concrete shape from research (search per-tool block). Rides count
+// mode only (page_size: 0, backend 2026-09-09): a page fetch carries no block, which
+// the shared envelope already allows (its `counts` is optional).
+const LinkedinAccountActivityLogCounts = z.object({
+  total_count: z.number().int(),
+  pending_count: z.number().int(),
+  success_count: z.number().int(),
+  failed_count: z.number().int(),
+  skipped_count: z.number().int(),
+  groups: z.record(z.unknown()), // action_type / status / linkedin_account_sid, objects even when empty
+}).passthrough();
+
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 
 const base = {
@@ -118,7 +130,8 @@ export const linkedinAccountActivityLogTools: ToolDefinition[] = [
     description:
       'List activity-log rows, one per plugin call (Task↔Result cycle): pending on dispatch, then success / failed / skipped. ' +
       'Use for: "why is account X failing" (status:failed + created_at window, read error_message/error_code), inspecting in-flight pending tasks, cross-referencing a Grafana trace_id, and polling an MCP-triggered async action by sid until status flips terminal. ' +
-      'NOT for LinkedIn quota hits (linkedin-account-quota-hits), the rolling limit count (linkedin-account-smart-limits), or account state (linkedin-accounts). No q. Sort: created_at (default desc) | duration_ms. include[]: linkedin_account, linkedin_account_smart_limit, sync_run.',
+      'NOT for LinkedIn quota hits (linkedin-account-quota-hits), the rolling limit count (linkedin-account-smart-limits), or account state (linkedin-accounts). No q. Sort: created_at (default desc) | duration_ms. include[]: linkedin_account, linkedin_account_smart_limit, sync_run. ' +
+      'page_size: 0 is count mode: no rows, and the counts block over the filter (total_count, the per-status scalars, groups by action_type / status / linkedin_account_sid); a page fetch carries no counts and a null pagination.total_count.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-account-activity-log/search' },
     operation: 'search',
@@ -126,10 +139,7 @@ export const linkedinAccountActivityLogTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     inputSchema: McpSearchRequestSchema(LinkedinAccountActivityLogFilter, LinkedinAccountActivityLogInclude, LinkedinAccountActivityLogSortable, 200),
-    // search emits no counts block: the counts/aggregate surface is metrics-only
-    // (LinkedinAccountActivityLogController::search calls mcpSearch without a
-    // counts arg; aggregate() is consumed solely by metrics()).
-    outputSchema: McpSearchResponse(LinkedinAccountActivityLog),
+    outputSchema: McpSearchResponse(LinkedinAccountActivityLog, undefined, LinkedinAccountActivityLogCounts),
     annotations: { title: 'Search LinkedIn account activity log', ...RO },
   },
   {
