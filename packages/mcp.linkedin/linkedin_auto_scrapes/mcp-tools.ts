@@ -126,12 +126,15 @@ const LinkedinAutoScrape = z.object({
 
 const LinkedinAutoScrapeCounts = z.object({}).passthrough();
 
-// Every key exists on the PHP LinkedinAutoScrapeFilter (15 fields). A key it does
-// not declare is a 500 inside the backend, not a 422, so this list is pinned by
-// the contract-parity gate. q is the backend's LIKE over title + sid + source_input.url
-// (the auto-scrape search took filter.q on 2026-09-09).
+// Every key exists on the PHP LinkedinAutoScrapeFilter (15 operator fields plus
+// the reserved q scalar). A key it does not declare is a 500 inside the backend,
+// not a 422, so this list is pinned by the contract-parity gate. q is the
+// table's search box: every filter on the auto-scrapes list is applied by the
+// backend, because a client-side pass over one cursor page can hide every
+// loaded row while matches sit further down.
 const LinkedinAutoScrapeFilter = z.object({
-  q: z.string().max(255).optional().describe('Free-text LIKE over title + sid + source_input.url (the pasted list URL of the url-family sources; params, anchor and post sources have no url and match on title + sid only). The executor name and the mass-action title are not searched: slice by linkedin_account_sid / mass_action_sid.'),
+  q: z.string().optional()
+    .describe('Free-text LIKE over title + sid + source_input.url (the pasted list URL of the url-family sources; params, anchor and post sources have no url and match on title + sid only). The executor name and the mass-action title are not searched: slice by linkedin_account_sid / mass_action_sid.'),
   sid: filterOp(z.string(), ['eq', 'in']).optional(),
   linkedin_account_sid: filterOp(z.string(), ['eq', 'in']).optional(),
   source_method: filterOp(SourceMethod, ['eq', 'ne', 'in', 'nin']).optional(),
