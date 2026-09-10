@@ -219,5 +219,36 @@ export const GOLDEN: GoldenQuery[] = [
     id: 'api-search-accounts-endpoint',
     query: 'search linkedin accounts API endpoint request parameters',
     expect_paths: ['api-reference/', 'kb/antidetect-browsers-and-proxies'],
+  },  {
+    // Прогон промпта 25.08: копайлот дважды рассказал про несуществующий email-канал.
+    id: 'email-not-supported',
+    query: 'email channel send sequence mailbox support',
+    expect_paths: ['kb/email-is-not-supported-yet'],
+  },
+  {
+    // Тот же прогон, косвенная формулировка после вопроса про LinkedIn.
+    id: 'email-bulk-mass-action',
+    query: 'bulk email mass action step type retry',
+    expect_paths: ['kb/email-is-not-supported-yet'],
+  },
+  {
+    // Измерено дважды: 20.08 выдача давала расписание ретраев вебхуков,
+    // 09.09 — таблицу интервалов синка. Оба раза числа мимо.
+    id: 'failed-send-retry',
+    query: 'failed message send retry interval automatic',
+    expect_paths: ['kb/inbox-and-message-sync'],
+  },  {
+    // Живой поиск в доках 12.08: 'recruit' дал ноль результатов,
+    // 'recruiter' — одно попадание с CTR 100% на страницу премиум-чека.
+    id: 'recruiter-support',
+    query: 'is recruiter supported',
+    expect_paths: ['kb/recruiter'],
+  },
+  {
+    // Источник тикетов, где саппорт бессилен: продлить сессию может
+    // только держатель места, вручную.
+    id: 'recruiter-session-expired',
+    query: 'recruiter reauth required session expired sign in again',
+    expect_paths: ['kb/recruiter'],
   },
 ];
