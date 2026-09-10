@@ -1,8 +1,9 @@
 // Entity: LinkedIn Account (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/linkedin_accounts.md
 // Format: registry v2, where each tool carries route metadata so the generic
-// dispatcher can drive it. 24 tools: 22 on the linkedin-accounts route group
-// (incl. the explicit-skill endorse pair, 2026-09-02), plus the 2 follow-edge
+// dispatcher can drive it. 25 tools: 23 on the linkedin-accounts route group
+// (incl. the explicit-skill endorse pair, 2026-09-02, and the account-wide
+// smart-limit switch, 2026-09-10), plus the 2 follow-edge
 // writes that sit on /api/linkedin-followings/ and are filed here because this
 // file is the research file that owns that edge (see the block above
 // follow_linkedin_member). Smart-limits (3 more) share the
@@ -109,6 +110,12 @@ const LinkedinAccount = z.object({
   has_premium: z.boolean(),
   has_sn: z.boolean(),
   has_recruiter: z.boolean(),
+  // The account-wide smart-limit switch (2026-09-10): one boolean for every
+  // bucket. true = the warmup governs the caps and a typed daily_limit /
+  // delay_in_seconds / batch_size on any limit row is refused (409
+  // smart_limits_governed); false = the caps run as typed. Its one writer is
+  // set_linkedin_account_smart_limits.
+  smart_limits_enabled: z.boolean(),
   inmail_credits: z.number().nullable(),
   last_premium_check_at: z.string().nullable(),
 
@@ -239,6 +246,8 @@ const LinkedinAccountFilter = z.object({
   has_premium: filterOp(z.boolean(), ['eq']).optional(),
   has_sn: filterOp(z.boolean(), ['eq']).optional(),
   has_recruiter: filterOp(z.boolean(), ['eq']).optional(),
+  smart_limits_enabled: filterOp(z.boolean(), ['eq']).optional()
+    .describe('The account-wide smart-limit switch. eq:false lists every hand-managed sender (caps typed by hand, no warmup protection).'),
   inmail_credits: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']).optional()
     .describe('is_null:true = last parse failed.'),
   last_premium_check_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
@@ -1283,6 +1292,37 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(LinkedinAccount),
     annotations: { title: 'Update account sync config', ...ACT },
+  },
+  // The account-wide smart-limit switch (2026-09-10, Eugene: "they are either
+  // on or off"). ONE boolean per account, every bucket at once; the per-row
+  // toggle that update_linkedin_account_smart_limit used to carry is gone,
+  // because sixteen flags let one bucket run by hand while the account read
+  // "protected". Dangerous: OFF removes the warmup's ban protection, so the
+  // preview / confirm step stands between the agent and the flip.
+  {
+    ...base,
+    name: 'set_linkedin_account_smart_limits',
+    description:
+      'Switch smart-limit governance on or off for the WHOLE account, every bucket at once (there is no per-bucket toggle). ' +
+      'ON: the warmup sets every limit row\'s daily_limit / delay_in_seconds / batch_size, and update_linkedin_account_smart_limit refuses those fields with 409 smart_limits_governed; target_limit and learning_enabled stay yours. Turning on re-derives every cap from the latest snapshot on this call. ' +
+      'OFF: every cap runs exactly as typed and the account loses the warmup ban protection: say so to the user before switching off, and read recommended_daily_limit / recommended_delay_in_seconds on the rows before typing caps. ' +
+      'Idempotent. SINGLE account: for a fleet, author a mass action on /mcp/orchestration/mass-actions with the step `linkedin-accounts.set-smart-limits` (scope objects, args {enabled}); run it BEFORE a limit-row run over the same senders.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/set-smart-limits', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    stepEligible: true,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      enabled: z.boolean().describe('true = the warmup governs every bucket (protection on); false = the caps run as typed (protection off).'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount),
+    annotations: { title: 'Set account smart limits', ...DANGER_IDEM },
   },
   // The narrow label verb. It was `update_linkedin_account` until 2026-08-27,
   // when the second field it carried (`display_name`) was dropped from the

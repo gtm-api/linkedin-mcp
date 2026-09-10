@@ -32,13 +32,16 @@ export const MOUNTS: MountConfig[] = [
       { kind: 'exclude', name: 'get_linkedin_account_my_recruiter_seat' },
       { kind: 'exclude', name: 'get_linkedin_account_my_hiring_projects' },
     ],
-    // 27, not the default 25. The three self-account feeds added on 2026-08-07
-    // (profile views, catch-up cards, Sales Navigator alerts) took this mount
-    // from 24 to 27, and resolveMounts throws at module scope, so the worker
-    // would not boot at 25.
+    maxTools: 26,
+    // 26 since 2026-09-10: the account-wide smart-limit switch
+    // (set_linkedin_account_smart_limits) is the 26th tool on this mount. It
+    // replaces a FIELD that update_linkedin_account_smart_limit used to carry
+    // (the per-row toggle), so nothing here could be collapsed to pay for it,
+    // and the two exclusions above already moved every tool this mount can
+    // spare. Taken for Eugene's 2026-09-10 decision ("they are either on or
+    // off"); the number itself awaits his sign-off, like the messaging raise.
     //
-    // NO maxTools: the platform default of 25 applies, and the mount sits exactly
-    // on it.
+    // Before that the mount sat exactly on the platform default of 25:
     //
     // This mount carried an UNSIGNED `maxTools: 27` from 2026-08-07, taken when the
     // three self-account feeds (profile views, catch-up cards, Sales Navigator
@@ -284,7 +287,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/orchestration/mass-actions',
     name: 'gtm-orchestration-mass-actions',
     instructions:
-      'GTM mass actions - bulk execution across every channel. A run holds a plan of up to 3 steps and one item per target. This is the ONE approval path for doing anything to many rows at once: LinkedIn connects and reactions, bulk email, AND the antidetect-browser / account fleet verbs (antidetect-browsers.create [generate scope: "provision N browsers"] / run / stop / delete / generate-cloud-browser-access-key / revoke-cloud-browser-access-key, linkedin-accounts.update-sync-config, linkedin-account-smart-limits.update / reset-hold). Label edits and full resync are single-account only (their own tools set_linkedin_account_label / reset_linkedin_account_sync), not mass steps. Scope is objects (existing rows), targets (payload identities), generate (mint N new rows; step 1 must be a .create verb), or none (a standing run). To START one, always preview_mass_action first: it validates the whole plan, prices it, flags destructive steps, and returns a commit_token that create_mass_action consumes; that one approval covers every item and every step, so pass the token through unchanged. To WATCH one, get_mass_actions_metrics answers "where is it" in a single call (in_flight 0 means it is caught up) and the run status is only active or paused, never an outcome. To STEER one, pause / resume / release_mass_action_canary; delete_mass_action is the stop path. The items are where per-target truth lives, so drill into them with search_mass_action_items (current_step, the object cursor incl. what a generate step minted, and step_log[] per step: what ran, what it minted, what it cost, what it said when it broke). Fix failures with retry_mass_action_items, which resumes each item at its own current_step and never re-runs a completed step. Retry and delete are protected (preview then confirm).',
+      'GTM mass actions - bulk execution across every channel. A run holds a plan of up to 3 steps and one item per target. This is the ONE approval path for doing anything to many rows at once: LinkedIn connects and reactions, bulk email, AND the antidetect-browser / account fleet verbs (antidetect-browsers.create [generate scope: "provision N browsers"] / run / stop / delete / generate-cloud-browser-access-key / revoke-cloud-browser-access-key, linkedin-accounts.update-sync-config, linkedin-accounts.set-smart-limits [the account-wide smart-limit switch; run it BEFORE a limit-row run over the same senders], linkedin-account-smart-limits.update / reset-hold). Label edits and full resync are single-account only (their own tools set_linkedin_account_label / reset_linkedin_account_sync), not mass steps. Scope is objects (existing rows), targets (payload identities), generate (mint N new rows; step 1 must be a .create verb), or none (a standing run). To START one, always preview_mass_action first: it validates the whole plan, prices it, flags destructive steps, and returns a commit_token that create_mass_action consumes; that one approval covers every item and every step, so pass the token through unchanged. To WATCH one, get_mass_actions_metrics answers "where is it" in a single call (in_flight 0 means it is caught up) and the run status is only active or paused, never an outcome. To STEER one, pause / resume / release_mass_action_canary; delete_mass_action is the stop path. The items are where per-target truth lives, so drill into them with search_mass_action_items (current_step, the object cursor incl. what a generate step minted, and step_log[] per step: what ran, what it minted, what it cost, what it said when it broke). Fix failures with retry_mass_action_items, which resumes each item at its own current_step and never re-runs a completed step. Retry and delete are protected (preview then confirm).',
     selectors: [por('mass_actions'), por('mass_action_items')],
     maxTools: 25,
     facade: 'none',

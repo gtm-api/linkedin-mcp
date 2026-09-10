@@ -107,12 +107,16 @@ const MassActionStepToolCanonical = z.enum([
   // the URL, so an omitted `purpose` hands out N re-login links silently.
   'antidetect-browsers.generate-cloud-browser-access-key',
   'antidetect-browsers.revoke-cloud-browser-access-key',
-  // Linkedin-account mass-edit. Only update-sync-config is a mass operation;
-  // the label `update` and `reset-sync` are single-account (public verbs +
-  // set_linkedin_account_label / reset_linkedin_account_sync tools), not mass
-  // steps. There is no `linkedin-accounts.update` step and there never was: the
-  // label tool's own description used to send authors here to look for one.
+  // Linkedin-account mass-edits: update-sync-config and, since 2026-09-10, the
+  // account-wide smart-limit switch (args {enabled: bool}; run it BEFORE a
+  // limit-row run over the same senders, since a governed sender refuses typed
+  // caps with 409 smart_limits_governed). The label `update` and `reset-sync`
+  // are single-account (public verbs + set_linkedin_account_label /
+  // reset_linkedin_account_sync tools), not mass steps. There is no
+  // `linkedin-accounts.update` step and there never was: the label tool's own
+  // description used to send authors here to look for one.
   'linkedin-accounts.update-sync-config',
+  'linkedin-accounts.set-smart-limits',
   // Smart-limit mass-edit.
   'linkedin-account-smart-limits.update',
   'linkedin-account-smart-limits.reset-hold',

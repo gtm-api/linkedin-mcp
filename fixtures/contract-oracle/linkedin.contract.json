@@ -1774,6 +1774,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "smart_limits_enabled",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
                         "name": "account_share_sid",
                         "type": "?string",
                         "nullable": true,
@@ -2013,6 +2019,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "smart_limits_enabled",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
                         "name": "account_share_sid",
                         "type": "?string",
                         "nullable": true,
@@ -2227,6 +2239,7 @@
                     "has_premium",
                     "has_sn",
                     "has_recruiter",
+                    "smart_limits_enabled",
                     "inmail_credits",
                     "last_premium_check_at",
                     "last_connections_sync_at",
@@ -2921,12 +2934,6 @@
                         "has_default": false
                     },
                     {
-                        "name": "smart_limits_enabled",
-                        "type": "bool",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
                         "name": "status",
                         "type": "string",
                         "nullable": false,
@@ -3094,12 +3101,6 @@
                         "has_default": false
                     },
                     {
-                        "name": "smart_limits_enabled",
-                        "type": "bool",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
                         "name": "status",
                         "type": "string",
                         "nullable": false,
@@ -3226,7 +3227,6 @@
                     "delay_in_seconds",
                     "done_today_count",
                     "last_reset_at",
-                    "smart_limits_enabled",
                     "learning_enabled",
                     "status",
                     "hold_till",
@@ -23353,21 +23353,6 @@
                     "between": null
                 },
                 {
-                    "field": "smart_limits_enabled",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "learning_enabled",
                     "rules": [
                         "sometimes",
@@ -24261,6 +24246,20 @@
                 },
                 {
                     "field": "filter.has_recruiter",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.smart_limits_enabled",
                     "rules": [
                         "nullable"
                     ],
@@ -25985,6 +25984,46 @@
                         "sales_navigator_conversations",
                         "recruiter_conversations"
                     ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/set-smart-limits",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "setSmartLimits",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": true,
+            "step_tool": "linkedin-accounts.set-smart-limits",
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission",
+                "stepEligible",
+                "stepTool"
+            ],
+            "required_permission": "can_manage_smart_limits",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSetSmartLimitsRequest",
+            "rules": [
+                {
+                    "field": "enabled",
+                    "rules": [
+                        "required",
+                        "boolean"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
                     "min": null,
                     "max": null,
                     "size": null,
@@ -47375,21 +47414,6 @@
                     "between": null
                 },
                 {
-                    "field": "smart_limits_enabled",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "learning_enabled",
                     "rules": [
                         "sometimes",
@@ -47612,6 +47636,72 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/linkedin-accounts/set-smart-limits",
+            "controller": "App\\Entities\\LinkedinAccount\\InternalLinkedinAccountStepController",
+            "action": "setSmartLimits",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\InternalLinkedinAccountSetSmartLimitsRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "enabled",
+                    "rules": [
+                        "required",
+                        "boolean"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
                     "between": null
                 }
             ],

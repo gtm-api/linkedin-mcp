@@ -67,8 +67,9 @@ const LinkedinAccountSmartLimit = z.object({
   done_7d_count: z.number().nullable().optional(),
   last_reset_at: z.string(),
 
-  // Smart toggle
-  smart_limits_enabled: z.boolean(),
+  // No smart toggle on the row since 2026-09-10: whether the warmup governs it
+  // is the ACCOUNT's smart_limits_enabled (search_linkedin_accounts), one
+  // switch for every bucket, flipped by set_linkedin_account_smart_limits.
 
   // State (status + independent clocks). No `saturated`: reaching the daily cap
   // latches hold_till = midnight, so a spent daily budget IS `held`.
@@ -99,7 +100,6 @@ const LinkedinAccountSmartLimitFilter = z.object({
   delay_in_seconds: num(['eq', 'ne', 'gte', 'lte', 'gt', 'lt']),
   done_today_count: num(['eq', 'ne', 'gte', 'lte', 'gt', 'lt']).describe('Live read of today\'s usage.'),
   last_reset_at: str(['gte', 'lte', 'gt', 'lt']),
-  smart_limits_enabled: filterOp(z.boolean(), ['eq']).optional(),
   status: str(['eq', 'ne', 'in', 'nin']).describe('Primary state filter: active | held | linkedin_blocked (held = daily budget spent OR a live hold, the same thing).'),
   hold_till: str(['gte', 'lte', 'gt', 'lt', 'is_null']).describe('Platform-side pause clock.'),
   linkedin_quota_hit_till: str(['gte', 'lte', 'gt', 'lt', 'is_null']).describe('LinkedIn-block clock.'),
@@ -139,7 +139,7 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_account_smart_limits',
     description:
-      'List per-limit_type policy rows (one account owns 15 public buckets: send_connection_requests, send_messages, send_inmails, scraping, enrichment, custom_request, …) with filters, sorting, cursor pagination and a counts block (status / limit_type / smart_limits_enabled breakdowns). ' +
+      'List per-limit_type policy rows (one account owns 15 public buckets: send_connection_requests, send_messages, send_inmails, scraping, enrichment, custom_request, …) with filters, sorting, cursor pagination and a counts block (status / limit_type breakdowns). Whether the warmup governs a row is the ACCOUNT\'s smart_limits_enabled, not a row field. ' +
       'Use for: "which limits are at their daily cap / held / blocked by LinkedIn" (status filter; held means the daily budget is spent), "can account X still send InMails today" (filter linkedin_account_sid + limit_type, read status + daily_limit − done_today_count), fleet capacity, smart-limit adoption rate. ' +
       'Every row also carries recommended_daily_limit / recommended_delay_in_seconds (what the platform would run this bucket at for THIS account) and risk_level (none | elevated | ban_likely) for the values currently set. ' +
       'Single-row case = search(filter:{linkedin_account_sid, limit_type}, page_size:1). No q. include[]: linkedin_account, linkedin_account_quota_hits.',
@@ -157,10 +157,10 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     ...base,
     name: 'update_linkedin_account_smart_limit',
     description:
-      'Patch one limit row\'s operator-tunable policy (daily_limit / target_limit / delay_in_seconds / batch_size / smart_limits_enabled / learning_enabled; at least one field OR reset_hold:true); status recomputes atomically. ' +
-      'Pacing: batch_size calls fire back-to-back, then delay_in_seconds passes before the next burst. ' +
-      'RISK RULE: read recommended_daily_limit / recommended_delay_in_seconds first. Up to twice the recommendation (or a delay down to half) is dangerous, risk_level "elevated"; beyond that LinkedIn restricts the account, "ban_likely". Nothing is refused: warn the user in those words before committing; flag turning smart_limits_enabled off. ' +
-      'A spent budget is "held"; raising daily_limit alone does not clear it, pass reset_hold:true in the same call (clears only if the new cap exceeds done_today_count). On a smart-managed row the persistent lever is target_limit. System-managed fields (counters, smart_limit, clocks, status, recommended_*, risk_level) are rejected; a LinkedIn-side lock cannot be reset.',
+      'Patch one limit row\'s operator-tunable policy (daily_limit / target_limit / delay_in_seconds / batch_size / learning_enabled; at least one field OR reset_hold:true); status recomputes atomically. ' +
+      'GATE: while the ACCOUNT\'s smart_limits_enabled is true, daily_limit / delay_in_seconds / batch_size are the warmup\'s and this call answers 409 smart_limits_governed (context.refused_fields). Then bound the cap with target_limit (the cap follows min(smart, target) at once), or call set_linkedin_account_smart_limits({enabled:false}) first and say that this removes the ban protection. ' +
+      'With the switch off nothing is refused: read recommended_daily_limit / recommended_delay_in_seconds first; up to twice the recommendation (or a delay down to half) is "elevated", beyond that "ban_likely"; warn in those words before committing. ' +
+      'A spent budget is "held"; raising daily_limit alone does not clear it, pass reset_hold:true in the same call. System-managed fields are rejected; a LinkedIn-side lock cannot be reset.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'PATCH', pathTemplate: '/api/linkedin-account-smart-limits/{sid}', sidParam: 'sid' },
     operation: 'update',
@@ -175,7 +175,6 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
         .describe('Whether the adaptive ceiling keeps moving. false pins learned_ceiling where it stands; the quota-hit block clock still arms either way, so this is a tuning knob, not a safety switch.'),
       delay_in_seconds: z.number().int().min(1).max(3600).optional().describe('The hold: seconds between one burst and the next (1..3600).'),
       batch_size: z.number().int().min(1).max(10).optional().describe('The burst: calls that fire back-to-back before the hold (1..10; a longer burst only trips the ten-starts-a-minute account guard).'),
-      smart_limits_enabled: z.boolean().optional(),
       reset_hold: z.boolean().optional().describe('Clear the daily-saturation hold in the same call (the atomic "raise the limit AND resume now"). Only resumes if the new daily_limit > done_today_count; otherwise the row re-holds. Never touches a LinkedIn-side lock.'),
       ...usageMetaField,
     }),
