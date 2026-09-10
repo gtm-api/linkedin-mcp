@@ -1296,6 +1296,10 @@
                 {
                     "name": "Maintenance",
                     "value": "maintenance"
+                },
+                {
+                    "name": "RateLimited",
+                    "value": "rate_limited"
                 }
             ]
         },

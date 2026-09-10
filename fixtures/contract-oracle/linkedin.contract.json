@@ -23336,6 +23336,23 @@
                     "between": null
                 },
                 {
+                    "field": "batch_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "smart_limits_enabled",
                     "rules": [
                         "sometimes",
@@ -47341,6 +47358,23 @@
                     "between": null
                 },
                 {
+                    "field": "batch_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "smart_limits_enabled",
                     "rules": [
                         "sometimes",
@@ -49148,6 +49182,23 @@
             "uri": "tools/linkedin-shadowban-checks/{sid}",
             "controller": "App\\Entities\\LinkedinShadowbanCheck\\LinkedinShadowbanCheckPublicController",
             "action": "get",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "tools/linkedin-shadowban-checks/{sid}/confirm-sent",
+            "controller": "App\\Entities\\LinkedinShadowbanCheck\\LinkedinShadowbanCheckPublicController",
+            "action": "confirmSent",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,

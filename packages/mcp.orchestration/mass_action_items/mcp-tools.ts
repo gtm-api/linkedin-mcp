@@ -45,8 +45,11 @@ const MassActionItemStepStatus = z.enum([
 // Why an item is parked mid-cascade. 'task_pending': an async plugin task is in
 // flight. 'maintenance' (backend 2026-08-24): the owning service answered the
 // planned-window 503, so the item is pending with scheduled_at at the window's
-// retry_after and the minutely tick redispatches it. Closed by design pass.
-const MassActionItemWaitReason = z.enum(['task_pending', 'maintenance']);
+// retry_after and the minutely tick redispatches it. 'rate_limited' (backend
+// 2026-09-10): the owning service answered 429 rate_limited (a smart-limit hold
+// or spent budget, a LinkedIn lock, the per-minute guard), so the item is
+// pending until the clock the envelope named. Closed by design pass.
+const MassActionItemWaitReason = z.enum(['task_pending', 'maintenance', 'rate_limited']);
 
 // ─── step_log[] entry: the forensic record of one plan step ───
 //
@@ -135,7 +138,7 @@ const MassActionItemFilter = z.object({
   current_step: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional()
     .describe('Which plan step the row sits on: "everyone stuck at step 2".'),
   wait_reason: filterOp(MassActionItemWaitReason, ['eq', 'is_null']).optional()
-    .describe("eq:'task_pending' selects the items deferred on an async task; eq:'maintenance' the ones parked by a planned maintenance window."),
+    .describe("eq:'task_pending' selects the items deferred on an async task; eq:'maintenance' the ones parked by a planned maintenance window; eq:'rate_limited' the ones parked by the owning service's rate limit (a smart-limit hold or spent budget, a LinkedIn lock, the per-minute guard), due again at scheduled_at."),
   retry_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
   scheduled_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
     .describe('Due horizon: what runs next and when.'),
