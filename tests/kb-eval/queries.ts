@@ -219,34 +219,36 @@ export const GOLDEN: GoldenQuery[] = [
     id: 'api-search-accounts-endpoint',
     query: 'search linkedin accounts API endpoint request parameters',
     expect_paths: ['api-reference/', 'kb/antidetect-browsers-and-proxies'],
-  },  {
-    // Прогон промпта 25.08: копайлот дважды рассказал про несуществующий email-канал.
+  },
+  {
+    // Prompt run 2026-08-25: the copilot twice described an email channel that does not exist.
     id: 'email-not-supported',
     query: 'email channel send sequence mailbox support',
     expect_paths: ['kb/email-is-not-supported-yet'],
   },
   {
-    // Тот же прогон, косвенная формулировка после вопроса про LinkedIn.
+    // Same run, the indirect phrasing that followed a LinkedIn question.
     id: 'email-bulk-mass-action',
     query: 'bulk email mass action step type retry',
     expect_paths: ['kb/email-is-not-supported-yet'],
   },
   {
-    // Измерено дважды: 20.08 выдача давала расписание ретраев вебхуков,
-    // 09.09 — таблицу интервалов синка. Оба раза числа мимо.
+    // Measured twice: on 2026-08-20 the answer gave the webhook retry schedule, on
+    // 2026-09-09 the sync interval table. Wrong numbers both times.
     id: 'failed-send-retry',
     query: 'failed message send retry interval automatic',
     expect_paths: ['kb/inbox-and-message-sync'],
-  },  {
-    // Живой поиск в доках 12.08: 'recruit' дал ноль результатов,
-    // 'recruiter' — одно попадание с CTR 100% на страницу премиум-чека.
+  },
+  {
+    // Live docs search 2026-08-12: 'recruit' gave zero results, 'recruiter' one hit
+    // with a 100% CTR onto the premium-check page.
     id: 'recruiter-support',
     query: 'is recruiter supported',
     expect_paths: ['kb/recruiter'],
   },
   {
-    // Источник тикетов, где саппорт бессилен: продлить сессию может
-    // только держатель места, вручную.
+    // A source of tickets support cannot fix: only the seat holder can renew the
+    // session, by hand.
     id: 'recruiter-session-expired',
     query: 'recruiter reauth required session expired sign in again',
     expect_paths: ['kb/recruiter'],
