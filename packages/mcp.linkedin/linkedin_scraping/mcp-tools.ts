@@ -867,7 +867,7 @@ const LinkedinSalesNavParamIdPreview = z.object({
 // recruiter-only facts after it. connection_degree spells the talent wire's
 // network distance ('1st' | '2nd' | '3rd' | 'out_of_network').
 const LinkedinRecruiterPersonPreview = LinkedinPersonPreview.extend({
-  talent_id: z.string().describe('The Recruiter (talent) profile id, AEMAA…: what send_linkedin_recruiter_message addresses as recipient_profile_id. Same member as ln_member_id.'),
+  recruiter_id: z.string().describe('The Recruiter (talent) profile id, AEMAA…: what send_linkedin_recruiter_message addresses as recipient_profile_id. Same member as ln_member_id.'),
   industry: z.string().nullable(),
   can_send_inmail: z.boolean().nullable().describe('LinkedIn says this seat may InMail the member right now.'),
   open_to_work: z.boolean().nullable().describe('The member signalled openness to new opportunities.'),
@@ -1472,7 +1472,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_recruiter_people',
     description:
-      'One page of a LinkedIn Recruiter (talent) people search, by a structured filters object (the Recruiter facets: titles, skills, companies, locations, postal codes, industries, education, languages, seniority, function, company size and type, year sliders, network, open-to-work) OR by a pasted Recruiter search url. A Recruiter URL carries no filters, only the searchHistoryId of the search LinkedIn keeps on the seat, so the url half replays that stored search on your page; every answer returns search_history_id and search_url, so page 2 onwards is addressed by the URL alone. 25 hits a page, page 1..40, a real total; rows carry talent_id (for send_linkedin_recruiter_message), headline, location, current position, can_send_inmail. Needs a Recruiter-seat executor with a live session (422 recruiter_required, 409 recruiter_reauth_required); 429 recruiter_search_usage_limit is LinkedIn\'s per-seat throttle, wait a minute. Ids via scrape_linkedin_recruiter_param_id_lookup. One scraping-bucket slot per page.',
+      'One page of a LinkedIn Recruiter (talent) people search, by a structured filters object (the Recruiter facets: titles, skills, companies, locations, postal codes, industries, education, languages, seniority, function, company size and type, year sliders, network, open-to-work) OR by a pasted Recruiter search url. A Recruiter URL carries no filters, only the searchHistoryId of the search LinkedIn keeps on the seat, so the url half replays that stored search on your page; every answer returns search_history_id and search_url, so page 2 onwards is addressed by the URL alone. 25 hits a page, page 1..40, a real total; rows carry recruiter_id (for send_linkedin_recruiter_message), headline, location, current position, can_send_inmail. Needs a Recruiter-seat executor with a live session (422 recruiter_required, 409 recruiter_reauth_required); 429 recruiter_search_usage_limit is LinkedIn\'s per-seat throttle, wait a minute. Ids via scrape_linkedin_recruiter_param_id_lookup. One scraping-bucket slot per page.',
     toolClass: 'typical',
     route: rt('search-recruiter-people'),
     operation: 'action',

@@ -94,7 +94,7 @@ const LinkedinMessage = z.object({
   ln_member_id: z.string(),
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
-  talent_id: z.string().nullable()
+  recruiter_id: z.string().nullable()
     .describe("The counterpart's LinkedIn Recruiter (talent) profile id, denormalized from the parent recruiter thread. Null off the recruiter surface."),
   nickname: z.string().nullable(),
   subject: z.string().nullable(),
@@ -195,7 +195,7 @@ const LinkedinMessageFilter = z.object({
   ln_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   ln_member_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']),
   sn_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
-  talent_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
+  recruiter_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']),
   message_hash: filterOp(z.string(), ['eq', 'in']),
   q: z.string().max(128).describe('FULLTEXT over message text + inmail subject.'),
@@ -440,7 +440,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     mount: 'linkedin.recruiter',
     name: 'send_linkedin_recruiter_message',
     description:
-      "Send one LinkedIn Recruiter InMail (outward action): open a NEW recruiter thread via talent_id (AEMAA… id; ln_id / sn_id work too), or reply INTO an existing thread via linkedin_conversation_sid (messenger_type='recruiter'). subject required (≤ 200), text ≤ 1900; rich-text attributes on a NEW thread only. Guards, in order: Recruiter seat (422 recruiter_required); live Recruiter session (409 recruiter_reauth_required: Recruiter has its own 30-day session that only the seat holder renews by signing in to Recruiter again in the account's browser, so tell the user, do not retry); stamped seat on a reply (422 recruiter_seat_unresolvable); LinkedIn's one-InMail-per-candidate-per-24h rule (429 recruiter_inmail_cooldown with cooldown_ends_at: refresh the thread with get_my_latest_linkedin_recruiter_messages if a reply may have landed, else wait and explain the rule). Spends send_inmails and an InMail credit. When NOT: basic threads → send_linkedin_message; SN → send_linkedin_sales_nav_message.",
+      "Send one LinkedIn Recruiter InMail (outward action): open a NEW recruiter thread via recruiter_id (AEMAA… id; ln_id / sn_id work too), or reply INTO an existing thread via linkedin_conversation_sid (messenger_type='recruiter'). subject required (≤ 200), text ≤ 1900; rich-text attributes on a NEW thread only. Guards, in order: Recruiter seat (422 recruiter_required); live Recruiter session (409 recruiter_reauth_required: Recruiter has its own 30-day session that only the seat holder renews by signing in to Recruiter again in the account's browser, so tell the user, do not retry); stamped seat on a reply (422 recruiter_seat_unresolvable); LinkedIn's one-InMail-per-candidate-per-24h rule (429 recruiter_inmail_cooldown with cooldown_ends_at: refresh the thread with get_my_latest_linkedin_recruiter_messages if a reply may have landed, else wait and explain the rule). Spends send_inmails and an InMail credit. When NOT: basic threads → send_linkedin_message; SN → send_linkedin_sales_nav_message.",
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send-recruiter' },
     operation: 'action',
@@ -452,7 +452,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing recruiter thread (messenger_type='recruiter'); provide this OR a recipient. A reply dispatches with the thread's own counterpart as the recipient."),
-      talent_id: z.string().max(64).nullable().optional().describe('The recipient\'s Recruiter (talent) profile id (AEMAA…), from a recruiter thread\'s talent_id or participants[].talent_id. New-thread mode.'),
+      recruiter_id: z.string().max(64).nullable().optional().describe('The recipient\'s Recruiter (talent) profile id (AEMAA…), from a recruiter thread\'s recruiter_id or participants[].recruiter_id. New-thread mode.'),
       ln_id: z.string().max(128).nullable().optional().describe('A regular-profile URN (ACoAA…) for a new thread; the wire resolves it too.'),
       sn_id: z.string().max(64).nullable().optional().describe('A Sales Navigator URN (ACwAA…) for a new thread; the wire resolves it too.'),
       subject: z.string().min(1).max(200).describe('InMail subject; 1..200 chars, required on both wires.'),

@@ -24,7 +24,7 @@ const ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
   .describe('LinkedIn account sid (ln_ac_…).');
 
 const MessengerType = z.enum(['linkedin', 'sales_navigator', 'recruiter'])
-  .describe('Messenger surface: the basic LinkedIn messenger, Sales Navigator, or the LinkedIn Recruiter inbox (the threads a recruiter seat owns; the counterpart is a talent_id).');
+  .describe('Messenger surface: the basic LinkedIn messenger, Sales Navigator, or the LinkedIn Recruiter inbox (the threads a recruiter seat owns; the counterpart is a recruiter_id).');
 
 // Metrics window: required half-open [from, to), ≤ 90 days.
 const Period = z.object({
@@ -45,7 +45,7 @@ const LinkedinConversation = z.object({
   ln_member_id: z.string().nullable(),
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
-  talent_id: z.string().nullable()
+  recruiter_id: z.string().nullable()
     .describe("The counterpart's LinkedIn Recruiter (talent) profile id (AEMAA…): the ONLY id a messenger_type='recruiter' thread carries, and what send_linkedin_recruiter_message dispatches as the reply recipient. It does not decode to ln_member_id. Null on the other two surfaces."),
   nickname: z.string().nullable(),
   // Denormalized attendee list (JSON [ro]); NULL for group/system threads never populated.
@@ -54,7 +54,7 @@ const LinkedinConversation = z.object({
     ln_member_id: z.string().nullable().optional(),
     ln_id: z.string().nullable().optional(),
     sn_id: z.string().nullable().optional(),
-    talent_id: z.string().nullable().optional(),
+    recruiter_id: z.string().nullable().optional(),
     nickname: z.string().nullable().optional(),
     full_name: z.string().nullable().optional(),
     headline: z.string().nullable().optional(),
@@ -102,7 +102,7 @@ const LinkedinConversationFilter = z.object({
   ln_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   ln_member_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   sn_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
-  talent_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
+  recruiter_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']),
   is_muted: filterOp(z.boolean(), ['eq', 'ne', 'is_null']),
   unread_count: filterOp(z.number().int(), ['eq', 'ne', 'gt', 'gte', 'lt', 'lte', 'is_null'])
@@ -270,7 +270,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     mount: 'linkedin.recruiter',
     name: 'sync_my_recruiter_conversations',
     description:
-      "Start a background sync run that reconciles the LinkedIn Recruiter inbox (the talent mailbox a recruiter seat owns) for one account: messenger_type='recruiter' threads with the candidate's talent_id, their messages drained inline. ASYNC: returns a pending ref to poll. Needs a Recruiter seat on the account AND its stamped seat number (422 recruiter_required / recruiter_seat_unresolvable otherwise; check_linkedin_account_premium_subscription with checks: ['recruiter'] refreshes both). Walks the INBOX tab and then UNRESOLVED (a thread this seat opened sits there until the candidate replies), never ARCHIVED or SCHEDULED. Separate sync_type and cadence from the two other messengers.",
+      "Start a background sync run that reconciles the LinkedIn Recruiter inbox (the talent mailbox a recruiter seat owns) for one account: messenger_type='recruiter' threads with the candidate's recruiter_id, their messages drained inline. ASYNC: returns a pending ref to poll. Needs a Recruiter seat on the account AND its stamped seat number (422 recruiter_required / recruiter_seat_unresolvable otherwise; check_linkedin_account_premium_subscription with checks: ['recruiter'] refreshes both). Walks the INBOX tab and then UNRESOLVED (a thread this seat opened sits there until the candidate replies), never ARCHIVED or SCHEDULED. Separate sync_type and cadence from the two other messengers.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/sync-my-recruiter-conversations' },
     operation: 'action',
@@ -288,7 +288,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     mount: 'linkedin.recruiter',
     name: 'get_my_latest_linkedin_conversations_recruiter',
     description:
-      "LinkedIn Recruiter variant of get_my_latest_linkedin_conversations: always-fresh head read of the recruiter inbox for one account (§5.8 refresh-then-return over the talent wire, page size fixed at 15 by that wire). Same hard-429 guards; returns messenger_type='recruiter' rows whose talent_id is the candidate. Needs a Recruiter seat and its stamped seat number (422 recruiter_required / recruiter_seat_unresolvable).",
+      "LinkedIn Recruiter variant of get_my_latest_linkedin_conversations: always-fresh head read of the recruiter inbox for one account (§5.8 refresh-then-return over the talent wire, page size fixed at 15 by that wire). Same hard-429 guards; returns messenger_type='recruiter' rows whose recruiter_id is the candidate. Needs a Recruiter seat and its stamped seat number (422 recruiter_required / recruiter_seat_unresolvable).",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/get-my-latest-recruiter' },
     operation: 'action',

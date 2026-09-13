@@ -5605,7 +5605,7 @@
                         "has_default": true
                     },
                     {
-                        "name": "talent_id",
+                        "name": "recruiter_id",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -5730,7 +5730,7 @@
                         "has_default": true
                     },
                     {
-                        "name": "talent_id",
+                        "name": "recruiter_id",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -5808,7 +5808,7 @@
                     "ln_member_id",
                     "ln_id",
                     "sn_id",
-                    "talent_id",
+                    "recruiter_id",
                     "nickname",
                     "is_muted",
                     "unread_count",
@@ -6282,7 +6282,7 @@
                         "has_default": true
                     },
                     {
-                        "name": "talent_id",
+                        "name": "recruiter_id",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -6437,7 +6437,7 @@
                         "has_default": true
                     },
                     {
-                        "name": "talent_id",
+                        "name": "recruiter_id",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -6512,7 +6512,7 @@
                     "ln_member_id",
                     "ln_id",
                     "sn_id",
-                    "talent_id",
+                    "recruiter_id",
                     "nickname",
                     "subject",
                     "message_hash",
@@ -34747,7 +34747,7 @@
                     "between": null
                 },
                 {
-                    "field": "talent_id",
+                    "field": "recruiter_id",
                     "rules": [
                         "sometimes",
                         "nullable",
