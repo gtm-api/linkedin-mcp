@@ -172,4 +172,4 @@ Tell the user what an action will do before it goes out. That is the whole job.
 - Worked flows, end to end: [recipes.md](references/recipes.md)
 - API and MCP reference: `https://docs.gtm-api.com`
 - Public repo: `https://github.com/gtm-api/linkedin-mcp`
-- Sign up, free plan: `https://app.gtm-api.com/login`
+- Sign up, free plan: `https://app.gtm-api.com/signup`
