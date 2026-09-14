@@ -6,7 +6,7 @@ The server exposes three MCP tools (`list_toolsets`, `get_toolset_tools`, `call_
 
 ## Setup
 
-1. Get an API key at [app.gtm-api.com](https://app.gtm-api.com/login) (forever free plan, no card) and connect a LinkedIn account you own.
+1. Get an API key at [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and connect a LinkedIn account you own.
 2. Start this Actor in **Standby** mode with `gtmApiKey` set in the input, or pass the key per request instead (an `x-gtm-api-key` header, or `?gtm_api_key=...` in the URL).
 3. Point your MCP client at the Actor's Standby URL, path `/mcp`, with your Apify token:
 
@@ -26,7 +26,7 @@ A normal (non-Standby) run performs a connectivity self-check against the hosted
 
 | Field | Required | Meaning |
 |---|---|---|
-| `gtmApiKey` | no, if passed per request | API key from [app.gtm-api.com](https://app.gtm-api.com/login), sent upstream as an Authorization bearer |
+| `gtmApiKey` | no, if passed per request | API key from [app.gtm-api.com](https://app.gtm-api.com/signup), sent upstream as an Authorization bearer |
 | `upstreamUrl` | no | Endpoint override, defaults to `https://mcp.gtm-api.com/mcp` |
 
 ## Prefer a direct connection?
