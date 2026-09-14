@@ -26,7 +26,7 @@ const UserConfig = z.object({
     .describe('Which workspace to open on load (ts_tm_…); NOT default_team_sid.'),
   setup_completed: z.boolean().optional()
     .describe('The post-signup wizard is finished (or its last step was skipped).'),
-  setup_step: z.enum(['verify', 'questions', 'workspace', 'call']).nullable().optional()
+  setup_step: z.enum(['verify', 'questions', 'workspace', 'linkedin', 'call']).nullable().optional()
     .describe('Resume point inside the wizard; null = not started.'),
   setup_call_step: z.boolean().nullable().optional()
     .describe('Read-only. Whether this user\'s wizard includes step 04 (intro call): null = not scored yet, so it is offered. Server-computed from the step 02 sender bracket; silently dropped if sent to update.'),

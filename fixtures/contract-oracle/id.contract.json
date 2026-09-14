@@ -1045,6 +1045,253 @@
                 ]
             }
         },
+        "ApiRequest": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\ApiRequestDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "service",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "occurred_at",
+                        "type": "Carbon\\Carbon|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "surface",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "credential_kind",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "client_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "method",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "route",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "entity",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "operation",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status_family",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "client_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "actor_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "action_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "duration_ms",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "trace_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Responses\\ApiRequestResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "service",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "occurred_at",
+                        "type": "Carbon\\Carbon|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "surface",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "credential_kind",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "client_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "method",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "route",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "entity",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "operation",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status_family",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "client_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "actor_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "action_name",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "duration_ms",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "trace_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\ApiRequestFilter",
+                "fields": [
+                    "sid",
+                    "service",
+                    "surface",
+                    "credential_kind",
+                    "client_sid",
+                    "actor_sid",
+                    "entity",
+                    "operation",
+                    "action_name",
+                    "route",
+                    "status",
+                    "status_family",
+                    "occurred_at",
+                    "trace_id"
+                ]
+            }
+        },
         "BillingPaddleCustomer": {
             "domain": {
                 "class": "Gtm\\Lib\\Common\\Microservices\\Id\\BillingPaddleCustomer\\BillingPaddleCustomerDomain",
@@ -3470,6 +3717,160 @@
                 ]
             }
         },
+        "SubscriptionAllocation": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\SubscriptionAllocation\\SubscriptionAllocationDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "subscription_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "linkedin_seats",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_seats",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "credits_per_period",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "whitelabel",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\SubscriptionAllocation\\Responses\\SubscriptionAllocationResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "subscription_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "linkedin_seats",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_seats",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "credits_per_period",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "whitelabel",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\SubscriptionAllocation\\SubscriptionAllocationFilter",
+                "fields": [
+                    "sid",
+                    "subscription_sid",
+                    "team_sid",
+                    "created_at",
+                    "deleted_at"
+                ]
+            }
+        },
         "SupportRequest": {
             "domain": {
                 "class": "Gtm\\Lib\\Common\\Microservices\\Id\\SupportRequest\\SupportRequestDomain",
@@ -4490,6 +4891,75 @@
                     "deleted_at"
                 ]
             }
+        },
+        "WhitelabelClient": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\WhitelabelClient\\WhitelabelClientDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "whitelabel_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "user_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\WhitelabelClient\\Responses\\WhitelabelClientResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "whitelabel_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "user_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\WhitelabelClient\\WhitelabelClientFilter",
+                "fields": [
+                    "sid",
+                    "whitelabel_sid",
+                    "user_sid",
+                    "created_at"
+                ]
+            }
         }
     },
     "enums": {
@@ -4709,6 +5179,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Core\\Enums\\SortDirectionEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Asc",
+                    "value": "asc"
+                },
+                {
+                    "name": "Desc",
+                    "value": "desc"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\AccountShare\\Enums\\AccountShareEndReasonEnum": {
             "backing": "string",
             "cases": [
@@ -4916,6 +5399,182 @@
                 {
                     "name": "Expired",
                     "value": "expired"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestCredentialKindEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "ApiKey",
+                    "value": "api_key"
+                },
+                {
+                    "name": "Oauth",
+                    "value": "oauth"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestGroupableFieldsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Service",
+                    "value": "service"
+                },
+                {
+                    "name": "Surface",
+                    "value": "surface"
+                },
+                {
+                    "name": "CredentialKind",
+                    "value": "credential_kind"
+                },
+                {
+                    "name": "ClientSid",
+                    "value": "client_sid"
+                },
+                {
+                    "name": "Entity",
+                    "value": "entity"
+                },
+                {
+                    "name": "Operation",
+                    "value": "operation"
+                },
+                {
+                    "name": "Route",
+                    "value": "route"
+                },
+                {
+                    "name": "StatusFamily",
+                    "value": "status_family"
+                },
+                {
+                    "name": "OccurredDay",
+                    "value": "occurred_day"
+                },
+                {
+                    "name": "OccurredHour",
+                    "value": "occurred_hour"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestOperationEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Get",
+                    "value": "get"
+                },
+                {
+                    "name": "Search",
+                    "value": "search"
+                },
+                {
+                    "name": "Metrics",
+                    "value": "metrics"
+                },
+                {
+                    "name": "GroupBy",
+                    "value": "group_by"
+                },
+                {
+                    "name": "Create",
+                    "value": "create"
+                },
+                {
+                    "name": "Update",
+                    "value": "update"
+                },
+                {
+                    "name": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "name": "Action",
+                    "value": "action"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestServiceEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Id",
+                    "value": "id"
+                },
+                {
+                    "name": "Linkedin",
+                    "value": "linkedin"
+                },
+                {
+                    "name": "Orchestration",
+                    "value": "orchestration"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "OccurredAt",
+                    "value": "occurred_at"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestSourceEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Ok",
+                    "value": "ok"
+                },
+                {
+                    "name": "Error",
+                    "value": "error"
+                },
+                {
+                    "name": "Unconfigured",
+                    "value": "unconfigured"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestStatusFamilyEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Success",
+                    "value": "2xx"
+                },
+                {
+                    "name": "Redirect",
+                    "value": "3xx"
+                },
+                {
+                    "name": "ClientError",
+                    "value": "4xx"
+                },
+                {
+                    "name": "ServerError",
+                    "value": "5xx"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestSurfaceEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "ApiKey",
+                    "value": "api_key"
+                },
+                {
+                    "name": "Agent",
+                    "value": "agent"
+                },
+                {
+                    "name": "OauthOther",
+                    "value": "oauth_other"
                 }
             ]
         },
@@ -5242,12 +5901,20 @@
                     "value": "email_verified"
                 },
                 {
+                    "name": "QualificationCompleted",
+                    "value": "qualification_completed"
+                },
+                {
                     "name": "SetupCompleted",
                     "value": "setup_completed"
                 },
                 {
                     "name": "LinkedinConnected",
                     "value": "linkedin_connected"
+                },
+                {
+                    "name": "FirstLinkedinApiRequest",
+                    "value": "first_linkedin_api_request"
                 },
                 {
                     "name": "Purchase",
@@ -5524,8 +6191,32 @@
                     "value": "linkedin_sync_failed"
                 },
                 {
+                    "name": "LinkedinAccountReady",
+                    "value": "linkedin_account_ready"
+                },
+                {
+                    "name": "LinkedinAccountSignedOut",
+                    "value": "linkedin_account_signed_out"
+                },
+                {
+                    "name": "EmailBoxReady",
+                    "value": "email_box_ready"
+                },
+                {
                     "name": "LinkedinHeldProfilesDeletionWarning",
                     "value": "linkedin_held_profiles_deletion_warning"
+                },
+                {
+                    "name": "OnboardingConnectNudge",
+                    "value": "onboarding_connect_nudge"
+                },
+                {
+                    "name": "AutomationPaused",
+                    "value": "automation_paused"
+                },
+                {
+                    "name": "AutomationResumed",
+                    "value": "automation_resumed"
                 },
                 {
                     "name": "AccountShareReceived",
@@ -5835,6 +6526,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\SubscriptionAllocation\\Enums\\SubscriptionAllocationSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CreatedAt",
+                    "value": "created_at"
+                },
+                {
+                    "name": "UpdatedAt",
+                    "value": "updated_at"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\SupportRequest\\Enums\\SupportRequestGroupableFieldsEnum": {
             "backing": "string",
             "cases": [
@@ -5978,6 +6682,10 @@
                 {
                     "name": "SubscriptionCanceled",
                     "value": "subscription_canceled"
+                },
+                {
+                    "name": "OwnerErased",
+                    "value": "owner_erased"
                 }
             ]
         },
@@ -6054,6 +6762,31 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\User\\Enums\\UserAutomateFirstEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "OutboundPlays",
+                    "value": "outbound_plays"
+                },
+                {
+                    "name": "AiAgents",
+                    "value": "ai_agents"
+                },
+                {
+                    "name": "SignalsEnrichment",
+                    "value": "signals_enrichment"
+                },
+                {
+                    "name": "ApiIntegration",
+                    "value": "api_integration"
+                },
+                {
+                    "name": "Other",
+                    "value": "other"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\User\\Enums\\UserEmailStatusEnum": {
             "backing": "string",
             "cases": [
@@ -6080,6 +6813,96 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\User\\Enums\\UserHeardFromEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Friend",
+                    "value": "friend"
+                },
+                {
+                    "name": "OurOutreach",
+                    "value": "our_outreach"
+                },
+                {
+                    "name": "GetSales",
+                    "value": "getsales"
+                },
+                {
+                    "name": "MirrorProfiles",
+                    "value": "mirrorprofiles"
+                },
+                {
+                    "name": "Webinar",
+                    "value": "webinar"
+                },
+                {
+                    "name": "LinkedinPosts",
+                    "value": "linkedin_posts"
+                },
+                {
+                    "name": "Search",
+                    "value": "search"
+                },
+                {
+                    "name": "Llm",
+                    "value": "llm"
+                },
+                {
+                    "name": "Agency",
+                    "value": "agency"
+                },
+                {
+                    "name": "Communities",
+                    "value": "communities"
+                },
+                {
+                    "name": "Course",
+                    "value": "course"
+                },
+                {
+                    "name": "PaidAd",
+                    "value": "paid_ad"
+                },
+                {
+                    "name": "Reviews",
+                    "value": "reviews"
+                },
+                {
+                    "name": "Other",
+                    "value": "other"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\User\\Enums\\UserPersonaEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "AgencyClients",
+                    "value": "agency_clients"
+                },
+                {
+                    "name": "InhouseGtm",
+                    "value": "inhouse_gtm"
+                },
+                {
+                    "name": "DeveloperPlatform",
+                    "value": "developer_platform"
+                },
+                {
+                    "name": "GtmIntegrator",
+                    "value": "gtm_integrator"
+                },
+                {
+                    "name": "SoloFounder",
+                    "value": "solo_founder"
+                },
+                {
+                    "name": "Other",
+                    "value": "other"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\User\\Enums\\UserQualificationStatusEnum": {
             "backing": "string",
             "cases": [
@@ -6101,20 +6924,20 @@
             "backing": "string",
             "cases": [
                 {
-                    "name": "R1_10",
-                    "value": "r1_10"
+                    "name": "R1",
+                    "value": "r1"
                 },
                 {
-                    "name": "R10Plus",
-                    "value": "r10_plus"
+                    "name": "R2_4",
+                    "value": "r2_4"
                 },
                 {
-                    "name": "R20Plus",
-                    "value": "r20_plus"
+                    "name": "R5_20",
+                    "value": "r5_20"
                 },
                 {
-                    "name": "R50Plus",
-                    "value": "r50_plus"
+                    "name": "R20_100",
+                    "value": "r20_100"
                 },
                 {
                     "name": "R100Plus",
@@ -6138,8 +6961,21 @@
                     "value": "workspace"
                 },
                 {
+                    "name": "Linkedin",
+                    "value": "linkedin"
+                },
+                {
                     "name": "Call",
                     "value": "call"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\WhitelabelClient\\Enums\\WhitelabelClientSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CreatedAt",
+                    "value": "created_at"
                 }
             ]
         },
@@ -6157,6 +6993,23 @@
                 {
                     "name": "DomainNotProvenInTime",
                     "value": "domain_not_proven_in_time"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Enums\\WhitelabelArtworkEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Logo",
+                    "value": "logo"
+                },
+                {
+                    "name": "Icon",
+                    "value": "icon"
+                },
+                {
+                    "name": "LoginImage",
+                    "value": "login_image"
                 }
             ]
         },
@@ -9221,6 +10074,647 @@
                     "in": null,
                     "min": 0,
                     "max": 604800,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/api-requests/metrics",
+            "controller": "App\\Entities\\ApiRequest\\ApiRequestController",
+            "action": "metrics",
+            "operation": "metrics",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_teams",
+            "internal": false,
+            "request_class": "App\\Entities\\ApiRequest\\Requests\\ApiRequestMetricsRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.service",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.surface",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.credential_kind",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.client_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.actor_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.entity",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.operation",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.action_name",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.route",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.status",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.status_family",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.occurred_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.trace_id",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "period",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "period.from",
+                    "rules": [
+                        "required",
+                        "date"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "period.to",
+                    "rules": [
+                        "required",
+                        "date",
+                        "after:period.from"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "group_by",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"service\",\"surface\",\"credential_kind\",\"client_sid\",\"entity\",\"operation\",\"route\",\"status_family\",\"occurred_day\",\"occurred_hour\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "service",
+                        "surface",
+                        "credential_kind",
+                        "client_sid",
+                        "entity",
+                        "operation",
+                        "route",
+                        "status_family",
+                        "occurred_day",
+                        "occurred_hour"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/api-requests/search",
+            "controller": "App\\Entities\\ApiRequest\\ApiRequestController",
+            "action": "search",
+            "operation": "search",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_teams",
+            "internal": false,
+            "request_class": "App\\Entities\\ApiRequest\\Requests\\ApiRequestSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.service",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.surface",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.credential_kind",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.client_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.actor_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.entity",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.operation",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.action_name",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.route",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.status",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.status_family",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.occurred_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.trace_id",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.field",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"occurred_at\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "occurred_at"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.direction",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"asc\",\"desc\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "limit",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
                     "size": null,
                     "between": null
                 }
@@ -15278,7 +16772,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "in:\"verify\",\"questions\",\"workspace\",\"call\""
+                        "in:\"verify\",\"questions\",\"workspace\",\"linkedin\",\"call\""
                     ],
                     "required": false,
                     "nullable": true,
@@ -15287,6 +16781,7 @@
                         "verify",
                         "questions",
                         "workspace",
+                        "linkedin",
                         "call"
                     ],
                     "min": null,
@@ -15615,6 +17110,40 @@
         },
         {
             "method": "POST",
+            "uri": "auth/impersonation/redeem",
+            "controller": "\\App\\Http\\Controllers\\AuthController",
+            "action": "impersonationRedeem",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\ImpersonationRedeemRequest",
+            "rules": [
+                {
+                    "field": "code",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "auth/invitation-context",
             "controller": "\\App\\Http\\Controllers\\AuthController",
             "action": "invitationContext",
@@ -15837,17 +17366,56 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "in:\"r1_10\",\"r10_plus\",\"r20_plus\",\"r50_plus\",\"r100_plus\""
+                        "in:\"r1\",\"r2_4\",\"r5_20\",\"r20_100\",\"r100_plus\""
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": [
-                        "r1_10",
-                        "r10_plus",
-                        "r20_plus",
-                        "r50_plus",
+                        "r1",
+                        "r2_4",
+                        "r5_20",
+                        "r20_100",
                         "r100_plus"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "describes_you",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "describes_you_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"agency_clients\",\"inhouse_gtm\",\"developer_platform\",\"gtm_integrator\",\"solo_founder\",\"other\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "agency_clients",
+                        "inhouse_gtm",
+                        "developer_platform",
+                        "gtm_integrator",
+                        "solo_founder",
+                        "other"
                     ],
                     "min": null,
                     "max": null,
@@ -15871,7 +17439,76 @@
                     "between": null
                 },
                 {
+                    "field": "automate_first_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"outbound_plays\",\"ai_agents\",\"signals_enrichment\",\"api_integration\",\"other\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "outbound_plays",
+                        "ai_agents",
+                        "signals_enrichment",
+                        "api_integration",
+                        "other"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "heard_from",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "heard_from_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"friend\",\"our_outreach\",\"getsales\",\"mirrorprofiles\",\"webinar\",\"linkedin_posts\",\"search\",\"llm\",\"agency\",\"communities\",\"course\",\"paid_ad\",\"reviews\",\"other\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "friend",
+                        "our_outreach",
+                        "getsales",
+                        "mirrorprofiles",
+                        "webinar",
+                        "linkedin_posts",
+                        "search",
+                        "llm",
+                        "agency",
+                        "communities",
+                        "course",
+                        "paid_ad",
+                        "reviews",
+                        "other"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "heard_from_detail",
                     "rules": [
                         "nullable",
                         "string",
@@ -16662,6 +18299,91 @@
         },
         {
             "method": "POST",
+            "uri": "internal/email-boxes",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "create",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-boxes/bootstrap/redeem",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "redeemBootstrap",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-boxes/list",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "list",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "PATCH",
+            "uri": "internal/email-boxes/{sid}",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "update",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "GET",
+            "uri": "internal/email-boxes/{teamSid}",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "forTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
             "uri": "internal/handover/report-end",
             "controller": "App\\Entities\\Handover\\InternalHandoverController",
             "action": "reportEnd",
@@ -16800,6 +18522,23 @@
         },
         {
             "method": "POST",
+            "uri": "internal/integration-sinks/for-team",
+            "controller": "App\\Entities\\IntegrationSink\\InternalIntegrationSinkController",
+            "action": "forTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
             "uri": "internal/notifications/dispatch",
             "controller": "App\\Entities\\Notification\\InternalNotificationController",
             "action": "dispatch",
@@ -16871,6 +18610,23 @@
             "uri": "internal/ssl-certificates/get-active",
             "controller": "App\\Entities\\SslCertificate\\InternalSslCertificateController",
             "action": "getActive",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ssl-certificates/lookup",
+            "controller": "App\\Entities\\SslCertificate\\InternalSslCertificateController",
+            "action": "lookup",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
@@ -17007,6 +18763,23 @@
             "uri": "oauth/consent-context",
             "controller": "\\App\\Http\\Controllers\\OAuthFlowController",
             "action": "consentContext",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "oauth/grant/accounts",
+            "controller": "\\App\\Http\\Controllers\\OAuthFlowController",
+            "action": "grantAccounts",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
@@ -17209,6 +18982,86 @@
                     ],
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/directory/resolve",
+            "controller": "App\\Ops\\Controllers\\OpsDirectoryController",
+            "action": "resolve",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsDirectoryRequest",
+            "rules": [
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "max:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 18,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "user_sids",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "user_sids.*",
+                    "rules": [
+                        "string",
+                        "max:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 18,
                     "size": null,
                     "between": null
                 }
@@ -17881,6 +19734,89 @@
         },
         {
             "method": "POST",
+            "uri": "ops/users/{userSid}/cancel-erasure",
+            "controller": "App\\Ops\\Controllers\\OpsUserController",
+            "action": "cancelErasure",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "ops/workspaces/api-usage",
+            "controller": "App\\Ops\\Controllers\\OpsWorkspaceController",
+            "action": "apiUsage",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsWorkspaceRollupRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "max:200"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "max:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 18,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "ops/workspaces/rollup",
             "controller": "App\\Ops\\Controllers\\OpsWorkspaceController",
             "action": "rollup",
@@ -18175,6 +20111,42 @@
         },
         {
             "method": "POST",
+            "uri": "ops/workspaces/{teamSid}/login-as",
+            "controller": "App\\Ops\\Controllers\\OpsImpersonationController",
+            "action": "loginAs",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsLoginAsRequest",
+            "rules": [
+                {
+                    "field": "user_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "size:18",
+                        "starts_with:us_mb"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "paddle/webhook",
             "controller": "App\\Http\\Controllers\\PaddleWebhookController",
             "action": "handle",
@@ -18195,6 +20167,91 @@
             "uri": "partner/teams",
             "controller": "App\\Http\\Controllers\\PartnerController",
             "action": "provisionTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "DELETE",
+            "uri": "partner/teams/{sid}",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "deleteTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "partner/teams/{sid}/members",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "attachMember",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "partner/teams/{sid}/release",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "releaseTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "partner/teams/{sid}/resume",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "resumeTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "partner/teams/{sid}/suspend",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "suspendTeam",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,

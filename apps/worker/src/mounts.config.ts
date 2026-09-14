@@ -334,8 +334,8 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/platform',
     name: 'gtm-id-platform',
     instructions:
-      'GTM platform: notifications, SSL certificates (issue / renew / delete), and support escalation (escalate_to_human hands the current issue to the human support team; the team replies to the user\'s account email). Certificate mutations are protected (preview → confirm).',
-    selectors: [pid('notifications'), pid('ssl_certificates'), pid('support_requests')],
+      'GTM platform: notifications, SSL certificates (issue / renew / delete), support escalation (escalate_to_human hands the current issue to the human support team; the team replies to the user\'s account email), and the team\'s own API request log (search_api_requests / get_api_request_metrics: every call made with an api key or an OAuth client, your own included; how many, how many failed, which tools, which clients). Certificate mutations are protected (preview → confirm).',
+    selectors: [pid('notifications'), pid('ssl_certificates'), pid('support_requests'), pid('api_requests')],
     maxTools: 25,
     facade: 'none',
   },

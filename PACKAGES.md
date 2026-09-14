@@ -130,14 +130,14 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 4 mounts / 72 tools
+## mcp.id: 4 mounts / 74 tools
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
 | identity | `/mcp/id/identity` | users (2), teams (6), team_members (6), sessions (2) | 16 | ✅ |
 | access | `/mcp/id/access` | api_keys (7), oauth_clients (5), oauth_authorizations (3), account_shares (5) | 20 | ✅ |
 | billing | `/mcp/id/billing` | billing_products (1), billing_subscriptions (14), billing_transactions (4), billing_payment_methods (3) | 22 | ✅ |
-| platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), support_requests (3) | 14 | ✅ |
+| platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), support_requests (3), api_requests (2) | 16 | ✅ |
 
 2026-08-16 - the `credits` mount and the `credit_transactions` package were removed with the
 platform-wide credits exit; data-bus reads are no longer metered.
@@ -146,6 +146,12 @@ platform-wide credits exit; data-bus reads are no longer metered.
 21 to 22 (`undo_cancel_billing_subscription` landed 2026-08-20), and the section header and the
 totals came DOWN, because the 2026-08-26 observability retirement edited the platform row (16 to 14,
 one package gone) without touching either. 16 + 20 + 22 + 14 = 72 tools over 15 packages.
+
+2026-09-14 - `api_requests` (2 tools, `search_api_requests` / `get_api_request_metrics`) joins the
+platform mount: the team's own log of external API traffic, written by every answering service into
+its `api_request_log` and merged by gtm.service.id behind one public surface (research
+`api_requests.md`). It is what the SPA dashboard reads, and an agent's way to see its own footprint
+("how many calls did I make today, did any fail"). Platform 14 to 16, id 72 to 74, 15 to 16 packages.
 
 ⚠️ `account_shares` moved here from `mcp.linkedin/platform` at the 2026-07-26 handover cutover: a
 handover binds TWO tenants that may live in different clusters, so the record and its tools belong on
@@ -218,8 +224,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **47 registry packages / 264 tools**, served over **18 mounts + 1 facade**. By service:
-linkedin 168 (27 packages), id 72 (15), orchestration 22 (4), support 2 (1). Every number in this
+Totals: **48 registry packages / 279 tools**, served over **18 mounts + 1 facade**. By service:
+linkedin 180 (27 packages), id 74 (16), orchestration 23 (4), support 2 (1). Every number in this
 file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
 `MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
 run, so re-run it rather than editing a count by hand.
