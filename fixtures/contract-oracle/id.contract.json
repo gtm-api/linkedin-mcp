@@ -5402,6 +5402,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestBucketEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Hour",
+                    "value": "hour"
+                },
+                {
+                    "name": "Day",
+                    "value": "day"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\ApiRequest\\Enums\\ApiRequestCredentialKindEnum": {
             "backing": "string",
             "cases": [
@@ -10377,6 +10390,25 @@
                         "status_family",
                         "occurred_day",
                         "occurred_hour"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "bucket",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"hour\",\"day\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "hour",
+                        "day"
                     ],
                     "min": null,
                     "max": null,
@@ -17520,6 +17552,22 @@
                     "in": null,
                     "min": null,
                     "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "company_domain",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 }

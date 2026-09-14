@@ -46354,6 +46354,25 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "bucket",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"hour\",\"day\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "hour",
+                        "day"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null

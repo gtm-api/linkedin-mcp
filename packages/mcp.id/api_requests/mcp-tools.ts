@@ -87,6 +87,21 @@ const ApiRequestFilter = z.object({
     .describe('All the calls of one MCP turn share a trace id.'),
 }).partial();
 
+const ApiRequestBucket = z.enum(['hour', 'day']);
+
+// One point of the time axis: the bucket's own counts and, when group_by was
+// passed, the split's counts for that bucket only.
+const ApiRequestSeriesPoint = z.object({
+  start: z.string().describe('The bucket start, ISO 8601 UTC.'),
+  counts: z.object({
+    total_count: z.number().int(),
+    error_count: z.number().int(),
+    groups: z.object({ status_family: z.record(z.number().int()) }).passthrough(),
+  }).passthrough(),
+  groups: z.record(z.object({ total_count: z.number().int(), error_count: z.number().int() }))
+    .describe('Per group_by key, this bucket only; empty when no group_by was passed.'),
+}).passthrough();
+
 const ApiRequestSortable = z.enum(['occurred_at']);
 const ApiRequestGroupBy = z.enum(['service', 'surface', 'credential_kind', 'client_sid', 'entity', 'operation', 'route', 'status_family', 'occurred_day', 'occurred_hour']);
 
@@ -121,7 +136,7 @@ export const apiRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'get_api_request_metrics',
     description:
-      'Period-bound totals of the team\'s external API requests, merged across the answering services: total_count, error_count and the 2xx/3xx/4xx/5xx split in aggregated.counts; error_rate, avg_duration_ms, first/last_occurred_at in aggregated.metrics. Requires period {from, to} (ISO 8601 UTC, half-open, at most 92 days). Optional group_by splits the same numbers per key: occurred_hour / occurred_day for a chart (empty buckets are absent; occurred_hour needs a period under 21 days), client_sid ("how much does each agent call"), route or entity ("which tools"), status_family, service, surface. Use to answer "how many calls this week and how many failed" in one round-trip instead of paging the log. aggregated.counts.sources says which services answered.',
+      'Period-bound totals of the team\'s external API requests, merged across the answering services: total_count, error_count and the 2xx/3xx/4xx/5xx split in aggregated.counts; error_rate, avg_duration_ms, first/last_occurred_at in aggregated.metrics. Requires period {from, to} (ISO 8601 UTC, half-open, at most 92 days). Optional group_by splits the same numbers per key: client_sid ("how much does each agent call"), route or entity ("which tools"), status_family, service, surface (occurred_hour / occurred_day exist too but bucket is the better time axis). Optional bucket (hour | day) cuts the window into consecutive UTC buckets, series.points[] one per bucket over the whole window with zeros filled, each carrying its own counts and its own group_by split: "requests per day by type" is group_by entity + bucket day in one call. Use to answer "how many calls this week and how many failed" in one round-trip instead of paging the log. aggregated.counts.sources says which services answered.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/api-requests/metrics' },
     operation: 'metrics',
@@ -134,9 +149,22 @@ export const apiRequestsTools: ToolDefinition[] = [
         to: z.string().describe('ISO 8601 UTC window end (exclusive); at most 92 days after from.'),
       }).describe('Required metrics window [from, to). Operators on occurred_at inside filter are ignored.'),
       group_by: ApiRequestGroupBy.nullable().optional()
-        .describe('Split the aggregate per key: occurred_hour / occurred_day = chart buckets (UTC bucket start as the key), client_sid / route / entity / status_family / service / surface = breakdowns. Cap 500 groups.'),
+        .describe('Split the aggregate per key: client_sid / route / entity / status_family / service / surface = breakdowns (occurred_hour / occurred_day = a legacy time split; prefer bucket). Cap 500 groups.'),
+      bucket: ApiRequestBucket.nullable().optional()
+        .describe('The time axis, independent of group_by: hour or day (UTC). Answers series.points[], one per bucket over the whole window, zeros filled, each with its own counts and group_by split.'),
     }),
-    outputSchema: McpMetricsResponse(ApiRequestMetrics),
+    outputSchema: McpMetricsResponse(ApiRequestMetrics).extend({
+      metrics: z.object({
+        period: z.object({ from: z.string(), to: z.string() }).passthrough().optional(),
+        aggregated: z.object({
+          counts: z.record(z.unknown()).optional(),
+          metrics: ApiRequestMetrics.optional(),
+        }).passthrough().optional(),
+        groups: z.array(z.object({ key: z.string(), counts: z.record(z.unknown()), metrics: ApiRequestMetrics }).passthrough()).optional(),
+        series: z.object({ bucket: ApiRequestBucket, points: z.array(ApiRequestSeriesPoint) }).optional()
+          .describe('Present only when bucket was passed.'),
+      }).passthrough(),
+    }),
     annotations: { title: 'API request metrics', ...RO },
   },
 ];
