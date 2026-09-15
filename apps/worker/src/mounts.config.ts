@@ -31,6 +31,9 @@ export const MOUNTS: MountConfig[] = [
       // same no-headroom reason; the tools' own `mount` field says so.
       { kind: 'exclude', name: 'get_linkedin_account_my_recruiter_seat' },
       { kind: 'exclude', name: 'get_linkedin_account_my_hiring_projects' },
+      // The Recruiter contract chooser pair (2026-09-15) rides with them.
+      { kind: 'exclude', name: 'get_linkedin_account_my_recruiter_contracts' },
+      { kind: 'exclude', name: 'select_linkedin_account_recruiter_contract' },
     ],
     maxTools: 26,
     // 26 since 2026-09-10: the account-wide smart-limit switch
@@ -129,10 +132,14 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/recruiter',
     name: 'gtm-linkedin-recruiter',
     instructions:
-      'GTM LinkedIn Recruiter inbox, the third messenger next to LinkedIn and Sales Navigator: read a team account\'s own Recruiter seat and hiring projects, sync its recruiter inbox into the shared conversations / messages tables (messenger_type recruiter, candidates known by talent_id), read the latest threads and one thread\'s messages, and send Recruiter InMails (a new thread, or a reply into one). Needs a Recruiter seat on the account (search accounts with has_recruiter: true) and its stamped seat number; the tools answer 422 recruiter_required / recruiter_seat_unresolvable otherwise. Stored history is searchable on the messaging mount with filter.messenger_type = recruiter. Sends are protected (preview then confirm) and spend InMail credits.',
+      'GTM LinkedIn Recruiter inbox, the third messenger next to LinkedIn and Sales Navigator: read a team account\'s own Recruiter seat and hiring projects, sync its recruiter inbox into the shared conversations / messages tables (messenger_type recruiter, candidates known by talent_id), read the latest threads and one thread\'s messages, and send Recruiter InMails (a new thread, or a reply into one). Needs a Recruiter seat on the account (search accounts with has_recruiter: true) and its stamped seat number; the tools answer 422 recruiter_required / recruiter_seat_unresolvable otherwise (a member on several contracts binds one with get/select recruiter contracts). LinkedIn Recruiter asks for the account\'s password again about every 30 days: where the seat holder stored it on the account (recruiter_credentials_stored_at) the platform signs the browser back in by itself; otherwise the tools answer 409 recruiter_reauth_required whose context.account_url is the page where the seat holder stores it or opens the browser to sign in. Stored history is searchable on the messaging mount with filter.messenger_type = recruiter. Sends are protected (preview then confirm) and spend InMail credits.',
     selectors: [
       { kind: 'tool', name: 'get_linkedin_account_my_recruiter_seat' },
       { kind: 'tool', name: 'get_linkedin_account_my_hiring_projects' },
+      // The contract chooser (2026-09-15): list the member's contracts and bind
+      // the browser to one, for the seat holder on several contracts.
+      { kind: 'tool', name: 'get_linkedin_account_my_recruiter_contracts' },
+      { kind: 'tool', name: 'select_linkedin_account_recruiter_contract' },
       { kind: 'tool', name: 'sync_my_recruiter_conversations' },
       { kind: 'tool', name: 'get_my_latest_linkedin_conversations_recruiter' },
       { kind: 'tool', name: 'get_my_latest_linkedin_messages_recruiter' },

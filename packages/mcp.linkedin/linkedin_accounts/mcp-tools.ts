@@ -93,7 +93,9 @@ const LinkedinAccount = z.object({
   recruiter_contract_id: z.string().nullable()
     .describe('The Recruiter contract (talent ts_contract number) the stamped seat belongs to, from the same seat read. A seat only means something inside its contract: hiring-project urns embed it, and a member on several contracts holds a different seat on each.'),
   recruiter_session_expires_at: z.string().nullable()
-    .describe("When the Recruiter (enterprise) session of the bound browser profile runs out (ISO 8601): the expiry of LinkedIn's li_a cookie, read from the antidetect vendor's cookie store by the premium check (the clock, never the value). LinkedIn issues that session for 30 days when the seat holder enters the LinkedIn password on the Recruiter sign-in page; past this clock every recruiter tool answers 409 recruiter_reauth_required until the seat holder signs in to Recruiter again in the account's browser. Null = not read (no seat, or a vendor without a readable cookie store)."),
+    .describe("When the Recruiter (enterprise) session of the bound browser profile runs out (ISO 8601): the expiry of LinkedIn's li_a cookie, read from the antidetect vendor's cookie store by the premium check (the clock, never the value). LinkedIn issues that session for 30 days when the seat holder enters the LinkedIn password on the Recruiter sign-in page. Past this clock the platform signs the browser back in by itself when a Recruiter password is stored on the account (recruiter_credentials_stored_at); otherwise every recruiter tool answers 409 recruiter_reauth_required, whose context.account_url is where the seat holder stores the password or opens the browser to sign in. Null = no clock (not read, or the session cookie was not seen, which is not a verdict)."),
+  recruiter_credentials_stored_at: z.string().nullable()
+    .describe("When the seat holder stored the Recruiter password on this account (ISO 8601); null = none stored. With it the platform signs the browser back into LinkedIn Recruiter by itself whenever LinkedIn asks for the password again (about every 30 days), so recruiter tools keep working across that; without it a run-out session answers 409 recruiter_reauth_required until a person acts. The password itself is never readable through any tool or API: it is stored encrypted and used only for that sign-in, and it is forgotten on the first wrong-password answer. Storing it is done by the seat holder on the account's page in the app (the 409 carries the link), not through MCP."),
 
   // Display essentials
   full_name: z.string().nullable(),
@@ -235,7 +237,9 @@ const LinkedinAccountFilter = z.object({
   recruiter_contract_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
     .describe('Exact match on the Recruiter contract number the stamped seat belongs to.'),
   recruiter_session_expires_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
-    .describe('lt:<now> = seat holders whose Recruiter session has run out and who must sign in to Recruiter again; is_null:false = the clock was read.'),
+    .describe('lt:<now> = seat holders whose Recruiter session has run out (the platform renews it by itself where a Recruiter password is stored, see recruiter_credentials_stored_at); is_null:false = the clock was read.'),
+  recruiter_credentials_stored_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
+    .describe('is_null:false = a Recruiter password is stored, so a run-out Recruiter session renews itself; is_null:true = the seat holder has to sign in by hand (or store the password) when it runs out.'),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   full_name: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   avatar_url: filterOp(z.string(), ['is_null']).optional()
@@ -406,6 +410,39 @@ const LinkedinAccountRecruiterSeat = z.object({
 
 const LinkedinAccountRecruiterSeatResult = z.object({
   recruiter_seat: LinkedinAccountRecruiterSeat,
+}).passthrough();
+
+// One row of LinkedIn's Recruiter contract chooser (talentContractOptions): a
+// contract the member can act under. Every scalar but contract_id is nullable
+// on the wire; `category` is an open vocabulary (INDIVIDUAL and CORPORATE seen).
+const LinkedinAccountRecruiterContract = z.object({
+  contract_id: z.string().describe('The ts_contract number: what select_linkedin_account_recruiter_contract takes. Never a urn.'),
+  contract_urn: z.string().nullable().describe('urn:li:ts_contract:N, verbatim.'),
+  contract_name: z.string().nullable(),
+  category: z.string().nullable()
+    .describe('CORPORATE = a Recruiter seat on a company contract; INDIVIDUAL = a LinkedIn Job Posting contract on the personal account, never a Recruiter seat. Open vocabulary.'),
+  description: z.string().nullable(),
+  sso_enabled: z.boolean().nullable(),
+  application_instance_urn: z.string().nullable(),
+  enterprise_profile_urn: z.string().nullable(),
+  enterprise_account_id: z.string().nullable().describe('Parsed from enterprise_profile_urn; null when its shape did not match.'),
+  enterprise_profile_id: z.string().nullable(),
+}).passthrough();
+
+const LinkedinAccountRecruiterContractsResult = z.object({
+  recruiter_contracts: z.array(LinkedinAccountRecruiterContract)
+    .describe('The chooser rows, contract_id first. Empty when the chooser offers nothing selectable.'),
+  current_contract_id: z.string().nullable()
+    .describe("The contract the account's seat is stamped under (recruiter_contract_id), null when no seat is stamped: on a member with several contracts that is the row to select."),
+}).passthrough();
+
+const LinkedinAccountSelectRecruiterContractResult = z.object({
+  recruiter_contract: LinkedinAccountRecruiterContract.nullable().describe('The row the browser was bound to.'),
+  owner_seat_id: z.string().nullable().describe("The ts_seat under the bound contract, off LinkedIn's answer; null when the answer carried none."),
+  profile_id: z.string().nullable().describe('The talent (AEMAA…) id of the recruiter under the bound contract.'),
+  redirect_url: z.string().nullable().describe('Where LinkedIn sends the chooser next. Informational.'),
+  seat_stamped: z.boolean()
+    .describe('True when recruiter_seat_id and recruiter_contract_id were stamped from this answer; false when it carried no seat, in which case the browser is bound and the next premium check (checks: [\'recruiter\']) stamps the pair.'),
 }).passthrough();
 
 // The one recruiter list with a real total: hiring projects. Optional paging
@@ -1056,6 +1093,46 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(LinkedinAccount, LinkedinAccountHiringProjectsResult),
     annotations: { title: 'Get my Recruiter hiring projects', ...RO },
+  },
+  {
+    ...base,
+    mount: 'linkedin.recruiter',
+    name: 'get_linkedin_account_my_recruiter_contracts',
+    description:
+      "The Recruiter contracts this account's member can act under (LinkedIn's contract chooser, wire get-recruiter-contract-options), with current_contract_id = the contract the account's seat is stamped under. NEEDS A RECRUITER SEAT on the account (422 recruiter_required otherwise). Read it when has_recruiter is true but recruiter_seat_id is null: a member on several contracts holds no seat until the browser is bound to one, and the premium check binds one by itself only when the choice is unambiguous (the account's own contract, the only row, the only CORPORATE row). CORPORATE rows are Recruiter seats; the INDIVIDUAL row is a Job Posting contract on the personal account. Not gated on the Recruiter session clock: the chooser answers for a browser LinkedIn has not let into Recruiter yet, and a run-out session is renewed by the platform itself where a Recruiter password is stored.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-recruiter-contracts', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ sid: SID, ...usageMetaField }),
+    outputSchema: McpActionResponse(LinkedinAccount, LinkedinAccountRecruiterContractsResult),
+    annotations: { title: 'Get my Recruiter contracts', ...RO },
+  },
+  {
+    ...base,
+    mount: 'linkedin.recruiter',
+    name: 'select_linkedin_account_recruiter_contract',
+    description:
+      "Bind the account's browser to ONE of the member's Recruiter contracts (the contract chooser's Select, wire select-recruiter-contract) and stamp the seat that comes with it. contract_id is the ts_contract NUMBER from get_linkedin_account_my_recruiter_contracts, never a urn. Pick a CORPORATE row: the wrong row binds the browser to the wrong inbox, and a member on several contracts is exactly who this is for (the premium check does not guess among several). 422 contract_not_offered lists the rows on offer in context.offered; 422 contract_not_selectable means the row lacks an urn the Select needs. On success recruiter_seat_id and recruiter_contract_id are stamped from LinkedIn's answer (seat_stamped true); when the answer carried no seat the browser is still bound and the next premium check with checks: ['recruiter'] stamps the pair. Switching contracts switches the Recruiter inbox the sync reads: a reset of recruiter_conversations after a switch is the operator's call.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/select-recruiter-contract', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      contract_id: z.string().regex(/^\d{1,32}$/).describe('The ts_contract number as get_linkedin_account_my_recruiter_contracts lists it, e.g. "437500276". Never a urn.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, LinkedinAccountSelectRecruiterContractResult),
+    annotations: { title: 'Select my Recruiter contract', readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
   },
   {
     ...base,

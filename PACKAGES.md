@@ -22,10 +22,10 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| accounts | `/mcp/linkedin/accounts` | linkedin_accounts (22 of its 26: the explicit-skill endorse pair rides on content, the two Recruiter self reads on recruiter), linkedin_account_smart_limits (3) | 25 | ✅ (at cap) |
+| accounts | `/mcp/linkedin/accounts` | linkedin_accounts (23 of its 29: the explicit-skill endorse pair rides on content, the four Recruiter self reads on recruiter), linkedin_account_smart_limits (3) | 26 | ✅ (at cap) |
 | account_monitor | `/mcp/linkedin/account-monitor` | linkedin_account_snapshots (1), linkedin_benchmarks (1), linkedin_account_quota_hits (1), linkedin_account_block_log (1), linkedin_account_activity_log (2), linkedin_account_sync_runs (3) | 9 | ✅ |
 | messaging | `/mcp/linkedin/messaging` | linkedin_conversations (14 of its 16), linkedin_messages (13 of its 15): the four Recruiter messenger verbs ride on recruiter | 27 | ✅ (budget **28**, 1 free) |
-| recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 2 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 2 from linkedin_messages (get-my-latest-recruiter, send-recruiter). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 6 | ✅ |
+| recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 4 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects, get-my-recruiter-contracts, select-recruiter-contract) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 2 from linkedin_messages (get-my-latest-recruiter, send-recruiter). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 8 | ✅ |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (6), linkedin_connection_invitations (6), linkedin_followers (3) | 21 | ✅ |
 | content | `/mcp/linkedin/content` | linkedin_posting (8: create-post, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 10 | ✅ |
 | scraping | `/mcp/linkedin/scraping` | linkedin_scraping (23; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not) | 23 | ✅ (budget 25, 2 free) |
@@ -224,8 +224,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **48 registry packages / 279 tools**, served over **18 mounts + 1 facade**. By service:
-linkedin 180 (27 packages), id 74 (16), orchestration 23 (4), support 2 (1). Every number in this
+Totals: **48 registry packages / 281 tools**, served over **18 mounts + 1 facade**. By service:
+linkedin 182 (27 packages), id 74 (16), orchestration 23 (4), support 2 (1). Every number in this
 file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
 `MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
 run, so re-run it rather than editing a count by hand.
