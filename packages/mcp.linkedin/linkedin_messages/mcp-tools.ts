@@ -332,7 +332,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_message',
     description:
-      'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id. Guards run first: in-flight dedup, send_messages daily cap, 8000-char body cap, connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row is inserted only on terminal success. When NOT: InMail to a non-connection → send_linkedin_inmail; voice note → send_linkedin_voice_message; Sales Navigator thread → send_linkedin_sales_nav_message; the connection-request note lives on linkedin-connection-requests. Bulk send: loop client-side and respect the daily cap.',
+      'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id or by public_identifier (slug or linkedin.com/in/ URL, resolved server-side). Guards run first: in-flight dedup, send_messages daily cap, 8000-char body cap, connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row is inserted only on terminal success. When NOT: InMail to a non-connection → send_linkedin_inmail; voice note → send_linkedin_voice_message; Sales Navigator thread → send_linkedin_sales_nav_message; the connection-request note lives on linkedin-connection-requests. Bulk send: loop client-side and respect the daily cap.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send' },
     operation: 'action',
@@ -347,6 +347,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing basic-messenger thread; provide this OR a profile URN. Our sid only: a raw LinkedIn 2-…== thread id is NOT accepted here, resolve it first with search_linkedin_conversations filter.conversation_hash.eq."),
       ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…) for a new thread.'),
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (ACwAA…); interchangeable with ln_id.'),
+      public_identifier: z.string().max(2048).nullable().optional().describe("For a new thread when all you have is the person's vanity slug or linkedin.com/in/<slug> URL: resolved server-side to the URN (own rows, then the corpus, then a lite-profile read on the sender that spends enrichment). One addressing form per call: linkedin_conversation_sid, ln_id / sn_id, or public_identifier."),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
       client_reference: z.string().max(255).nullable().optional()

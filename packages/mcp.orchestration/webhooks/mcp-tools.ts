@@ -383,7 +383,7 @@ export const webhooksTools: ToolDefinition[] = [
       target_url: z.string().max(2048).optional().describe('https:// only, public IP only.'),
       events: z.array(WebhookEventType).min(1).optional()
         .describe('Full replacement; WebhookEventTypeEnum values.'),
-      filters: WebhookFilters.optional().describe('Full replacement.'),
+      filters: WebhookFilters.nullable().optional().describe('Full replacement; null or {} clears the narrowing so every subscribed event is delivered again.'),
       status: z.enum(['on', 'off']).optional().describe("on | off only; 'failed' is platform-set."),
       ...usageMetaField,
     }),

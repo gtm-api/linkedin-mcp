@@ -3670,11 +3670,12 @@
                     "field": "filters",
                     "rules": [
                         "sometimes",
+                        "nullable",
                         "array",
                         "Closure"
                     ],
                     "required": false,
-                    "nullable": false,
+                    "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,
@@ -4156,11 +4157,12 @@
                     "field": "filters",
                     "rules": [
                         "sometimes",
+                        "nullable",
                         "array",
                         "Closure"
                     ],
                     "required": false,
-                    "nullable": false,
+                    "nullable": true,
                     "type": "array",
                     "in": null,
                     "min": null,

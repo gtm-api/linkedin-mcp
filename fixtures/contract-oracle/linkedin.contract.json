@@ -28412,15 +28412,37 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required",
-                        "string"
+                        "required_without:public_identifier",
+                        "prohibits:public_identifier",
+                        "nullable",
+                        "string",
+                        "max:128"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without:profile_id",
+                        "prohibits:profile_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -34352,6 +34374,26 @@
                     "in": null,
                     "min": null,
                     "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "prohibits:ln_id",
+                        "prohibits:sn_id",
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },

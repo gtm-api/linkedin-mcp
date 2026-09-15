@@ -142,7 +142,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_connection_request',
     description:
-      'Send one outbound LinkedIn connection request (outward action). profile_id is the target URN (ln_id OR sn_id). Server-side checks run first: the daily send limit, the premium-aware note cap (200 free / 300 premium), and the 21-day resend cooldown. Fire-on-success: a row is created only when LinkedIn confirms the send. NOT idempotent: a second send while a request is pending 409s (already_pending).',
+      'Send one outbound LinkedIn connection request (outward action). Address the person by profile_id (the URN, ln_id OR sn_id) or by public_identifier (a vanity slug or linkedin.com/in/ URL, resolved server-side). Server-side checks run first: the daily send limit, the premium-aware note cap (200 free / 300 premium), and the 21-day resend cooldown. Fire-on-success: a row is created only when LinkedIn confirms the send. NOT idempotent: a second send while a request is pending 409s (already_pending).',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-requests/send' },
     operation: 'action',
@@ -154,7 +154,8 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      profile_id: z.string().describe('Target URN: ln_id (ACoAA…) OR sn_id (ACwAA…); both accepted as profile_id.'),
+      profile_id: z.string().max(128).optional().describe('Target URN: ln_id (ACoAA…) OR sn_id (ACwAA…); both accepted as profile_id. Exactly one of profile_id / public_identifier.'),
+      public_identifier: z.string().max(2048).optional().describe("The person's vanity slug (jane-doe) or their linkedin.com/in/<slug> URL, when that is all you have (a signup, a CRM). Resolved server-side to the URN: the team's own rows first (connections, invitations, followers), then the corpus, then a lite-profile read on the sender (spends enrichment, one extra browser call, cached afterwards). Exactly one of profile_id / public_identifier."),
       note: z.string().max(300).nullable().optional()
         .describe('Invitation note; server caps at 200 chars when the sender is not premium. Over the cap it is 422 unless allow_no_note_fallback is set.'),
       allow_no_note_fallback: z.boolean().optional()
