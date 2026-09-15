@@ -116,7 +116,13 @@ const LinkedinAccount = z.object({
   // smart_limits_governed); false = the caps run as typed. Its one writer is
   // set_linkedin_account_smart_limits.
   smart_limits_enabled: z.boolean(),
-  inmail_credits: z.number().nullable(),
+  // The InMail balances. LinkedIn keeps one InMail pool per product and moves
+  // nothing between them, so each pool the platform can read has its own
+  // field, both written only by the premium check's credits step.
+  inmail_credits: z.number().nullable()
+    .describe("The Sales Navigator seat's InMail balance (the LSS_INMAIL grant), read only while the account holds a seat and cleared when the seat goes. Null = never read, the last read failed, or the seat was just lost; not zero."),
+  premium_inmail_credits: z.number().nullable()
+    .describe("The Premium plan's own InMail balance (Premium Career / Business), read off LinkedIn's Premium page for a Premium account WITHOUT a Sales Navigator seat (a seat holder's linkedin.com InMail is the seat's grant above) and cleared when the plan goes. Null = never read or the last read could not be parsed; not zero."),
   last_premium_check_at: z.string().nullable(),
 
   // Per-entity sync clocks
@@ -249,7 +255,9 @@ const LinkedinAccountFilter = z.object({
   smart_limits_enabled: filterOp(z.boolean(), ['eq']).optional()
     .describe('The account-wide smart-limit switch. eq:false lists every hand-managed sender (caps typed by hand, no warmup protection).'),
   inmail_credits: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']).optional()
-    .describe('is_null:true = last parse failed.'),
+    .describe('The Sales Navigator seat grant. is_null:true = never read or last parse failed.'),
+  premium_inmail_credits: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']).optional()
+    .describe('The Premium plan pool (seatless Premium accounts). gte:1 = senders with Premium InMails left; is_null:true = never read.'),
   last_premium_check_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
 
   // Per-entity sync clocks (staleness / scheduler predicates).
@@ -757,7 +765,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     // the row stale for no gain.
     name: 'check_linkedin_account_premium_subscription',
     description:
-      'Refresh the account\'s subscription state and persist it: Premium, the Sales Navigator and Recruiter seats, and the InMail balance (self-probe, no target, no credits). `checks` picks which of those four to run and omitting it runs all four, which is the call you want when you just need the picture. Ask for a subset when you need one answer cheaply: `recruiter` reads a marker in the already-open tab, while the full run opens a background tab for the profile. Each result is written to the account record, and a probe that fails leaves the previous value alone rather than clearing it, so a failure never reads as "seat lost". On the full run a false Premium settles both seats without probing them, because each includes Premium.',
+      'Refresh the account\'s subscription state and persist it: Premium, the Sales Navigator and Recruiter seats, and the InMail balance (self-probe, no target, no credits). `checks` picks which of those four to run and omitting it runs all four, which is the call you want when you just need the picture. Ask for a subset when you need one answer cheaply: `recruiter` reads a marker in the already-open tab, while the full run opens a background tab for the profile. Each result is written to the account record, and a probe that fails leaves the previous value alone rather than clearing it, so a failure never reads as "seat lost". On the full run a false Premium settles both seats without probing them, because each includes Premium. A Recruiter seat whose member holds several contracts is bound to the only corporate contract on offer by this check itself; with several on offer the seat stays unstamped until the seat holder picks one in the account\'s browser.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/check-premium', sidParam: 'sid' },
     operation: 'action',
@@ -769,7 +777,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     inputSchema: z.object({
       sid: SID,
       checks: z.array(z.enum(['premium', 'sales_nav', 'recruiter', 'inmail_credits'])).min(1).max(4).nullable().optional()
-        .describe('Which steps to run. OMIT for all four, which is the normal call. `premium` reads the profile flag and, on a full run, settles both seats when it comes back false. `sales_nav` and `recruiter` probe one seat each and are the cheap ones. `inmail_credits` reads the Sales Navigator balance (the LSS_INMAIL grant) and needs a Sales Navigator SEAT: on a full run it is skipped for a seatless account (the last known balance is kept), and naming it in `checks` for one is refused with 422 `sales_nav_required`. Asking for a subset skips the rest entirely, so nothing you did not ask for is re-read or re-written.'),
+        .describe('Which steps to run. OMIT for all four, which is the normal call. `premium` reads the profile flag and, on a full run, settles both seats when it comes back false. `sales_nav` and `recruiter` probe one seat each and are the cheap ones. `inmail_credits` reads the pool the plan has: the Sales Navigator grant into inmail_credits with a seat, the Premium plan\'s own balance into premium_inmail_credits for a Premium account without one (LinkedIn keeps the two apart). An account with no Premium has no pool: on a full run the step is skipped (last known balances kept), and naming it in `checks` for one is refused with 422 `premium_required`. Asking for a subset skips the rest entirely, so nothing you did not ask for is re-read or re-written.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount),

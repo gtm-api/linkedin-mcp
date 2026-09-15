@@ -1858,6 +1858,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "premium_inmail_credits",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "last_premium_check_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2103,6 +2109,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "premium_inmail_credits",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "last_premium_check_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2241,6 +2253,7 @@
                     "has_recruiter",
                     "smart_limits_enabled",
                     "inmail_credits",
+                    "premium_inmail_credits",
                     "last_premium_check_at",
                     "last_connections_sync_at",
                     "last_conversations_sync_at",
@@ -7429,6 +7442,10 @@
                     "value": "get_my_credits"
                 },
                 {
+                    "name": "GetPremiumCredits",
+                    "value": "get_premium_credits"
+                },
+                {
                     "name": "GetBasicProfile",
                     "value": "get_basic_profile"
                 },
@@ -7681,6 +7698,10 @@
                     "value": "get_hiring_projects"
                 },
                 {
+                    "name": "GetRecruiterContractOptions",
+                    "value": "get_recruiter_contract_options"
+                },
+                {
                     "name": "EditMyProfile",
                     "value": "edit_my_profile"
                 },
@@ -7807,6 +7828,10 @@
                 {
                     "name": "SendRecruiterMessageInConversation",
                     "value": "send_recruiter_message_in_conversation"
+                },
+                {
+                    "name": "SelectRecruiterContract",
+                    "value": "select_recruiter_contract"
                 },
                 {
                     "name": "AddParticipants",
@@ -24287,6 +24312,20 @@
                 },
                 {
                     "field": "filter.inmail_credits",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.premium_inmail_credits",
                     "rules": [
                         "nullable"
                     ],
