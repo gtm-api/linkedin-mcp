@@ -44,7 +44,7 @@ const CloudBrowserAccessEntry = z.object({
     .describe('Cap on CONCURRENT sessions on this key; null means unlimited.'),
   allowed_ips: z.array(z.string()).nullable(),
   allowed_countries: z.array(z.string()).nullable(),
-  purpose: z.enum(['relogin', 'share']).optional()
+  purpose: z.enum(['relogin', 'recruiter_relogin', 'share']).optional()
     .describe('What the public page behind the link does. Stamped at mint and never re-negotiated at connect, because the visitor is unauthenticated. Absent on keys minted before the field existed, which the backend reads as relogin.'),
 });
 
@@ -410,9 +410,9 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
       allowed_ips: z.array(z.string().max(45)).optional().describe('IP allow-list checked at connect time.'),
       allowed_countries: z.array(z.string().length(2)).optional().describe('ISO country allow-list checked at connect time.'),
       purpose: z
-        .enum(['relogin', 'share'])
+        .enum(['relogin', 'recruiter_relogin', 'share'])
         .optional()
-        .describe('What the page behind the link does: relogin = sign the LinkedIn session back in and re-bind the browser on confirm (default); share = drive the browser, no sign-in step.'),
+        .describe('What the page behind the link does: relogin = sign the LinkedIn session back in and re-bind the browser on confirm (default); share = drive the browser, no sign-in step; recruiter_relogin = the relogin flow aimed at LinkedIn Recruiter (2026-09-15): the cloud browser opens on linkedin.com/talent so the seat holder signs the Recruiter session back in, and the confirmed restart re-checks the account\'s recruiter_status.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(

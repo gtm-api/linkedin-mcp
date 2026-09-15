@@ -48,6 +48,8 @@ const LinkedinAccountStatus = z.enum([
   'shared_out',
   'subscription_required',
 ]);
+// The account's LinkedIn Recruiter status (2026-09-15; the has_recruiter flag became this).
+const LinkedinAccountRecruiterStatus = z.enum(['active', 'signed_out']);
 
 // Target person for outward/probe actions: at least one identifier (backend-validated).
 const Target = z.object({
@@ -89,13 +91,11 @@ const LinkedinAccount = z.object({
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
   recruiter_seat_id: z.string().nullable()
-    .describe("The account's own LinkedIn Recruiter seat number (the talent ts_seat), stamped by the premium check when the recruiter probe says yes and cleared when it says no. Every recruiter sync / thread read / reply dispatches with it; null with has_recruiter true means the seat is not stamped yet: run check_linkedin_account_premium_subscription with checks: ['recruiter']."),
+    .describe("The account's own LinkedIn Recruiter seat number (the talent ts_seat), stamped by the premium check when the recruiter probe says yes and cleared when it says no. Every recruiter sync / thread read / reply dispatches with it; null with recruiter_status set means the seat is not stamped yet: run check_linkedin_account_premium_subscription with checks: ['recruiter']."),
   recruiter_contract_id: z.string().nullable()
     .describe('The Recruiter contract (talent ts_contract number) the stamped seat belongs to, from the same seat read. A seat only means something inside its contract: hiring-project urns embed it, and a member on several contracts holds a different seat on each.'),
   recruiter_session_expires_at: z.string().nullable()
-    .describe("When the Recruiter (enterprise) session of the bound browser profile runs out (ISO 8601): the expiry of LinkedIn's li_a cookie, read from the antidetect vendor's cookie store by the premium check (the clock, never the value). LinkedIn issues that session for 30 days when the seat holder enters the LinkedIn password on the Recruiter sign-in page. Past this clock the platform signs the browser back in by itself when a Recruiter password is stored on the account (recruiter_credentials_stored_at); otherwise every recruiter tool answers 409 recruiter_reauth_required, whose context.account_url is where the seat holder stores the password or opens the browser to sign in. Null = no clock (not read, or the session cookie was not seen, which is not a verdict)."),
-  recruiter_credentials_stored_at: z.string().nullable()
-    .describe("When the seat holder stored the Recruiter password on this account (ISO 8601); null = none stored. With it the platform signs the browser back into LinkedIn Recruiter by itself whenever LinkedIn asks for the password again (about every 30 days), so recruiter tools keep working across that; without it a run-out session answers 409 recruiter_reauth_required until a person acts. The password itself is never readable through any tool or API: it is stored encrypted and used only for that sign-in, and it is forgotten on the first wrong-password answer. Storing it is done by the seat holder on the account's page in the app (the 409 carries the link), not through MCP."),
+    .describe("When the Recruiter (enterprise) session of the bound browser profile runs out (ISO 8601): the expiry of LinkedIn's li_a cookie, read from the antidetect vendor's cookie store by the premium check (the clock, never the value). LinkedIn issues that session for 30 days when the seat holder enters the LinkedIn password on the Recruiter sign-in page. Past this clock the account's recruiter_status turns signed_out (the session sweep confirms it in the browser's cookie jar within 15 minutes) and every recruiter tool answers 409 recruiter_reauth_required, whose context.account_url is the account's page where the seat holder signs in again through the cloud browser. Null = no clock (not read, or the session cookie was not seen, which is not a verdict; recruiter_status is the verdict)."),
 
   // Display essentials
   full_name: z.string().nullable(),
@@ -111,7 +111,8 @@ const LinkedinAccount = z.object({
   // Premium / Sales-Navigator flags
   has_premium: z.boolean(),
   has_sn: z.boolean(),
-  has_recruiter: z.boolean(),
+  recruiter_status: LinkedinAccountRecruiterStatus.nullable()
+    .describe("The account's LinkedIn Recruiter status. null = no Recruiter seat (the premium check's recruiter probe said no, or never ran). active = the seat's Recruiter (enterprise) session answers talent calls. signed_out = LinkedIn Recruiter asks the seat holder for the LinkedIn password again (about every 30 days): every recruiter tool answers 409 recruiter_reauth_required and the recruiter sync waits until the seat holder signs in through the cloud browser from the account's page (the 409's context.account_url); the status returns to active by itself once they have. Filter on it to find seats that need their holder."),
   // The account-wide smart-limit switch (2026-09-10): one boolean for every
   // bucket. true = the warmup governs the caps and a typed daily_limit /
   // delay_in_seconds / batch_size on any limit row is refused (409
@@ -201,7 +202,7 @@ const LinkedinAccountCounts = z.object({
   total_count: z.number().int().describe('Rows matching the filter.'),
   with_sn_count: z.number().int().describe('Accounts with has_sn = true.'),
   with_premium_count: z.number().int().describe('Accounts with has_premium = true.'),
-  with_recruiter_count: z.number().int().describe('Accounts with has_recruiter = true.'),
+  with_recruiter_count: z.number().int().describe('Accounts with a Recruiter seat (recruiter_status active or signed_out).'),
   active_today_count: z.number().int()
     .describe('Heartbeat since today 00:00 UTC. Server UTC day boundary, not schedule-aware.'),
   stale_count: z.number().int()
@@ -237,9 +238,7 @@ const LinkedinAccountFilter = z.object({
   recruiter_contract_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
     .describe('Exact match on the Recruiter contract number the stamped seat belongs to.'),
   recruiter_session_expires_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
-    .describe('lt:<now> = seat holders whose Recruiter session has run out (the platform renews it by itself where a Recruiter password is stored, see recruiter_credentials_stored_at); is_null:false = the clock was read.'),
-  recruiter_credentials_stored_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
-    .describe('is_null:false = a Recruiter password is stored, so a run-out Recruiter session renews itself; is_null:true = the seat holder has to sign in by hand (or store the password) when it runs out.'),
+    .describe('lt:<now> = seat holders whose Recruiter session clock has run out (recruiter_status eq:signed_out is the confirmed verdict); is_null:false = the clock was read.'),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   full_name: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   avatar_url: filterOp(z.string(), ['is_null']).optional()
@@ -255,7 +254,8 @@ const LinkedinAccountFilter = z.object({
   // Premium / Sales-Navigator flags.
   has_premium: filterOp(z.boolean(), ['eq']).optional(),
   has_sn: filterOp(z.boolean(), ['eq']).optional(),
-  has_recruiter: filterOp(z.boolean(), ['eq']).optional(),
+  recruiter_status: filterOp(LinkedinAccountRecruiterStatus, ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('null = no Recruiter seat. eq:signed_out = seat holders who have to sign in to Recruiter again (their recruiter sync and Recruiter tools wait); eq:active = seats whose session answers.'),
   smart_limits_enabled: filterOp(z.boolean(), ['eq']).optional()
     .describe('The account-wide smart-limit switch. eq:false lists every hand-managed sender (caps typed by hand, no warmup protection).'),
   inmail_credits: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']).optional()
@@ -1099,7 +1099,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     mount: 'linkedin.recruiter',
     name: 'get_linkedin_account_my_recruiter_contracts',
     description:
-      "The Recruiter contracts this account's member can act under (LinkedIn's contract chooser, wire get-recruiter-contract-options), with current_contract_id = the contract the account's seat is stamped under. NEEDS A RECRUITER SEAT on the account (422 recruiter_required otherwise). Read it when has_recruiter is true but recruiter_seat_id is null: a member on several contracts holds no seat until the browser is bound to one, and the premium check binds one by itself only when the choice is unambiguous (the account's own contract, the only row, the only CORPORATE row). CORPORATE rows are Recruiter seats; the INDIVIDUAL row is a Job Posting contract on the personal account. Not gated on the Recruiter session clock: the chooser answers for a browser LinkedIn has not let into Recruiter yet, and a run-out session is renewed by the platform itself where a Recruiter password is stored.",
+      "The Recruiter contracts this account's member can act under (LinkedIn's contract chooser, wire get-recruiter-contract-options), with current_contract_id = the contract the account's seat is stamped under. NEEDS A RECRUITER SEAT on the account (422 recruiter_required otherwise). Read it when recruiter_status is set but recruiter_seat_id is null: a member on several contracts holds no seat until the browser is bound to one, and the premium check binds one by itself only when the choice is unambiguous (the account's own contract, the only row, the only CORPORATE row). CORPORATE rows are Recruiter seats; the INDIVIDUAL row is a Job Posting contract on the personal account. Not gated on the Recruiter session clock: the chooser answers for a browser LinkedIn has not let into Recruiter yet, and a run-out session (recruiter_status signed_out) is the seat holder's to renew through the cloud browser.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-recruiter-contracts', sidParam: 'sid' },
     operation: 'action',

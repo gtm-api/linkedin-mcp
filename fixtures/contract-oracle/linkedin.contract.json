@@ -1768,9 +1768,9 @@
                         "has_default": false
                     },
                     {
-                        "name": "has_recruiter",
-                        "type": "bool",
-                        "nullable": false,
+                        "name": "recruiter_status",
+                        "type": "?string",
+                        "nullable": true,
                         "has_default": false
                     },
                     {
@@ -1829,12 +1829,6 @@
                     },
                     {
                         "name": "recruiter_session_expires_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "recruiter_credentials_stored_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
@@ -2025,9 +2019,9 @@
                         "has_default": false
                     },
                     {
-                        "name": "has_recruiter",
-                        "type": "bool",
-                        "nullable": false,
+                        "name": "recruiter_status",
+                        "type": "?string",
+                        "nullable": true,
                         "has_default": false
                     },
                     {
@@ -2086,12 +2080,6 @@
                     },
                     {
                         "name": "recruiter_session_expires_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "recruiter_credentials_stored_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
@@ -2257,13 +2245,12 @@
                     "recruiter_seat_id",
                     "recruiter_contract_id",
                     "recruiter_session_expires_at",
-                    "recruiter_credentials_stored_at",
                     "full_name",
                     "avatar_url",
                     "label",
                     "has_premium",
                     "has_sn",
-                    "has_recruiter",
+                    "recruiter_status",
                     "smart_limits_enabled",
                     "inmail_credits",
                     "premium_inmail_credits",
@@ -2690,63 +2677,6 @@
                     "created_at"
                 ]
             }
-        },
-        "LinkedinAccountCredential": {
-            "domain": {
-                "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccountCredential\\LinkedinAccountCredentialDomain",
-                "fields": [
-                    {
-                        "name": "sid",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "team_sid",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "linkedin_account_sid",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "login_hint",
-                        "type": "string",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
-                        "name": "created_by",
-                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "last_used_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "created_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "updated_at",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    }
-                ]
-            },
-            "response": null,
-            "filter": null
         },
         "LinkedinAccountQuotaHit": {
             "domain": {
@@ -7303,6 +7233,10 @@
                 {
                     "name": "Share",
                     "value": "share"
+                },
+                {
+                    "name": "RecruiterRelogin",
+                    "value": "recruiter_relogin"
                 }
             ]
         },
@@ -7902,10 +7836,6 @@
                 {
                     "name": "SelectRecruiterContract",
                     "value": "select_recruiter_contract"
-                },
-                {
-                    "name": "LoginRecruiter",
-                    "value": "login_recruiter"
                 },
                 {
                     "name": "AddParticipants",
@@ -9055,6 +8985,32 @@
                 {
                     "name": "Unknown",
                     "value": "unknown"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccount\\Enums\\LinkedinAccountRecruiterSignedOutReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "SessionExpired",
+                    "value": "session_expired"
+                },
+                {
+                    "name": "WireUnauthorized",
+                    "value": "wire_401"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccount\\Enums\\LinkedinAccountRecruiterStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Active",
+                    "value": "active"
+                },
+                {
+                    "name": "SignedOut",
+                    "value": "signed_out"
                 }
             ]
         },
@@ -10581,14 +10537,15 @@
                     "rules": [
                         "sometimes",
                         "nullable",
-                        "in:\"relogin\",\"share\""
+                        "in:\"relogin\",\"share\",\"recruiter_relogin\""
                     ],
                     "required": false,
                     "nullable": true,
                     "type": null,
                     "in": [
                         "relogin",
-                        "share"
+                        "share",
+                        "recruiter_relogin"
                     ],
                     "min": null,
                     "max": null,
@@ -24287,20 +24244,6 @@
                     "between": null
                 },
                 {
-                    "field": "filter.recruiter_credentials_stored_at",
-                    "rules": [
-                        "nullable"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": null,
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
                     "field": "filter.full_name",
                     "rules": [
                         "nullable"
@@ -24371,7 +24314,7 @@
                     "between": null
                 },
                 {
-                    "field": "filter.has_recruiter",
+                    "field": "filter.recruiter_status",
                     "rules": [
                         "nullable"
                     ],
@@ -25274,28 +25217,6 @@
         },
         {
             "method": "POST",
-            "uri": "api/linkedin-accounts/{sid}/forget-recruiter-credentials",
-            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
-            "action": "forgetRecruiterCredentials",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_update_linkedin_accounts",
-            "internal": false,
-            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
-            "rules": [],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
             "uri": "api/linkedin-accounts/{sid}/get-my-analytics",
             "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
             "action": "getMyAnalytics",
@@ -25806,28 +25727,6 @@
             "rules_reason": null
         },
         {
-            "method": "POST",
-            "uri": "api/linkedin-accounts/{sid}/get-recruiter-credentials",
-            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
-            "action": "getRecruiterCredentials",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_view_linkedin_accounts",
-            "internal": false,
-            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
-            "rules": [],
-            "rules_reason": null
-        },
-        {
             "method": "PATCH",
             "uri": "api/linkedin-accounts/{sid}/my-profile",
             "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
@@ -26231,63 +26130,6 @@
                     "in": null,
                     "min": null,
                     "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
-            "uri": "api/linkedin-accounts/{sid}/set-recruiter-credentials",
-            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
-            "action": "setRecruiterCredentials",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_update_linkedin_accounts",
-            "internal": false,
-            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSetRecruiterCredentialsRequest",
-            "rules": [
-                {
-                    "field": "login",
-                    "rules": [
-                        "required",
-                        "string",
-                        "min:1",
-                        "max:320"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": 1,
-                    "max": 320,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "password",
-                    "rules": [
-                        "required",
-                        "string",
-                        "min:1",
-                        "max:400"
-                    ],
-                    "required": true,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": 1,
-                    "max": 400,
                     "size": null,
                     "between": null
                 }
@@ -45908,14 +45750,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "in:relogin,share"
+                        "in:relogin,share,recruiter_relogin"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": [
                         "relogin",
-                        "share"
+                        "share",
+                        "recruiter_relogin"
                     ],
                     "min": null,
                     "max": null,

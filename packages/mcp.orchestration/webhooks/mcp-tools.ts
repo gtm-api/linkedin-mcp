@@ -59,6 +59,8 @@ const WebhookEventType = z.enum([
   'linkedin-accounts.login-succeeded',
   'linkedin-accounts.login-failed',
   'linkedin-accounts.logged-out',
+  'linkedin-accounts.recruiter-signed-out',
+  'linkedin-accounts.recruiter-signed-in',
   'linkedin-accounts.heartbeat-stale',
   'linkedin-accounts.subscription-hold-applied',
   'linkedin-accounts.subscription-hold-released',
