@@ -7339,6 +7339,39 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowser\\Enums\\AntidetectBrowserVendorProfileReclaimEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Reclaimed",
+                    "value": "reclaimed"
+                },
+                {
+                    "name": "ReclaimFailed",
+                    "value": "reclaim_failed"
+                },
+                {
+                    "name": "KeptCustomer",
+                    "value": "kept_customer"
+                },
+                {
+                    "name": "KeptShared",
+                    "value": "kept_shared"
+                },
+                {
+                    "name": "KeptHandover",
+                    "value": "kept_handover"
+                },
+                {
+                    "name": "NotRequested",
+                    "value": "not_requested"
+                },
+                {
+                    "name": "NoVendorProfile",
+                    "value": "no_vendor_profile"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowser\\Enums\\AntidetectBrowserVendorProviderEnum": {
             "backing": "string",
             "cases": [
@@ -30062,7 +30095,8 @@
                     "rules": [
                         "string",
                         "min:1",
-                        "max:64"
+                        "max:64",
+                        "regex:/^(?!urn:)[A-Za-z0-9_-]+$/"
                     ],
                     "required": false,
                     "nullable": false,
@@ -30222,7 +30256,8 @@
                     "rules": [
                         "string",
                         "min:1",
-                        "max:64"
+                        "max:64",
+                        "regex:/^(?!urn:)[A-Za-z0-9_-]+$/"
                     ],
                     "required": false,
                     "nullable": false,
@@ -50166,6 +50201,60 @@
                     "nullable": false,
                     "type": "boolean",
                     "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/teams/purge",
+            "controller": "App\\Entities\\TeamPurge\\InternalTeamPurgeController",
+            "action": "purge",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\TeamPurge\\Requests\\InternalTeamPurgeRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "stage",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"soft_delete\",\"hard_delete\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "soft_delete",
+                        "hard_delete"
+                    ],
                     "min": null,
                     "max": null,
                     "size": null,

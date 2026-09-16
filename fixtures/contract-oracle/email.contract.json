@@ -108,6 +108,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "email_oauth_app_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
                         "name": "backfill_days",
                         "type": "int",
                         "nullable": false,
@@ -281,6 +287,12 @@
                         "has_default": false
                     },
                     {
+                        "name": "email_oauth_app_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
                         "name": "backfill_days",
                         "type": "int",
                         "nullable": false,
@@ -355,6 +367,7 @@
                     "sid",
                     "email_sending_domain_sid",
                     "email_tracking_domain_sid",
+                    "email_oauth_app_sid",
                     "provider",
                     "address",
                     "status",
@@ -1597,6 +1610,248 @@
                 ]
             }
         },
+        "EmailOauthApp": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\EmailOauthAppDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "provider",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppProviderEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "client_id",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "microsoft_tenant",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "callback_host",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "google_pubsub_topic",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "publishing_status",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppPublishingStatusEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "is_default",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppStatusEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "last_verified_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "last_error_code",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "accounts_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Responses\\EmailOauthAppResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "provider",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "client_id",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "microsoft_tenant",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "callback_host",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "google_pubsub_topic",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "publishing_status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "is_default",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "last_verified_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "last_error_code",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "accounts_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "created_by",
+                        "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\EmailOauthAppFilter",
+                "fields": [
+                    "sid",
+                    "provider",
+                    "status",
+                    "is_default",
+                    "callback_host",
+                    "client_id",
+                    "q",
+                    "created_at",
+                    "deleted_at"
+                ]
+            }
+        },
         "EmailSendingDomain": {
             "domain": {
                 "class": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailSendingDomain\\EmailSendingDomainDomain",
@@ -2194,6 +2449,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Core\\Enums\\SortDirectionEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Asc",
+                    "value": "asc"
+                },
+                {
+                    "name": "Desc",
+                    "value": "desc"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccountActivityLog\\Enums\\EmailAccountActivityLogActionTypeEnum": {
             "backing": "string",
             "cases": [
@@ -2709,6 +2977,78 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppErrorCodeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "InvalidClient",
+                    "value": "invalid_client"
+                },
+                {
+                    "name": "UnauthorizedClient",
+                    "value": "unauthorized_client"
+                },
+                {
+                    "name": "TenantNotFound",
+                    "value": "tenant_not_found"
+                },
+                {
+                    "name": "Unreachable",
+                    "value": "unreachable"
+                },
+                {
+                    "name": "Unknown",
+                    "value": "unknown"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppProviderEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Google",
+                    "value": "google"
+                },
+                {
+                    "name": "Microsoft",
+                    "value": "microsoft"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppPublishingStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Unknown",
+                    "value": "unknown"
+                },
+                {
+                    "name": "Testing",
+                    "value": "testing"
+                },
+                {
+                    "name": "Unverified",
+                    "value": "unverified"
+                },
+                {
+                    "name": "Verified",
+                    "value": "verified"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Verified",
+                    "value": "verified"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Email\\EmailSuppression\\Enums\\EmailSuppressionOriginEnum": {
             "backing": "string",
             "cases": [
@@ -2778,9 +3118,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccountActivityLog\\Requests\\EmailAccountActivityLogSearchRequest",
             "rules": [
@@ -3129,9 +3470,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccountHealth\\Requests\\EmailAccountHealthSearchRequest",
             "rules": [
@@ -3363,9 +3705,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccountSyncRun\\Requests\\EmailAccountSyncRunSearchRequest",
             "rules": [
@@ -3676,9 +4019,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountCreateRequest",
             "rules": [
@@ -3753,35 +4097,20 @@
                     "between": null
                 },
                 {
-                    "field": "oauth_client_id",
+                    "field": "email_oauth_app_sid",
                     "rules": [
                         "required_if:provider,google,microsoft",
                         "string",
-                        "max:512"
+                        "starts_with:em_oa_",
+                        "size:18"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "oauth_client_secret",
-                    "rules": [
-                        "required_if:provider,google,microsoft",
-                        "string",
-                        "max:512"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 512,
-                    "size": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 },
                 {
@@ -4031,9 +4360,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountDetectProviderRequest",
             "rules": [
@@ -4083,9 +4413,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountMetricsRequest",
             "rules": [
@@ -4199,9 +4530,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountRequestConnectLinkRequest",
             "rules": [
@@ -4210,7 +4542,8 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "in:\"google\",\"microsoft\",\"imap_smtp\""
+                        "in:\"google\",\"microsoft\",\"imap_smtp\"",
+                        "required_with:email_oauth_app_sid"
                     ],
                     "required": false,
                     "nullable": true,
@@ -4223,6 +4556,23 @@
                     "min": null,
                     "max": null,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_oauth_app_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_oa_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 },
                 {
@@ -4304,9 +4654,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountSearchRequest",
             "rules": [
@@ -4371,6 +4722,20 @@
                 },
                 {
                     "field": "filter.email_tracking_domain_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.email_oauth_app_sid",
                     "rules": [
                         "nullable"
                     ],
@@ -4701,9 +5066,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_accounts",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -4721,9 +5087,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_accounts",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -4741,9 +5108,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_update_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountUpdateRequest",
             "rules": [
@@ -4920,9 +5288,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_accounts",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -4941,9 +5310,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_update_email_accounts",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -4962,12 +5332,31 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_update_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountReconnectRequest",
             "rules": [
+                {
+                    "field": "email_oauth_app_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:em_oa_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
                 {
                     "field": "connection",
                     "rules": [
@@ -5198,9 +5587,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_update_email_accounts",
             "internal": false,
             "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountResumeSendingRequest",
             "rules": [
@@ -5251,9 +5641,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_accounts",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -5271,9 +5662,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_suppressions",
             "internal": false,
             "request_class": "App\\Entities\\EmailBounceLog\\Requests\\EmailBounceLogMetricsRequest",
             "rules": [
@@ -5457,9 +5849,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_suppressions",
             "internal": false,
             "request_class": "App\\Entities\\EmailBounceLog\\Requests\\EmailBounceLogSearchRequest",
             "rules": [
@@ -5739,9 +6132,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_engagements",
             "internal": false,
             "request_class": "App\\Entities\\EmailEngagement\\Requests\\EmailEngagementMetricsRequest",
             "rules": [
@@ -5938,9 +6332,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_engagements",
             "internal": false,
             "request_class": "App\\Entities\\EmailEngagement\\Requests\\EmailEngagementSearchRequest",
             "rules": [
@@ -6203,9 +6598,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailFolder\\Requests\\EmailFolderSearchRequest",
             "rules": [
@@ -6456,9 +6852,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailMessage\\Requests\\EmailMessageMetricsRequest",
             "rules": [
@@ -6575,9 +6972,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailMessage\\Requests\\EmailMessageSearchRequest",
             "rules": [
@@ -7073,10 +7471,11 @@
                 "description",
                 "massAction",
                 "operation",
+                "requiredPermission",
                 "scheduleRequired",
                 "stepEligible"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailMessage\\Requests\\EmailMessageSendRequest",
             "rules": [
@@ -7378,6 +7777,22 @@
                     "between": null
                 },
                 {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "override_suppression",
                     "rules": [
                         "nullable",
@@ -7499,9 +7914,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_email_messages",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -7519,9 +7935,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_messages",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -7539,9 +7956,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailMessage\\Requests\\EmailMessageUpdateRequest",
             "rules": [
@@ -7639,9 +8057,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailMessage\\Requests\\EmailMessageGetAttachmentRequest",
             "rules": [
@@ -7681,6 +8100,690 @@
         },
         {
             "method": "POST",
+            "uri": "api/email-oauth-apps",
+            "controller": "App\\Entities\\EmailOauthApp\\EmailOauthAppController",
+            "action": "store",
+            "operation": "create",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailOauthApp\\Requests\\EmailOauthAppCreateRequest",
+            "rules": [
+                {
+                    "field": "provider",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"google\",\"microsoft\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "google",
+                        "microsoft"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "name",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_secret",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:1024"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 1024,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "microsoft_tenant",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "callback_host",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "google_pubsub_topic",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "is_default",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "publishing_status",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"unknown\",\"testing\",\"unverified\",\"verified\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "unknown",
+                        "testing",
+                        "unverified",
+                        "verified"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-oauth-apps/search",
+            "controller": "App\\Entities\\EmailOauthApp\\EmailOauthAppController",
+            "action": "search",
+            "operation": "search",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailOauthApp\\Requests\\EmailOauthAppSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.provider",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.status",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.is_default",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.callback_host",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.client_id",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.q",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.created_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.deleted_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.field",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"created_at\",\"name\",\"last_verified_at\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "created_at",
+                        "name",
+                        "last_verified_at"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sort.direction",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"asc\",\"desc\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "asc",
+                        "desc"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "DELETE",
+            "uri": "api/email-oauth-apps/{sid}",
+            "controller": "App\\Entities\\EmailOauthApp\\EmailOauthAppController",
+            "action": "destroy",
+            "operation": "delete",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_email_accounts",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "PATCH",
+            "uri": "api/email-oauth-apps/{sid}",
+            "controller": "App\\Entities\\EmailOauthApp\\EmailOauthAppController",
+            "action": "update",
+            "operation": "update",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailOauthApp\\Requests\\EmailOauthAppUpdateRequest",
+            "rules": [
+                {
+                    "field": "name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "microsoft_tenant",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "callback_host",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "google_pubsub_topic",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "is_default",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "publishing_status",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"unknown\",\"testing\",\"unverified\",\"verified\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "unknown",
+                        "testing",
+                        "unverified",
+                        "verified"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_secret",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:1024"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 1024,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_id",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "provider",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-oauth-apps/{sid}/verify",
+            "controller": "App\\Entities\\EmailOauthApp\\EmailOauthAppController",
+            "action": "verify",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_email_accounts",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
             "uri": "api/email-sending-domains",
             "controller": "App\\Entities\\EmailSendingDomain\\EmailSendingDomainController",
             "action": "store",
@@ -7691,9 +8794,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_sending_domains",
             "internal": false,
             "request_class": "App\\Entities\\EmailSendingDomain\\Requests\\EmailSendingDomainCreateRequest",
             "rules": [
@@ -7744,9 +8848,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_sending_domains",
             "internal": false,
             "request_class": "App\\Entities\\EmailSendingDomain\\Requests\\EmailSendingDomainSearchRequest",
             "rules": [
@@ -8010,9 +9115,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_sending_domains",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -8031,9 +9137,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_sending_domains",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -8051,9 +9158,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_suppressions",
             "internal": false,
             "request_class": "App\\Entities\\EmailSuppression\\Requests\\EmailSuppressionCreateRequest",
             "rules": [
@@ -8153,9 +9261,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_suppressions",
             "internal": false,
             "request_class": "App\\Entities\\EmailSuppression\\Requests\\EmailSuppressionMetricsRequest",
             "rules": [
@@ -8337,9 +9446,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_suppressions",
             "internal": false,
             "request_class": "App\\Entities\\EmailSuppression\\Requests\\EmailSuppressionSearchRequest",
             "rules": [
@@ -8576,9 +9686,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_suppressions",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -8596,9 +9707,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailThread\\Requests\\EmailThreadMetricsRequest",
             "rules": [
@@ -8710,9 +9822,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailThread\\Requests\\EmailThreadSearchRequest",
             "rules": [
@@ -9053,9 +10166,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_messages",
             "internal": false,
             "request_class": "App\\Entities\\EmailThread\\Requests\\EmailThreadGetLlmContextRequest",
             "rules": [
@@ -9122,9 +10236,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_act_email_messages",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -9142,9 +10257,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_tracking_domains",
             "internal": false,
             "request_class": "App\\Entities\\EmailTrackingDomain\\Requests\\EmailTrackingDomainCreateRequest",
             "rules": [
@@ -9195,9 +10311,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_view_email_tracking_domains",
             "internal": false,
             "request_class": "App\\Entities\\EmailTrackingDomain\\Requests\\EmailTrackingDomainSearchRequest",
             "rules": [
@@ -9431,9 +10548,10 @@
             "schedule_required": false,
             "declared_arguments": [
                 "description",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_tracking_domains",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -9452,9 +10570,10 @@
             "declared_arguments": [
                 "description",
                 "massAction",
-                "operation"
+                "operation",
+                "requiredPermission"
             ],
-            "required_permission": null,
+            "required_permission": "can_manage_email_tracking_domains",
             "internal": false,
             "request_class": null,
             "rules": null,
@@ -9493,57 +10612,6 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action takes no request object"
-        },
-        {
-            "method": "POST",
-            "uri": "internal/email-accounts/push/gmail",
-            "controller": "App\\Entities\\EmailAccount\\InternalEmailAccountController",
-            "action": "gmailPushNotifications",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "GET",
-            "uri": "internal/email-accounts/push/graph",
-            "controller": "App\\Entities\\EmailAccount\\InternalEmailAccountController",
-            "action": "graphChangeNotifications",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "POST",
-            "uri": "internal/email-accounts/push/graph",
-            "controller": "App\\Entities\\EmailAccount\\InternalEmailAccountController",
-            "action": "graphChangeNotifications",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
         },
         {
             "method": "POST",
@@ -9981,6 +11049,376 @@
                 }
             ],
             "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/dump",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "dump",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/dump-delete",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "dumpDelete",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Box\\Requests\\BoxOpsDumpRequest",
+            "rules": [
+                {
+                    "field": "dump_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^[a-z0-9]{12,32}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/dump-download",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "dumpDownload",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Box\\Requests\\BoxOpsDumpRequest",
+            "rules": [
+                {
+                    "field": "dump_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^[a-z0-9]{12,32}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/dump-status",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "dumpStatus",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Box\\Requests\\BoxOpsDumpRequest",
+            "rules": [
+                {
+                    "field": "dump_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^[a-z0-9]{12,32}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/hold",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "hold",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/restore",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "restore",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Box\\Requests\\BoxOpsRestoreRequest",
+            "rules": [
+                {
+                    "field": "source",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source.base_url",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:255",
+                        "regex:#^https?://[A-Za-z0-9.\\-]+(:[0-9]+)?/?$#"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source.access_key",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:255",
+                        "regex:/^[^\\s\"\\\\]+$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source.dump_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^[a-z0-9]{12,32}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source.sha256",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "regex:/^[0-9a-f]{64}$/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source.bytes",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/restore-status",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "restoreStatus",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Box\\Requests\\BoxOpsRestoreStatusRequest",
+            "rules": [
+                {
+                    "field": "restore_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^[a-z0-9]{12,32}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/resume",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "resume",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/rotate-secrets",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "rotateSecrets",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Box\\Requests\\BoxOpsRotateSecretsRequest",
+            "rules": [
+                {
+                    "field": "token",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^[A-Za-z0-9]{64}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/smoke",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "smoke",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/box/status",
+            "controller": "App\\Ops\\Box\\InternalBoxOpsController",
+            "action": "status",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
         },
         {
             "method": "POST",
@@ -10553,6 +11991,57 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "push/gmail",
+            "controller": "App\\Entities\\EmailAccount\\Push\\EmailAccountPushController",
+            "action": "gmail",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "GET",
+            "uri": "push/graph",
+            "controller": "App\\Entities\\EmailAccount\\Push\\EmailAccountPushController",
+            "action": "graph",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "push/graph",
+            "controller": "App\\Entities\\EmailAccount\\Push\\EmailAccountPushController",
+            "action": "graph",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
         },
         {
             "method": "GET",

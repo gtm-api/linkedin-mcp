@@ -24,11 +24,12 @@
     "uncovered_routes": []
   },
   "email": {
-    "_note": "uncovered_routes is the ENTIRE public surface of gtm.service.email: 44 routes, because this service has no MCP package at all. It is listed here route by route for the same reason every other gap is: the freshness gate reads a service list, and a service missing from that list is not covered debt, it is invisible debt. Added 2026-07-27, when email joined the registry-keyed gates with an empty package set. stale_routes is empty and will stay empty until an @gtm/mcp-email package exists to point anywhere. Burn down by authoring packages: every route a new tool covers must be deleted from this list and taken off ratchet.json in the same change.",
+    "_note": "uncovered_routes is the ENTIRE public surface of gtm.service.email: 49 routes (44 on 2026-07-27, plus the five email-oauth-apps routes the service gained in September 2026), because this service has no MCP package at all. It is listed here route by route for the same reason every other gap is: the freshness gate reads a service list, and a service missing from that list is not covered debt, it is invisible debt. Added 2026-07-27, when email joined the registry-keyed gates with an empty package set. stale_routes is empty and will stay empty until an @gtm/mcp-email package exists to point anywhere. Burn down by authoring packages: every route a new tool covers must be deleted from this list and taken off ratchet.json in the same change.",
     "stale_routes": [],
     "uncovered_routes": [
       "DELETE api/email-accounts/{sid}",
       "DELETE api/email-messages/{sid}",
+      "DELETE api/email-oauth-apps/{sid}",
       "DELETE api/email-sending-domains/{sid}",
       "DELETE api/email-suppressions/{sid}",
       "DELETE api/email-tracking-domains/{sid}",
@@ -36,6 +37,7 @@
       "GET api/email-messages/{sid}",
       "PATCH api/email-accounts/{sid}",
       "PATCH api/email-messages/{sid}",
+      "PATCH api/email-oauth-apps/{sid}",
       "POST api/email-account-activity-log/search",
       "POST api/email-account-health/search",
       "POST api/email-account-sync-runs/search",
@@ -58,6 +60,9 @@
       "POST api/email-messages/search",
       "POST api/email-messages/send",
       "POST api/email-messages/{sid}/get-attachment",
+      "POST api/email-oauth-apps",
+      "POST api/email-oauth-apps/search",
+      "POST api/email-oauth-apps/{sid}/verify",
       "POST api/email-sending-domains",
       "POST api/email-sending-domains/search",
       "POST api/email-sending-domains/{sid}/verify-dns",
