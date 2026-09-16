@@ -34604,7 +34604,7 @@
                         "sometimes",
                         "string",
                         "max:2048",
-                        "url"
+                        "url:https"
                     ],
                     "required": false,
                     "nullable": false,
@@ -34842,7 +34842,7 @@
                         "sometimes",
                         "string",
                         "max:2048",
-                        "url"
+                        "url:https"
                     ],
                     "required": false,
                     "nullable": false,
@@ -35319,7 +35319,7 @@
                         "sometimes",
                         "string",
                         "max:2048",
-                        "url"
+                        "url:https"
                     ],
                     "required": false,
                     "nullable": false,
@@ -35493,7 +35493,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "url",
+                        "url:https",
                         "max:2048"
                     ],
                     "required": false,
@@ -35746,7 +35746,7 @@
                         "sometimes",
                         "string",
                         "max:2048",
-                        "url"
+                        "url:https"
                     ],
                     "required": false,
                     "nullable": false,
