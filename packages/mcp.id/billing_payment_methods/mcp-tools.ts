@@ -82,7 +82,7 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     ...base,
     name: 'delete_billing_payment_method',
     description:
-      "Remove a saved payment method from the workspace's paying user's Paddle customer (proxies Paddle DELETE; no local row, no cascade). DANGEROUS. Search first and, if the method is is_default:true (the billing card), confirm with the user before deleting: it leaves the subscription card-less. Deleting an already-removed method is idempotent success. sid is a raw Paddle paymtd_ id. Requires billing.manage.",
+      "Remove a saved payment method: this only takes it off the paying user's saved list in Paddle. A method a live subscription uses is refused (409 conflict, payment_method_in_use) until that subscription is moved to another card via get_billing_payment_method_add_link: always the case for is_default:true while the plan bills it. A non-default card can be refused too, when it pays another subscription of the same payer (another workspace or a floating one). Idempotent. Requires billing.manage.",
     toolClass: 'typical',
     route: { service: 'id', method: 'DELETE', pathTemplate: '/api/billing-payment-methods/{sid}', sidParam: 'sid' },
     operation: 'delete',
