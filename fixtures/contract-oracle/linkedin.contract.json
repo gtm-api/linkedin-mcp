@@ -35094,6 +35094,23 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -35201,6 +35218,23 @@
                     "in": null,
                     "min": 1,
                     "max": 8000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 },
@@ -35457,6 +35491,23 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -35594,6 +35645,23 @@
                     "in": null,
                     "min": null,
                     "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 },

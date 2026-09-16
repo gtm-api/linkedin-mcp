@@ -379,6 +379,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
         url: z.string().optional().describe('https:// source the backend fetches.'),
         base64: z.string().optional().describe('Inline payload (~15 MB cap pre-normalization).'),
       }).describe('Exactly one of url / base64; normalized server-side to AAC/m4a ≤ 60 s.'),
+      client_reference: z.string().max(255).nullable().optional()
+        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -431,6 +433,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (preferred on the SN surface); interchangeable with ln_id.'),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
+      client_reference: z.string().max(255).nullable().optional()
+        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -463,6 +467,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
         length: z.number().int().min(1).describe('Run length in UTF-16 code units; start + length must fit inside text.'),
         kind: z.record(z.unknown()).describe('The formatting, an object with exactly one key: {"bold":{}}, {"italic":{}}, {"listItem":{}}, {"list":{"ordered":false}}, {"hyperlink":{"url":"https://..."}}.'),
       })).max(200).optional().describe('Rich-text runs over text. NEW THREAD ONLY: a reply with attributes is refused 422 attributes_not_supported_in_thread.'),
+      client_reference: z.string().max(255).nullable().optional()
+        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -579,6 +585,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       conversation_title: z.string().max(100).nullable().optional()
         .describe('Optional group name, max 100 chars; omitted leaves the thread unnamed.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
+      client_reference: z.string().max(255).nullable().optional()
+        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
