@@ -44,6 +44,13 @@ const ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
 const ENTITY_URN = z.string().min(1).max(512)
   .describe('The target handle, in the wire\'s full social-thread vocabulary (2026-08-21): a post urn in any of the four families - urn:li:activity:<id> (member posts), urn:li:share:<id>, urn:li:ugcPost:<id> (company pages and newsletters), urn:li:groupPost:<groupId>-<postId> (group threads) - or a COMMENT key to target a comment, in either form: public urn:li:comment:((activity|share|ugcPost|groupPost):<id>,<id>) or the fsd urn:li:fsd_comment:(<commentId>,<full thread urn>) LinkedIn\'s own responses carry (normalized before the wire). All pass verbatim; a malformed urn is refused 422 before any dispatch. A post URL is also accepted when the id is in it: the feed permalink and the share link (/posts/<slug>-activity-<id>-<hash>) are both converted locally. A link WITHOUT an id (a shortlink, a bare slug URL) is refused 422 entity_urn_not_resolvable: reading those means opening the page, so call get_activity_urn_by_url first rather than have a write verb open a page silently. The post does NOT need to be tracked or owned by us. Renamed from activity_urn on 2026-07-30; the old name is no longer accepted.');
 
+// react / unreact take the same handles as a comment, but a POST handle is
+// re-addressed at the post's social thread before the wire (2026-09-16, live
+// capture: a reaction sent to the activity urn of a ugcPost post answered success,
+// a null reaction_urn, and landed nowhere).
+const REACTION_ENTITY_URN = z.string().min(1).max(512)
+  .describe('The post or comment to react on. LinkedIn files a reaction under the post\'s social thread and silently drops one sent to any other key (success, null reaction_urn, nothing lands: captured live on the activity urn of a ugcPost company post), so a post handle is re-addressed at its thread before the wire. urn:li:ugcPost:<id> and urn:li:groupPost:<groupId>-<postId> are the thread and go as is. urn:li:activity:<id> and urn:li:share:<id> cost one post read first (the read enrich_linkedin_post_details makes, on this account, cached 7 days): a share post is reacted on at its activity urn, a ugcPost post at its ugcPost urn, a repost without commentary at the original. A post the read returns null for (deleted, or not visible to the account) is refused 422 post_not_resolvable. A COMMENT key targets a comment and passes verbatim, either form: urn:li:comment:((activity|share|ugcPost|groupPost):<id>,<id>) or urn:li:fsd_comment:(<commentId>,<full thread urn>). A post URL works when the id is in it: the feed permalink, the /posts/<slug>-activity-<id>-<hash> share link, the -ugcPost-<id>- share link. A link WITHOUT an id (a shortlink, a bare slug URL) is refused 422 entity_urn_not_resolvable: call enrich_linkedin_get_activity_urn_by_url first. A malformed urn is refused 422 before any dispatch. The post does NOT need to be tracked or owned by us.');
+
 // BREAKING, 2026-08-06: create-post went live and its reserved contract was
 // rewritten to the node's express-validator chain, which disagreed with it in
 // five ways (§ CONTRACT AUTHORITY: the wire is the contract, our reserved shape
@@ -255,7 +262,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'react_linkedin_post',
     description:
-      'Leave OUR reaction on any LinkedIn post OR comment, addressed by its social-thread urn in entity_urn (wire create-reaction): a post urn in any family, or a comment urn (either form) - the vocabulary entity_urn documents. The social-selling counterpart of create_linkedin_comment. Outward and fire-on-success: the post does NOT need to be tracked, nothing is persisted here. Identity-bound: linkedin_account_sid REQUIRED, spends the react_posts bucket (30/day at a 360 s floor), saturation returns 429. Returns reaction_urn (the created reaction\'s key; null on wire drift) plus the activity-log row. interested is the EVENT-post reaction: ordinary posts silently ignore it (success envelope, null reaction_urn, nothing lands - verified live), so a null urn after an interested react is the no-op tell. To comment use create_linkedin_comment; to read who already reacted use the scraping get-post-reactors tool.',
+      'Leave OUR reaction on any LinkedIn post OR comment (wire create-reaction): entity_urn takes a post urn in any family, a post URL carrying one, or a comment urn. A post is reacted on at its social thread; an activity or share urn costs one cached post read to name it (see entity_urn). The social-selling counterpart of create_linkedin_comment. Outward and fire-on-success: the post does NOT need to be tracked, nothing is persisted here. Identity-bound: linkedin_account_sid REQUIRED, spends the react_posts bucket (30/day at a 360 s floor), saturation returns 429. Returns reaction_urn (the reaction\'s key, naming the entity it landed on; null on drift or when LinkedIn ignored it) plus the activity-log row. interested is the EVENT-post reaction: ordinary posts silently ignore it (success envelope, null reaction_urn, nothing lands - verified live), so a null urn after an interested react is the no-op tell. To comment use create_linkedin_comment; to read who already reacted use the scraping get-post-reactors tool.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/react' },
     operation: 'action',
@@ -267,7 +274,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      entity_urn: ENTITY_URN,
+      entity_urn: REACTION_ENTITY_URN,
       reaction_type: z.enum(['like', 'celebrate', 'support', 'love', 'insightful', 'funny', 'interested']).nullable().optional()
         .describe('The reaction to leave, mapped to the plugin wire ReactionType. Defaults to like. interested (wire MAYBE) works on EVENT posts; ordinary posts silently ignore it (null reaction_urn back).'),
       ...usageMetaField,
@@ -325,7 +332,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'unreact_linkedin_post',
     description:
-      'Remove OUR reaction from a LinkedIn post or comment, addressed by the same entity_urn react_linkedin_post took (wire delete-reaction). Undo a reaction left by mistake or by a play that has been retargeted. Takes no reaction_type: LinkedIn holds at most one reaction per account per entity, so removal is unambiguous. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME react_posts bucket as reacting (30/day at a 360 s floor, bursting 2 so a reaction and its removal fit back-to-back), saturation returns 429. Removing a reaction that was never there is not a documented success on the wire, so it comes back as 409 reaction_not_removed rather than a cheerful no-op.',
+      'Remove OUR reaction from a LinkedIn post or comment, addressed by the same entity_urn react_linkedin_post took (wire delete-reaction). Undo a reaction left by mistake or by a play that has been retargeted. Takes no reaction_type: LinkedIn holds at most one reaction per account per entity, so removal is unambiguous. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME react_posts bucket as reacting (30/day at a 360 s floor, bursting 2 so a reaction and its removal fit back-to-back), saturation returns 429. A post is addressed at its social thread exactly like react_linkedin_post, so undoing with the value you reacted with removes the reaction that landed. removed: true means LinkedIn accepted the delete, not that a reaction existed (a delete with nothing to remove answered true live, 2026-09-16); a refused removal comes back 409 reaction_not_removed.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/unreact' },
     operation: 'action',
@@ -337,7 +344,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      entity_urn: ENTITY_URN,
+      entity_urn: REACTION_ENTITY_URN,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), UnreactResult),
