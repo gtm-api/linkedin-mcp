@@ -6216,6 +6216,14 @@
                     "value": "linkedin_account_signed_out"
                 },
                 {
+                    "name": "LinkedinAccountRecruiterSignedOut",
+                    "value": "linkedin_account_recruiter_signed_out"
+                },
+                {
+                    "name": "CloudBrowserSignInLink",
+                    "value": "cloud_browser_sign_in_link"
+                },
+                {
                     "name": "EmailBoxReady",
                     "value": "email_box_ready"
                 },
@@ -6706,6 +6714,23 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Team\\Enums\\TeamDeletionStateEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Live",
+                    "value": "live"
+                },
+                {
+                    "name": "Deleted",
+                    "value": "deleted"
+                },
+                {
+                    "name": "Purged",
+                    "value": "purged"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\Team\\Enums\\TeamGroupableFieldsEnum": {
             "backing": "string",
             "cases": [
@@ -6733,6 +6758,19 @@
                 {
                     "name": "Partner",
                     "value": "partner"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Team\\Enums\\TeamPurgeStageEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "SoftDelete",
+                    "value": "soft_delete"
+                },
+                {
+                    "name": "HardDelete",
+                    "value": "hard_delete"
                 }
             ]
         },
@@ -18385,6 +18423,23 @@
         },
         {
             "method": "POST",
+            "uri": "internal/email-boxes/gateway-map",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "gatewayMap",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
             "uri": "internal/email-boxes/list",
             "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
             "action": "list",
@@ -18416,6 +18471,23 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-boxes/{sid}/ops-address",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "opsAddress",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
         },
         {
             "method": "GET",
@@ -18690,6 +18762,41 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/teams/deletion-state",
+            "controller": "App\\Entities\\Team\\InternalTeamController",
+            "action": "deletionState",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\Team\\Requests\\TeamDeletionStateRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
