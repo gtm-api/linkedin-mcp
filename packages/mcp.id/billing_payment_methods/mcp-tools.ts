@@ -36,8 +36,13 @@ const BillingPaymentMethod = z.object({
   saved_at: z.string().nullable(),
 }).passthrough();
 
-const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
-const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
+// Every verb is a live Paddle round-trip, so all three are open-world (research
+// Annotations). get-add-link mints a fresh portal session on each call: a write
+// that is neither idempotent nor destructive. delete is idempotent: a method
+// Paddle no longer holds answers already_deleted.
+const PADDLE_READ = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: true };
+const PADDLE_MINT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true };
+const PADDLE_DELETE = { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: true };
 
 const base = {
   service: 'id',
@@ -59,7 +64,7 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     dangerous: false,
     inputSchema: z.object({ ...usageMetaField }),
     outputSchema: McpSearchResponse(BillingPaymentMethod),
-    annotations: { title: 'List payment methods', ...RO },
+    annotations: { title: 'List payment methods', ...PADDLE_READ },
   },
   {
     ...base,
@@ -76,7 +81,7 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({ ...usageMetaField }),
     outputSchema: McpActionResponse(z.null(), z.object({ add_link: z.string().nullable(), expires_at: z.string(), subscription_sid: z.string() })),
-    annotations: { title: 'Get add-card link', ...RO },
+    annotations: { title: 'Get add-card link', ...PADDLE_MINT },
   },
   {
     ...base,
@@ -91,6 +96,6 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     dangerous: true,
     inputSchema: z.object({ sid: PAYMENT_METHOD_SID, ...usageMetaField }),
     outputSchema: McpSimpleDeleteResponse,
-    annotations: { title: 'Delete payment method', ...DANGER },
+    annotations: { title: 'Delete payment method', ...PADDLE_DELETE },
   },
 ];
