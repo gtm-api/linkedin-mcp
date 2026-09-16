@@ -1388,10 +1388,11 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'set_linkedin_account_smart_limits',
     description:
-      'Switch smart-limit governance on or off for the WHOLE account, every bucket at once (there is no per-bucket toggle). ' +
-      'ON: the warmup sets every limit row\'s daily_limit / delay_in_seconds / batch_size, and update_linkedin_account_smart_limit refuses those fields with 409 smart_limits_governed; target_limit and learning_enabled stay yours. Turning on re-derives every cap from the latest snapshot on this call. ' +
-      'OFF: every cap runs exactly as typed and the account loses the warmup ban protection: say so to the user before switching off, and read recommended_daily_limit / recommended_delay_in_seconds on the rows before typing caps. ' +
-      'Idempotent. SINGLE account: for a fleet, author a mass action on /mcp/orchestration/mass-actions with the step `linkedin-accounts.set-smart-limits` (scope objects, args {enabled}); run it BEFORE a limit-row run over the same senders.',
+      'Switch smart-limit governance on or off for the WHOLE account, every bucket at once (no per-bucket toggle). ' +
+      'The switch remembers nothing: a real flip in EITHER direction first resets every limit row to the platform defaults (daily_limit = the bucket\'s platform max, delay / burst = the enum pair, target_limit = the platform default, hold cleared). ' +
+      'ON: the warmup then sets every row\'s daily_limit / delay_in_seconds / batch_size (re-derived from the latest snapshot) and update_linkedin_account_smart_limit refuses those fields with 409 smart_limits_governed; target_limit and learning_enabled stay yours. The seeded target_limit is a target the warmup climbs toward, never a limit somebody set. ' +
+      'OFF: every cap runs exactly as typed and the account loses the warmup ban protection: say so first, read the rows\' recommended_* before typing caps. ' +
+      'Idempotent. SINGLE account: a fleet is a mass action with step linkedin-accounts.set-smart-limits (scope objects, args {enabled}), run BEFORE a limit-row run on the same senders.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/set-smart-limits', sidParam: 'sid' },
     operation: 'action',

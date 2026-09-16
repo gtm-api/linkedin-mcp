@@ -157,10 +157,10 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     ...base,
     name: 'update_linkedin_account_smart_limit',
     description:
-      'Patch one limit row\'s operator-tunable policy (daily_limit / target_limit / delay_in_seconds / batch_size / learning_enabled; at least one field OR reset_hold:true); status recomputes atomically. ' +
-      'GATE: while the ACCOUNT\'s smart_limits_enabled is true, daily_limit / delay_in_seconds / batch_size are the warmup\'s and this call answers 409 smart_limits_governed (context.refused_fields). Then bound the cap with target_limit (the cap follows min(smart, target) at once), or call set_linkedin_account_smart_limits({enabled:false}) first and say that this removes the ban protection. ' +
-      'With the switch off nothing is refused: read recommended_daily_limit / recommended_delay_in_seconds first; up to twice the recommendation (or a delay down to half) is "elevated", beyond that "ban_likely"; warn in those words before committing. ' +
-      'A spent budget is "held"; raising daily_limit alone does not clear it, pass reset_hold:true in the same call. System-managed fields are rejected; a LinkedIn-side lock cannot be reset.',
+      'GATE: on a governed account (smart_limits_enabled true, the default) daily_limit / delay_in_seconds / batch_size belong to the warmup; moving any is 409 smart_limits_governed: never promise a raised cap there. target_limit only BOUNDS (the row follows min(smart_limit, target_limit)): a target above the warmup ceiling changes nothing today; a young or dormant account sits at 1..2 for weeks (see warmup_breakdown). The other way: set_linkedin_account_smart_limits({enabled:false}), said out loud as removing ban protection. ' +
+      'One row (daily_limit / target_limit / delay_in_seconds / batch_size / learning_enabled; one field OR reset_hold:true). ' +
+      'Switch off: nothing refused; read the row\'s recommended_* first, 2x (or half the delay) is "elevated", beyond that "ban_likely", warn so. ' +
+      'A spent budget is "held": raising daily_limit alone does not clear it, pass reset_hold:true too; it resumes once the cap exceeds done_today_count (governed rows re-hold at once). System fields are rejected; a LinkedIn lock is not resettable.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'PATCH', pathTemplate: '/api/linkedin-account-smart-limits/{sid}', sidParam: 'sid' },
     operation: 'update',
@@ -185,8 +185,8 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     ...base,
     name: 'reset_linkedin_account_smart_limit_hold',
     description:
-      'Clear OUR platform-side pause (hold_till = null) on one row. Prefer update({daily_limit:<higher>, reset_hold:true}) for the common "raise the cap AND resume". This standalone action is for resuming WITHOUT changing the limit (only meaningful when done_today_count < daily_limit, e.g. a systemic hold). ' +
-      'On a spent budget (done_today_count >= daily_limit) the saturation-latch re-holds immediately, so this is a no-op that stays held; raise daily_limit first. Idempotent (no-op if hold was already clear). Does NOT touch done_today_count or linkedin_quota_hit_till: a LinkedIn-side hard lock cannot be reset from the public surface (result.new_status stays linkedin_blocked if that clock is still active).',
+      'Clear OUR platform-side pause (hold_till = null) on one row. On a spent budget (done_today_count >= daily_limit) the saturation latch re-holds at once, so this is a no-op that stays held: the cap has to grow first. On a HAND-MANAGED account (smart_limits_enabled false) prefer update({daily_limit:<higher>, reset_hold:true}), which raises the cap and resumes atomically. On a GOVERNED account (the default) daily_limit is the warmup\'s and cannot be raised by hand: target_limit only bounds the cap, the warmup ceiling grows with account age and sent activity across snapshots, and the ramp lifts the latch by itself once its recomputed cap outgrows done_today_count, so nothing resumes today. This action resumes WITHOUT changing the limit (meaningful only when done_today_count < daily_limit, e.g. a systemic hold). ' +
+      'Idempotent. Does NOT touch done_today_count or linkedin_quota_hit_till: a LinkedIn-side hard lock cannot be reset from the public surface (result.new_status stays linkedin_blocked while that clock runs).',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-account-smart-limits/{sid}/reset-hold', sidParam: 'sid' },
     operation: 'action',
