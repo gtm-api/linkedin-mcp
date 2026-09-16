@@ -166,12 +166,9 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/content',
     name: 'gtm-linkedin-content',
     instructions:
-      'GTM LinkedIn content authoring and engagement: publish a post, comment on a post, react to a post, endorse or unendorse a connection\'s skill by id, from one of the team accounts. Posts are addressed by activity URN and need no prior tracking. Every verb is protected (preview then confirm). Media for a post goes as an https url we download (request_media_upload gives one: a link the user opens to drop the file, or an upload from a shell) or inline as base64; never type out base64 of a pasted image. Reading a post and who engaged with it lives on the scraping and enrichment mounts.',
+      'GTM LinkedIn content authoring and engagement: publish a post, comment on a post, react to a post, endorse or unendorse a connection\'s skill by id, from one of the team accounts. Posts are addressed by activity URN and need no prior tracking. Every verb is protected (preview then confirm). Media for a post goes as an https url we download (request_media_upload on the platform mount gives one: a link the user opens to drop the file, or an upload from a shell) or inline as base64; never type out base64 of a pasted image. Reading a post and who engaged with it lives on the scraping and enrichment mounts.',
     selectors: [
       p('linkedin_posting'),
-      // The upload slot for post media (2026-09-16): a pre-signed S3 form whose
-      // file_url feeds create_linkedin_post images[].url / video.url.
-      p('media_uploads'),
       // The explicit-skill endorse pair from the linkedin_accounts package (see
       // the accounts mount for why it lives here): endorse by skill id, and
       // its undo. Engagement writes next to react / unreact.
@@ -344,8 +341,8 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/platform',
     name: 'gtm-id-platform',
     instructions:
-      'GTM platform: notifications, SSL certificates (issue / renew / delete), support escalation (escalate_to_human hands the current issue to the human support team; the team replies to the user\'s account email), and the team\'s own API request log (search_api_requests / get_api_request_metrics: every call made with an api key or an OAuth client, your own included; how many, how many failed, which tools, which clients). Certificate mutations are protected (preview → confirm).',
-    selectors: [pid('notifications'), pid('ssl_certificates'), pid('support_requests'), pid('api_requests')],
+      'GTM platform: notifications, SSL certificates (issue / renew / delete), support escalation (escalate_to_human hands the current issue to the human support team; the team replies to the user\'s account email), the team\'s own API request log (search_api_requests / get_api_request_metrics: every call made with an api key or an OAuth client, your own included; how many, how many failed, which tools, which clients), and upload slots (request_media_upload: a one-time link the user opens to drop a file, or an upload from a shell, and the public file_url to pass on, e.g. to create_linkedin_post, instead of base64). Certificate mutations are protected (preview → confirm).',
+    selectors: [pid('notifications'), pid('ssl_certificates'), pid('support_requests'), pid('api_requests'), pid('media_uploads')],
     maxTools: 25,
     facade: 'none',
   },

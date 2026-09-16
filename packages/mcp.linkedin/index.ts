@@ -14,7 +14,6 @@ import { linkedinConnectionRequestsTools } from './linkedin_connection_requests/
 import { linkedinConnectionInvitationsTools } from './linkedin_connection_invitations/mcp-tools';
 import { linkedinFollowersTools } from './linkedin_followers/mcp-tools';
 import { linkedinPostingTools } from './linkedin_posting/mcp-tools';
-import { mediaUploadsTools } from './media_uploads/mcp-tools';
 import { linkedinScrapingTools } from './linkedin_scraping/mcp-tools';
 import { linkedinAutoScrapesTools } from './linkedin_auto_scrapes/mcp-tools';
 import { linkedinAutoScrapeRunsTools } from './linkedin_auto_scrape_runs/mcp-tools';
@@ -53,7 +52,6 @@ export const linkedinPackages: ToolPackage[] = [
   pkg('linkedin_connection_invitations', linkedinConnectionInvitationsTools),
   pkg('linkedin_followers', linkedinFollowersTools),
   pkg('linkedin_posting', linkedinPostingTools),
-  pkg('media_uploads', mediaUploadsTools),
   pkg('linkedin_scraping', linkedinScrapingTools),
   pkg('linkedin_auto_scrapes', linkedinAutoScrapesTools),
   pkg('linkedin_auto_scrape_runs', linkedinAutoScrapeRunsTools),

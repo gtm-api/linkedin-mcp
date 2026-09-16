@@ -9722,39 +9722,6 @@
                     "value": "inconclusive"
                 }
             ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\MediaUpload\\Enums\\MediaUploadFileTypeEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "ImagePng",
-                    "value": "image/png"
-                },
-                {
-                    "name": "ImageJpeg",
-                    "value": "image/jpeg"
-                },
-                {
-                    "name": "ImageGif",
-                    "value": "image/gif"
-                },
-                {
-                    "name": "ImageWebp",
-                    "value": "image/webp"
-                },
-                {
-                    "name": "VideoMp4",
-                    "value": "video/mp4"
-                },
-                {
-                    "name": "VideoQuicktime",
-                    "value": "video/quicktime"
-                },
-                {
-                    "name": "VideoWebm",
-                    "value": "video/webm"
-                }
-            ]
         }
     },
     "routes": [
@@ -45059,70 +45026,6 @@
         },
         {
             "method": "POST",
-            "uri": "api/media-uploads/request-upload",
-            "controller": "App\\Entities\\MediaUpload\\MediaUploadController",
-            "action": "requestUpload",
-            "operation": "action",
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [
-                "description",
-                "massAction",
-                "operation",
-                "requiredPermission"
-            ],
-            "required_permission": "can_act_linkedin_engagements",
-            "internal": false,
-            "request_class": "App\\Entities\\MediaUpload\\Requests\\MediaUploadRequestUploadRequest",
-            "rules": [
-                {
-                    "field": "file_name",
-                    "rules": [
-                        "sometimes",
-                        "string",
-                        "min:1",
-                        "max:200"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": null,
-                    "min": 1,
-                    "max": 200,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "file_type",
-                    "rules": [
-                        "sometimes",
-                        "string",
-                        "in:\"image/png\",\"image/jpeg\",\"image/gif\",\"image/webp\",\"video/mp4\",\"video/quicktime\",\"video/webm\""
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "string",
-                    "in": [
-                        "image/png",
-                        "image/jpeg",
-                        "image/gif",
-                        "image/webp",
-                        "video/mp4",
-                        "video/quicktime",
-                        "video/webm"
-                    ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                }
-            ],
-            "rules_reason": null
-        },
-        {
-            "method": "POST",
             "uri": "external/cloud-browsers/connect",
             "controller": "App\\Entities\\CloudBrowser\\ExternalCloudBrowserController",
             "action": "connect",
@@ -45569,40 +45472,6 @@
                 }
             ],
             "rules_reason": null
-        },
-        {
-            "method": "GET",
-            "uri": "external/uploads/{token}",
-            "controller": "App\\Entities\\MediaUpload\\ExternalMediaUploadController",
-            "action": "show",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
-        },
-        {
-            "method": "PUT",
-            "uri": "external/uploads/{token}",
-            "controller": "App\\Entities\\MediaUpload\\ExternalMediaUploadController",
-            "action": "store",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
         },
         {
             "method": "POST",

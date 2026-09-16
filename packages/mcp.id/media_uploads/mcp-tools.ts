@@ -1,8 +1,11 @@
-// Entity: Media Uploads (gtm.service.linkedin)
-// Source of truth: product/research/gtm.service.linkedin/entities/media_uploads.md
+// Entity: Media Uploads (gtm.service.id)
+// Source of truth: product/research/gtm.service.id/entities/media_uploads.md
 // The upload-slot surface, one route: POST /api/media-uploads/request-upload
-// (2026-09-16). Stateless: no table, no Domain. It reserves ONE object for an
-// image or video and answers its public file_url plus two ways to fill it: a
+// (2026-09-16). Platform-wide: built in gtm.service.linkedin, moved to id the same
+// day, because a post image, an email attachment and an avatar are one primitive
+// and id serves every cluster. Stateless: no table, no Domain. It reserves ONE
+// object for a file of a purpose (post_media today: an image or video) and
+// answers its public file_url plus two ways to fill it: a
 // one-time upload_link on our domain (a person opens it and drops the file, or a
 // shell runs curl -T) and, when file_type is given, a pre-signed S3 POST form.
 // The file_url then goes to create_linkedin_post as images[].url / video.url.
@@ -24,7 +27,10 @@ const MediaUploadFileType = z.enum([
   'video/webm',
 ]);
 
+const MediaUploadPurpose = z.enum(['post_media']);
+
 const RequestUploadResult = z.object({
+  purpose: z.string().describe('What the slot is for (post_media today); it decides the accepted file types.'),
   upload_link: z.string().describe('One-time link on our domain, valid until upload_expires_at. A person opens it in a browser and drops the file; a shell sends it with the curl line. Accepts one successful upload.'),
   upload: z.object({
     url: z.string().describe('The S3 form action to POST to.'),
@@ -45,14 +51,14 @@ const HINTS = { readOnlyHint: false, destructiveHint: false, idempotentHint: fal
 
 export const mediaUploadsTools: ToolDefinition[] = [
   {
-    service: 'linkedin',
+    service: 'id',
     entity: 'media_uploads',
-    mount: 'linkedin.content',
+    mount: 'id.platform',
     name: 'request_media_upload',
     description:
       'Get a place for ONE image or video file, then pass its file_url to create_linkedin_post (images[].url or video.url) instead of base64. In a chat without HTTP (the user pasted or has the picture): give the user upload_link, ask them to open it and drop the file, and call create_linkedin_post with file_url once they confirm. With a shell: run the curl line (upload_link, replace <path>). Pass file_type to also get a pre-signed S3 POST form (upload). Never type base64 of a pasted image: the model sees pixels, not the file, and the bytes come out wrong. The link works once for 30 minutes, up to 35 MB, images PNG/JPEG/GIF/WEBP or video MP4/MOV/WEBM (checked by content). The file is public by URL and deleted after 7 days. 120 per workspace per hour.',
     toolClass: 'complex',
-    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/media-uploads/request-upload' },
+    route: { service: 'id', method: 'POST', pathTemplate: '/api/media-uploads/request-upload' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
@@ -60,10 +66,12 @@ export const mediaUploadsTools: ToolDefinition[] = [
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
+      purpose: MediaUploadPurpose.optional()
+        .describe('What the file is for. post_media (the default): an image or video for create_linkedin_post.'),
       file_name: z.string().min(1).max(200).optional()
         .describe('Optional file name, e.g. "q3-chart.png". Characters outside A-Z a-z 0-9 . _ - become "-" in the stored name. Omit when you do not know it yet.'),
       file_type: MediaUploadFileType.optional()
-        .describe('Optional MIME type. Given, it also mints the pre-signed S3 form with this Content-Type bound in. The upload_link needs no type: it reads it from the file.'),
+        .describe('Optional MIME type, one the purpose takes. Given, it also mints the pre-signed S3 form with this Content-Type bound in. The upload_link needs no type: it reads it from the file.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), RequestUploadResult),

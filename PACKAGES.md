@@ -11,7 +11,7 @@ Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below 
 a plan. Every row below is ✅ shipped: three services are at full MCP coverage and the only remaining
 gap is `gtm.service.email`, which has no package and therefore no row.
 
-## mcp.linkedin: 12 mounts / 178 tools
+## mcp.linkedin: 12 mounts / 177 tools
 
 > 2026-07-24 service split: `linkedin-tracked-posts` / `-comments` / `-engagements` / `-searches` /
 > `-search-results` left this backend for `gs.service.signals`, and the outbound authoring verbs
@@ -27,7 +27,7 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 | messaging | `/mcp/linkedin/messaging` | linkedin_conversations (14 of its 16), linkedin_messages (13 of its 15): the four Recruiter messenger verbs ride on recruiter | 27 | ✅ (budget **28**, 1 free) |
 | recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 4 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects, get-my-recruiter-contracts, select-recruiter-contract) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 2 from linkedin_messages (get-my-latest-recruiter, send-recruiter). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 8 | ✅ |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (6), linkedin_connection_invitations (6), linkedin_followers (3) | 21 | ✅ |
-| content | `/mcp/linkedin/content` | linkedin_posting (8: create-post, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post) + media_uploads (1: request-upload, the S3 upload slot whose file_url feeds create-post media) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 11 | ✅ |
+| content | `/mcp/linkedin/content` | linkedin_posting (8: create-post, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 10 | ✅ |
 | scraping | `/mcp/linkedin/scraping` | linkedin_scraping (23; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not) | 23 | ✅ (budget 25, 2 free) |
 | auto_scrapes | `/mcp/linkedin/auto-scrapes` | linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2), linkedin_auto_scrape_results (1) | 13 | ✅ |
 | enrichment | `/mcp/linkedin/enrichment` | linkedin_enrichment (22) | 22 | ✅ |
@@ -63,10 +63,9 @@ pool-executor mode and a v2 signals consumer) without another budget conversatio
 2026-07-27 (Eugene). The 28 is a product decision, not a test fix. The inbox is a single job to a
 client (find the thread, read it, answer it), so the alternative - splitting `linkedin_conversations`
 from `linkedin_messages` onto two URLs - would make a client mount twice to do one thing.
-2026-09-16 - `media_uploads` (1 tool, `request_media_upload`) joins `content` next to
-`linkedin_posting`: a pre-signed S3 POST form for one image or video, whose public `file_url` goes
-into `create_linkedin_post` as `images[].url` / `video.url` (the same change gave create-post its
-`url` arm). Stateless, like the posting group. content 10 to 11 of 25, linkedin 177 to 178.
+2026-09-16 - `media_uploads` was built in this package set next to `linkedin_posting` and moved to
+`mcp.id` the same day (see the id section): uploading a file is a platform primitive, not a LinkedIn
+one. content is back at 10 of 25, linkedin at 177; create-post keeps its `url` arm.
 
 `resolveMounts` throws at module scope on the 29th tool, which kills the worker isolate rather than
 degrading one mount, and `tests/worker-boot.test.ts` is the only thing that catches it: read its
@@ -135,14 +134,14 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 4 mounts / 74 tools
+## mcp.id: 4 mounts / 75 tools
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
 | identity | `/mcp/id/identity` | users (2), teams (6), team_members (6), sessions (2) | 16 | ✅ |
 | access | `/mcp/id/access` | api_keys (7), oauth_clients (5), oauth_authorizations (3), account_shares (5) | 20 | ✅ |
 | billing | `/mcp/id/billing` | billing_products (1), billing_subscriptions (14), billing_transactions (4), billing_payment_methods (3) | 22 | ✅ |
-| platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), support_requests (3), api_requests (2) | 16 | ✅ |
+| platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), support_requests (3), api_requests (2), media_uploads (1) | 17 | ✅ |
 
 2026-08-16 - the `credits` mount and the `credit_transactions` package were removed with the
 platform-wide credits exit; data-bus reads are no longer metered.
@@ -157,6 +156,13 @@ platform mount: the team's own log of external API traffic, written by every ans
 its `api_request_log` and merged by gtm.service.id behind one public surface (research
 `api_requests.md`). It is what the SPA dashboard reads, and an agent's way to see its own footprint
 ("how many calls did I make today, did any fail"). Platform 14 to 16, id 72 to 74, 15 to 16 packages.
+
+2026-09-16 - `media_uploads` (1 tool, `request_media_upload`) joins the platform mount: the
+platform's upload slots (research `media_uploads.md` in gtm.service.id). A slot of a purpose
+(`post_media` today) answers a one-time link a person opens to drop the file (or a shell fills with
+`curl -T`), a pre-signed S3 form when a type is given, and the public `file_url` a consumer
+downloads, e.g. `create_linkedin_post` `images[].url`. Built on the linkedin content mount first and
+moved here the same day. Platform 16 to 17, id 74 to 75, 16 to 17 packages.
 
 ⚠️ `account_shares` moved here from `mcp.linkedin/platform` at the 2026-07-26 handover cutover: a
 handover binds TWO tenants that may live in different clusters, so the record and its tools belong on
@@ -230,7 +236,7 @@ running on a local handler over the docs index instead of a backend service is a
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
 Totals: **49 registry packages / 282 tools**, served over **18 mounts + 1 facade**. By service:
-linkedin 183 (28 packages), id 74 (16), orchestration 23 (4), support 2 (1). Every number in this
+linkedin 182 (27 packages), id 75 (17), orchestration 23 (4), support 2 (1). Every number in this
 file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
 `MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
 run, so re-run it rather than editing a count by hand.
