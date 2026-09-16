@@ -162,7 +162,7 @@ export const teamsTools: ToolDefinition[] = [
     ...base,
     name: 'delete_team',
     description:
-      'Cascade soft-delete a workspace and its owned rows (members, keys, sessions, oauth clients, certs). Owner-only. DESTRUCTIVE. Blocked (409 delete_blocked) while a paid applied subscription is live. Unapply/cancel it first; clear soft blockers (active keys / members) with acknowledge[]. Deleting the owner\'s LAST workspace is allowed and leaves their ACCOUNT untouched: they are left with no workspace until their next sign-in provisions a replacement. Erasing an account is a separate deliberate act, never a side effect of this tool.',
+      'Cascade soft-delete a workspace and its owned rows (members, keys, sessions, oauth clients, certs). Owner-only. DESTRUCTIVE. Blocked (409 delete_blocked) while a paid applied subscription is live. Unapply/cancel it first; clear soft blockers (active keys / members) with acknowledge[]. Deleting the owner\'s LAST workspace is allowed and leaves their ACCOUNT untouched: they are left with no workspace until their next sign-in provisions a replacement. Erasing an account is a separate deliberate act, never a side effect of this tool. There is no restore: the deleted workspace cannot be brought back, cascade.recovery_available_until is null, and its data is erased 30 days later.',
     toolClass: 'typical',
     route: { service: 'id', method: 'DELETE', pathTemplate: '/api/teams/{sid}', sidParam: 'sid' },
     operation: 'delete',
