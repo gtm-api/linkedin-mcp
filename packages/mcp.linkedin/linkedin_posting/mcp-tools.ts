@@ -58,7 +58,7 @@ const LinkedinPostingAllowedCommentersScope = z.enum(['ALL', 'CONNECTIONS_ONLY',
 
 const LinkedinPostingImageValue = z.object({
   file_base64: z.string().min(1)
-    .describe('The image bytes: a data:<mime>;base64,<...> URL or bare base64. The only way to attach an image; there is no fetch-by-url arm.'),
+    .describe('The image bytes of a PNG, JPEG, GIF or WEBP: a data:<mime>;base64,<...> URL or bare base64. The only way to attach an image; there is no fetch-by-url arm. Checked before anything is dispatched: a damaged file, a non-image or invalid base64 is a 422 on this member (image_corrupt / image_format_unrecognized / image_not_base64) and spends nothing. Encode the file with a tool and pass that output through unchanged: base64 re-typed by hand is the usual source of the damage.'),
   file_byte_size: z.number().int().min(1).nullable().optional(),
   file_name: z.string().min(1).max(255).nullable().optional(),
   file_type: z.string().min(1).max(255).nullable().optional(),
