@@ -7113,6 +7113,14 @@
                     "value": "stopped_before_delete"
                 },
                 {
+                    "name": "StoppedForMaintenance",
+                    "value": "stopped_for_maintenance"
+                },
+                {
+                    "name": "ReleasedAfterMaintenance",
+                    "value": "released_after_maintenance"
+                },
+                {
                     "name": "StartFailure",
                     "value": "start_failure"
                 },
@@ -7263,6 +7271,10 @@
                 {
                     "name": "IdleTimeout",
                     "value": "idle_timeout"
+                },
+                {
+                    "name": "MaintenanceReleased",
+                    "value": "maintenance_released"
                 }
             ]
         },

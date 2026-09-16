@@ -23,9 +23,10 @@ const AntidetectBrowserLog = z.object({
   automation_server_sid: z.string().nullable(),
   level: z.enum(['info', 'error']),
   event_type: z.enum([
-    // Lifecycle (6)
+    // Lifecycle (8)
     'started_on_schedule', 'stopped_on_schedule', 'started_by_user', 'stopped_by_user',
     'started_after_maintenance', 'stopped_before_delete',
+    'stopped_for_maintenance', 'released_after_maintenance',
     // Error (7)
     'start_failure', 'proxy_error', 'login_issue', 'runtime_error',
     'started_after_error', 'server_unreachable', 'error_escalation',
