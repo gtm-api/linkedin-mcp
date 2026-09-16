@@ -394,7 +394,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'generate_cloud_browser_access_key',
     description:
-      'Mint a cloud-browser access key (smart-link) on a browser. Returns the whole minted entry in result.access_key, whose `key` field is the raw cb_ak_ token (shown once), AND result.public_connect_url, the ready-to-share link to hand to whoever opens it (no platform account needed on their side). Pass result.access_key.key, never result.access_key, to revoke_cloud_browser_access_key. `purpose` decides what the page behind the link does: `relogin` walks them through signing the LinkedIn session back in and re-binds the browser once they confirm, `share` just hands them the browser to drive. Optional ttl_hours / max_connects / allowed_ips / allowed_countries scope the key. DANGEROUS: both the key and the link are bearer secrets granting remote browser access.',
+      'Mint a cloud-browser access key (smart-link) on a browser. Returns the whole minted entry in result.access_key, whose `key` field is the raw cb_ak_ token (shown once), AND result.public_connect_url, the ready-to-share link to hand to whoever opens it (no platform account needed on their side). Pass result.access_key.key, never result.access_key, to revoke_cloud_browser_access_key. `purpose` decides what the page behind the link does: `relogin` walks them through signing the LinkedIn session back in and re-binds the browser once they confirm, `share` just hands them the browser to drive. Optional ttl_hours / max_connects / allowed_ips / allowed_countries scope the key; send_to_email also mails the link to whoever holds the LinkedIn password (a fixed mail, no text to supply). DANGEROUS: both the key and the link are bearer secrets granting remote browser access.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/generate-cloud-browser-access-key' },
     operation: 'action',
@@ -413,6 +413,8 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
         .enum(['relogin', 'recruiter_relogin', 'share'])
         .optional()
         .describe('What the page behind the link does: relogin = sign the LinkedIn session back in and re-bind the browser on confirm (default); share = drive the browser, no sign-in step; recruiter_relogin = the relogin flow aimed at LinkedIn Recruiter (2026-09-15): the cloud browser opens on linkedin.com/talent so the seat holder signs the Recruiter session back in, and the confirmed restart re-checks the account\'s recruiter_status.'),
+      send_to_email: z.string().email().max(255).optional()
+        .describe('Also email the link to this address, typically the person who holds the LinkedIn password and has no account on the platform. The mail is queued after the key is committed; result.sent_to_email echoes the address. A malformed address is 422 and mints nothing.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(
@@ -422,6 +424,8 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
           access_key: CloudBrowserAccessEntry
             .describe('The minted entry, key included. Shown once: the key is a bearer secret and is never read back in full from any other surface.'),
           public_connect_url: z.string().describe('Shareable smart link carrying the key. Give this to the person who will open it.'),
+          sent_to_email: z.string().optional()
+            .describe('Present only when the request carried send_to_email: the address the link was mailed to. A queued send, not a delivery receipt.'),
         })
         .passthrough(),
     ),

@@ -10551,6 +10551,23 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "send_to_email",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "email:rfc",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "email",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
