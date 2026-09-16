@@ -565,18 +565,22 @@ const ResolvedPost = z.object({
 // Projection field set per research §Transient preview objects (LinkedinPersonPreview)
 // + backend LinkedinPersonPreviewMapper: every key is always emitted (null when the
 // search wire does not expose it), so fields are .nullable() but never .optional().
+// Coverage per engine: the regular people search fills headline, location and
+// connection_degree from the search card since 2026-09-16 (the node read the
+// identity only before that, the MCP audit report item 3); position and
+// company_name are structured facts only the Recruiter search carries.
 const LinkedinPersonPreview = z.object({
   ln_member_id: z.string().nullable().describe('Canonical member id (decoded in-process).'),
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
   full_name: z.string().nullable(),
-  headline: z.string().nullable(),
-  position: z.string().nullable(),
-  company_name: z.string().nullable(),
-  location: z.string().nullable(),
-  avatar_url: z.string().nullable(),
-  connection_degree: z.string().nullable(),
+  headline: z.string().nullable().describe('The card\'s headline line on the regular and Recruiter engines; null on Sales Navigator people search.'),
+  position: z.string().nullable().describe('Recruiter search only; the regular card prints no structured position (read the headline).'),
+  company_name: z.string().nullable().describe('Recruiter search only; the regular card prints no structured company (read the headline).'),
+  location: z.string().nullable().describe('The card\'s location line on the regular and Recruiter engines; null on Sales Navigator people search.'),
+  avatar_url: z.string().nullable().describe('Best effort on the regular engines (a DOM lookup, null when the card image had not rendered).'),
+  connection_degree: z.string().nullable().describe('The degree badge as the card prints it: 1st, 2nd, 3rd or 3rd+ on the regular engines; Recruiter spells 1st, 2nd, 3rd, out_of_network.'),
 }).passthrough();
 
 // The services screen answers with the SAME card shape as the people search,
@@ -585,17 +589,21 @@ const LinkedinPersonPreview = z.object({
 // wire, and promising them made the tool describe data it could never return.
 const LinkedinServiceProviderPreview = LinkedinPersonPreview;
 
+// Coverage per engine: the regular company search fills industry, followers (the
+// card's "4K followers" line as a number, LinkedIn's own rounding) and location
+// since 2026-09-16; employees_size and tagline come from the Sales Navigator
+// account search only; website is on no search wire.
 const LinkedinCompanyPreview = z.object({
   company_ln_id: z.string().nullable(),
-  nickname: z.string().nullable(),
+  nickname: z.string().nullable().describe('Vanity slug; regular and similar-companies engines only (Sales Navigator: null, resolve via get-company-public-identifier).'),
   name: z.string().nullable(),
   industry: z.string().nullable(),
-  employees_size: z.string().nullable(),
-  followers: z.number().int().nullable(),
-  location: z.string().nullable(),
-  tagline: z.string().nullable(),
+  employees_size: z.string().nullable().describe('Sales Navigator size bucket ("11-50"); null on the regular engine.'),
+  followers: z.number().int().nullable().describe('Regular and similar-companies engines; the regular card\'s rounded "4K followers" reads 4000.'),
+  location: z.string().nullable().describe('Regular engine: the card\'s location line; many cards print none.'),
+  tagline: z.string().nullable().describe('Sales Navigator only.'),
   logo_url: z.string().nullable(),
-  website: z.string().nullable(),
+  website: z.string().nullable().describe('On no search wire; always null.'),
 }).passthrough();
 
 // The THIRD row kind on this surface, and the reason the jobs search could not
@@ -975,7 +983,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_people',
     description:
-      'One page of a regular LinkedIn people search, addressed EITHER by `filters` OR by a pasted search `url`: exactly one of the two, never both, never neither. Use filters when the agent composes the search itself, url for a search already built in the LinkedIn UI or for anything the filter vocabulary cannot express. Same engine and the same person rows either way; page on with paging.has_more. commercial_use_limit_hit true means LinkedIn\'s monthly search paywall fired and rows may be truncated: switch to the Sales Navigator people tool or wait for the reset.',
+      'One page of a regular LinkedIn people search, addressed EITHER by `filters` OR by a pasted search `url`: exactly one of the two, never both, never neither. Use filters when the agent composes the search itself, url for a search already built in the LinkedIn UI or for anything the filter vocabulary cannot express. Same engine and the same person rows either way; page on with paging.has_more. Rows carry the card\'s headline, location and degree badge next to the identity (position / company_name are Recruiter-only). commercial_use_limit_hit true means LinkedIn\'s monthly search paywall fired and rows may be truncated: switch to the Sales Navigator people tool or wait for the reset.',
     toolClass: 'typical',
     route: rt('search-people'),
     operation: 'action',
@@ -1206,7 +1214,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_companies',
     description:
-      'One page of a regular LinkedIn company search, addressed EITHER by `filters` (keywords, geo ids, industry ids, headcount buckets) OR by a pasted /search/results/companies/ `url`: exactly one of the two, never both, never neither. Rows are company previews, not people. Same engine and the same company rows either way; page on with paging.has_more. For revenue, growth, follower, Fortune and buying-signal facets use scrape_linkedin_search_sales_nav_companies instead: this engine has none of them.',
+      'One page of a regular LinkedIn company search, addressed EITHER by `filters` (keywords, geo ids, industry ids, headcount buckets) OR by a pasted /search/results/companies/ `url`: exactly one of the two, never both, never neither. Rows are company previews, not people, carrying the card\'s industry, followers (LinkedIn\'s rounded count) and location next to the identity. Same engine and the same company rows either way; page on with paging.has_more. For revenue, growth, follower, Fortune and buying-signal facets use scrape_linkedin_search_sales_nav_companies instead: this engine has none of them.',
     toolClass: 'typical',
     route: rt('search-companies'),
     operation: 'action',

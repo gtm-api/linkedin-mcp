@@ -166,7 +166,7 @@ export const webhookLogsTools: ToolDefinition[] = [
     ...base,
     name: 'get_webhook_logs_metrics',
     description:
-      'Period-bound aggregates over webhook deliveries: success_rate, failure_rate, p50/p95/p99 latency, total_retries, last_success_at / last_failure_at. Requires period {from,to} (≤ 90 days). Optional filter scopes the row set (created_at operators inside filter are ignored; period is the only time window) and an optional single group_by axis (status, event_type, response_code, webhook_sid, account_sid).',
+      'Period-bound aggregates over webhook deliveries: success_rate, failure_rate, p50/p95/p99 latency, total_retries, last_success_at / last_failure_at. The rates and the two timestamps count TERMINAL outcomes only (rows in status success / failed): a delivery still in its retry loop is neither, so it shows in counts.groups.status.retrying and total_retries here and in the webhook row\'s consecutive_failed_attempts / last_failure_at (which count every attempt), not in these rates; a period with nothing terminal reads null, not 0. Requires period {from,to} (≤ 90 days). Optional filter scopes the row set (created_at operators inside filter are ignored; period is the only time window) and an optional single group_by axis (status, event_type, response_code, webhook_sid, account_sid).',
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/webhook-logs/metrics' },
     operation: 'metrics',

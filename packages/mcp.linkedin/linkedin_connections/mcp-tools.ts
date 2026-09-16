@@ -120,6 +120,12 @@ const LinkedinConnectionGroupable = z.enum([
 ]);
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
+// A live-dispatch read: it fetches from LinkedIn in-request through the account's
+// browser, which cold-starts a stopped or idle one (about 50 s, or 503
+// browser_starting) and releases that account's overdue syncs. Not a read-only
+// tool in the MCP sense, whatever its verb says (the audit report of 2026-09-16,
+// item 11): a client that auto-approves readOnlyHint tools must not run it blind.
+const LIVE_READ = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 const SYNC = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false };
 
@@ -134,7 +140,7 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_connections',
     description:
-      "List an account's 1st-degree LinkedIn connections with filters, sorting, cursor pagination and full-text q over the contact name. Live rows by default (deleted_at.is_null:true); pass is_null:false for churn analysis. Returns a counts block of predicate tallies; include[] can eager-load linkedin_account, the source request/invitation, conversations and last_messages.",
+      "List an account's 1st-degree LinkedIn connections with filters, sorting, cursor pagination and filter.q, a LIKE (substring) over the contact name. Live rows by default (filter {\"deleted_at\": {\"is_null\": true}}); pass {\"deleted_at\": {\"is_null\": false}} for churn analysis. Returns a counts block of predicate tallies; include[] can eager-load linkedin_account, the source request/invitation, conversations and last_messages.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connections/search' },
     operation: 'search',
@@ -187,10 +193,10 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_connections',
     description:
-      'Always-fresh head read: refresh the newest connections from LinkedIn in-request (§5.8), then return the last N (connected_at DESC) with a counts block. The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped. For richer slicing call search_linkedin_connections right after.',
+      'Always-fresh head read: refresh the newest connections from LinkedIn in-request (§5.8), then return the last N (connected_at DESC) with a counts block. The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped. For richer slicing call search_linkedin_connections right after. Runs through the account\'s browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account\'s overdue syncs.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connections/get-my-latest' },
-    operation: 'search',
+    operation: 'action',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
@@ -214,7 +220,7 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
         stop_reason: z.enum(['overlap', 'covered', 'page_cap', 'exhausted']).nullable(),
       }),
     }),
-    annotations: { title: 'Get my latest connections', ...RO },
+    annotations: { title: 'Get my latest connections', ...LIVE_READ },
   },
   {
     ...base,

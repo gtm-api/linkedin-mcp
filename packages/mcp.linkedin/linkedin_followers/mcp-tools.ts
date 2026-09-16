@@ -89,6 +89,12 @@ const LinkedinFollowerSortable = z.enum(['created_at', 'last_check_at', 'updated
 const LinkedinFollowerGroupable = z.enum(['linkedin_account_sid']);
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
+// A live-dispatch read: it fetches from LinkedIn in-request through the account's
+// browser, which cold-starts a stopped or idle one (about 50 s, or 503
+// browser_starting) and releases that account's overdue syncs. Not a read-only
+// tool in the MCP sense, whatever its verb says (the audit report of 2026-09-16,
+// item 11): a client that auto-approves readOnlyHint tools must not run it blind.
+const LIVE_READ = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 
 const base = {
   service: 'linkedin',
@@ -101,7 +107,7 @@ export const linkedinFollowersTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_followers',
     description:
-      'List stored followers of team accounts with filters, sorting, cursor pagination and full-text q over the follower name. Returns a counts block. include[] can eager-load linkedin_account plus the funnel probes linkedin_connection / linkedin_connection_request; both absent means a warm, untouched prospect.',
+      'List stored followers of team accounts with filters, sorting, cursor pagination and filter.q, a LIKE (substring) over the follower name. Returns a counts block. include[] can eager-load linkedin_account plus the funnel probes linkedin_connection / linkedin_connection_request; both absent means a warm, untouched prospect.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-followers/search' },
     operation: 'search',
@@ -137,10 +143,10 @@ export const linkedinFollowersTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_followers',
     description:
-      'Always-fresh head read of the followers list: refresh the newest from LinkedIn in-request (§5.8), then return the last N (created_at DESC) with a counts block. The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped.',
+      'Always-fresh head read of the followers list: refresh the newest from LinkedIn in-request (§5.8), then return the last N (created_at DESC) with a counts block. The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped. Runs through the account\'s browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account\'s overdue syncs.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-followers/get-my-latest' },
-    operation: 'search',
+    operation: 'action',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
@@ -154,6 +160,6 @@ export const linkedinFollowersTools: ToolDefinition[] = [
     }),
     outputSchema: McpSearchResponse(LinkedinFollower, undefined, LinkedinFollowerCounts)
       .extend({ refresh: LinkedinFollowerRefresh }),
-    annotations: { title: 'Get my latest followers', ...RO },
+    annotations: { title: 'Get my latest followers', ...LIVE_READ },
   },
 ];

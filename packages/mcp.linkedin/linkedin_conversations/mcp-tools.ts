@@ -135,6 +135,12 @@ const GroupVerbResult = z.object({
 }).passthrough();
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
+// A live-dispatch read: it fetches from LinkedIn in-request through the account's
+// browser, which cold-starts a stopped or idle one (about 50 s, or 503
+// browser_starting) and releases that account's overdue syncs. Not a read-only
+// tool in the MCP sense, whatever its verb says (the audit report of 2026-09-16,
+// item 11): a client that auto-approves readOnlyHint tools must not run it blind.
+const LIVE_READ = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
 
@@ -149,7 +155,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_conversations',
     description:
-      'List LinkedIn message threads for the team across both messenger surfaces (basic LinkedIn + Sales Navigator) with operator-object filters (account, contact ids, conversation_hash = LinkedIn\'s own 2-…== thread id, messenger_type, event-count, activity / message-sync clock ranges), sort, cursor pagination, and include[] for the parent account and the last 50 messages. Live rows by default; page_size:0 for count-only. Given a thread id by the user, look it up with filter.conversation_hash.eq: q is a nickname LIKE and will not find it.',
+      'List LinkedIn message threads for the team across both messenger surfaces (basic LinkedIn + Sales Navigator) with operator-object filters (account, contact ids, conversation_hash = LinkedIn\'s own 2-…== thread id, messenger_type, event-count, activity / message-sync clock ranges), sort, cursor pagination, and include[] for the parent account and the last 50 messages. Live rows by default; page_size:0 for count-only. Given a thread id by the user, look it up with filter.filter {"conversation_hash": {"eq": "<hash>"}}: q is a nickname LIKE and will not find it.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/search' },
     operation: 'search',
@@ -233,7 +239,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_conversations',
     description:
-      "Always-fresh head read of the basic-LinkedIn-messenger thread list for one account (§5.8 foreground refresh, then the last N threads from the refreshed DB, last_activity_at DESC). Never serves stale data: it 429s with bucket_saturated / sync_in_progress instead. Use before an inbox decision; use sync_my_linkedin_conversations for full backfill.",
+      "Always-fresh head read of the basic-LinkedIn-messenger thread list for one account (§5.8 foreground refresh, then the last N threads from the refreshed DB, last_activity_at DESC). Never serves stale data: it 429s with bucket_saturated / sync_in_progress instead. Use before an inbox decision; use sync_my_linkedin_conversations for full backfill. Runs through the account's browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account's overdue syncs.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/get-my-latest' },
     operation: 'action',
@@ -249,13 +255,13 @@ export const linkedinConversationsTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpSearchResponse(LinkedinConversation),
-    annotations: { title: 'Get my latest LinkedIn conversations', ...ACT },
+    annotations: { title: 'Get my latest LinkedIn conversations', ...LIVE_READ },
   },
   {
     ...base,
     name: 'get_my_latest_linkedin_conversations_sales_nav',
     description:
-      "Sales Navigator variant of get_my_latest_linkedin_conversations: always-fresh head read of the SN thread list for one account (§5.8 refresh-then-return). Same hard-429 guards; returns messenger_type='sales_navigator' rows.",
+      "Sales Navigator variant of get_my_latest_linkedin_conversations: always-fresh head read of the SN thread list for one account (§5.8 refresh-then-return). Same hard-429 guards; returns messenger_type='sales_navigator' rows. Runs through the account's browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account's overdue syncs.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/get-my-latest-sales-nav' },
     operation: 'action',
@@ -271,7 +277,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpSearchResponse(LinkedinConversation),
-    annotations: { title: 'Get my latest Sales Navigator conversations', ...ACT },
+    annotations: { title: 'Get my latest Sales Navigator conversations', ...LIVE_READ },
   },
   {
     ...base,
@@ -296,7 +302,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     mount: 'linkedin.recruiter',
     name: 'get_my_latest_linkedin_conversations_recruiter',
     description:
-      "LinkedIn Recruiter variant of get_my_latest_linkedin_conversations: always-fresh head read of the recruiter inbox for one account (§5.8 refresh-then-return over the talent wire, page size fixed at 15 by that wire). Same hard-429 guards; returns messenger_type='recruiter' rows whose recruiter_id is the candidate. Needs a Recruiter seat and its stamped seat number (422 recruiter_required / recruiter_seat_unresolvable).",
+      "LinkedIn Recruiter variant of get_my_latest_linkedin_conversations: always-fresh head read of the recruiter inbox for one account (§5.8 refresh-then-return over the talent wire, page size fixed at 15 by that wire). Same hard-429 guards; returns messenger_type='recruiter' rows whose recruiter_id is the candidate. Needs a Recruiter seat and its stamped seat number (422 recruiter_required / recruiter_seat_unresolvable). Runs through the account's browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account's overdue syncs.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/get-my-latest-recruiter' },
     operation: 'action',
@@ -312,7 +318,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpSearchResponse(LinkedinConversation),
-    annotations: { title: 'Get my latest Recruiter conversations', ...ACT },
+    annotations: { title: 'Get my latest Recruiter conversations', ...LIVE_READ },
   },
   {
     ...base,

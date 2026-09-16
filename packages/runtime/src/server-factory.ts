@@ -7,7 +7,7 @@ import { composeChain } from './chain';
 import { dispatch } from './dispatcher';
 import { getAuthScope } from './auth-scope';
 import { registerFacadeTools } from './facade';
-import { registeredShape } from './input-schema';
+import { callableSchema } from './input-schema';
 import { toolDescription } from './tool-description';
 
 export type ServerFactory = (mount: ResolvedMount, catalog?: ResolvedMount[]) => McpServer;
@@ -52,10 +52,12 @@ export function createServerFactory(
         tool.name,
         {
           description: toolDescription(tool),
-          // Registered shape (incl. commit_token on dangerous tools) comes from
-          // input-schema.ts, the same module the facade parses against, so the
-          // two entry points cannot advertise different contracts.
-          inputSchema: registeredShape(tool),
+          // The callable schema (incl. commit_token on dangerous tools) comes
+          // from input-schema.ts, the same module the facade parses against, so
+          // the two entry points cannot advertise different contracts. It is a
+          // deep-strict object, so the SDK's parse refuses an unknown key the
+          // way the facade does instead of stripping it in silence.
+          inputSchema: callableSchema(tool),
           annotations: tool.annotations,
         },
         async (args: Record<string, unknown>): Promise<ToolResult> => {

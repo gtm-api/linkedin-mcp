@@ -60,9 +60,80 @@ export function registeredShape(tool: ToolDefinition): z.ZodRawShape {
     : tool.inputSchema.shape;
 }
 
-/** The same contract as a parseable object, for callers that hold the args. */
+/**
+ * The same contract as a parseable object, for callers that hold the args:
+ * STRICT at every level. Zod objects strip unknown keys by default, so until
+ * 2026-09-16 both entry points dropped a misspelled or mis-shaped key in
+ * silence: `filter: {"linkedin_account_sid.eq": "..."}` (the dotted shorthand
+ * an older description showed) parsed to an EMPTY filter, a top-level `q`
+ * vanished, and the call succeeded against the whole team's rows with
+ * applied_filters {} (the MCP audit report, items 1 and 2). An unknown key is
+ * now the 422 the backend itself would answer, with a hint naming the shape.
+ * Objects declared `.passthrough()` keep it: those are the free-form bodies
+ * (custom request payloads, step args) whose keys are the caller's to choose.
+ */
 export function callableSchema(tool: ToolDefinition): z.AnyZodObject {
-  return z.object(registeredShape(tool));
+  return deepStrict(z.object(registeredShape(tool))) as z.AnyZodObject;
+}
+
+/** Rebuild a schema so every strip-mode object under it refuses unknown keys. */
+export function deepStrict<T extends z.ZodTypeAny>(schema: T): T {
+  const def = schema._def as unknown as { typeName?: string } & Record<string, unknown>;
+  switch (def.typeName) {
+    case z.ZodFirstPartyTypeKind.ZodObject: {
+      const object = schema as unknown as z.AnyZodObject;
+      if (object._def.unknownKeys === 'passthrough') return schema;
+      const shape: z.ZodRawShape = {};
+      for (const [key, value] of Object.entries(object.shape as z.ZodRawShape)) shape[key] = deepStrict(value);
+      return new z.ZodObject({ ...object._def, shape: () => shape, unknownKeys: 'strict' }) as unknown as T;
+    }
+    case z.ZodFirstPartyTypeKind.ZodOptional:
+    case z.ZodFirstPartyTypeKind.ZodNullable:
+      return new (schema.constructor as new (d: unknown) => T)({ ...def, innerType: deepStrict(def.innerType as z.ZodTypeAny) });
+    case z.ZodFirstPartyTypeKind.ZodDefault:
+      return new z.ZodDefault({ ...(def as unknown as z.ZodDefaultDef), innerType: deepStrict(def.innerType as z.ZodTypeAny) }) as unknown as T;
+    case z.ZodFirstPartyTypeKind.ZodEffects:
+      return new z.ZodEffects({ ...(def as unknown as z.ZodEffectsDef), schema: deepStrict(def.schema as z.ZodTypeAny) }) as unknown as T;
+    case z.ZodFirstPartyTypeKind.ZodArray:
+      return new z.ZodArray({ ...(def as unknown as z.ZodArrayDef), type: deepStrict(def.type as z.ZodTypeAny) }) as unknown as T;
+    case z.ZodFirstPartyTypeKind.ZodUnion:
+      return new z.ZodUnion({ ...(def as unknown as z.ZodUnionDef), options: (def.options as z.ZodTypeAny[]).map(deepStrict) as never }) as unknown as T;
+    case z.ZodFirstPartyTypeKind.ZodDiscriminatedUnion: {
+      const d = def as unknown as z.ZodDiscriminatedUnionDef<string>;
+      return z.discriminatedUnion(d.discriminator, d.options.map((o) => deepStrict(o)) as never) as unknown as T;
+    }
+    case z.ZodFirstPartyTypeKind.ZodIntersection:
+      return new z.ZodIntersection({ ...(def as unknown as z.ZodIntersectionDef), left: deepStrict(def.left as z.ZodTypeAny), right: deepStrict(def.right as z.ZodTypeAny) }) as unknown as T;
+    case z.ZodFirstPartyTypeKind.ZodRecord:
+      return new z.ZodRecord({ ...(def as unknown as z.ZodRecordDef), valueType: deepStrict(def.valueType as z.ZodTypeAny) }) as unknown as T;
+    default:
+      return schema;
+  }
+}
+
+// What an unknown key most likely meant, so the 422 repairs itself in one
+// turn. Dotted `field.op` keys are the shorthand older descriptions used to
+// print; a top-level `q` is the full-text filter placed one level too high.
+const TOOL_KEY_HINTS: Record<string, Record<string, string>> = {
+  update_linkedin_account_smart_limit: {
+    smart_limits_enabled: 'the account-wide switch is not a limit-row field: call set_linkedin_account_smart_limits with {"enabled": true|false}',
+  },
+};
+
+export function unknownKeyHint(tool: ToolDefinition, path: PropertyKey[], key: string): string {
+  const specific = TOOL_KEY_HINTS[tool.name]?.[key];
+  if (specific) return `unknown key "${key}": ${specific}`;
+  const dotted = /^([A-Za-z0-9_]+)\.([a-z_]+)$/.exec(key);
+  if (dotted) {
+    const [, field, op] = dotted;
+    const where = path.length === 0 ? 'filter' : path.join('.');
+    return `unknown key "${key}": filters are nested objects, not dotted keys; write ${where}: {"${field}": {"${op}": <value>}}`;
+  }
+  if (path.length === 0 && key === 'q') {
+    return 'unknown key "q": the text search is a filter field, write filter: {"q": "<text>"}';
+  }
+  const where = path.length === 0 ? 'a parameter' : `a field of ${path.join('.')}`;
+  return `unknown key "${key}": not ${where} of ${tool.name}; read the schema (get_toolset_tools with verbose:true) and drop or rename it`;
 }
 
 /**
@@ -79,6 +150,14 @@ export function validationFailedResult(tool: ToolDefinition, error: z.ZodError):
 
   for (const issue of error.issues) {
     const field = issue.path.length ? issue.path.join('.') : '(root)';
+    if (issue.code === 'unrecognized_keys') {
+      for (const key of issue.keys) {
+        const message = unknownKeyHint(tool, issue.path, key);
+        (fieldErrors[field] ??= []).push({ rule: 'unknown_key', message });
+        lines.push(`  • ${field}: ${message} [unknown_key]`);
+      }
+      continue;
+    }
     (fieldErrors[field] ??= []).push({ rule: issue.code, message: issue.message });
     lines.push(`  • ${field}: ${issue.message} [${issue.code}]`);
   }

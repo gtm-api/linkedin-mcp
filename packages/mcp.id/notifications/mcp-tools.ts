@@ -101,7 +101,7 @@ export const notificationsTools: ToolDefinition[] = [
     ...base,
     name: 'search_notifications',
     description:
-      'List notifications (email and in_app channels) for the team/user with filtering, sorting and cursor pagination: the user inbox ("what was sent to me?"), admin audit ("what did the system email Jane about?"), or failure triage (status:failed in the last 24h). No full-text search. Returns a counts block of predicate tallies (by status / event_name / channel). Bodies are omitted from list rows; call get_notification for the rendered body.',
+      'List notifications (email and in_app channels) for the team/user with filtering, sorting and cursor pagination: the user inbox ("what was sent to me?"), admin audit ("what did the system email Jane about?"), or failure triage (status:failed in the last 24h). No full-text search. Returns a counts block of predicate tallies (by status / event_name / channel). Bodies are omitted from list rows; call get_notification for the rendered body. On gtm-api.com every row is channel email: the in_app channel, read_at and the mark-read verbs are a shared-contract surface the GetSales side writes, so read_at is always null here and there is nothing to mark read.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/notifications/search' },
     operation: 'search',

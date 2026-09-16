@@ -97,14 +97,43 @@ describe('facade call_tool argument validation', () => {
     expect(Object.keys((result.structuredContent as { error: { field_errors: object } }).error.field_errors)).toEqual(['page_size']);
   });
 
-  it('passes a valid call through parsed, stripping keys the schema does not declare', async () => {
+  // Until 2026-09-16 an undeclared key was stripped in silence and the call
+  // went through (the MCP audit report, items 1 and 2: a dotted filter key
+  // parsed to an empty filter and answered the whole team). Now it is the 422
+  // the backend would answer, with a hint that names the shape.
+  it('refuses a key the schema does not declare, with a hint, and dispatches nothing', async () => {
     const { call, dispatched } = facade([mkTool()]);
 
     const result = await call({ name: 'search_things', arguments: { page_size: 25, bogus: 'x' } });
 
-    expect(result.isError).toBeUndefined();
-    expect(dispatched).toHaveLength(1);
-    expect(dispatched[0].args).toEqual({ page_size: 25 });
+    expect(result.isError).toBe(true);
+    expect(dispatched).toEqual([]);
+    const errors = (result.structuredContent as { error: { code: string; field_errors: Record<string, Array<{ rule: string; message: string }>> } }).error;
+    expect(errors.code).toBe('validation_failed');
+    expect(errors.field_errors['(root)'][0].rule).toBe('unknown_key');
+    expect(errors.field_errors['(root)'][0].message).toContain('unknown key "bogus"');
+  });
+
+  it('names the nested shape for a dotted filter key and filter.q for a top-level q', async () => {
+    const { call, dispatched } = facade([mkTool({
+      inputSchema: z.object({
+        filter: z.object({ name: z.object({ eq: z.string().optional() }).optional(), q: z.string().optional() }).optional(),
+        page_size: z.number().int().min(0).max(200).optional(),
+        _meta: z.any().optional(),
+      }),
+    })]);
+
+    const dotted = await call({ name: 'search_things', arguments: { filter: { 'name.eq': 'Ann' } } });
+    expect(dotted.isError).toBe(true);
+    const dottedErrors = (dotted.structuredContent as { error: { field_errors: Record<string, Array<{ message: string }>> } }).error.field_errors;
+    expect(dottedErrors['filter'][0].message).toContain('filter: {"name": {"eq": <value>}}');
+
+    const topQ = await call({ name: 'search_things', arguments: { q: 'Ann' } });
+    expect(topQ.isError).toBe(true);
+    const qErrors = (topQ.structuredContent as { error: { field_errors: Record<string, Array<{ message: string }>> } }).error.field_errors;
+    expect(qErrors['(root)'][0].message).toContain('filter: {"q": "<text>"}');
+
+    expect(dispatched).toEqual([]);
   });
 
   it('accepts commit_token on a dangerous tool, which the tool schema itself never declares', async () => {

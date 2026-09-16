@@ -122,7 +122,7 @@ export const antidetectBrowserProxiesTools: ToolDefinition[] = [
     ...base,
     name: 'search_antidetect_browser_proxies',
     description:
-      'List antidetect browser proxies (platform-wide pool) with filters, sorting and cursor pagination. Live proxies by default (deleted_at.is_null:true). Credentials (ip / port / username / password) are masked to null on this public read surface.',
+      'List antidetect browser proxies (platform-wide pool) with filters, sorting and cursor pagination. Live proxies by default (filter {"deleted_at": {"is_null": true}}). Credentials (ip / port / username / password) are masked to null on this public read surface.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browser-proxies/search' },
     operation: 'search',

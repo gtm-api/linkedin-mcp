@@ -134,16 +134,37 @@ function errorResult(text: string): ToolResult {
   return { content: [{ type: 'text', text }], isError: true };
 }
 
+// One line saying what the confirmed call will do, built from the arguments
+// alone: the preview makes no backend call, so ids stay ids (no names resolved).
+// Long values are cut so a message body does not swallow the line.
+function effectSummary(tool: string, action: string, args: Record<string, unknown>): string {
+  const brief = (value: unknown): string => {
+    if (value === null || value === undefined) return 'null';
+    if (typeof value === 'string') return value.length > 60 ? JSON.stringify(value.slice(0, 57) + '...') : JSON.stringify(value);
+    if (Array.isArray(value)) return `[${value.length} item${value.length === 1 ? '' : 's'}]`;
+    if (typeof value === 'object') return `{${Object.keys(value as object).length} keys}`;
+    return String(value);
+  };
+  const parts = Object.entries(args).map(([key, value]) => `${key}=${brief(value)}`);
+  return `${tool} will run ${action}${parts.length ? ` with ${parts.join(', ')}` : ' with no arguments'}.`;
+}
+
 function previewResult(ctx: DispatchContext, token: string, expiresIn: number, team: string): ToolResult {
   const action = ctx.tool.route.pathTemplate.split('/').pop() ?? ctx.tool.name;
+  const { commit_token: _committed, ...args } = ctx.args;
+  const summary = effectSummary(ctx.tool.name, action, args);
   const text = [
     `⚠️ ${ctx.tool.name} is a protected action and needs confirmation before it runs.`,
     `Nothing has changed yet. Review the arguments below, then call ${ctx.tool.name} AGAIN with the exact same arguments plus "commit_token": "${token}" to execute.`,
     `The token is single-use and expires in ${expiresIn}s.`,
     ...(team !== '' ? [`It will execute in team ${team}.`] : []),
     '',
-    `arguments: ${JSON.stringify((() => { const { commit_token: _c, ...r } = ctx.args; return r; })())}`,
+    summary,
+    `arguments: ${JSON.stringify(args)}`,
   ].join('\n');
+  // The arguments and the summary ride in structuredContent too: a client that
+  // reads only the structured block (the audit report of 2026-09-16, T2) used to
+  // see a token and nothing about what it was confirming.
   return {
     content: [{ type: 'text', text }],
     structuredContent: {
@@ -151,6 +172,8 @@ function previewResult(ctx: DispatchContext, token: string, expiresIn: number, t
       tool: ctx.tool.name,
       action,
       dangerous: true,
+      summary,
+      arguments: args,
       commit_token: token,
       expires_in_seconds: expiresIn,
       team_sid: team !== '' ? team : null,

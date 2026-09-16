@@ -88,6 +88,12 @@ const LinkedinConnectionInvitationSortable = z.enum([
 ]);
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
+// A live-dispatch read: it fetches from LinkedIn in-request through the account's
+// browser, which cold-starts a stopped or idle one (about 50 s, or 503
+// browser_starting) and releases that account's overdue syncs. Not a read-only
+// tool in the MCP sense, whatever its verb says (the audit report of 2026-09-16,
+// item 11): a client that auto-approves readOnlyHint tools must not run it blind.
+const LIVE_READ = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 const SYNC = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false };
 
@@ -154,10 +160,10 @@ export const linkedinConnectionInvitationsTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_connection_invitations',
     description:
-      'Always-fresh head read of pending inbound invitations: refresh the newest from LinkedIn in-request (§5.8), then return the last N (received_at DESC). The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped.',
+      'Always-fresh head read of pending inbound invitations: refresh the newest from LinkedIn in-request (§5.8), then return the last N (received_at DESC). The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped. Runs through the account\'s browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account\'s overdue syncs.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-invitations/get-my-latest' },
-    operation: 'search',
+    operation: 'action',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
@@ -180,7 +186,7 @@ export const linkedinConnectionInvitationsTools: ToolDefinition[] = [
         stop_reason: z.string().nullable(),
       }).describe('§5.8 in-request refresh outcome (first page runs the LinkedIn refresh; continuation pages report performed=false).'),
     }),
-    annotations: { title: 'Get my latest connection invitations', ...RO },
+    annotations: { title: 'Get my latest connection invitations', ...LIVE_READ },
   },
   {
     ...base,

@@ -92,6 +92,12 @@ const LinkedinConnectionRequestSortable = z.enum([
 ]);
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
+// A live-dispatch read: it fetches from LinkedIn in-request through the account's
+// browser, which cold-starts a stopped or idle one (about 50 s, or 503
+// browser_starting) and releases that account's overdue syncs. Not a read-only
+// tool in the MCP sense, whatever its verb says (the audit report of 2026-09-16,
+// item 11): a client that auto-approves readOnlyHint tools must not run it blind.
+const LIVE_READ = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 const SYNC = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false };
 const DANGER_ONCE = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
@@ -107,7 +113,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_connection_requests',
     description:
-      'List outbound LinkedIn connection requests (invitations we sent) with filters, sorting, cursor pagination and full-text q over the note. Pending rows have removal_kind IS NULL; terminal rows are accepted / withdrawn / expired (deleted_at set). include[] can eager-load linkedin_account.',
+      'List outbound LinkedIn connection requests (invitations we sent) with filters, sorting, cursor pagination and filter.q, a LIKE (substring) over the note. Pending rows have removal_kind IS NULL; terminal rows are accepted / withdrawn / expired (deleted_at set). include[] can eager-load linkedin_account.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-requests/search' },
     operation: 'search',
@@ -157,7 +163,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
       profile_id: z.string().max(128).optional().describe('Target URN: ln_id (ACoAA…) OR sn_id (ACwAA…); both accepted as profile_id. Exactly one of profile_id / public_identifier.'),
       public_identifier: z.string().max(2048).optional().describe("The person's vanity slug (jane-doe) or their linkedin.com/in/<slug> URL, when that is all you have (a signup, a CRM). Resolved server-side to the URN: the team's own rows first (connections, invitations, followers), then the corpus, then a lite-profile read on the sender (spends enrichment, one extra browser call, cached afterwards). Exactly one of profile_id / public_identifier."),
       note: z.string().max(300).nullable().optional()
-        .describe('Invitation note; server caps at 200 chars when the sender is not premium. Over the cap it is 422 unless allow_no_note_fallback is set.'),
+        .describe('Invitation note; server caps at 200 chars when the sender is not premium. Over the cap it is 422 unless allow_no_note_fallback is set. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       allow_no_note_fallback: z.boolean().optional()
         .describe("Default false. When the note is longer than the sender's cap (200 free / 300 premium), send the invite WITHOUT it instead of refusing 422, for campaigns where reaching the person beats personalizing. The response says which happened in result.note_fallback_used, and the stored row carries note=null, so a follow-up does not assume a note the prospect never saw. Scope, stated plainly: this covers the length cap, which the server evaluates itself. LinkedIn's own monthly with-note quota is only visible at send time and arrives untyped, so a refusal there still fails the call rather than being retried blind (a retry after an ambiguous send can invite the person twice)."),
       client_reference: z.string().max(255).nullable().optional()
@@ -188,10 +194,10 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_connection_requests',
     description:
-      'Always-fresh head read of pending outbound requests: refresh the newest from LinkedIn in-request (§5.8), then return the last N (sent_at DESC). The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped.',
+      'Always-fresh head read of pending outbound requests: refresh the newest from LinkedIn in-request (§5.8), then return the last N (sent_at DESC). The first page (cursor null) triggers the refresh; continuation pages read the already-refreshed DB. Account-scoped. Runs through the account\'s browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account\'s overdue syncs.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-requests/get-my-latest' },
-    operation: 'search',
+    operation: 'action',
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
@@ -204,7 +210,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpSearchResponse(LinkedinConnectionRequest),
-    annotations: { title: 'Get my latest connection requests', ...RO },
+    annotations: { title: 'Get my latest connection requests', ...LIVE_READ },
   },
   {
     ...base,

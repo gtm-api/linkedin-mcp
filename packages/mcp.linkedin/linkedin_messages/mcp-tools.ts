@@ -198,7 +198,7 @@ const LinkedinMessageFilter = z.object({
   recruiter_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']),
   message_hash: filterOp(z.string(), ['eq', 'in']),
-  q: z.string().max(128).describe('FULLTEXT over message text + inmail subject.'),
+  q: z.string().max(128).describe('A LIKE (substring, case-insensitive) over message text + InMail subject. Message text only: it does not search contact names.'),
   sent_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']),
   created_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']),
   updated_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']),
@@ -216,6 +216,12 @@ const LinkedinMessageMetricsFilter = LinkedinMessageFilter
   .pick({ linkedin_account_sid: true });
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
+// A live-dispatch read: it fetches from LinkedIn in-request through the account's
+// browser, which cold-starts a stopped or idle one (about 50 s, or 503
+// browser_starting) and releases that account's overdue syncs. Not a read-only
+// tool in the MCP sense, whatever its verb says (the audit report of 2026-09-16,
+// item 11): a client that auto-approves readOnlyHint tools must not run it blind.
+const LIVE_READ = { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true };
 const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
 
@@ -230,7 +236,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_messages',
     description:
-      'List LinkedIn messages (basic DM + Sales Navigator + InMail) with operator-object filters (account, conversation, channel, direction, contact ids, date ranges) and FULLTEXT q over body + subject. Supports include[], sort, cursor pagination. page_size:0 for count-only. To read a single message, filter by {sid:{eq:"ln_ms_…"}}.',
+      'List LinkedIn messages (basic DM + Sales Navigator + InMail) with operator-object filters (account, conversation, channel, direction, contact ids, date ranges) and filter.q, a LIKE (substring) over body + subject (message text, not contact names). Supports include[], sort, cursor pagination. page_size:0 for count-only. To read a single message, filter by {sid:{eq:"ln_ms_…"}}.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/search' },
     operation: 'search',
@@ -265,7 +271,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'get_my_latest_linkedin_messages',
     description:
-      'Always-fresh head read of ONE basic-messenger thread (§5.8 refresh of that conversation from LinkedIn, then the last N messages, sent_at DESC). Never stale: it 429s with bucket_saturated / sync_in_progress. Use before drafting a reply; use search_linkedin_messages for stored history.',
+      'Always-fresh head read of ONE basic-messenger thread (§5.8 refresh of that conversation from LinkedIn, then the last N messages, sent_at DESC). Never stale: it 429s with bucket_saturated / sync_in_progress. Use before drafting a reply; use search_linkedin_messages for stored history. Runs through the account\'s browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account\'s overdue syncs.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/get-my-latest' },
     operation: 'action',
@@ -281,13 +287,13 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpSearchResponse(LinkedinMessage, undefined, LinkedinMessageCounts).extend({ refresh: LatestRefresh }),
-    annotations: { title: 'Get my latest LinkedIn messages', ...ACT },
+    annotations: { title: 'Get my latest LinkedIn messages', ...LIVE_READ },
   },
   {
     ...base,
     name: 'get_my_latest_linkedin_messages_sales_nav',
     description:
-      "Sales Navigator variant of get_my_latest_linkedin_messages: always-fresh head read of ONE SN thread's messages (§5.8 refresh-then-return). Requires a messenger_type='sales_navigator' conversation; same hard-429 guards.",
+      "Sales Navigator variant of get_my_latest_linkedin_messages: always-fresh head read of ONE SN thread's messages (§5.8 refresh-then-return). Requires a messenger_type='sales_navigator' conversation; same hard-429 guards. Runs through the account's browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account's overdue syncs.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/get-my-latest-sales-nav' },
     operation: 'action',
@@ -303,14 +309,14 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpSearchResponse(LinkedinMessage, undefined, LinkedinMessageCounts).extend({ refresh: LatestRefresh }),
-    annotations: { title: 'Get my latest Sales Navigator messages', ...ACT },
+    annotations: { title: 'Get my latest Sales Navigator messages', ...LIVE_READ },
   },
   {
     ...base,
     mount: 'linkedin.recruiter',
     name: 'get_my_latest_linkedin_messages_recruiter',
     description:
-      "LinkedIn Recruiter variant of get_my_latest_linkedin_messages: always-fresh head read of ONE recruiter thread's messages (§5.8 refresh-then-return over the talent wire, dispatched with the account's seat). Requires a messenger_type='recruiter' conversation (a 422 messenger_type_mismatch names the right tool otherwise) and a Recruiter seat with its stamped seat number; same hard-429 guards. Rows: linkedin_type='inmail', type outbox for the seat's own messages and inbox for the candidate's.",
+      "LinkedIn Recruiter variant of get_my_latest_linkedin_messages: always-fresh head read of ONE recruiter thread's messages (§5.8 refresh-then-return over the talent wire, dispatched with the account's seat). Requires a messenger_type='recruiter' conversation (a 422 messenger_type_mismatch names the right tool otherwise) and a Recruiter seat with its stamped seat number; same hard-429 guards. Rows: linkedin_type='inmail', type outbox for the seat's own messages and inbox for the candidate's. Runs through the account's browser: a stopped or idle one is cold-started first (about 50 s, or 503 browser_starting), which also releases that account's overdue syncs.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/get-my-latest-recruiter' },
     operation: 'action',
@@ -326,7 +332,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpSearchResponse(LinkedinMessage, undefined, LinkedinMessageCounts).extend({ refresh: LatestRefresh }),
-    annotations: { title: 'Get my latest Recruiter messages', ...ACT },
+    annotations: { title: 'Get my latest Recruiter messages', ...LIVE_READ },
   },
   {
     ...base,
@@ -348,7 +354,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…) for a new thread.'),
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (ACwAA…); interchangeable with ln_id.'),
       public_identifier: z.string().max(2048).nullable().optional().describe("For a new thread when all you have is the person's vanity slug or linkedin.com/in/<slug> URL: resolved server-side to the URN (own rows, then the corpus, then a lite-profile read on the sender that spends enrichment). One addressing form per call: linkedin_conversation_sid, ln_id / sn_id, or public_identifier."),
-      text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars.'),
+      text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
       client_reference: z.string().max(255).nullable().optional()
         .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
@@ -404,7 +410,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…); one URN required.'),
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
       subject: z.string().min(1).max(200).describe('REQUIRED InMail subject; 1..200 chars.'),
-      text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars.'),
+      text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
       client_reference: z.string().max(255).nullable().optional()
         .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
@@ -431,7 +437,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing SN thread (messenger_type='sales_navigator'); provide this OR a profile URN."),
       ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN for a new SN thread.'),
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (preferred on the SN surface); interchangeable with ln_id.'),
-      text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars.'),
+      text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
       client_reference: z.string().max(255).nullable().optional()
         .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
@@ -461,7 +467,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ln_id: z.string().max(128).nullable().optional().describe('A regular-profile URN (ACoAA…) for a new thread; the wire resolves it too.'),
       sn_id: z.string().max(64).nullable().optional().describe('A Sales Navigator URN (ACwAA…) for a new thread; the wire resolves it too.'),
       subject: z.string().min(1).max(200).describe('InMail subject; 1..200 chars, required on both wires.'),
-      text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars, \\n line breaks.'),
+      text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars, \\n line breaks. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attributes: z.array(z.object({
         start: z.number().int().min(0).describe('Offset into text in UTF-16 code units (JS String offsets).'),
         length: z.number().int().min(1).describe('Run length in UTF-16 code units; start + length must fit inside text.'),
@@ -581,7 +587,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
         ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN.'),
         sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
       })).min(2).max(20).describe('2..20 other participants; each needs a URN.'),
-      text: z.string().min(1).max(8000).describe('Opening message; 1..8000 chars.'),
+      text: z.string().min(1).max(8000).describe('Opening message; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       conversation_title: z.string().max(100).nullable().optional()
         .describe('Optional group name, max 100 chars; omitted leaves the thread unnamed.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),

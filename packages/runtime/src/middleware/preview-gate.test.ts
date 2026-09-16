@@ -135,6 +135,15 @@ describe('preview-gate middleware', () => {
     expect(res.isError).toBeUndefined();
     expect(res.structuredContent?.preview).toBe(true);
     expect(typeof res.structuredContent?.commit_token).toBe('string');
+    // A structured-only reader sees what it is confirming, not just a token
+    // (the audit report of 2026-09-16, T2): the arguments (commit_token left
+    // out) and a one-line effect summary built from them, mirrored in the text.
+    expect(res.structuredContent?.arguments).toEqual({ sid: 'ln_ac_1', types: ['messaging'] });
+    const summary = res.structuredContent?.summary as string;
+    expect(summary).toMatch(/will run/);
+    expect(summary).toContain('sid="ln_ac_1"');
+    expect(summary).toContain('types=[1 item]');
+    expect(res.content[0].text).toContain(summary);
   });
 
   it('phase 2 executes with a valid token and enforces single-use', async () => {

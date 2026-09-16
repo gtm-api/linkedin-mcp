@@ -221,7 +221,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'search_antidetect_browsers',
     description:
-      'List antidetect browsers on the team with filters (name lookup via the vendor_name filter, eq/in), sorting and cursor pagination. Live browsers by default (deleted_at.is_null:true). Returns a counts block of predicate tallies; include[] can eager-load linkedin_account, antidetect_browser_proxy and antidetect_browser_logs. Use this to find a browser sid before run / stop / delete.',
+      'List antidetect browsers on the team with filters (name lookup via the vendor_name filter, eq/in), sorting and cursor pagination. Live browsers by default (filter {"deleted_at": {"is_null": true}}). Returns a counts block of predicate tallies; include[] can eager-load linkedin_account, antidetect_browser_proxy and antidetect_browser_logs. Use this to find a browser sid before run / stop / delete.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/search' },
     operation: 'search',

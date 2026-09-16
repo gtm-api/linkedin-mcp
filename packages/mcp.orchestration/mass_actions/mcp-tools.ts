@@ -137,7 +137,7 @@ const MassActionStepTool = z.union([
 const MassActionPlanStep = z.object({
   tool: MassActionStepTool,
   args: z.record(z.unknown()).optional()
-    .describe("The verb's own arguments, EXCLUDING the target: the target is injected per item from the object cursor or the item payload. Shared across every item of the run. One arg is worth stating explicitly because its default is silent and not what a bulk hand-out usually wants: on 'antidetect-browsers.generate-cloud-browser-access-key', `purpose` is 'relogin' unless you pass 'share'. A relogin link ends in a confirm that re-binds the browser to the account; a share link just lets the visitor drive it. The two links look identical, so an omitted `purpose` mints N re-login links without complaining."),
+    .describe("The verb's own arguments, EXCLUDING the target: the target is injected per item from the object cursor or the item payload. Shared across every item of the run, and sent verbatim: the platform renders no merge fields, so a {{first_name}} in a note or body goes out as those braces to every recipient (preview_mass_action warns about it). One arg is worth stating explicitly because its default is silent and not what a bulk hand-out usually wants: on 'antidetect-browsers.generate-cloud-browser-access-key', `purpose` is 'relogin' unless you pass 'share'. A relogin link ends in a confirm that re-binds the browser to the account; a share link just lets the visitor drive it. The two links look identical, so an omitted `purpose` mints N re-login links without complaining."),
 }).passthrough();
 
 const MassActionPlan = z.object({
@@ -338,11 +338,9 @@ export const massActionsTools: ToolDefinition[] = [
     name: 'preview_mass_action',
     description:
       [
-        'Validate a whole bulk plan without running anything and mint the consent token create_mass_action consumes. ALWAYS the first call of a bulk dispatch.',
+        'Validate a bulk plan without running anything and mint the consent token create_mass_action consumes. ALWAYS the first call of a bulk dispatch. One pass, all findings at once: plan shape (1..3 steps), step-eligibility of each tool, scope shape and size (1..100), the generate-scope rule (step 1 must mint an object), the send-class schedule mandate. A tool outside the step vocabulary is 422 with field_errors["plan.steps.{i}.tool"][0].rule = "not_step_eligible". Nothing is persisted, charged or created.',
         '',
-        'Validates in one pass, reporting all findings at once: plan shape (1..3 steps), step-eligibility of each tool, scope shape and size (1..100), the generate-scope rule (step 1 must mint an object) and the send-class schedule mandate. A tool outside the step vocabulary comes back 422 validation_failed with error.field_errors["plan.steps.{i}.tool"][0].rule = "not_step_eligible", naming the authorable set so the plan is repairable in one turn. Nothing is persisted, charged or created.',
-        '',
-        'On success the result carries preview (items_count, steps_per_item, dangerous_steps, eta, warnings), commit_token and expires_at. Show the preview to the user, then pass the token to create_mass_action UNCHANGED with the exact same inputs: it is an HMAC over them plus the caller, so any edit invalidates it (422) and needs a fresh preview. Tokens live 15 minutes.',
+        'Result: preview (items_count, steps_per_item, dangerous_steps, eta, warnings), commit_token, expires_at. eta.starts is when item 1 starts (ISO when scheduled, else asap); eta.estimated_completion_at is starts plus (items_count - 1) mean gaps, null for ASAP or an empty scope. warnings are non-blocking, today one per step arg with an unresolved {{placeholder}} (args go out verbatim). Show the preview, then pass the token to create_mass_action UNCHANGED with the same inputs (an HMAC over them). Tokens live 15 min.',
       ].join('\n'),
     toolClass: 'complex',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/preview' },
@@ -489,11 +487,11 @@ export const massActionsTools: ToolDefinition[] = [
     name: 'append_mass_action_items',
     description:
       [
-        'Feed more targets into a run that is already going, without a second preview or consent token: the plan they execute is the one already approved, and appended items join the pacing chain BEHIND the tail so the schedule is not compressed.',
+        'Feed more leads into a run that is already going, without a second preview or consent token: the plan they execute is the one already approved, and appended items join the pacing chain BEHIND the tail.',
         '',
-        'Identities are payload-kind leads, the same shape a targets-scope create takes. Each one must carry at least one of ln_member_id, ln_id, sn_id, company_ln_id or nickname, which is what the run dedups on: a lead already enrolled comes back in skipped_duplicate_count instead of running twice, so re-sending an overlapping batch is safe. Up to 100 per call; repeat the call to keep a standing run fed.',
+        'Identities are payload-kind leads, the shape a targets-scope create takes: each carries at least one of ln_member_id, ln_id, sn_id, company_ln_id or nickname, the dedup key, so a lead already enrolled comes back in skipped_duplicate_count instead of running twice. Up to 100 per call; repeat to keep a standing run fed.',
         '',
-        'The run has to be active: a paused one is 409 run_not_active (resume it first) and a stopped one is 409 too (create a new run). The canary gate still applies, so on a run whose gate is closed the appended items wait behind item 1.',
+        'The run has to be active (a paused one is 409 run_not_active, a stopped one too) and payload-addressed: created with scope targets or none. A generate run (step 1 is a creates: verb) is 422 run_not_payload_addressed, each appended lead would provision one more paid browser beyond the count consented to; an objects run is 422 too, its items address existing rows. The canary gate still applies.',
       ].join('\n'),
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/{sid}/append-items', sidParam: 'sid' },
