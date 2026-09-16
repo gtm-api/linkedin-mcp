@@ -36,8 +36,8 @@ const ACCESS_KEY = z.string().length(18).startsWith('cb_ak_')
 // cloud-browser sessions, and a stored counter that no writer maintained was deleted
 // on 2026-08-27 after every reader of it had seen 0 forever.
 const CloudBrowserAccessEntry = z.object({
-  key: ACCESS_KEY
-    .describe('The bearer token itself. Readable in full here, and only here: on cloud-browser-sessions it is masked to the last 4.'),
+  key: ACCESS_KEY.nullable()
+    .describe('The bearer token itself, in full, for a caller holding can_manage_cloud_browser_external_links (the permission that mints it: reading a key is the same power as minting one, since the public connect checks nothing but the key). null for every other caller; the entry stays so the link, its expiry and its use can still be listed. On cloud-browser-sessions it is masked to the last 4.'),
   expires_at: z.string().nullable()
     .describe('ISO 8601 expiry; null means it never expires. Checked at connect and never again, so a session can outlive its own key.'),
   max_connects: z.number().nullable()
@@ -153,7 +153,7 @@ const AntidetectBrowser = z.object({
     .describe('5G Proxy add-on: the browser runs on the dedicated 5G mobile route (faster command execution, fewer retries). Each flagged browser occupies one add-on slot.'),
   // Cloud-browser access
   cloud_browser_access: z.array(CloudBrowserAccessEntry)
-    .describe('The smart links minted on this browser, keys included in full. Each console open used to leave a throwaway entry here; minting now sweeps entries that expired over 24h ago, so this is the live link list rather than a log.'),
+    .describe('The smart links minted on this browser; the key itself only for a caller holding can_manage_cloud_browser_external_links, null otherwise (2026-09-16). Each console open used to leave a throwaway entry here; minting now sweeps entries that expired over 24h ago, so this is the live link list rather than a log.'),
   // Audit
   created_by: AccessIdentityValue,
   deleted_by: AccessIdentityValue.nullable(),

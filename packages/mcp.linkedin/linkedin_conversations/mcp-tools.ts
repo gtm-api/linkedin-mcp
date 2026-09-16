@@ -126,6 +126,14 @@ const LinkedinConversationFilter = z.object({
 const LinkedinConversationMetricsFilter = LinkedinConversationFilter
   .pick({ linkedin_account_sid: true });
 
+// The group verbs (add / remove participants, rename) dispatch through the tracked
+// path: a LinkedIn refusal throws (409 linkedin_refused or an account-level code),
+// so the only status that ever rides back is success, with the audit row's sid.
+const GroupVerbResult = z.object({
+  status: z.literal('success').describe('The only value this verb answers with: a refusal is a typed error, never a status.'),
+  activity_log_sid: z.string().nullable().describe('The linkedin-account-activity-log row of the call (ln_al_).'),
+}).passthrough();
+
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
@@ -385,7 +393,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     ...base,
     name: 'add_linkedin_conversation_participants',
     description:
-      'Add one or more members to an existing thread on LinkedIn (outward action). Pass the conversation sid + participant_ln_ids (1..20 member URNs); a 1:1 thread is promoted to a group. Returns the updated conversation.',
+      'Add one or more members to an existing thread on LinkedIn (outward action). Pass the conversation sid + participant_ln_ids (1..20 bare LinkedIn profile ids, the ACoA... ln_id of a connection or conversation participant; never a urn: string, the SDK wraps the id itself and a URN is wrapped twice and refused); a 1:1 thread is promoted to a group. item is the stored thread as it was before the call (the participant list follows on the next inbox sync); result carries status success and the activity_log_sid of the call. A LinkedIn refusal is a typed error (409 linkedin_refused, or the account-level 409 / 422 codes), never a success with a failed status.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/{sid}/add-participants', sidParam: 'sid' },
     operation: 'action',
@@ -396,17 +404,17 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      participant_ln_ids: z.array(z.string().min(1).max(64)).min(1).max(20).describe('Member URNs to add (1..20).'),
+      participant_ln_ids: z.array(z.string().min(1).max(64)).min(1).max(20).describe('Bare LinkedIn profile ids (ACoA...) to add, 1..20; not urn: strings.'),
       ...usageMetaField,
     }),
-    outputSchema: McpActionResponse(LinkedinConversation),
+    outputSchema: McpActionResponse(LinkedinConversation, GroupVerbResult),
     annotations: { title: 'Add conversation participants', ...DANGER },
   },
   {
     ...base,
     name: 'remove_linkedin_conversation_participants',
     description:
-      'Remove one or more members from a group thread on LinkedIn (outward action). Pass the conversation sid + participant_ln_ids (1..20 member URNs to remove). Returns the updated conversation.',
+      'Remove one or more members from a group thread on LinkedIn (outward action). Pass the conversation sid + participant_ln_ids (1..20 bare LinkedIn profile ids, the ACoA... ln_id; never a urn: string, the SDK wraps the id itself). item is the stored thread as it was before the call (the participant list follows on the next inbox sync); result carries status success and the activity_log_sid of the call. A LinkedIn refusal is a typed error (409 linkedin_refused, or the account-level 409 / 422 codes), never a success with a failed status.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/{sid}/remove-participants', sidParam: 'sid' },
     operation: 'action',
@@ -417,17 +425,17 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      participant_ln_ids: z.array(z.string().min(1).max(64)).min(1).max(20).describe('Member URNs to remove (1..20).'),
+      participant_ln_ids: z.array(z.string().min(1).max(64)).min(1).max(20).describe('Bare LinkedIn profile ids (ACoA...) to remove, 1..20; not urn: strings.'),
       ...usageMetaField,
     }),
-    outputSchema: McpActionResponse(LinkedinConversation),
+    outputSchema: McpActionResponse(LinkedinConversation, GroupVerbResult),
     annotations: { title: 'Remove conversation participants', ...DANGER },
   },
   {
     ...base,
     name: 'rename_linkedin_conversation',
     description:
-      'Rename a group thread on LinkedIn (outward action). Pass the conversation sid + the new title (1..256 chars). Returns the updated conversation.',
+      'Rename a group thread on LinkedIn (outward action). Pass the conversation sid + the new title (1..256 chars). Group threads only: LinkedIn refuses a 1:1 thread, and that refusal is a typed error (409 linkedin_refused), never a success with a failed status. item is the stored thread as it was before the call (the title follows on the next inbox sync); result carries status success and the activity_log_sid of the call.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-conversations/{sid}/rename', sidParam: 'sid' },
     operation: 'action',
@@ -441,7 +449,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
       title: z.string().min(1).max(256).describe('New group thread title (1..256 chars).'),
       ...usageMetaField,
     }),
-    outputSchema: McpActionResponse(LinkedinConversation),
+    outputSchema: McpActionResponse(LinkedinConversation, GroupVerbResult),
     annotations: { title: 'Rename conversation', ...DANGER },
   },
 ];
