@@ -6136,6 +6136,10 @@
                     "value": "team_data_deletion_warning"
                 },
                 {
+                    "name": "TeamDataDeletionFinalWarning",
+                    "value": "team_data_deletion_final_warning"
+                },
+                {
                     "name": "TeamOwnershipTransferred",
                     "value": "team_ownership_transferred"
                 },
