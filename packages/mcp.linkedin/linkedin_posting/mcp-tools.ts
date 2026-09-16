@@ -48,8 +48,9 @@ const ENTITY_URN = z.string().min(1).max(512)
 // rewritten to the node's express-validator chain, which disagreed with it in
 // five ways (§ CONTRACT AUTHORITY: the wire is the contract, our reserved shape
 // was a guess). `media` (up to 9 items, content_base64 XOR url) is gone with no
-// alias: the wire member is `images`, at most ONE, base64 only, and there is no
-// url arm anywhere on it. `visibility` moved from lowercase to the wire's own
+// alias: the wire member is `images` (at most ONE then, 20 since 2026-08-21),
+// base64-only on the wire; the backend's own `url` arm (2026-09-16) downloads and
+// converts before dispatch. `visibility` moved from lowercase to the wire's own
 // uppercase vocabulary. `allowed_commenters_scope` and `images[].alt_text` were
 // missing and are now taken. `text` may be EMPTY when an image is attached.
 const LinkedinPostingVisibility = z.enum(['ANYONE', 'CONNECTIONS_ONLY']);
@@ -57,8 +58,10 @@ const LinkedinPostingVisibility = z.enum(['ANYONE', 'CONNECTIONS_ONLY']);
 const LinkedinPostingAllowedCommentersScope = z.enum(['ALL', 'CONNECTIONS_ONLY', 'NONE']);
 
 const LinkedinPostingImageValue = z.object({
-  file_base64: z.string().min(1)
-    .describe('The image bytes of a PNG, JPEG, GIF or WEBP: a data:<mime>;base64,<...> URL or bare base64. The only way to attach an image; there is no fetch-by-url arm. Checked before anything is dispatched: a damaged file, a non-image or invalid base64 is a 422 on this member (image_corrupt / image_format_unrecognized / image_not_base64) and spends nothing. Encode the file with a tool and pass that output through unchanged: base64 re-typed by hand is the usual source of the damage.'),
+  file_base64: z.string().min(1).optional()
+    .describe('The image bytes of a PNG, JPEG, GIF or WEBP: a data:<mime>;base64,<...> URL or bare base64. Exactly one of file_base64 or url. Checked before anything is dispatched: a damaged file, a non-image or invalid base64 is a 422 on this member (image_corrupt / image_format_unrecognized / image_not_base64) and spends nothing. Base64 typed out by hand is the usual source of damage: prefer url.'),
+  url: z.string().url().max(2048).optional()
+    .describe('An https URL of the image file, downloaded by us (public hosts only, the same 35 MB post budget, typed and checked by content). Exactly one of file_base64 or url. A request_media_upload file_url works once its upload is done. A link to a web page that shows the image is refused (image_format_unrecognized); fetch problems are media_url_invalid / media_url_host_forbidden / media_url_fetch_failed / media_too_large.'),
   file_byte_size: z.number().int().min(1).nullable().optional(),
   file_name: z.string().min(1).max(255).nullable().optional(),
   file_type: z.string().min(1).max(255).nullable().optional(),
@@ -165,7 +168,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_post',
     description:
-      'Publish ONE feed post - as the member, AS a company page it administers (author_organization_id), or INTO a group (group_id) - now or scheduled (scheduled_at) - wire create-post. Public; retract with delete_linkedin_post, or delete a scheduled draft with delete_linkedin_scheduled_post. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when media is attached; no text, images or video at all is a 422. Media: up to 20 images XOR one video, base64 only, 35 MB decoded total. Body and alt text publish byte for byte, blank lines included. mentions makes spans of text clickable profile links (positions in UTF-16 code units); brand_partnership adds the "Brand partnership" flag; group_id and visibility are mutually exclusive. Nothing is stored here: the response carries the published post (urn, url, time, the body LinkedIn kept) plus the activity-log row.',
+      'Publish ONE feed post - as the member, AS a company page it administers (author_organization_id), or INTO a group (group_id) - now or scheduled (scheduled_at) - wire create-post. Public; retract with delete_linkedin_post, or delete a scheduled draft with delete_linkedin_scheduled_post. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when media is attached; no text, images or video at all is a 422. Media: up to 20 images XOR one video, each base64 or an https url (see request_media_upload), 35 MB total. Body and alt text publish byte for byte, blank lines included. mentions makes spans of text clickable profile links (positions in UTF-16 code units); brand_partnership adds the "Brand partnership" flag; group_id excludes visibility. Nothing is stored here: the response carries the published post (urn, url, time, body) plus the activity-log row.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/create-post' },
     operation: 'action',
@@ -185,8 +188,10 @@ export const linkedinPostingTools: ToolDefinition[] = [
       allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional()
         .describe('Who may comment: ALL (the node default), CONNECTIONS_ONLY, or NONE to disable comments. Works on group posts too.'),
       video: z.object({
-        file_base64: z.string().min(1)
-          .describe('The video bytes: a data:<mime>;base64,<...> URL or bare base64. One video per post.'),
+        file_base64: z.string().min(1).optional()
+          .describe('The video bytes: a data:<mime>;base64,<...> URL or bare base64. Exactly one of file_base64 or url.'),
+        url: z.string().url().max(2048).optional()
+          .describe('An https URL of an MP4, MOV or WEBM file, downloaded by us (public hosts only, within the 35 MB budget). Exactly one of file_base64 or url; a request_media_upload file_url works once uploaded.'),
         file_byte_size: z.number().int().min(1).nullable().optional(),
         file_name: z.string().min(1).max(255).nullable().optional(),
         file_type: z.string().min(1).max(255).nullable().optional(),

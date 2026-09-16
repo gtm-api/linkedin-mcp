@@ -9722,6 +9722,39 @@
                     "value": "inconclusive"
                 }
             ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\MediaUpload\\Enums\\MediaUploadFileTypeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "ImagePng",
+                    "value": "image/png"
+                },
+                {
+                    "name": "ImageJpeg",
+                    "value": "image/jpeg"
+                },
+                {
+                    "name": "ImageGif",
+                    "value": "image/gif"
+                },
+                {
+                    "name": "ImageWebp",
+                    "value": "image/webp"
+                },
+                {
+                    "name": "VideoMp4",
+                    "value": "video/mp4"
+                },
+                {
+                    "name": "VideoQuicktime",
+                    "value": "video/quicktime"
+                },
+                {
+                    "name": "VideoWebm",
+                    "value": "video/webm"
+                }
+            ]
         }
     },
     "routes": [
@@ -36164,16 +36197,34 @@
                 {
                     "field": "images.*.file_base64",
                     "rules": [
-                        "required",
+                        "required_without:images.*.url",
+                        "prohibits:images.*.url",
                         "string",
                         "min:1"
                     ],
-                    "required": true,
+                    "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": 1,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "images.*.url",
+                    "rules": [
+                        "required_without:images.*.file_base64",
+                        "string",
+                        "max:2048",
+                        "url:https"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -36258,7 +36309,9 @@
                 {
                     "field": "video.file_base64",
                     "rules": [
-                        "required_with:video",
+                        "exclude_without:video",
+                        "required_without:video.url",
+                        "prohibits:video.url",
                         "string",
                         "min:1"
                     ],
@@ -36268,6 +36321,24 @@
                     "in": null,
                     "min": 1,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "video.url",
+                    "rules": [
+                        "exclude_without:video",
+                        "required_without:video.file_base64",
+                        "string",
+                        "max:2048",
+                        "url:https"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -44980,6 +45051,70 @@
                     "in": null,
                     "min": 1,
                     "max": 100,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/media-uploads/request-upload",
+            "controller": "App\\Entities\\MediaUpload\\MediaUploadController",
+            "action": "requestUpload",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\MediaUpload\\Requests\\MediaUploadRequestUploadRequest",
+            "rules": [
+                {
+                    "field": "file_name",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "file_type",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"image/png\",\"image/jpeg\",\"image/gif\",\"image/webp\",\"video/mp4\",\"video/quicktime\",\"video/webm\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "image/png",
+                        "image/jpeg",
+                        "image/gif",
+                        "image/webp",
+                        "video/mp4",
+                        "video/quicktime",
+                        "video/webm"
+                    ],
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }
