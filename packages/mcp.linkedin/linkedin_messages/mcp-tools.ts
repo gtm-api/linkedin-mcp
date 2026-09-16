@@ -42,13 +42,14 @@ const LinkedinMessageAutomation = z.enum(['auto', 'manual', 'connect', 'synced']
 //
 // `file_url` is OUR addition on top of an unchanged wire, the same arrangement
 // send_linkedin_voice_message already has: the backend fetches the URL
-// server-side (streamed, hard byte cap), base64s it, and fills in the members the
-// caller left out. Prefer it over inlining base64 in JSON.
+// server-side (through the same SSRF guard as create_linkedin_post media: https
+// only, public hosts only, streamed under the budget), base64s it, and fills in
+// the members the caller left out. Prefer it over inlining base64 in JSON.
 const Attachment = z.object({
   file_base64: z.string().min(1).optional()
     .describe('The file itself: a data:<mime>;base64,<...> URL or bare base64. Exactly one of file_base64 / file_url.'),
   file_url: z.string().max(2048).url().optional()
-    .describe('https:// URL the BACKEND downloads server-side and encodes for you. Exactly one of file_base64 / file_url.'),
+    .describe('An https URL of the file, downloaded by the backend and encoded for you (public hosts on port 443 only, no credentials in the URL; a request_media_upload file_url works once uploaded). Exactly one of file_base64 / file_url. Refused 422 on this member before anything is dispatched: attachment_url_invalid (not https, a port other than 443, credentials), attachment_url_host_forbidden (a private or reserved address), attachment_fetch_failed, attachments_too_large.'),
   file_name: z.string().min(1).max(255).optional()
     .describe('Display filename shown to the recipient. Derived from the URL path when omitted on the file_url arm.'),
   file_type: z.string().min(1).max(255).optional()
@@ -382,7 +383,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN for a new thread.'),
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
       audio: z.object({
-        url: z.string().optional().describe('https:// source the backend fetches.'),
+        url: z.string().optional().describe('An https URL of the audio file, downloaded by the backend (public hosts on port 443 only, no credentials in the URL, up to 32 MB before normalization). Refused 422 before anything is dispatched: audio_url_invalid (not https, a port other than 443, credentials), audio_url_host_forbidden (a private or reserved address), audio_fetch_failed, audio_too_large.'),
         base64: z.string().optional().describe('Inline payload (~15 MB cap pre-normalization).'),
       }).describe('Exactly one of url / base64; normalized server-side to AAC/m4a ≤ 60 s.'),
       client_reference: z.string().max(255).nullable().optional()
