@@ -36,7 +36,9 @@ const SslCertificate = z.object({
   team_sid: z.string(),
   domain: z.string(),
   status: SslCertificateStatus,
-  // HTTP-01 token + key-authorization while status=challenge; null otherwise.
+  // The in-flight attempt's HTTP-01 token + key-authorization: set while an
+  // attempt runs (status=challenge on a first issuance, status=active on a
+  // renewal); null otherwise.
   challenge: z.object({
     type: z.literal('http-01'),
     token: z.string(),
@@ -123,7 +125,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     ...base,
     name: 'get_ssl_certificate',
     description:
-      "Fetch a single certificate by sid: status, issuer, validity window, redacted last_error, and the HTTP-01 challenge data while status='challenge'. Poll this after issue/renew until status flips to 'active' (or 'failed' with last_error). The cert body and key are never returned.",
+      "Fetch a single certificate by sid: status, issuer, validity window, redacted last_error, and the HTTP-01 challenge data while an attempt is in flight (status='challenge' on a first issuance, 'active' during a renewal). Poll this after issue/renew until challenge is null: a first issuance ends 'active' or 'failed' with last_error; a renewal stays 'active', with last_error null when the new certificate is live and set when it failed (the current one keeps serving). The cert body and key are never returned.",
     toolClass: 'trivial',
     route: { service: 'id', method: 'GET', pathTemplate: '/api/ssl-certificates/{sid}', sidParam: 'sid' },
     operation: 'get',
@@ -204,7 +206,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     ...base,
     name: 'renew_ssl_certificate',
     description:
-      'Force a re-issue of an existing certificate, ignoring the 30-day expiry window (operator-forced). ASYNC: same HTTP-01 path as issue: re-runs ACME on the same row, flips status→challenge, and on success replaces the persisted leaf / full chain / key and re-stamps expires_at (poll get_ssl_certificate or await ssl-certificates.renewed / .failed). Use after a CA chain fix or to recover a failed/expired certificate; the previous certificate keeps serving until the new one goes live.',
+      'Force a re-issue of an existing certificate, ignoring the 30-day expiry window (operator-forced). ASYNC: same HTTP-01 path as issue and the auto-renew job, on the same row. On an active certificate the row STAYS active (it keeps serving and routing) while challenge carries the attempt: on success the persisted leaf / full chain / key are replaced and issued_at / expires_at re-stamped, on failure last_error is set and the current certificate keeps serving. On a pending/failed/expired row nothing is serving, so it flips status→challenge and ends active or failed like issue. Poll get_ssl_certificate until challenge is null, or await ssl-certificates.renewed / .failed. Use after a CA chain fix, to retry a failing renewal once its cause is fixed, or to recover a failed/expired certificate. 409 conflict while an attempt is in flight (issuance_already_in_progress, e.g. the renew job\'s).',
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/ssl-certificates/{sid}/renew', sidParam: 'sid' },
     operation: 'action',
