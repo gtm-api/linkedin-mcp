@@ -1146,6 +1146,30 @@
                         "has_default": true
                     },
                     {
+                        "name": "account_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_code",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_cause",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "duration_ms",
                         "type": "?int",
                         "nullable": true,
@@ -1259,6 +1283,30 @@
                         "has_default": true
                     },
                     {
+                        "name": "account_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_code",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_cause",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "duration_ms",
                         "type": "?int",
                         "nullable": true,
@@ -1285,8 +1333,12 @@
                     "operation",
                     "action_name",
                     "route",
+                    "account_sid",
                     "status",
                     "status_family",
+                    "error_code",
+                    "error_reason",
+                    "error_cause",
                     "occurred_at",
                     "trace_id"
                 ]
@@ -10352,6 +10404,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.account_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.status",
                     "rules": [
                         "nullable"
@@ -10367,6 +10433,48 @@
                 },
                 {
                     "field": "filter.status_family",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.error_code",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.error_reason",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.error_cause",
                     "rules": [
                         "nullable"
                     ],
@@ -10677,6 +10785,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.account_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.status",
                     "rules": [
                         "nullable"
@@ -10692,6 +10814,48 @@
                 },
                 {
                     "field": "filter.status_family",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.error_code",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.error_reason",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.error_cause",
                     "rules": [
                         "nullable"
                     ],
@@ -16869,14 +17033,14 @@
                         "sometimes",
                         "nullable",
                         "url",
-                        "max:1024"
+                        "max:2048"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "url",
                     "in": null,
                     "min": null,
-                    "max": 1024,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -18408,23 +18572,6 @@
                 }
             ],
             "rules_reason": null
-        },
-        {
-            "method": "GET",
-            "uri": "auth/verify-email/{email}/{code}",
-            "controller": "App\\Http\\Controllers\\AuthController",
-            "action": "verifyEmail",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action takes no request object"
         },
         {
             "method": "GET",

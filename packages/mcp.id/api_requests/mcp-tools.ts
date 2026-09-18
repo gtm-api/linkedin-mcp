@@ -41,8 +41,12 @@ const ApiRequest = z.object({
   entity: z.string(),
   operation: ApiRequestOperation,
   action_name: z.string().nullable(),
+  account_sid: z.string().nullable(),
   status: z.number().int(),
   status_family: ApiRequestStatusFamily,
+  error_code: z.string().nullable(),
+  error_reason: z.string().nullable(),
+  error_cause: z.string().nullable(),
   duration_ms: z.number().int().nullable(),
   trace_id: z.string().nullable(),
 }).passthrough();
@@ -78,9 +82,17 @@ const ApiRequestFilter = z.object({
     .describe('The verb of an action route (send, run_now); is_null:true = the six canonical operations.'),
   route: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']).optional()
     .describe('The route key, exact: "POST api/linkedin-conversations/search".'),
+  account_sid: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('The account the request named (ln_ac_*, em_ac_*): "everything that was refused on this sender". is_null:true = calls that named no account.'),
   status: filterOp(z.number().int(), ['eq', 'ne', 'in', 'nin', 'gte', 'lte', 'gt', 'lt']).optional(),
   status_family: filterOp(ApiRequestStatusFamily, ['eq', 'ne', 'in', 'nin']).optional()
     .describe('4xx and 5xx together are the errors every dashboard number counts.'),
+  error_code: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('The typed error code of the envelope that was returned (rate_limited, validation_failed, not_found); is_null:true = the calls that succeeded.'),
+  error_reason: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('The sub-code inside error.context (bucket_saturated, account_rate_exceeded, not_connected): what a status alone cannot say.'),
+  error_cause: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('The specific trigger a layered gate adds (held, daily_saturation, delay_not_elapsed, linkedin_quota_hit): held means a person paused the account, daily_saturation means the limit is spent, and a 429 does not tell them apart.'),
   occurred_at: filterOp(z.string(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional()
     .describe('ISO 8601 UTC. The only time axis on search; ignored on metrics, where period is the window.'),
   trace_id: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
@@ -118,7 +130,7 @@ export const apiRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'search_api_requests',
     description:
-      'List the team\'s external API requests newest first: every call made with an api key or an OAuth client (your own calls included), as logged by the service that answered it, merged across id, linkedin and orchestration. One row per request: the client (key or OAuth client, with its name), the route and entity, the HTTP status and its family, the duration, the trace id. Use for "what did our agents do", "show the failing requests since noon" (filter status_family in [4xx,5xx]), "what did the n8n client call" (filter client_sid), or to reconstruct one MCP turn (filter trace_id). page_size 0 counts only; the cursor is a keyset merged across services. counts.sources says which services answered; a service marked error contributed nothing. Not LinkedIn activity (that is the account activity log) and not a quota: the log counts, it never limits.',
+      'List the team\'s external API requests newest first: every call made with an api key or an OAuth client (your own calls included), as logged by the service that answered it, merged across id, linkedin and orchestration. One row per request: the client (key or OAuth client, with its name), the route and entity, the HTTP status and its family, the typed error it failed with (error_code, error_reason, error_cause), the account it named, the duration, the trace id. Use for "what did our agents do", "show the failing requests since noon" (filter status_family in [4xx,5xx]), "why are these all 429" (filter error_cause: a paused account is not a spent daily limit), "what did the n8n client call" (filter client_sid), or one MCP turn (filter trace_id). page_size 0 counts only; the cursor is a keyset merged across services. counts.sources says which services answered; a service marked error contributed nothing. Not LinkedIn activity (that is the account activity log) and not a quota: the log counts, it never limits.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/api-requests/search' },
     operation: 'search',
