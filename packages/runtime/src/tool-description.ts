@@ -25,7 +25,7 @@ export function bulkAffordance(tool: ToolDefinition): string {
 // that has paced tools, the pacing note of a toolset listing), never per tool: a
 // sentence this long on every row would double the lite listing.
 export const PACING_CONTRACT =
-  'Pacing: a tool marked "Paced: <bucket>" spends that smart-limit bucket of the LinkedIn account it runs on, and calls of one bucket are spaced per account. A short wait is slept on the server, so the call simply takes longer; a longer one answers 429 rate_limited with context.retry_after, and the call succeeds unchanged from that moment, not earlier. Calls fired in parallel do not leave together, they queue behind each other, so parallelism buys nothing on one account: run them one after another, or spread them over accounts. A success carries pacing.next_call_after when the platform reports it.';
+  'Pacing: a tool marked "Paced: <bucket>" spends that smart-limit bucket of the LinkedIn account it runs on, and calls of one bucket are spaced per account. A short wait is slept on the server, so the call simply takes longer; a longer one answers 429 rate_limited with context.retry_after, and the call succeeds unchanged from that moment, not earlier. Calls fired in parallel do not leave together, they queue behind each other, so parallelism buys nothing on one account: run them one after another, or spread them over accounts. A success carries pacing {limit_type, next_call_after, remaining_today}: the next call of that bucket on that account is due at pacing.next_call_after.';
 
 /** `Paced: <bucket>.` for a tool whose call the platform paces, else ''. */
 export function pacingAffordance(tool: ToolDefinition): string {

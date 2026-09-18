@@ -212,6 +212,24 @@ export const PendingRef = z.object({
   webhook_events: z.array(z.string()),
 }).passthrough();
 
+// The success-side twin of `error.context.retry_after`. gtm.service.linkedin puts
+// it on the success envelope of any request that dispatched to an account's
+// LinkedIn browser (the AttachDispatchPacing middleware there), whatever the
+// operation, so it is not a member of the envelope builders below: the public
+// contract adds it to exactly the tools that declare `pacedBucket`
+// (packages/openapi/src/generate.ts). A composite call (a post read, then the
+// reaction) names the LAST bucket it spent and the latest of the clocks involved.
+export const McpPacing = z.object({
+  linkedin_account_sid: z.string()
+    .describe('The account whose bucket the call spent.'),
+  limit_type: z.string()
+    .describe('The smart-limit bucket the call spent, e.g. send_messages.'),
+  next_call_after: z.string()
+    .describe('ISO 8601, the same form as retry_after: the moment this same call goes through again without waiting. The next pacing slot while the day has budget left, the daily reset when it has none, the end of a LinkedIn lock while one stands.'),
+  remaining_today: z.number().int().nonnegative()
+    .describe('daily_limit minus done_today_count of that bucket, after this call.'),
+});
+
 export const McpActionResponse = <
   I extends z.ZodTypeAny = z.ZodRecord<z.ZodString, z.ZodUnknown>,
   R extends z.ZodTypeAny = z.ZodRecord<z.ZodString, z.ZodUnknown>,

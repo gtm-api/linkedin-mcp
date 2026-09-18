@@ -28,7 +28,8 @@ import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
-import { McpErrorResponse } from '@gtm/mcp-shared';
+import { z } from 'zod';
+import { McpErrorResponse, McpPacing } from '@gtm/mcp-shared';
 import { convertSchema, type JsonSchema } from './schema';
 import {
   CONTACT,
@@ -146,6 +147,12 @@ const operationDescription = (tool: ToolDefinition): string => {
   if (tool.docsPath) lines.push(`- Entity reference: \`${tool.docsPath}\`.`);
   return lines.join('\n');
 };
+
+/** A paced tool's success envelope carries the optional `pacing` block (McpPacing). */
+const outputSchemaOf = (tool: ToolDefinition): z.ZodTypeAny =>
+  tool.pacedBucket && tool.outputSchema instanceof z.ZodObject
+    ? tool.outputSchema.extend({ pacing: McpPacing.optional() })
+    : tool.outputSchema;
 
 const extensions = (tool: ToolDefinition): JsonSchema => {
   const ext: JsonSchema = {
@@ -322,7 +329,7 @@ function buildDocument(
       };
     }
 
-    const output = convertSchema(`${name}Response`, tool.outputSchema);
+    const output = convertSchema(`${name}Response`, outputSchemaOf(tool));
     if (output.fallbackReason) fallbacks.push(`${tool.name} output: ${output.fallbackReason}`);
     schemas[`${name}Response`] = output.schema;
 
