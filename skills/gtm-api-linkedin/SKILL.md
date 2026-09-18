@@ -120,6 +120,13 @@ commit. The token belongs to that one preview.
 `commit_token` does not appear in the tool's own input schema. That is deliberate: the gate adds
 it. Passing it on the first call is not how you skip the preview.
 
+The preview checks the arguments against the backend before it hands out a token. If the real call
+would be refused for them (a missing field, a combination the action does not take, a permission you
+do not hold), the preview returns that same error and no token, so fix the arguments and preview
+again. `validated: true` in the preview means the arguments passed that check. It does not promise
+the action will succeed: the daily budget, a Sales Navigator seat, whether the person is connected
+are only known when the action runs.
+
 Show the preview to the user before committing anything that reaches another person. The gate
 exists so an over-eager agent cannot burn an account, and committing without reading it gives that
 protection away.
