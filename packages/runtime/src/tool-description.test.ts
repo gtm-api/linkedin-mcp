@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
-import { toolDescription, withAffordances } from './tool-description';
+import { PACING_CONTRACT, toolDescription, withAffordances } from './tool-description';
 import type { ToolDefinition } from './types';
 
 function tool(over: Partial<ToolDefinition> = {}): ToolDefinition {
@@ -57,5 +57,30 @@ describe('toolDescription', () => {
       'one-liner Usable as a mass-action plan step.',
     );
     expect(withAffordances('one-liner', tool())).toBe('one-liner');
+  });
+
+  it('names the bucket of a paced tool, after the bulk marker', () => {
+    expect(toolDescription(tool({ pacedBucket: 'send_messages' }))).toBe('Send a thing. Paced: send_messages.');
+    expect(toolDescription(tool({ massAction: true, scheduleRequired: true, pacedBucket: 'send_messages' }))).toBe(
+      'Send a thing. Bulk: dispatchable over filter/targets[] as a mass-action, schedule required. Paced: send_messages.',
+    );
+    expect(withAffordances('one-liner', tool({ pacedBucket: 'scraping' }))).toBe('one-liner Paced: scraping.');
+  });
+});
+
+// The marker on a tool is one word and a bucket; what it MEANS is said once per
+// surface. These pin the three facts an agent has to act on, because a contract
+// that drops one of them sends the agent back to hammering a refused call.
+describe('PACING_CONTRACT', () => {
+  it('tells the agent what a wait looks like, when to come back, and that parallel calls queue', () => {
+    expect(PACING_CONTRACT).toContain('Paced: <bucket>');
+    expect(PACING_CONTRACT).toContain('429 rate_limited');
+    expect(PACING_CONTRACT).toContain('context.retry_after');
+    expect(PACING_CONTRACT).toContain('parallel');
+    expect(PACING_CONTRACT).toContain('pacing.next_call_after');
+  });
+
+  it('stays thin enough to ride on the instructions of every paced mount', () => {
+    expect(PACING_CONTRACT.length).toBeLessThan(700);
   });
 });

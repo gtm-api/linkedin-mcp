@@ -809,6 +809,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -831,6 +832,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -852,6 +854,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -868,6 +871,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -884,6 +888,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -900,6 +905,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -916,6 +922,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -937,6 +944,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -953,6 +961,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -991,6 +1000,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1015,6 +1025,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1039,6 +1050,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1064,6 +1076,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -1082,6 +1095,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1106,6 +1120,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -1124,6 +1139,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,  // binds the browser to a contract and switches the Recruiter inbox the sync reads: consent first, like every other mutation of this mount
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1144,6 +1160,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'edit_profile',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1185,6 +1202,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'endorse_skills',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1211,13 +1229,14 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     mount: 'linkedin.content',
     name: 'endorse_linkedin_account_skill_by_id',
     description:
-      "Endorse ONE explicit skill on a 1st-degree connection as this account (wire endorse-skill, ?action=endorse). Unlike endorse_linkedin_account_skill there is no discovery read and no auto-pick: you supply skill_id, exactly one dispatch. Skill ids exist only on skills that already carry at least one endorsement (a zero-endorsement skill is not addressable), so take them from the enrichment person-skills read. Requires a 1st-degree connection (409 not_connected). Spends the endorse_skills bucket (30/day at 360 s, bursts 2 so an endorse and its undo fire back to back). Returns the echoed skill urn, endorsed_by_viewer (true after endorse) and the global endorsement_count, plus the activity-log row. Re-endorsing is a LinkedIn-side no-op; undo with unendorse_linkedin_account_skill.",
+      "Endorse ONE explicit skill on a 1st-degree connection as this account (wire endorse-skill, ?action=endorse). Unlike endorse_linkedin_account_skill there is no discovery read and no auto-pick: you supply skill_id, exactly one dispatch. Skill ids exist only on skills that already carry at least one endorsement (a zero-endorsement skill is not addressable), so take them from the enrichment person-skills read. Requires a 1st-degree connection (409 not_connected). Spends the endorse_skills bucket (30/day, paced; the undo waits only 2 s, so an endorse and its undo fit back to back). Returns the echoed skill urn, endorsed_by_viewer (true after endorse) and the global endorsement_count, plus the activity-log row. Re-endorsing is a LinkedIn-side no-op; undo with unendorse_linkedin_account_skill.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/endorse-skill-by-id', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'endorse_skills',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1234,13 +1253,14 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     mount: 'linkedin.content',
     name: 'unendorse_linkedin_account_skill',
     description:
-      "Retract ONE skill endorsement this account holds on a 1st-degree connection (wire unendorse-skill, ?action=unendorse): the undo of endorse_linkedin_account_skill / endorse_linkedin_account_skill_by_id, addressed by the same skill_id. Spends the SAME endorse_skills bucket as the endorse it reverses (verb-pair rule; the bucket bursts 2 so a do/undo pair fires back to back). Returns the echoed skill urn, endorsed_by_viewer (false after unendorse) and the global endorsement_count, plus the activity-log row. Retracting the LAST endorsement of a skill collapses its person-skills row to name only (no skill_id, no count). Retracting one this account never made is unverified on the wire.",
+      "Retract ONE skill endorsement this account holds on a 1st-degree connection (wire unendorse-skill, ?action=unendorse): the undo of endorse_linkedin_account_skill / endorse_linkedin_account_skill_by_id, addressed by the same skill_id. Spends the SAME endorse_skills bucket as the endorse it reverses (verb-pair rule; an undo is paced 2 s, not the bucket delay, so a do/undo pair fits back to back). Returns the echoed skill urn, endorsed_by_viewer (false after unendorse) and the global endorsement_count, plus the activity-log row. Retracting the LAST endorsement of a skill collapses its person-skills row to name only (no skill_id, no count). Retracting one this account never made is unverified on the wire.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/unendorse-skill', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'endorse_skills',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1262,6 +1282,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'visit_profiles',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, target: Target, ...usageMetaField }),
@@ -1279,6 +1300,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'networking_general',
     massAction: false,
     stepEligible: true,
     scheduleRequired: false,
@@ -1301,6 +1323,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'networking_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1389,7 +1412,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     name: 'set_linkedin_account_smart_limits',
     description:
       'Switch smart-limit governance on or off for the WHOLE account, every bucket at once (no per-bucket toggle). ' +
-      'The switch remembers nothing: a real flip in EITHER direction first resets every limit row to the platform defaults (daily_limit = the bucket\'s platform max, delay / burst = the enum pair, target_limit = the platform default, hold cleared). ' +
+      'The switch remembers nothing: a real flip in EITHER direction first resets every limit row to the platform defaults (daily_limit = the bucket\'s platform max, delay / batch = the enum pair, target_limit = the platform default, hold cleared). ' +
       'ON: the warmup then sets every row\'s daily_limit / delay_in_seconds / batch_size (re-derived from the latest snapshot) and update_linkedin_account_smart_limit refuses those fields with 409 smart_limits_governed; target_limit and learning_enabled stay yours. The seeded target_limit is a target the warmup climbs toward, never a limit somebody set. ' +
       'OFF: every cap runs exactly as typed and the account loses the warmup ban protection: say so first, read the rows\' recommended_* before typing caps. ' +
       'Idempotent. SINGLE account: a fleet is a mass action with step linkedin-accounts.set-smart-limits (scope objects, args {enabled}), run BEFORE a limit-row run on the same senders.',

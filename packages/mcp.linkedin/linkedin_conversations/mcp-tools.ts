@@ -246,6 +246,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -268,6 +269,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -309,6 +311,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -331,6 +334,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -348,6 +352,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -365,6 +370,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -386,6 +392,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -406,6 +413,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -427,6 +435,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -448,6 +457,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

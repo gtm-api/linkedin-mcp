@@ -155,6 +155,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'send_connection_requests',
     massAction: false,
     stepEligible: true,
     scheduleRequired: false,
@@ -201,6 +202,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       page_size: z.number().int().min(1).max(100).optional()
@@ -223,6 +225,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'networking_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),

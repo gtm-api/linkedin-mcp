@@ -65,6 +65,16 @@ export interface ToolDefinition {
   /** Bulk verbs that MUST be paced (anti-spam send-class). Only meaningful on top of
    *  massAction or stepEligible: a verb that is neither cannot mandate pacing. */
   scheduleRequired?: boolean;
+  /**
+   * The smart-limit bucket a call of this tool spends on the account that runs it
+   * (send_messages, scraping, self_account_sync, ...). Set on every tool whose
+   * route dispatches to the account's LinkedIn browser, writes and live reads
+   * alike, because that is what the platform paces: calls of one bucket are
+   * spaced per account, a short wait is slept server-side, a longer one answers
+   * 429 rate_limited with context.retry_after. Drives the `Paced` marker and the
+   * pacing note of the toolset listing (tool-description.ts, facade.ts).
+   */
+  pacedBucket?: string;
   /** Response fields carrying one-time secrets (exempt from redaction). */
   allowSecretFields?: string[];
   /** MUST include `_meta` (usage analytics). */

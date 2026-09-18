@@ -399,6 +399,8 @@ const LIVE = { readOnlyHint: false, destructiveHint: false, idempotentHint: fals
 
 const base = {
   service: 'linkedin',
+  // Every tool of this package dispatches a read to the account's browser.
+  pacedBucket: 'enrichment',
   entity: 'linkedin_enrichment',
   mount: 'linkedin.enrichment',
 } as const;

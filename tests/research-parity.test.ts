@@ -61,7 +61,7 @@ const BASELINE_PATH = fileURLToPath(new URL('../fixtures/research-parity/baselin
  *  complex 1500) are the doctrine, but `toolClass` is optional on ToolDefinition,
  *  so a flat pair is the only budget every tool can be held to. SOFT is a printed
  *  warning, HARD is a failure. Measured on the AUTHORED `description`: the runtime
- *  appends the bulk affordance marker (packages/runtime/src/tool-description.ts)
+ *  appends the bulk and pacing affordance markers (packages/runtime/src/tool-description.ts)
  *  deterministically, and a tool must not be charged for a string it did not write. */
 const SOFT_BUDGET = 500;
 const HARD_BUDGET = 1024;

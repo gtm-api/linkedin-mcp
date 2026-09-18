@@ -19,6 +19,27 @@ import {
 const SID = z.string().length(18).startsWith('ln_sm_')
   .describe('Smart-limit row sid (ln_sm_…).');
 
+// The 15 public buckets an account owns, one row each. Also the vocabulary of a
+// tool's `pacedBucket` (tests/pacing-parity.test.ts): a call of a paced tool
+// spends exactly one of these.
+export const SMART_LIMIT_BUCKETS = [
+  'send_connection_requests',
+  'networking_general',
+  'send_messages',
+  'send_inmails',
+  'messaging_general',
+  'comment_posts',
+  'react_posts',
+  'endorse_skills',
+  'visit_profiles',
+  'edit_profile',
+  'self_account_sync',
+  'scraping',
+  'enrichment',
+  'posting',
+  'custom_request',
+] as const;
+
 // Item projection: mirrors LinkedinAccountSmartLimitDomain (research §Domain)
 // field-by-field. Trailing .passthrough() is forward-compat only (backend may
 // add fields). Counts stays passthrough: the counts block is an auto-computed
@@ -31,21 +52,7 @@ const LinkedinAccountSmartLimit = z.object({
 
   // Identity (composite natural key with linkedin_account_sid)
   limit_type: z.enum([
-    'send_connection_requests',
-    'networking_general',
-    'send_messages',
-    'send_inmails',
-    'messaging_general',
-    'comment_posts',
-    'react_posts',
-    'endorse_skills',
-    'visit_profiles',
-    'edit_profile',
-    'self_account_sync',
-    'scraping',
-    'enrichment',
-    'posting',
-    'custom_request',
+    ...SMART_LIMIT_BUCKETS,
     // The 16th case. LinkedinAccountSmartLimitTypeEnum calls it the hidden
     // governor and no tool creates one, but the bootstrap job does, so a search
     // over a real account returns rows carrying it and a 15-case enum fails to
@@ -76,8 +83,10 @@ const LinkedinAccountSmartLimit = z.object({
   status: z.enum(['active', 'held', 'linkedin_blocked']),
   hold_till: z.string().nullable(),
   linkedin_quota_hit_till: z.string().nullable(),
-  // Delay-gate clock (v5.1 §9): when this bucket last counted a successful
-  // action; next dispatch allowed at + delay_in_seconds. Null until first count.
+  // When this bucket last counted a successful action. Null until first count.
+  // NOT the pacing clock since 2026-09-18: a dispatch reserves its slot before
+  // the call leaves (the platform's own last_dispatch_at), so what a caller is
+  // told to wait is context.retry_after on the 429, never this field + a delay.
   last_counted_at: z.string().nullable(),
 
   // Timestamps (no deleted_at on this entity)
@@ -173,8 +182,8 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
       target_limit: z.number().int().min(0).max(1000).nullable().optional().describe('Warm-up ceiling; null clears it.'),
       learning_enabled: z.boolean().optional()
         .describe('Whether the adaptive ceiling keeps moving. false pins learned_ceiling where it stands; the quota-hit block clock still arms either way, so this is a tuning knob, not a safety switch.'),
-      delay_in_seconds: z.number().int().min(1).max(3600).optional().describe('The hold: seconds between one burst and the next (1..3600).'),
-      batch_size: z.number().int().min(1).max(10).optional().describe('The burst: calls that fire back-to-back before the hold (1..10; a longer burst only trips the ten-starts-a-minute account guard).'),
+      delay_in_seconds: z.number().int().min(1).max(3600).optional().describe('The pacing window in seconds (1..3600). Calls of the bucket leave one at a time, delay_in_seconds / batch_size apart; nothing fires back-to-back.'),
+      batch_size: z.number().int().min(1).max(10).optional().describe('Calls per pacing window (1..10). It only divides the window: two calls of the bucket are delay_in_seconds / batch_size apart, so 30 s with 3 paces a call every 10 s. It is not a burst.'),
       reset_hold: z.boolean().optional().describe('Clear the daily-saturation hold in the same call (the atomic "raise the limit AND resume now"). Only resumes if the new daily_limit > done_today_count; otherwise the row re-holds. Never touches a LinkedIn-side lock.'),
       ...usageMetaField,
     }),

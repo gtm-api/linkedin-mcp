@@ -65,3 +65,6 @@ export const linkedinPackages: ToolPackage[] = [
   pkg('cloud_browsers', cloudBrowsersTools),
   pkg('cloud_browser_sessions', cloudBrowserSessionsTools),
 ];
+
+// The vocabulary of a tool's `pacedBucket`, for the pacing gate in tests/.
+export { SMART_LIMIT_BUCKETS } from './linkedin_account_smart_limits/mcp-tools';

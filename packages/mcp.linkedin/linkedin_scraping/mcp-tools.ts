@@ -906,6 +906,8 @@ const STUB = '⛔ NOT SHIPPED YET. The contract is locked and validated now but 
 
 const base = {
   service: 'linkedin',
+  // Every tool of this package dispatches a read to the account's browser.
+  pacedBucket: 'scraping',
   entity: 'linkedin_scraping',
   mount: 'linkedin.scraping',
 } as const;

@@ -125,6 +125,11 @@ const flagSentences = (tool: ToolDefinition): string[] => {
   if (tool.scheduleRequired) {
     flags.push('schedule required: bulk use of this verb MUST be paced, an unpaced plan is rejected');
   }
+  if (tool.pacedBucket) {
+    flags.push(
+      `paced: a call spends the \`${tool.pacedBucket}\` smart-limit bucket of the account it runs on, and calls of one bucket are spaced per account. A short wait is slept by the server; a longer one answers 429 \`rate_limited\` with \`context.retry_after\`, and the same call succeeds from that moment. Parallel calls on one account queue behind each other`,
+    );
+  }
   return flags;
 };
 
@@ -156,6 +161,7 @@ const extensions = (tool: ToolDefinition): JsonSchema => {
     'x-gtm-schedule-required': tool.scheduleRequired === true,
   };
   if (tool.toolClass) ext['x-gtm-tool-class'] = tool.toolClass;
+  if (tool.pacedBucket) ext['x-gtm-paced-bucket'] = tool.pacedBucket;
   if (tool.availability === 'stub_501') ext['x-gtm-not-implemented-reason'] = STUB_REASON;
   return ext;
 };

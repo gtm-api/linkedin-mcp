@@ -156,7 +156,7 @@ const QUEUE_READ = { readOnlyHint: false, destructiveHint: false, idempotentHint
 // The three creates ARE now undoable through this API (2026-08-20), which is a
 // change of fact but not of hint: destructiveHint marks an outward write, and an
 // undo is itself one. The undo spends the bucket of the create it reverses, and
-// those buckets burst 2 so the pair fits back-to-back.
+// it is paced 2 s, not the bucket's delay, so the pair fits back to back.
 const DANGER = {
   readOnlyHint: false,
   destructiveHint: true,
@@ -182,6 +182,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'posting',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -237,6 +238,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'comment_posts',
     massAction: true,
     stepEligible: true,
     scheduleRequired: false,
@@ -269,6 +271,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'react_posts',
     massAction: true,
     stepEligible: true,
     scheduleRequired: false,
@@ -293,6 +296,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'posting',
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
@@ -309,13 +313,14 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'delete_linkedin_comment',
     description:
-      'Delete one of OUR OWN LinkedIn comments, addressed by comment_urn (wire delete-comment). The counterpart of create_linkedin_comment. You already hold the handle: create_linkedin_comment returns comment_urn, and the linkedin-scraping get-post-comments rows carry the same compound urn, so a comment can be removed without any extra read. LinkedIn only deletes the account\'s own comments and we do not pre-validate that. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME comment_posts bucket as commenting (30/day at a 360 s floor, bursting 2 so a comment and its delete fit back-to-back), saturation returns 429. Nothing is stored on this service.',
+      'Delete one of OUR OWN LinkedIn comments, addressed by comment_urn (wire delete-comment). The counterpart of create_linkedin_comment. You already hold the handle: create_linkedin_comment returns comment_urn, and the linkedin-scraping get-post-comments rows carry the same compound urn, so a comment can be removed without any extra read. LinkedIn only deletes the account\'s own comments and we do not pre-validate that. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME comment_posts bucket as commenting (30/day), but an undo is paced 2 s, not the bucket delay, so a comment and its delete fit back to back; saturation returns 429. Nothing is stored on this service.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/delete-comment' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'comment_posts',
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
@@ -332,13 +337,14 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'unreact_linkedin_post',
     description:
-      'Remove OUR reaction from a LinkedIn post or comment, addressed by the same entity_urn react_linkedin_post took (wire delete-reaction). Undo a reaction left by mistake or by a play that has been retargeted. Takes no reaction_type: LinkedIn holds at most one reaction per account per entity, so removal is unambiguous. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME react_posts bucket as reacting (30/day at a 360 s floor, bursting 2 so a reaction and its removal fit back-to-back), saturation returns 429. A post is addressed at its social thread exactly like react_linkedin_post, so undoing with the value you reacted with removes the reaction that landed. removed: true means LinkedIn accepted the delete, not that a reaction existed (a delete with nothing to remove answered true live, 2026-09-16); a refused removal comes back 409 reaction_not_removed.',
+      'Remove OUR reaction from a LinkedIn post or comment, addressed by the same entity_urn react_linkedin_post took (wire delete-reaction). Undo a reaction left by mistake or by a play that has been retargeted. Takes no reaction_type: LinkedIn holds at most one reaction per account per entity, so removal is unambiguous. Identity-bound: linkedin_account_sid REQUIRED, spends the SAME react_posts bucket as reacting (30/day), but an undo is paced 2 s, not the bucket delay, so a reaction and its removal fit back to back; saturation returns 429. A post is addressed at its social thread exactly like react_linkedin_post, so undoing with the value you reacted with removes the reaction that landed. removed: true means LinkedIn accepted the delete, not that a reaction existed (a delete with nothing to remove answered true live, 2026-09-16); a refused removal comes back 409 reaction_not_removed.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/unreact' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'react_posts',
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
@@ -361,6 +367,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'posting',
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,
@@ -388,6 +395,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'posting',
     massAction: false,
     stepEligible: false,
     scheduleRequired: false,

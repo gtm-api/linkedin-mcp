@@ -150,6 +150,7 @@ export const linkedinFollowersTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       page_size: z.number().int().min(1).max(100).optional()

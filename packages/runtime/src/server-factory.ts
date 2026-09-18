@@ -8,7 +8,7 @@ import { dispatch } from './dispatcher';
 import { getAuthScope } from './auth-scope';
 import { registerFacadeTools } from './facade';
 import { callableSchema } from './input-schema';
-import { toolDescription } from './tool-description';
+import { PACING_CONTRACT, toolDescription } from './tool-description';
 
 export type ServerFactory = (mount: ResolvedMount, catalog?: ResolvedMount[]) => McpServer;
 
@@ -18,9 +18,12 @@ export type ServerFactory = (mount: ResolvedMount, catalog?: ResolvedMount[]) =>
 export const REPLY_STYLE =
   'Reply style: keep every answer as simple and short as the request allows, for support answers and plain context alike. Give the minimum that answers the ask or supplies the needed context, then stop. No filler, no padding, no unrequested detail.';
 
-/** Mount instructions + the global reply-style rule; the rule alone when a mount has none. */
-export function composeInstructions(mountInstructions?: string): string {
-  return mountInstructions ? `${mountInstructions}\n\n${REPLY_STYLE}` : REPLY_STYLE;
+/**
+ * Mount instructions + the pacing contract when the surface has paced tools + the
+ * global reply-style rule; the rule alone when a mount has neither.
+ */
+export function composeInstructions(mountInstructions?: string, paced = false): string {
+  return [mountInstructions, paced ? PACING_CONTRACT : undefined, REPLY_STYLE].filter(Boolean).join('\n\n');
 }
 
 // Build a factory that returns a fresh McpServer per request (stateless,
@@ -39,7 +42,12 @@ export function createServerFactory(
   return (mount: ResolvedMount, catalog: ResolvedMount[] = []): McpServer => {
     const server = new McpServer(
       { name: mount.config.name, version: deps.config.version },
-      { instructions: composeInstructions(mount.config.instructions) },
+      {
+        instructions: composeInstructions(
+          mount.config.instructions,
+          (mount.config.facade === 'toolsets' ? catalog.flatMap((m) => m.tools) : mount.tools).some((tool) => tool.pacedBucket),
+        ),
+      },
     );
 
     if (mount.config.facade === 'toolsets') {

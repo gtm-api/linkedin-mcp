@@ -6,7 +6,7 @@ import type { ResolvedMount } from './mounts';
 import type { DispatchContext, RuntimeDeps, ToolResult } from './types';
 import { getAuthScope } from './auth-scope';
 import { callableSchema, registeredShape, TeamSidOverride, toolOwnsTeamSid, validationFailedResult } from './input-schema';
-import { toolDescription, withAffordances } from './tool-description';
+import { PACING_CONTRACT, toolDescription, withAffordances } from './tool-description';
 
 // The unified facade: 3 meta-tools over the whole registry, for clients that
 // want one URL instead of mounting each domain. `call_tool` re-enters the SAME
@@ -75,6 +75,13 @@ export function registerFacadeTools(
               title: t.annotations.title,
               description: toolDescription(t),
               dangerous: t.dangerous,
+              // Not read-only + open world = the call drives the account's live
+              // LinkedIn session (a cold browser start included), which a client
+              // that auto-approves reads must see HERE: the facade registers three
+              // meta-tools, so per-tool MCP annotations never reach it.
+              read_only: t.annotations.readOnlyHint,
+              open_world: t.annotations.openWorldHint,
+              paced_bucket: t.pacedBucket ?? null,
               availability: t.availability,
               // registeredShape, not t.inputSchema.shape: a dangerous tool also
               // takes commit_token, and call_tool now parses against exactly
@@ -83,7 +90,8 @@ export function registerFacadeTools(
             }
           : { name: t.name, title: t.annotations.title, summary: withAffordances(t.description.split('\n')[0].slice(0, 160), t) },
       );
-      return { content: [{ type: 'text', text: JSON.stringify({ toolset: key, tools }, null, 2) }], structuredContent: { toolset: key, tools } };
+      const listing = mount.tools.some((t) => t.pacedBucket) ? { toolset: key, pacing: PACING_CONTRACT, tools } : { toolset: key, tools };
+      return { content: [{ type: 'text', text: JSON.stringify(listing, null, 2) }], structuredContent: listing };
     },
   );
 

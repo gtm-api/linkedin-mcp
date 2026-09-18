@@ -43,6 +43,7 @@ export const linkedinCustomRequestsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'custom_request',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

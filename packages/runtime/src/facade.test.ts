@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { registerFacadeTools } from './facade';
+import { PACING_CONTRACT } from './tool-description';
 import { runWithAuthScope } from './auth-scope';
 import { buildRegistry } from './registry';
 import type { ResolvedMount } from './mounts';
@@ -220,5 +221,50 @@ describe('facade call_tool argument validation', () => {
     const [tool] = (result.structuredContent as { tools: Array<{ params: string[] }> }).tools;
 
     expect(tool.params).toContain('commit_token');
+  });
+});
+
+// The facade registers three meta-tools, so neither the per-tool MCP annotations
+// nor a mount's server instructions reach its client: the listing is the only
+// place a facade agent can learn that a call drives a live session and is paced.
+describe('facade get_toolset_tools pacing', () => {
+  const send = mkTool({
+    name: 'send_thing',
+    description: 'Send a thing.',
+    operation: 'action',
+    envelope: 'action',
+    pacedBucket: 'send_messages',
+    annotations: { title: 'Send thing', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: true },
+  });
+
+  it('marks the paced tool in the lite row and states the contract once for the listing', async () => {
+    const { list } = facade([mkTool(), send]);
+
+    const listing = (await list({ toolset: 'linkedin.things' })).structuredContent as {
+      pacing?: string; tools: Array<{ name: string; summary: string }>;
+    };
+
+    expect(listing.pacing).toBe(PACING_CONTRACT);
+    expect(listing.tools.find((row) => row.name === 'send_thing')!.summary).toBe('Send a thing. Paced: send_messages.');
+    expect(listing.tools.find((row) => row.name === 'search_things')!.summary).toBe('Search things.');
+  });
+
+  it('carries the bucket and the session-driving hints on a verbose row', async () => {
+    const { list } = facade([mkTool(), send]);
+
+    const { tools } = (await list({ toolset: 'linkedin.things', verbose: true })).structuredContent as {
+      tools: Array<{ name: string; read_only: boolean; open_world: boolean; paced_bucket: string | null }>;
+    };
+
+    expect(tools.find((row) => row.name === 'send_thing')).toMatchObject({ read_only: false, open_world: true, paced_bucket: 'send_messages' });
+    expect(tools.find((row) => row.name === 'search_things')).toMatchObject({ read_only: true, open_world: false, paced_bucket: null });
+  });
+
+  it('adds no pacing note to a toolset that has no paced tool', async () => {
+    const { list } = facade([mkTool()]);
+
+    const listing = (await list({ toolset: 'linkedin.things' })).structuredContent as Record<string, unknown>;
+
+    expect(listing).not.toHaveProperty('pacing');
   });
 });

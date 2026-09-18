@@ -280,6 +280,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -302,6 +303,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -325,6 +327,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'self_account_sync',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -347,6 +350,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'send_messages',
     massAction: false,
     stepEligible: true,
     scheduleRequired: false,
@@ -376,6 +380,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'send_messages',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -405,6 +410,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'send_inmails',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -432,6 +438,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'send_inmails',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -460,6 +467,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'send_inmails',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -493,6 +501,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -516,6 +525,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -536,6 +546,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -559,6 +570,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    pacedBucket: 'messaging_general',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -581,6 +593,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    pacedBucket: 'send_messages',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
