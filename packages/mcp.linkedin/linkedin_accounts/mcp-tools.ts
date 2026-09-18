@@ -1123,7 +1123,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
-    dangerous: false,
+    dangerous: true,  // binds the browser to a contract and switches the Recruiter inbox the sync reads: consent first, like every other mutation of this mount
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -1132,7 +1132,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount, LinkedinAccountSelectRecruiterContractResult),
-    annotations: { title: 'Select my Recruiter contract', readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
+    annotations: { title: 'Select my Recruiter contract', readOnlyHint: false, destructiveHint: true, idempotentHint: true, openWorldHint: false },
   },
   {
     ...base,

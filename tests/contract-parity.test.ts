@@ -128,6 +128,66 @@ const ALLOWLIST_FILE = 'fixtures/contract-oracle/mass-action-allowlist.json';
 const STEP_ALLOWLIST_FILE = 'fixtures/contract-oracle/step-eligible-allowlist.json';
 const REQUEST_BASELINE_FILE = 'fixtures/contract-oracle/request-parity-baseline.json';
 
+// Filter fields the PHP {Entity}Filter carries and a search tool deliberately does
+// NOT offer, tool name -> field -> the reason. Read by the filter completeness
+// gate; an entry whose field is offered again, or gone from the PHP filter, fails it.
+const FILTER_FIELDS_NOT_OFFERED: Record<string, Record<string, string>> = {
+  search_antidetect_browser_logs: {
+    team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
+  },
+  search_antidetect_browsers: {
+    account_share_sid: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
+  },
+  search_cloud_browser_sessions: {
+    team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
+  },
+  search_data_requests: {
+    cached_from_sid: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    completed_at: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    error_code: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    input_kind: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    input_value: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    linkedin_account_sid: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    ln_id: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    nickname: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    sn_id: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
+    updated_at: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+  },
+  search_linkedin_account_quota_hits: {
+    limit_type: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+  },
+  search_linkedin_account_smart_limits: {
+    clean_saturation_streak: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    learned_ceiling: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    learned_ceiling_source: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    learned_ceiling_updated_at: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    learning_enabled: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    probe_not_before: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+  },
+  search_linkedin_connection_invitations: {
+    linkedin_invitation_id: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    shared_secret: 'a secret: never a search axis for an agent',
+  },
+  search_linkedin_messages: {
+    subject: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+  },
+  search_notifications: {
+    read_at: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+  },
+  search_oauth_clients: {
+    actor_kind: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+  },
+  search_webhook_logs: {
+    team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
+  },
+  search_webhooks: {
+    sid: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
+    team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
+  },
+};
+
 const readJson = (path: string) =>
   JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'));
 
@@ -489,6 +549,52 @@ for (const svc of SERVICES) {
       /* eslint-disable-next-line no-console */
       for (const line of attributed) console.log(`  multi-domain folder, attributed by fit: ${line}`);
       expect(violations).toEqual([]);
+    });
+
+    // The missing direction of the gate above (2026-09-18). That one fails on a
+    // Zod filter key the PHP filter lacks, because it is a 500 on call; a PHP filter
+    // field NO search tool declares was invisible, and it is how
+    // `search_linkedin_messages` shipped without `client_reference`: the backend
+    // filtered on it over an index, six send tools promised the key was
+    // "searchable", and the strict input schema refused the filter before any
+    // call was made. Fields a tool deliberately does not offer are listed in
+    // FILTER_FIELDS_NOT_OFFERED with the reason; the list shrinks, it never grows
+    // silently, and an entry that stopped drifting fails the gate.
+    it('filter parity: every PHP {Entity}Filter field is offered by the search tool, or listed with a reason', () => {
+      const violations: string[] = [];
+      const stale: string[] = [];
+      let checked = 0;
+
+      for (const tool of tools) {
+        if (tool.operation !== 'search') continue;
+        const input = shapeOf(tool.inputSchema);
+        const filterShape = input?.filter ? shapeOf(input.filter) : null;
+        if (!filterShape) continue;
+
+        const keys = Object.keys(filterShape);
+        const candidates = candidatesFor(tool.entity).filter((key) => svc.oracle.entities[key].filter);
+        if (!candidates.length) continue;
+        const { pick } = attribute(
+          candidates.map((key) => fitOf(key, keys, svc.oracle.entities[key].filter!.fields, tool.name)),
+        );
+        if (!pick) continue;
+
+        checked++;
+        const notOffered = FILTER_FIELDS_NOT_OFFERED[tool.name] ?? {};
+        const missing = svc.oracle.entities[pick.key].filter!.fields.filter((field) => !keys.includes(field));
+        for (const field of missing) {
+          if (!(field in notOffered)) {
+            violations.push(`${tool.name}: ${pick.key}Filter filters on '${field}' and the tool does not offer it (add it to the Zod filter, or to FILTER_FIELDS_NOT_OFFERED with the reason)`);
+          }
+        }
+        for (const field of Object.keys(notOffered)) {
+          if (!missing.includes(field)) stale.push(`FILTER_FIELDS_NOT_OFFERED['${tool.name}'].${field} no longer drifts: delete the entry`);
+        }
+      }
+
+      /* eslint-disable-next-line no-console */
+      console.log(`${svc.name} filter completeness: ${checked} search tools checked.`);
+      expect([...violations, ...stale]).toEqual([]);
     });
 
     it('item parity: the Zod item never invents a field the {Entity}Domain lacks', () => {
