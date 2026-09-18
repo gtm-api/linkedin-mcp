@@ -10,13 +10,22 @@ export interface BuiltRequest {
 //  - GET/DELETE  → remaining args become query params (arrays as key[]=v);
 //  - POST/PUT/PATCH → remaining args become the JSON body.
 // `_meta` is always dropped (usage analytics, never sent to the backend).
-export function buildRequest(ctx: DispatchContext): BuiltRequest {
+// The validate twin of the public API (gtm.lib.common Core/Http/ValidateOnly): the
+// same routes mounted under `api/_validate`, authenticated and validated the same
+// way, whose actions never run. A backend that has no twin answers 404 there.
+export const VALIDATE_TWIN_PREFIX = '/api/_validate/';
+
+export function buildRequest(ctx: DispatchContext, opts: { validateOnly?: boolean } = {}): BuiltRequest {
   const { tool, args, deps } = ctx;
   const { route } = tool;
   const base = deps.config.baseUrls[route.service];
   if (!base) throw new Error(`no base URL configured for service '${route.service}'`);
 
   let path = route.pathTemplate;
+  if (opts.validateOnly) {
+    if (!path.startsWith('/api/')) throw new Error(`tool ${tool.name}: only /api routes have a validate twin`);
+    path = VALIDATE_TWIN_PREFIX + path.slice('/api/'.length);
+  }
   // _meta (usage analytics) is never sent to the backend.
   //
   // `commit_token` belongs to the preview gate, which only runs on

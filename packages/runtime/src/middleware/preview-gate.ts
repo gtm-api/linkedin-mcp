@@ -1,11 +1,15 @@
 import type { DispatchContext, RuntimeDeps, ToolResult } from '../types';
 import type { ToolMiddleware } from '../chain';
+import { backendFetch } from '../backend-client';
+import { mapErrorEnvelope } from '../error-map';
 
 // Human-in-the-loop consent gate for tools flagged `dangerous: true`
 // (destructive / paid). Stateless, HMAC commit-token design (ported from the
 // legacy gs.mcp preview-gate, but armed by default):
-//   - Call 1 (no commit_token): NO backend call. Returns a preview + a short-
-//     lived HMAC commit_token bound to the tool name and a hash of the args.
+//   - Call 1 (no commit_token): nothing executes. The arguments are checked
+//     against the backend's validate twin first (see validateOnBackend), then a
+//     preview is returned with a short-lived HMAC commit_token bound to the tool
+//     name and a hash of the args.
 //   - Call 2 (commit_token present): verify signature + expiry + tool + args
 //     hash, mark the token's jti single-use in KV, then execute.
 // Fail-closed: no secret / no store / KV error → refuse to execute.
@@ -149,7 +153,41 @@ function effectSummary(tool: string, action: string, args: Record<string, unknow
   return `${tool} will run ${action}${parts.length ? ` with ${parts.join(', ')}` : ' with no arguments'}.`;
 }
 
-function previewResult(ctx: DispatchContext, token: string, expiresIn: number, team: string): ToolResult {
+/**
+ * Ask the backend's validate twin whether the real route would refuse these
+ * arguments before its action even starts (auth, permissions, the FormRequest).
+ *
+ * Until 2026-09-18 a preview made no backend call at all, so a payload the commit
+ * would answer 422 to sailed through: the human confirmed it, and only the
+ * confirmed call found out. Now the refusal arrives AT the preview, rendered
+ * exactly as the real call would render it, and no token is minted for it.
+ *
+ * Returns the refusal, `'passed'`, or `'unavailable'`. Unavailable is every answer
+ * that is not a verdict on the arguments: no twin on that backend (404, which an
+ * unaware backend gives and an aware one gives for a sid it cannot bind, the same
+ * way the commit would), a transport failure, a 5xx, a body that is not the
+ * platform envelope. The gate then previews as it always did: the twin makes a
+ * preview stronger where it exists and never makes it unavailable.
+ */
+async function validateOnBackend(ctx: DispatchContext): Promise<ToolResult | 'passed' | 'unavailable'> {
+  if (ctx.tool.localHandler || !ctx.tool.route.pathTemplate.startsWith('/api/')) return 'unavailable';
+
+  const { commit_token: _drop, ...args } = ctx.args;
+  let res;
+  try {
+    res = await backendFetch({ ...ctx, args }, { validateOnly: true });
+  } catch {
+    return 'unavailable';
+  }
+  if (res.kind === 'transport_error' || res.status === 404 || res.status >= 500) return 'unavailable';
+
+  const env = res.envelope as { success?: boolean; operation?: string } | null;
+  if (env?.success === true && env.operation === 'validate') return 'passed';
+  if (env?.success === false && res.status >= 400) return mapErrorEnvelope(res.status, env as never, ctx);
+  return 'unavailable';
+}
+
+function previewResult(ctx: DispatchContext, token: string, expiresIn: number, team: string, validated: boolean): ToolResult {
   const action = ctx.tool.route.pathTemplate.split('/').pop() ?? ctx.tool.name;
   const { commit_token: _committed, ...args } = ctx.args;
   const summary = effectSummary(ctx.tool.name, action, args);
@@ -158,6 +196,7 @@ function previewResult(ctx: DispatchContext, token: string, expiresIn: number, t
     `Nothing has changed yet. Review the arguments below, then call ${ctx.tool.name} AGAIN with the exact same arguments plus "commit_token": "${token}" to execute.`,
     `The token is single-use and expires in ${expiresIn}s.`,
     ...(team !== '' ? [`It will execute in team ${team}.`] : []),
+    ...(validated ? ['The arguments passed the backend\'s own validation; what the action finds when it runs (limits, seats, the target\'s state) is only known at commit.'] : []),
     '',
     summary,
     `arguments: ${JSON.stringify(args)}`,
@@ -174,6 +213,9 @@ function previewResult(ctx: DispatchContext, token: string, expiresIn: number, t
       dangerous: true,
       summary,
       arguments: args,
+      // true = the backend's validate twin accepted these arguments; false = the
+      // backend has no twin (or did not answer), so only the MCP schema checked them.
+      validated,
       commit_token: token,
       expires_in_seconds: expiresIn,
       team_sid: team !== '' ? team : null,
@@ -210,9 +252,12 @@ export function makePreviewGate(deps: RuntimeDeps): ToolMiddleware {
     const provided = typeof ctx.args.commit_token === 'string' ? (ctx.args.commit_token as string) : undefined;
 
     if (!provided) {
+      const validation = await validateOnBackend(ctx);
+      if (typeof validation !== 'string') return validation;
+
       const jti = crypto.randomUUID();
       const { token, expiresIn } = await mintCommitToken(ctx.tool.name, argsHash, gate.secret, gate.ttlSeconds, nowMs, jti, team);
-      return previewResult(ctx, token, expiresIn, team);
+      return previewResult(ctx, token, expiresIn, team, validation === 'passed');
     }
 
     const verdict = await verifyCommitToken(provided, ctx.tool.name, argsHash, gate.secret, nowMs, team);

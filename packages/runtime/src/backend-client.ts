@@ -9,9 +9,9 @@ export type BackendResult =
 // via AbortController, and returns any JSON body (incl. 4xx/5xx error
 // envelopes) as kind:'ok' - only non-JSON / network / timeout is a
 // transport_error. Never throws.
-export async function backendFetch(ctx: DispatchContext): Promise<BackendResult> {
+export async function backendFetch(ctx: DispatchContext, opts: { validateOnly?: boolean } = {}): Promise<BackendResult> {
   const { tool, scope, deps } = ctx;
-  const { url, body } = buildRequest(ctx);
+  const { url, body } = buildRequest(ctx, opts);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), deps.config.backendTimeoutMs);

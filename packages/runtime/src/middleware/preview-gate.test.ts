@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { z } from 'zod';
 import {
   canonicalArgsHash,
@@ -176,3 +176,109 @@ describe('preview-gate middleware', () => {
     expect(res.isError).toBe(true);
   });
 });
+
+// The validate twin: before a token is minted, the gate asks the backend whether
+// the real route would refuse these arguments. What is pinned here is the contract
+// with a backend that may or may not have a twin: a refusal arrives AT the preview
+// and mints nothing, and every non-answer leaves the preview exactly as it was.
+describe('preview gate: backend validate twin', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  function depsWithBackend(): RuntimeDeps {
+    const deps = mkDeps(memStore().store, SECRET);
+    deps.config.baseUrls.linkedin = 'https://backend.test/linkedin/v4';
+    return deps;
+  }
+
+  function stubFetch(status: number, body: unknown): ReturnType<typeof vi.fn> {
+    const fetchMock = vi.fn(async () => new Response(typeof body === 'string' ? body : JSON.stringify(body), { status }));
+    vi.stubGlobal('fetch', fetchMock);
+    return fetchMock;
+  }
+
+  const never = async (): Promise<ToolResult> => {
+    throw new Error('the action must not run at preview');
+  };
+
+  it('asks the twin of the same route, with the sid in the path and no commit_token in the body', async () => {
+    const fetchMock = stubFetch(200, { success: true, operation: 'validate', valid: true, validated_requests: ['ResetSyncRequest'], meta: {} });
+    const gate = makePreviewGate(depsWithBackend());
+
+    const result = await gate(mkCtx({ sid: 'ln_ac_1', types: ['connections'] }, depsWithBackend()), never);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    expect(url).toBe('https://backend.test/linkedin/v4/api/_validate/linkedin-accounts/ln_ac_1/reset-sync');
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body as string)).toEqual({ types: ['connections'] });
+
+    const preview = result.structuredContent as { preview: boolean; validated: boolean; commit_token: string };
+    expect(preview.preview).toBe(true);
+    expect(preview.validated).toBe(true);
+    expect(preview.commit_token).toBeTruthy();
+    expect(result.content[0].text).toContain("passed the backend's own validation");
+  });
+
+  it('returns the refusal the commit would get, and mints no token for it', async () => {
+    stubFetch(422, {
+      success: false,
+      error: { code: 'validation_failed', message: 'The types field is required.', field_errors: { types: [{ rule: 'required', message: 'The types field is required.' }] } },
+      meta: { trace_id: 'trace' },
+    });
+    const deps = depsWithBackend();
+
+    const result = await makePreviewGate(deps)(mkCtx({ sid: 'ln_ac_1' }, deps), never);
+
+    // Rendered by the same mapper the real call goes through, so the agent reads
+    // at preview exactly what it would have read at commit.
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text).toContain('Validation failed for reset_linkedin_account_sync');
+    expect(result.content[0].text).toContain('types');
+    expect(JSON.stringify(result)).not.toContain('commit_token');
+  });
+
+  it.each([
+    ['a backend without the twin (404)', 404, { success: false, error: { code: 'not_found', message: 'Not found.' }, meta: {} }],
+    ['a backend in trouble (503)', 503, { success: false, error: { code: 'service_unavailable', message: 'Maintenance.' }, meta: {} }],
+    ['an answer that is not the platform envelope', 200, '<html>gateway</html>'],
+  ])('previews as before on %s', async (_label, status, body) => {
+    stubFetch(status, body);
+    const deps = depsWithBackend();
+
+    const result = await makePreviewGate(deps)(mkCtx({ sid: 'ln_ac_1' }, deps), never);
+
+    const preview = result.structuredContent as { preview: boolean; validated: boolean; commit_token: string };
+    expect(result.isError).toBeFalsy();
+    expect(preview.preview).toBe(true);
+    expect(preview.validated).toBe(false);
+    expect(preview.commit_token).toBeTruthy();
+    expect(result.content[0].text).not.toContain("passed the backend's own validation");
+  });
+
+  it('previews as before when the backend cannot be reached', async () => {
+    vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('ECONNREFUSED'); }));
+    const deps = depsWithBackend();
+
+    const result = await makePreviewGate(deps)(mkCtx({ sid: 'ln_ac_1' }, deps), never);
+
+    expect((result.structuredContent as { validated: boolean }).validated).toBe(false);
+  });
+
+  it('does not ask the twin again at commit: the confirmed call goes straight to the action', async () => {
+    const fetchMock = stubFetch(200, { success: true, operation: 'validate', valid: true, validated_requests: [], meta: {} });
+    const deps = depsWithBackend();
+    const gate = makePreviewGate(deps);
+    const args = { sid: 'ln_ac_1', types: ['connections'] };
+
+    const preview = (await gate(mkCtx(args, deps), never)).structuredContent as { commit_token: string };
+    let ran = 0;
+    await gate(mkCtx({ ...args, commit_token: preview.commit_token }, deps), async () => {
+      ran++;
+      return { content: [{ type: 'text', text: 'done' }] };
+    });
+
+    expect(ran).toBe(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+});
+
