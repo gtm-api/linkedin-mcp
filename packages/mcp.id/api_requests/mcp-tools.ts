@@ -148,7 +148,7 @@ export const apiRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'get_api_request_metrics',
     description:
-      'Period-bound totals of the team\'s external API requests, merged across the answering services: total_count, error_count and the 2xx/3xx/4xx/5xx split in aggregated.counts; error_rate, avg_duration_ms, first/last_occurred_at in aggregated.metrics. Requires period {from, to} (ISO 8601 UTC, half-open, at most 92 days). Optional group_by splits the same numbers per key: client_sid ("how much does each agent call"), route or entity ("which tools"), status_family, service, surface (occurred_hour / occurred_day exist too but bucket is the better time axis). Optional bucket (hour | day) cuts the window into consecutive UTC buckets, series.points[] one per bucket over the whole window with zeros filled, each carrying its own counts and its own group_by split: "requests per day by type" is group_by entity + bucket day in one call. Use to answer "how many calls this week and how many failed" in one round-trip instead of paging the log. aggregated.counts.sources says which services answered.',
+      'Period-bound totals of the team\'s external API requests, merged across the answering services: total_count, error_count and the 2xx/3xx/4xx/5xx split in aggregated.counts; error_rate, avg_duration_ms, first/last_occurred_at in aggregated.metrics. Requires period {from, to} (ISO 8601 UTC, half-open, at most 92 days). Optional group_by splits the same numbers per key: client_sid ("how much does each agent call", groups carry the client name), route or entity ("which tools"), status_family, service, surface (occurred_hour / occurred_day exist too but bucket is the better time axis). Optional bucket (hour | day) cuts the window into consecutive UTC buckets, series.points[] one per bucket over the whole window with zeros filled, each carrying its own counts and its own group_by split: "requests per day by type" is group_by entity + bucket day in one call. Use to answer "how many calls this week and how many failed" in one round-trip instead of paging the log. aggregated.counts.sources says which services answered.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/api-requests/metrics' },
     operation: 'metrics',
@@ -172,7 +172,16 @@ export const apiRequestsTools: ToolDefinition[] = [
           counts: z.record(z.unknown()).optional(),
           metrics: ApiRequestMetrics.optional(),
         }).passthrough().optional(),
-        groups: z.array(z.object({ key: z.string(), counts: z.record(z.unknown()), metrics: ApiRequestMetrics }).passthrough()).optional(),
+        groups: z.array(z.object({
+          key: z.string(),
+          // A split by client_sid names its groups: the api key's name (revoked
+          // keys included) or the OAuth client's, and which of the two it is.
+          // Absent on every other split and on a sid neither registry knows.
+          label: z.string().optional(),
+          credential_kind: z.enum(['api_key', 'oauth']).optional(),
+          counts: z.record(z.unknown()),
+          metrics: ApiRequestMetrics,
+        }).passthrough()).optional(),
         series: z.object({ bucket: ApiRequestBucket, points: z.array(ApiRequestSeriesPoint) }).optional()
           .describe('Present only when bucket was passed.'),
       }).passthrough(),
