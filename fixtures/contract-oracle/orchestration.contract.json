@@ -6525,5 +6525,20 @@
             "rules": null,
             "rules_reason": "the action takes no request object"
         }
-    ]
+    ],
+    "error_catalog": {
+        "commit_token_expired": "commit_token has expired; run the preview again and commit with the new token.",
+        "email_box_not_replaceable": "The current email box is not in a state a new one can replace (see context.status or context.detail); only an active or suspended box is replaced.",
+        "invalid_commit_token": "commit_token does not match this plan: preview the same title, scope, plan and schedule again and commit with the token the preview returns.",
+        "invalid_status_transition": "This status change is not allowed from the run's current status (see context.detail).",
+        "payload_too_large": "The webhook payload exceeds 64 KB after encoding and cannot be delivered.",
+        "period_inverted": "period.from is after period.to; swap them.",
+        "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",
+        "registry_unavailable": "The identity service did not answer the email-box registry call; retry in a minute.",
+        "run_not_active": "This run does not take new items (see context.detail: it is paused or deleted); resume it, or create a new run.",
+        "run_not_failed": "Only a failed provisioning run can be retried; this one has not failed.",
+        "sid_xor_filter_required": "Provide sid for one item or filter for a set, not neither.",
+        "too_many_splits": "group_by would produce more than 500 groups; narrow the filter or split on a field with fewer values.",
+        "wildcard_must_be_alone": "The events wildcard (*) stands alone; do not list other event types next to it."
+    }
 }

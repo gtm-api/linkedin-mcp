@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.34.4",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "dev": "bash bin/mcp-dev.sh",
     "dev:plain": "pnpm --filter @gtm/mcp-worker dev",
@@ -20,13 +22,19 @@
     "oracle:refresh": "bash bin/oracle-refresh.sh",
     "oracle:check": "bash bin/oracle-refresh.sh --check",
     "openapi:public": "bash bin/openapi-public.sh",
-    "openapi:public:check": "bash bin/openapi-public.sh --check"
+    "openapi:public:check": "bash bin/openapi-public.sh --check",
+    "docs:reasons": "node bin/error-reasons.mjs",
+    "docs:reasons:check": "node bin/error-reasons.mjs --check"
   },
   "devDependencies": {
     "turbo": "2.10.4",
     "typescript": "5.9.3"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["esbuild", "workerd", "sharp"]
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd",
+      "sharp"
+    ]
   }
 }

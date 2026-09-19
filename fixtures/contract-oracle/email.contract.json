@@ -12128,5 +12128,42 @@
             "rules": null,
             "rules_reason": "the action reads the raw request, so no rule set declares its body"
         }
-    ]
+    ],
+    "error_catalog": {
+        "account_bound_other_team": "This mailbox is already connected in another workspace.",
+        "account_not_active": "This email account is not active (see context.status), so it cannot send; reconnect it first.",
+        "account_not_syncable": "This account has no sync runs (see context.detail).",
+        "account_sending_paused": "Sending from this account is paused (see context.reason); resume it, or send from another account.",
+        "attachment_fetch_failed": "The attachment could not be downloaded from the provider (see context.detail).",
+        "attachment_too_large": "The attachments together exceed the size a send may carry (context.max_bytes).",
+        "body_fetch_failed": "The message body could not be fetched from the provider (see context.detail); a sync refreshes its locator.",
+        "callback_host_registry_unavailable": "The identity service did not answer the callback-host lookup; retry in a minute.",
+        "daily_limit_exceeded": "This account has used its daily sending budget; pass scheduled_at and the queue sends when budget allows.",
+        "dispatch_in_flight": "This message is being sent right now; retry once it reaches a terminal status.",
+        "dns_resolvers_unavailable": "The DNS resolvers did not answer, so the domain could not be verified; retry in a minute.",
+        "domain_bound_other_team": "This domain is already registered in another workspace.",
+        "email_box_dump_not_ready": "The mailbox dump is not finished (see context.status); retry once it is done.",
+        "email_box_ops_disabled": "This deployment is not a workspace mailbox host; box operations are off here.",
+        "idempotency_key_busy": "A send with this idempotency_key is in progress; wait for it to finish.",
+        "idempotency_key_reused": "This idempotency_key was used for a different send; use a new key for a new message.",
+        "invalid_transition": "This status change is not allowed while the account is connecting.",
+        "no_mailbox_license": "This Microsoft account has no mailbox (no Exchange license), so there is nothing to connect.",
+        "oauth_app_failed": "This OAuth app is not verified (see context); fix its credentials and probe it again.",
+        "oauth_app_probe_rate_limited": "The OAuth app was probed too often; retry after retry_after.",
+        "oauth_grant_invalid": "The provider refused this refresh token (revoked, expired, or from a mailbox that changed); connect the account again with a fresh consent.",
+        "oauth_scope_insufficient": "The consent did not grant the mailbox scope this connection needs; connect again and accept the mail permission.",
+        "outside_sending_window": "The account's sending window is closed right now; pass scheduled_at, or widen the window on the account.",
+        "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",
+        "provider_app_not_configured": "No OAuth client of this provider is configured on this deployment; the connection cannot be probed.",
+        "provider_not_reconnectable": "A hosted mailbox has no external provider to reconnect.",
+        "provider_probe_failed": "The provider's token endpoint could not be reached or refused our client; retry in a minute.",
+        "provider_probe_not_available": "This provider cannot be probed on this deployment yet (see context.detail).",
+        "recipient_suppressed": "Every recipient is on the suppression list (bounced or unsubscribed); nothing was sent.",
+        "redirect_host_not_allowed": "success_redirect_url must point at an allowed host.",
+        "relation_not_found": "reply_to_email_message_sid names no message this account holds.",
+        "scheduled_at_in_past": "scheduled_at is in the past; omit it to send now, or pass a future time.",
+        "send_as_denied": "from_email is not an address this account owns or is allowed to send as.",
+        "sync_in_progress": "A sync of this account is already running (context.open_sync_run_sid); wait for it to finish.",
+        "tracking_domain_not_verified": "The account's tracking domain is not verified, so tracking cannot be injected; verify the domain or send without tracking."
+    }
 }
