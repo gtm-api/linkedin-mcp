@@ -115,7 +115,7 @@ const LinkedinAccount = z.object({
     .describe("The account's LinkedIn Recruiter status. null = no Recruiter seat (the premium check's recruiter probe said no, or never ran). active = the seat's Recruiter (enterprise) session answers talent calls. signed_out = LinkedIn Recruiter asks the seat holder for the LinkedIn password again (about every 30 days): every recruiter tool answers 409 recruiter_reauth_required and the recruiter sync waits until the seat holder signs in through the cloud browser from the account's page (the 409's context.account_url); the status returns to active by itself once they have. Filter on it to find seats that need their holder."),
   // The account-wide smart-limit switch (2026-09-10): one boolean for every
   // bucket. true = the warmup governs the caps and a typed daily_limit /
-  // delay_in_seconds / batch_size on any limit row is refused (409
+  // delay_in_seconds on any limit row is refused (409
   // smart_limits_governed); false = the caps run as typed. Its one writer is
   // set_linkedin_account_smart_limits.
   smart_limits_enabled: z.boolean(),
@@ -1412,8 +1412,8 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     name: 'set_linkedin_account_smart_limits',
     description:
       'Switch smart-limit governance on or off for the WHOLE account, every bucket at once (no per-bucket toggle). ' +
-      'The switch remembers nothing: a real flip in EITHER direction first resets every limit row to the platform defaults (daily_limit = the bucket\'s platform max, delay / batch = the enum pair, target_limit = the platform default, hold cleared). ' +
-      'ON: the warmup then sets every row\'s daily_limit / delay_in_seconds / batch_size (re-derived from the latest snapshot) and update_linkedin_account_smart_limit refuses those fields with 409 smart_limits_governed; target_limit and learning_enabled stay yours. The seeded target_limit is a target the warmup climbs toward, never a limit somebody set. ' +
+      'The switch remembers nothing: a real flip in EITHER direction first resets every limit row to the platform defaults (daily_limit = the bucket\'s platform max, delay_in_seconds = the flat default, target_limit = the platform default, hold cleared). ' +
+      'ON: the warmup then sets every row\'s daily_limit / delay_in_seconds (re-derived from the latest snapshot) and update_linkedin_account_smart_limit refuses those fields with 409 smart_limits_governed; target_limit and learning_enabled stay yours. The seeded target_limit is a target the warmup climbs toward, never a limit somebody set. ' +
       'OFF: every cap runs exactly as typed and the account loses the warmup ban protection: say so first, read the rows\' recommended_* before typing caps. ' +
       'Idempotent. SINGLE account: a fleet is a mass action with step linkedin-accounts.set-smart-limits (scope objects, args {enabled}), run BEFORE a limit-row run on the same senders.',
     toolClass: 'typical',

@@ -64,8 +64,9 @@ const LinkedinAccountSmartLimit = z.object({
   daily_limit: z.number(),
   smart_limit: z.number().nullable(),
   target_limit: z.number().nullable(),
+  // The flat delay between any two dispatches of the bucket (pacing plan §8.3): the
+  // "burst N, then hold X" pair left the contract on 2026-09-19.
   delay_in_seconds: z.number(),
-  batch_size: z.number(),
 
   // Counter (today's usage)
   done_today_count: z.number(),
@@ -83,11 +84,9 @@ const LinkedinAccountSmartLimit = z.object({
   status: z.enum(['active', 'held', 'linkedin_blocked']),
   hold_till: z.string().nullable(),
   linkedin_quota_hit_till: z.string().nullable(),
-  // When this bucket last counted a successful action. Null until first count.
-  // NOT the pacing clock since 2026-09-18: a dispatch reserves its slot before
-  // the call leaves (the platform's own last_dispatch_at), so what a caller is
-  // told to wait is context.retry_after on the 429, never this field + a delay.
-  last_counted_at: z.string().nullable(),
+  // No pacing clock on the row: a dispatch reserves its slot before the call
+  // leaves (the platform's own last_dispatch_at), so what a caller is told to
+  // wait is context.retry_after on the 429, or pacing.next_call_after on a success.
 
   // Timestamps (no deleted_at on this entity)
   created_at: z.string(),
@@ -177,8 +176,8 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     ...base,
     name: 'update_linkedin_account_smart_limit',
     description:
-      'GATE: on a governed account (smart_limits_enabled true, the default) daily_limit / delay_in_seconds / batch_size belong to the warmup; moving any is 409 smart_limits_governed: never promise a raised cap there. target_limit only BOUNDS (the row follows min(smart_limit, target_limit)): a target above the warmup ceiling changes nothing today; a young or dormant account sits at 1..2 for weeks (see warmup_breakdown). The other way: set_linkedin_account_smart_limits({enabled:false}), said out loud as removing ban protection. ' +
-      'One row (daily_limit / target_limit / delay_in_seconds / batch_size / learning_enabled; one field OR reset_hold:true). ' +
+      'GATE: on a governed account (smart_limits_enabled true, the default) daily_limit / delay_in_seconds belong to the warmup; moving either is 409 smart_limits_governed: never promise a raised cap there. target_limit only BOUNDS (the row follows min(smart_limit, target_limit)): a target above the warmup ceiling changes nothing today; a young or dormant account sits at 1..2 for weeks (see warmup_breakdown). The other way: set_linkedin_account_smart_limits({enabled:false}), said out loud as removing ban protection. ' +
+      'One row (daily_limit / target_limit / delay_in_seconds / learning_enabled; one field OR reset_hold:true). ' +
       'Switch off: nothing refused; read the row\'s recommended_* first, 2x (or half the delay) is "elevated", beyond that "ban_likely", warn so. ' +
       'A spent budget is "held": raising daily_limit alone does not clear it, pass reset_hold:true too; it resumes once the cap exceeds done_today_count (governed rows re-hold at once). System fields are rejected; a LinkedIn lock is not resettable.',
     toolClass: 'complex',
@@ -193,8 +192,7 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
       target_limit: z.number().int().min(0).max(1000).nullable().optional().describe('Warm-up ceiling; null clears it.'),
       learning_enabled: z.boolean().optional()
         .describe('Whether the adaptive ceiling keeps moving. false pins learned_ceiling where it stands; the quota-hit block clock still arms either way, so this is a tuning knob, not a safety switch.'),
-      delay_in_seconds: z.number().int().min(1).max(3600).optional().describe('The pacing window in seconds (1..3600). Calls of the bucket leave one at a time, delay_in_seconds / batch_size apart; nothing fires back-to-back.'),
-      batch_size: z.number().int().min(1).max(10).optional().describe('Calls per pacing window (1..10). It only divides the window: two calls of the bucket are delay_in_seconds / batch_size apart, so 30 s with 3 paces a call every 10 s. It is not a burst.'),
+      delay_in_seconds: z.number().int().min(1).max(3600).optional().describe('The flat delay in seconds between any two calls of the bucket (1..3600), varied by up to 20% per call; nothing fires back-to-back. An undo verb (unreact, delete a comment or post, unendorse, unfollow, withdraw) waits 2 s instead.'),
       reset_hold: z.boolean().optional().describe('Clear the daily-saturation hold in the same call (the atomic "raise the limit AND resume now"). Only resumes if the new daily_limit > done_today_count; otherwise the row re-holds. Never touches a LinkedIn-side lock.'),
       ...usageMetaField,
     }),

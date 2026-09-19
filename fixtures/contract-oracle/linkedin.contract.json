@@ -2932,12 +2932,6 @@
                         "has_default": false
                     },
                     {
-                        "name": "batch_size",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
                         "name": "done_today_count",
                         "type": "int",
                         "nullable": false,
@@ -3011,12 +3005,6 @@
                     },
                     {
                         "name": "linkedin_quota_hit_till",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "last_counted_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
@@ -3099,12 +3087,6 @@
                         "has_default": false
                     },
                     {
-                        "name": "batch_size",
-                        "type": "int",
-                        "nullable": false,
-                        "has_default": false
-                    },
-                    {
                         "name": "done_today_count",
                         "type": "int",
                         "nullable": false,
@@ -3178,12 +3160,6 @@
                     },
                     {
                         "name": "linkedin_quota_hit_till",
-                        "type": "Carbon\\Carbon|string|null",
-                        "nullable": true,
-                        "has_default": true
-                    },
-                    {
-                        "name": "last_counted_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
@@ -23552,23 +23528,6 @@
                     "in": null,
                     "min": 1,
                     "max": 3600,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "batch_size",
-                    "rules": [
-                        "sometimes",
-                        "integer",
-                        "min:1",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 10,
                     "size": null,
                     "between": null
                 },
@@ -48687,23 +48646,6 @@
                     "in": null,
                     "min": 1,
                     "max": 3600,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "batch_size",
-                    "rules": [
-                        "sometimes",
-                        "integer",
-                        "min:1",
-                        "max:10"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "integer",
-                    "in": null,
-                    "min": 1,
-                    "max": 10,
                     "size": null,
                     "between": null
                 },
