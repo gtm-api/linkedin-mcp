@@ -6254,8 +6254,8 @@
                     },
                     {
                         "name": "ln_member_id",
-                        "type": "string",
-                        "nullable": false,
+                        "type": "?string",
+                        "nullable": true,
                         "has_default": false
                     },
                     {
@@ -12514,7 +12514,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -12624,7 +12625,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -12734,7 +12736,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -12877,7 +12880,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -12987,7 +12991,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -13130,7 +13135,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -13240,7 +13246,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -13350,7 +13357,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -13515,7 +13523,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -13625,7 +13634,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -13735,7 +13745,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -13878,7 +13889,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -14021,7 +14033,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -14150,7 +14163,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -14260,7 +14274,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -22498,7 +22513,8 @@
                         "prohibits:profile.sn_id,profile.nickname",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -22515,7 +22531,8 @@
                         "prohibits:profile.nickname",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25004,7 +25021,8 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "required_without_all:target.sn_id,target.nickname"
+                        "required_without_all:target.sn_id,target.nickname",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25020,7 +25038,8 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "required_without_all:target.ln_id,target.nickname"
+                        "required_without_all:target.ln_id,target.nickname",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25106,7 +25125,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25123,7 +25143,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25213,7 +25234,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25230,7 +25252,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26279,7 +26302,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26296,7 +26320,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26543,7 +26568,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26560,7 +26586,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -28570,7 +28597,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -28769,7 +28797,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -28786,7 +28815,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -31099,7 +31129,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -31209,7 +31240,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -31319,7 +31351,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -31462,7 +31495,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -31572,7 +31606,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -31682,7 +31717,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -31825,7 +31861,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -31935,7 +31972,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -32045,7 +32083,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -32210,7 +32249,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -32320,7 +32360,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -32430,7 +32471,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -32573,7 +32615,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -32716,7 +32759,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -32845,7 +32889,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -32955,7 +33000,8 @@
                         "prohibits:public_identifier",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -33674,7 +33720,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -33691,7 +33738,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -33780,7 +33828,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -33797,7 +33846,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -33869,7 +33919,8 @@
                     "field": "profile_id",
                     "rules": [
                         "required",
-                        "string"
+                        "string",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": true,
                     "nullable": false,
@@ -34505,7 +34556,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -34522,7 +34574,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -34746,7 +34799,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -34763,7 +34817,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35002,7 +35057,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35019,7 +35075,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35036,7 +35093,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35240,7 +35298,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35257,7 +35316,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35479,7 +35539,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35496,7 +35557,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35650,7 +35712,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -35667,7 +35730,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -44995,7 +45059,8 @@
                         "prohibits:profile.sn_id,profile.nickname",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -45012,7 +45077,8 @@
                         "prohibits:profile.nickname",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -46211,7 +46277,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:255"
+                        "max:255",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -48636,7 +48703,8 @@
                     "rules": [
                         "required",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": true,
                     "nullable": false,
@@ -48652,7 +48720,8 @@
                     "rules": [
                         "required",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
                     ],
                     "required": true,
                     "nullable": false,
@@ -48668,7 +48737,8 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -49099,7 +49169,8 @@
                     "rules": [
                         "required",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": true,
                     "nullable": false,
@@ -49229,7 +49300,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:128"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -49246,7 +49318,8 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -49345,7 +49418,8 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:255"
+                        "max:255",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -49361,7 +49435,8 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:255"
+                        "max:255",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,

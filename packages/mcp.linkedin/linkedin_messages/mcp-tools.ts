@@ -92,7 +92,8 @@ const LinkedinMessage = z.object({
   linkedin_type: LinkedinMessageLinkedinType,
   type: LinkedinMessageDirection,
   automation: LinkedinMessageAutomation,
-  ln_member_id: z.string(),
+  ln_member_id: z.string().nullable()
+    .describe("The counterpart's member id, decoded from whichever LinkedIn id the thread carries. Null only on a thread with an organization (a Message Ads page names nobody)."),
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
   recruiter_id: z.string().nullable()

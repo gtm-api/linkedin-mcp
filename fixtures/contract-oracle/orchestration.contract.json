@@ -2310,6 +2310,96 @@
                     "between": null
                 },
                 {
+                    "field": "scope.targets.*.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.profile_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "scope.count",
                     "rules": [
                         "sometimes",
@@ -2648,6 +2738,96 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.profile_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -3031,6 +3211,96 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.profile_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 }
@@ -5674,6 +5944,96 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.sn_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.profile_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 }

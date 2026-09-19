@@ -162,7 +162,7 @@ const MassActionScope = z.union([
   z.object({
     kind: z.literal('targets'),
     targets: z.array(z.record(z.unknown())).min(1).max(100)
-      .describe('1..100 payload-kind identities (send-class); per-item params, shape owned by the target entity.'),
+      .describe('1..100 payload-kind identities (send-class) plus per-item params (note, text, client_reference). A person is named by ln_id (a profile URN, ACoAA...) or sn_id (a Sales Navigator id, ACwAA...); profile_id takes either. ln_member_id is the decoded member NUMBER (digits), never a slug or a URN, and alone cannot be dispatched by a send verb; a vanity slug goes in nickname (or public_identifier). One person named twice is one item: the run dedups by member id.'),
   }),
   z.object({
     kind: z.literal('generate'),
@@ -489,7 +489,7 @@ export const massActionsTools: ToolDefinition[] = [
       [
         'Feed more leads into a run that is already going, without a second preview or consent token: the plan they execute is the one already approved, and appended items join the pacing chain BEHIND the tail.',
         '',
-        'Identities are payload-kind leads, the shape a targets-scope create takes: each carries at least one of ln_member_id, ln_id, sn_id, company_ln_id or nickname, the dedup key, so a lead already enrolled comes back in skipped_duplicate_count instead of running twice. Up to 100 per call; repeat to keep a standing run fed.',
+        'Identities are payload-kind leads, the shape a targets-scope create takes: at least one of ln_member_id (the decoded member NUMBER), ln_id / sn_id / profile_id (a LinkedIn URN), company_ln_id or nickname (a slug). A lead already enrolled comes back in skipped_duplicate_count, not run twice: the dedup is by member id, whichever URN each source used. Up to 100 per call; repeat to keep a standing run fed.',
         '',
         'The run has to be active (a paused one is 409 run_not_active, a stopped one too) and payload-addressed: created with scope targets or none. A generate run (step 1 is a creates: verb) is 422 run_not_payload_addressed, each appended lead would provision one more paid browser beyond the count consented to; an objects run is 422 too, its items address existing rows. The canary gate still applies.',
       ].join('\n'),
