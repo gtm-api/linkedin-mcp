@@ -50685,6 +50685,7 @@
         "run_in_progress": "A run of this auto-scrape is still in flight; wait for it to finish or stop it.",
         "run_window_expired": "More than 15 minutes passed since the login was confirmed; open a new session.",
         "sales_nav_required": "This source reads Sales Navigator and the account has no Sales Navigator seat; pick an account with one, or a LinkedIn-search source.",
+        "sales_session_stale": "LinkedIn refused this Sales Navigator call for a stale seat session; the platform re-arms the session or moves the call off the seat on the next attempt, retry after retry_after.",
         "scheduled_post_not_deleted": "LinkedIn did not delete this scheduled post: it is not this account's, or it was already published or removed.",
         "session_already_disconnected": "This session is already disconnected.",
         "shadowban_check_not_pending": "This check is not pending, so its send cannot be confirmed.",
