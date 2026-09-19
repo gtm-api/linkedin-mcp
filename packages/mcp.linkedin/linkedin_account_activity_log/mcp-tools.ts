@@ -73,6 +73,11 @@ const LinkedinAccountActivityLogFilter = z.object({
   target_ln_member_id: str(['eq', 'in', 'is_null']).describe('Canonical cross-surface key.'),
   target_sn_id: str(['eq', 'in', 'is_null']),
   target_nickname: str(['eq', 'in', 'is_null']),
+  target_recruiter_id: str(['eq', 'in', 'is_null'])
+    .describe('The Recruiter (talent) envelope of the person the action addressed; matches the person, like target_ln_id.'),
+  target_entity_urn: str(['eq', 'in', 'is_null'])
+    .describe('The object the action acted on: the post a reaction or a comment landed on (urn:li:activity / ugcPost), the comment a delete removed. "What did this account like?" is target_entity_type:post on like_post rows.'),
+  target_entity_type: filterOp(z.enum(['post', 'comment', 'message', 'conversation', 'invitation']), ['eq', 'in', 'is_null']).optional(),
   duration_ms: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']).optional()
     .describe('is_null:true ⇒ pending row.'),
   created_at: str(['gte', 'lte', 'gt', 'lt']),

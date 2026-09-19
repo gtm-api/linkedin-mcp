@@ -2513,6 +2513,9 @@
                     "target_ln_member_id",
                     "target_sn_id",
                     "target_nickname",
+                    "target_recruiter_id",
+                    "target_entity_urn",
+                    "target_entity_type",
                     "duration_ms",
                     "created_at",
                     "updated_at",
@@ -8741,6 +8744,31 @@
                 {
                     "name": "Skipped",
                     "value": "skipped"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccountActivityLog\\LinkedinAccountActivityLogTargetEntityTypeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Post",
+                    "value": "post"
+                },
+                {
+                    "name": "Comment",
+                    "value": "comment"
+                },
+                {
+                    "name": "Message",
+                    "value": "message"
+                },
+                {
+                    "name": "Conversation",
+                    "value": "conversation"
+                },
+                {
+                    "name": "Invitation",
+                    "value": "invitation"
                 }
             ]
         },
@@ -22888,6 +22916,48 @@
                 },
                 {
                     "field": "filter.target_nickname",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.target_recruiter_id",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.target_entity_urn",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.target_entity_type",
                     "rules": [
                         "nullable"
                     ],
