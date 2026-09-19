@@ -136,54 +136,21 @@ const FILTER_FIELDS_NOT_OFFERED: Record<string, Record<string, string>> = {
     team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
   },
   search_antidetect_browsers: {
-    account_share_sid: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
     team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
   },
   search_cloud_browser_sessions: {
     team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
   },
   search_data_requests: {
-    cached_from_sid: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    completed_at: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    error_code: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    input_kind: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    input_value: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    linkedin_account_sid: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    ln_id: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    nickname: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    sn_id: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
     team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
-    updated_at: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-  },
-  search_linkedin_account_quota_hits: {
-    limit_type: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-  },
-  search_linkedin_account_smart_limits: {
-    clean_saturation_streak: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    learned_ceiling: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    learned_ceiling_source: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    learned_ceiling_updated_at: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    learning_enabled: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-    probe_not_before: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
   },
   search_linkedin_connection_invitations: {
-    linkedin_invitation_id: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
     shared_secret: 'a secret: never a search axis for an agent',
-  },
-  search_linkedin_messages: {
-    subject: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-  },
-  search_notifications: {
-    read_at: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
-  },
-  search_oauth_clients: {
-    actor_kind: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
   },
   search_webhook_logs: {
     team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
   },
   search_webhooks: {
-    sid: 'baseline 2026-09-18: the backend filters on it and the tool does not offer it yet; offer it or state why not',
     team_sid: 'the tenant comes from the token, never from the request (KNOWLEDGE: team_sid is not a body field)',
   },
 };

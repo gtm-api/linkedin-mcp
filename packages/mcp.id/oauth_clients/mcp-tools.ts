@@ -71,6 +71,8 @@ const OauthClientFilter = z.object({
     .describe('Exact public identifier lookup.'),
   name: filterOp(z.string(), ['eq']).optional()
     .describe('Match on the human-readable client name.'),
+  actor_kind: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('What the client is (agent, integration, ...); is_null:true = unclassified legacy clients.'),
   status: filterOp(OauthClientStatus, ['eq', 'in']).optional(),
   is_confidential: filterOp(z.boolean(), ['eq']).optional()
     .describe('public/PKCE (false) vs confidential (true).'),

@@ -200,6 +200,8 @@ const LinkedinMessageFilter = z.object({
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']),
   message_hash: filterOp(z.string(), ['eq', 'in']),
   client_reference: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).describe("The caller's own key given at send time. The way to ask whether a send landed before repeating it: search by the key you sent."),
+  subject: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
+    .describe('The InMail subject, exact match; is_null:false = every message that carried one. For a text search use q.'),
   q: z.string().max(128).describe('A LIKE (substring, case-insensitive) over message text + InMail subject. Message text only: it does not search contact names.'),
   sent_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']),
   created_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']),

@@ -107,6 +107,17 @@ const LinkedinAccountSmartLimitFilter = z.object({
   smart_limit: num(['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']),
   target_limit: num(['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']),
   delay_in_seconds: num(['eq', 'ne', 'gte', 'lte', 'gt', 'lt']),
+  learning_enabled: filterOp(z.boolean(), ['eq']).optional()
+    .describe('false = the adaptive ceiling is pinned off for this row.'),
+  learned_ceiling: num(['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null'])
+    .describe('The cap LinkedIn refusals taught this bucket; is_null:false = every row the learner has lowered.'),
+  learned_ceiling_source: str(['eq', 'ne', 'in', 'nin', 'is_null'])
+    .describe('backoff (a LinkedIn refusal lowered it) | probe (a clean streak raised it).'),
+  learned_ceiling_updated_at: str(['gte', 'lte', 'gt', 'lt', 'is_null']),
+  probe_not_before: str(['gte', 'lte', 'gt', 'lt', 'is_null'])
+    .describe('When the learner may next try a higher ceiling.'),
+  clean_saturation_streak: num(['eq', 'ne', 'gte', 'lte', 'gt', 'lt'])
+    .describe('Days in a row the bucket spent its whole budget without a LinkedIn refusal.'),
   done_today_count: num(['eq', 'ne', 'gte', 'lte', 'gt', 'lt']).describe('Live read of today\'s usage.'),
   last_reset_at: str(['gte', 'lte', 'gt', 'lt']),
   status: str(['eq', 'ne', 'in', 'nin']).describe('Primary state filter: active | held | linkedin_blocked (held = daily budget spent OR a live hold, the same thing).'),

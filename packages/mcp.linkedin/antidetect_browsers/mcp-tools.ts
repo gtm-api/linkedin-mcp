@@ -177,6 +177,8 @@ const AntidetectBrowserFilter = z.object({
   vendor_name: filterOp(z.string(), ['eq', 'in']).optional()
     .describe('Vendor profile display name (the supported name lookup path).'),
   vendor_profile_id: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
+  account_share_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
+    .describe('The share a browser came in with; is_null:false = every browser that belongs to a shared account.'),
   linkedin_account_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   automation_server_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
     .describe('is_null:true = ops scan for browsers not assigned to a server.'),

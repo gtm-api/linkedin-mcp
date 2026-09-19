@@ -71,6 +71,8 @@ const NotificationFilter = z.object({
     .describe('Recipient: "show me Joe\'s notifications".'),
   event_name: filterOp(z.string(), ['eq', 'in']).optional()
     .describe('e.g. linkedin-accounts.logged-out.'),
+  read_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
+    .describe('is_null:true = unread.'),
   entity_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
     .describe('The domain entity a notification is about (e.g. a linkedin_account sid).'),
   status: filterOp(NotificationStatus, ['eq', 'in']).optional(),

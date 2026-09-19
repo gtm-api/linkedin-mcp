@@ -258,6 +258,7 @@ const WebhookTestResult = z.object({
 }).passthrough();
 
 const WebhookFilter = z.object({
+  sid: filterOp(z.string(), ['eq', 'in']).optional(),
   status: filterOp(WebhookStatus, ['eq', 'in']).optional(),
   events: filterOp(z.string(), ['eq', 'in']).optional()
     .describe('eq: webhooks subscribed to this event type; in: subscribed to ANY of these (JSON-contains on the events array).'),

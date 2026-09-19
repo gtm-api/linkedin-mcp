@@ -57,6 +57,8 @@ const LinkedinAccountQuotaHitFilter = z.object({
   linkedin_account_sid: filterOp(z.string(), ['eq', 'in']).optional(),
   linkedin_account_snapshot_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   reason: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']).optional(),
+  limit_type: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']).optional()
+    .describe('The smart-limit bucket the refusal locked (send_messages, send_connection_requests, ...). One reason can lock more than one bucket.'),
   has_premium: filterOp(z.boolean(), ['eq']).optional(),
   has_sn: filterOp(z.boolean(), ['eq']).optional(),
   has_recruiter: filterOp(z.boolean(), ['eq']).optional(),

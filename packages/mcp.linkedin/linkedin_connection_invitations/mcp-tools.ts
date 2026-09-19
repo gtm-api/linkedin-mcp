@@ -59,6 +59,8 @@ const LinkedinConnectionInvitationFilter = z.object({
   ln_member_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional(),
   sn_id: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional(),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
+  linkedin_invitation_id: filterOp(z.string(), ['eq', 'in']).optional()
+    .describe('LinkedIn\'s own id of the invitation, as a webhook or the wire names it.'),
   note: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
     .describe('Exact-match on the accompanying note (is_null:false = invitation carries a note). There is no free-text q on this entity.'),
   removal_kind: filterOp(LinkedinConnectionInvitationRemovalKind, ['eq', 'ne', 'in', 'nin', 'is_null']).optional()

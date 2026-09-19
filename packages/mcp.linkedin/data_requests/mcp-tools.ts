@@ -164,6 +164,23 @@ const DataRequestFilter = z.object({
   ln_member_id: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
     .describe('Canonical person axis; ln_id/sn_id inputs normalize to this.'),
   created_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
+  updated_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt']).optional(),
+  completed_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
+    .describe('is_null:true = still running or never ran.'),
+  linkedin_account_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
+    .describe('The account that executed (or was asked to execute) the request.'),
+  input_kind: filterOp(z.enum(['ln_id', 'sn_id', 'nickname', 'ln_member_id', 'url', 'activity_urn', 'params', 'domain']), ['eq', 'in']).optional(),
+  input_value: filterOp(z.string(), ['eq', 'in']).optional()
+    .describe('The raw input as it was given, exact match: "did we already fetch this url / this slug".'),
+  ln_id: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
+    .describe('A profile URN; matches the PERSON (normalized to the member id), so a row stored under the Sales Navigator id is found too.'),
+  sn_id: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
+    .describe('A Sales Navigator id; matches the person, like ln_id.'),
+  nickname: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
+  cached_from_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
+    .describe('The row a cache-served request was answered from; eq = every request one fetch has served.'),
+  error_code: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).optional()
+    .describe('Why a request failed (not_found, linkedin_429, browser_not_alive, ...); is_null:false = everything that failed.'),
   idempotency_key: filterOp(z.string(), ['eq']).optional()
     .describe('Exact-match retry-replay lookup.'),
 }).partial();

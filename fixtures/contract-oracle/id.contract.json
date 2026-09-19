@@ -13201,6 +13201,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.read_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.failed_at",
                     "rules": [
                         "nullable"
@@ -13413,6 +13427,20 @@
                 },
                 {
                     "field": "filter.delivered_at",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.read_at",
                     "rules": [
                         "nullable"
                     ],
@@ -14267,6 +14295,20 @@
                 },
                 {
                     "field": "filter.registration_kind",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.actor_kind",
                     "rules": [
                         "nullable"
                     ],
