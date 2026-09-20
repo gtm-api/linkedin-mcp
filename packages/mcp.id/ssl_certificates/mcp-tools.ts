@@ -140,7 +140,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     ...base,
     name: 'create_ssl_certificate',
     description:
-      "Register a custom domain as a certificate row in status='pending'. Does NOT start ACME; call issue_ssl_certificate next to begin the HTTP-01 flow. Idempotent on the domain natural key: an existing live row (pending/challenge/active) is returned as-is with already_exists:true; a failed/expired/soft-deleted row is recreated; a domain held active by another team returns 409 conflict.",
+      "Register a custom domain as a certificate row in status='pending'. Does NOT start ACME; call issue_ssl_certificate next to begin the HTTP-01 flow. Idempotent on the domain natural key: an existing live row (pending/challenge/active) is returned as-is with already_exists:true; a failed/expired/soft-deleted row is recreated; a domain whose certificate is active in another team returns 409 conflict (domain_active_in_another_team). A domain another team has only registered is not refused: the first certificate to go active holds it.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/ssl-certificates' },
     operation: 'create',
@@ -189,7 +189,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     ...base,
     name: 'issue_ssl_certificate',
     description:
-      "Start the ACME HTTP-01 flow for a registered domain. ASYNC: synchronously requests authorization from Let's Encrypt, stores the token + key-authorization, flips status→challenge, and returns the challenge data + a pending ref; the platform then self-checks, validates, finalizes and flips status→active in the background (poll get_ssl_certificate, or await the ssl-certificates.issued / .failed webhook). Use after create. Not idempotent: each call requests a fresh authorization. 409 conflict if the domain is already active (use renew).",
+      "Start the ACME HTTP-01 flow for a registered domain. ASYNC: synchronously requests authorization from Let's Encrypt, stores the token + key-authorization, flips status→challenge, and returns the challenge data + a pending ref; the platform then self-checks, validates, finalizes and flips status→active in the background (poll get_ssl_certificate, or await the ssl-certificates.issued / .failed webhook). Use after create. Not idempotent: each call requests a fresh authorization. 409 conflict if the domain is already active (use renew), while an attempt is in flight (issuance_already_in_progress), or while another team's certificate for the domain is active (domain_active_in_another_team: nothing was started and retrying cannot help). An attempt already in flight when that happens ends failed, with last_error opening with the same reason.",
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/ssl-certificates/{sid}/issue', sidParam: 'sid' },
     operation: 'action',
@@ -206,7 +206,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     ...base,
     name: 'renew_ssl_certificate',
     description:
-      'Force a re-issue of an existing certificate, ignoring the 30-day expiry window (operator-forced). ASYNC: same HTTP-01 path as issue and the auto-renew job, on the same row. On an active certificate the row STAYS active (it keeps serving and routing) while challenge carries the attempt: on success the persisted leaf / full chain / key are replaced and issued_at / expires_at re-stamped, on failure last_error is set and the current certificate keeps serving. On a pending/failed/expired row nothing is serving, so it flips status→challenge and ends active or failed like issue. Poll get_ssl_certificate until challenge is null, or await ssl-certificates.renewed / .failed. Use after a CA chain fix, to retry a failing renewal once its cause is fixed, or to recover a failed/expired certificate. 409 conflict while an attempt is in flight (issuance_already_in_progress, e.g. the renew job\'s).',
+      'Force a re-issue of an existing certificate, ignoring the 30-day expiry window (operator-forced). ASYNC: same HTTP-01 path as issue and the auto-renew job, on the same row. On an active certificate the row STAYS active (it keeps serving and routing) while challenge carries the attempt: on success the persisted leaf / full chain / key are replaced and issued_at / expires_at re-stamped, on failure last_error is set and the current certificate keeps serving. On a pending/failed/expired row nothing is serving, so it flips status→challenge and ends active or failed like issue. Poll get_ssl_certificate until challenge is null, or await ssl-certificates.renewed / .failed. Use after a CA chain fix, to retry a failing renewal once its cause is fixed, or to recover a failed/expired certificate. 409 conflict while an attempt is in flight (issuance_already_in_progress, e.g. the renew job\'s) or while another team\'s certificate for the domain is active (domain_active_in_another_team, retrying cannot help).',
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/ssl-certificates/{sid}/renew', sidParam: 'sid' },
     operation: 'action',
