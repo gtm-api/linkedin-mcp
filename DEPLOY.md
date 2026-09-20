@@ -1084,6 +1084,12 @@ because a workstation has gtm.mcp checked out at `<umbrella>/product/mcp/gtm.mcp
 | `../../research` | `tests/research-parity.test.ts` (the design side of every tool) |
 | `../../openapi/gtm.openapi.public` | `tests/openapi-public-drift.test.ts`, `bin/openapi-public.sh` |
 
+A linked git worktree (Claude Code puts them under `.claude/worktrees/`) has no
+corpus two directories up. The two test gates and `ci/fetch-corpus.sh` resolve it
+through the main checkout via the git common dir (`tests/umbrella.ts`);
+`bin/openapi-public.sh` does not, so regenerate the public spec from the main
+checkout.
+
 Both live in the private umbrella repo `gtm-api/gtm.ai` on Bitbucket. A CI
 clone has only gtm.mcp, so
 `ci/fetch-corpus.sh` sparse clones the umbrella and symlinks those two paths into

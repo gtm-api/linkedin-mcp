@@ -15,7 +15,10 @@
 # same relative offset: sparse clone of the umbrella, then a symlink per path.
 #
 # On a workstation it finds the corpus already there and exits without touching
-# the network, which is why it is safe to call from anywhere.
+# the network, which is why it is safe to call from anywhere. A linked git
+# worktree (Claude Code puts them under .claude/worktrees/) is the one layout
+# where the offset misses: the corpus then sits next to the MAIN checkout,
+# reached through the git common dir, the same way tests/umbrella.ts resolves it.
 #
 # Access to gtm-api/gtm.ai is required in CI. Either:
 #   - an SSH key on this repo (Repository settings > SSH keys), public half added
@@ -39,6 +42,21 @@ REF="${UMBRELLA_REF:-master}"
 if [ -d "$RESEARCH" ] && [ -d "$OPENAPI/gtm.openapi.public" ]; then
   echo "OK corpus already present next to the repo ($PARENT), nothing to fetch"
   exit 0
+fi
+
+# A linked worktree has no corpus next door, but its main checkout does. Exit
+# through the same resolution the tests use (tests/umbrella.ts) instead of
+# sparse-cloning the umbrella into the main checkout's .claude/ on a workstation
+# that already has the whole thing two directories over. In CI the clone is its
+# own main checkout, so this resolves to the same $PARENT and falls through.
+COMMON_DIR="$(git -C "$ROOT" rev-parse --git-common-dir 2>/dev/null || true)"
+if [ -n "$COMMON_DIR" ]; then
+  case "$COMMON_DIR" in /*) ;; *) COMMON_DIR="$ROOT/$COMMON_DIR" ;; esac
+  MAIN_PARENT="$(dirname "$COMMON_DIR")/../.."
+  if [ -d "$MAIN_PARENT/research" ] && [ -d "$MAIN_PARENT/openapi/gtm.openapi.public" ]; then
+    echo "OK corpus present next to the main checkout ($(cd "$MAIN_PARENT" && pwd)), nothing to fetch"
+    exit 0
+  fi
 fi
 
 CLONE_DIR="${UMBRELLA_DIR:-$PARENT/.umbrella}"

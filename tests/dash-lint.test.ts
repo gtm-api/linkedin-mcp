@@ -146,6 +146,10 @@ describe('no em/en dash anywhere in the tree', () => {
     }
   });
 
+  it('descends into no .claude checkout', () => {
+    expect(files.map(relPath).filter((rel) => rel.startsWith('.claude/'))).toEqual([]);
+  });
+
   it('finds none', () => {
     const hits = files.flatMap(offenders);
     expect(hits, `banned em/en dash (CLAUDE.md):\n${hits.join('\n')}`).toEqual([]);

@@ -6,6 +6,7 @@ import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
+import { RESEARCH_ROOT } from './umbrella';
 
 // Research parity gate: the registry against the DESIGN, not against the backend.
 //
@@ -54,7 +55,8 @@ import { supportPackages } from '@gtm/mcp-support';
 // Inputs
 // ---------------------------------------------------------------------------
 
-const RESEARCH_ROOT = fileURLToPath(new URL('../../../research/', import.meta.url));
+// RESEARCH_ROOT comes from ./umbrella: two directories up from this repo on a
+// workstation and in CI, resolved through the main checkout from a linked worktree.
 const BASELINE_PATH = fileURLToPath(new URL('../fixtures/research-parity/baseline.json', import.meta.url));
 
 /** §4.32 description budget, flat. The per-class caps (trivial 200 / typical 500 /

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { generate, renderYaml, serviceSpecPath } from '@gtm/mcp-openapi';
+import { OPENAPI_PUBLIC_DIR } from './umbrella';
 
 // Drift gate: the committed public OpenAPI contract must still be what the Zod
 // registry produces.
@@ -18,7 +18,8 @@ import { generate, renderYaml, serviceSpecPath } from '@gtm/mcp-openapi';
 // writes into a temp dir and runs the shared OAS validator, which is why it
 // stays a separate command rather than living here).
 
-const OUT_DIR = fileURLToPath(new URL('../../../openapi/gtm.openapi.public/', import.meta.url));
+// OPENAPI_PUBLIC_DIR comes from ./umbrella: two directories up from this repo on
+// a workstation and in CI, resolved through the main checkout from a linked worktree.
 
 describe('gtm.openapi.public', () => {
   const result = generate();
@@ -50,7 +51,7 @@ describe('gtm.openapi.public', () => {
 
   for (const document of result.documents) {
     it(`${document.service}: the committed spec matches the registry`, () => {
-      const committed = readFileSync(serviceSpecPath(OUT_DIR, document.service), 'utf8');
+      const committed = readFileSync(serviceSpecPath(OPENAPI_PUBLIC_DIR, document.service), 'utf8');
       expect(
         renderYaml(document.document) === committed,
         `product/openapi/gtm.openapi.public/services/${document.service}/openapi.yaml is stale. Regenerate and commit it:  pnpm openapi:public`,
