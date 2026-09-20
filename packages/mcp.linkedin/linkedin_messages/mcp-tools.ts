@@ -28,8 +28,8 @@ const LinkedinMessageLinkedinType = z.enum(['message', 'inmail', 'connection_not
   .describe('Channel sub-kind: regular DM / premium InMail / system-seeded connection note.');
 const LinkedinMessageDirection = z.enum(['inbox', 'outbox'])
   .describe('Direction relative to our account: received / sent.');
-const LinkedinMessageAutomation = z.enum(['auto', 'manual', 'connect', 'synced'])
-  .describe('Writer provenance.');
+const LinkedinMessageAutomation = z.enum(['auto', 'manual', 'synced'])
+  .describe("Writer provenance: a sequence runner (auto), a person through a send tool (manual), or the messages sync (synced). An invitation note is a synced row labelled linkedin_type=connection_note; the 'connect' value left on 2026-09-20 with the seeders that were its only writer and never shipped.");
 
 // BREAKING, 2026-08-13: the outbound attachment element is the WIRE's shape now.
 // It used to be published as {name, path(https), size} with a promise that the

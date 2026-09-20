@@ -9627,10 +9627,6 @@
                     "value": "manual"
                 },
                 {
-                    "name": "Connect",
-                    "value": "connect"
-                },
-                {
                     "name": "Synced",
                     "value": "synced"
                 }
