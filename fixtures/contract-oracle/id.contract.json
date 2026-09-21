@@ -17274,7 +17274,7 @@
             "rules_reason": null
         },
         {
-            "method": "GET",
+            "method": "POST",
             "uri": "auth/agent-signup-context",
             "controller": "\\App\\Http\\Controllers\\AgentRegistrationController",
             "action": "context",
@@ -17289,7 +17289,7 @@
             "request_class": "App\\Http\\Requests\\Auth\\AgentSignupContextRequest",
             "rules": [
                 {
-                    "field": "rt",
+                    "field": "verify_token",
                     "rules": [
                         "required",
                         "string",
@@ -17306,23 +17306,6 @@
                 }
             ],
             "rules_reason": null
-        },
-        {
-            "method": "GET",
-            "uri": "auth/cancel-erasure",
-            "controller": "App\\Http\\Controllers\\AuthController",
-            "action": "cancelErasure",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
         },
         {
             "method": "POST",
@@ -17494,6 +17477,56 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "auth/google",
+            "controller": "App\\Http\\Controllers\\AuthController",
+            "action": "googleStart",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\GoogleStartRequest",
+            "rules": [
+                {
+                    "field": "invite",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "utm",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "GET",
