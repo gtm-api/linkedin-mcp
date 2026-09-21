@@ -140,7 +140,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     ...base,
     name: 'create_ssl_certificate',
     description:
-      "Register a custom domain as a certificate row in status='pending'. Does NOT start ACME; call issue_ssl_certificate next to begin the HTTP-01 flow. Idempotent on the domain natural key: an existing live row (pending/challenge/active) is returned as-is with already_exists:true; a failed/expired/soft-deleted row is recreated; a domain whose certificate is active in another team returns 409 conflict (domain_active_in_another_team). A domain another team has only registered is not refused: the first certificate to go active holds it.",
+      "Register a custom domain as a certificate row in status='pending'. Does NOT start ACME; call issue_ssl_certificate next to begin the HTTP-01 flow. Idempotent on the domain natural key, and already_exists says whether the row was left as found. true: the team's row is returned as it stands (pending, active, or an attempt in flight whatever the status), nothing was written. false: a new row, or a failed/expired row with nothing in flight or a soft-deleted row recreated in place (same sid, reset to pending, challenge and last_error cleared; read last_error with get_ssl_certificate first if the reason matters). A domain whose certificate is active in another team returns 409 conflict (domain_active_in_another_team). A domain another team has only registered is not refused: the first certificate to go active holds it.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/ssl-certificates' },
     operation: 'create',
