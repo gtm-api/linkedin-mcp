@@ -626,6 +626,24 @@ const LinkedinAccountSalesNavNotificationsResult = z.object({
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
 const ACT = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
 const DANGER = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
+
+// One profile image (photo / background) the way create-post takes a picture:
+// exactly one of file_base64 / url; the type and size are sniffed from the
+// bytes server-side, so a caller's file_type is a hint at most.
+const ProfileImageInput = z.object({
+  file_base64: z.string().min(1).optional()
+    .describe('The image bytes: a data:<mime>;base64,<...> URL or bare base64, encoded by a tool (never typed out). Exactly one of file_base64 or url.'),
+  url: z.string().url().max(2048).optional()
+    .describe('An https URL of the image file itself (PNG, JPEG, GIF or WEBP), downloaded by us from a public host. Exactly one of file_base64 or url; a request_media_upload file_url works once uploaded.'),
+  file_name: z.string().min(1).max(255).optional().describe('Optional; derived from the type when omitted.'),
+  file_type: z.string().startsWith('image/').optional().describe('Optional; the real type is read off the bytes.'),
+  file_byte_size: z.number().int().min(1).optional(),
+});
+
+const PositionDate = z.object({
+  month: z.number().int().min(1).max(12),
+  year: z.number().int().min(1900).max(2100),
+});
 // Same posture as DANGER, but idempotentHint is TRUE because the live probe of
 // 2026-08-06 proved it rather than assumed it: follow and unfollow were each
 // called twice against the same member and the repeat returned the same
@@ -1157,7 +1175,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'edit_linkedin_account_my_profile',
-    description: "Edit the connected account's OWN LinkedIn profile intro card: name, headline, additional name, industry, location, the current position/education pins and their visibility, website, and pronouns. Send only what changes; the backend reads the current card first and submits the complete form, because the LinkedIn form is a REPLACE and anything omitted would be blanked. The About section is NOT editable here (LinkedIn uses a separate form), so passing summary is rejected rather than ignored. Industry, city, position and education take LinkedIn's own numeric ids, which this API does not resolve: omit them and their current values are kept. Spends the tight edit_profile budget (10/day, 600 s apart), because rapid profile churn is a bot signal. LinkedIn returns no confirmation of what it saved, so updated_fields reflects what was ASKED for; read the profile back to confirm.",
+    description: "Edit the connected account's OWN LinkedIn profile in one call: the intro card (name, headline, additional name, industry, location, the current position/education pins and their visibility, website, pronouns), the About section (`about`, `top_skills`), the profile photo (`photo`) and the background image (`background`). Send only what changes: the intro card is read first and submitted whole (the LinkedIn wire replaces it), the About save is partial (an omitted field keeps its value, about: '' clears the text, top_skills: [] removes them all), each image replaces one picture. Every section is its own LinkedIn save, run in that order and reported under result.sections; a refused section stops the call and the error names failed_section and applied_sections. One call spends one edit_profile slot however many sections it saves. Positions (work experience) have their own tool, set_linkedin_account_my_position.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'PATCH', pathTemplate: '/api/linkedin-accounts/{sid}/my-profile', sidParam: 'sid' },
     operation: 'action',
@@ -1186,14 +1204,76 @@ export const linkedinAccountsTools: ToolDefinition[] = [
       website: z.string().max(2048).optional(),
       website_label: z.string().max(100).optional(),
       custom_pronouns: z.string().max(50).optional(),
+      about: z.string().max(2600).nullable().optional()
+        .describe("The About section text (LinkedIn's cap is 2600). An empty string clears it; omit it to keep it."),
+      top_skills: z.array(z.string().min(1).max(100)).max(5).optional()
+        .describe('The up-to-5 top skills the About section shows, as skill names (LinkedIn\'s spelling) or ProfileSkill:<n> ids the previous save reported. An empty array removes them all; omit to keep them.'),
+      photo: ProfileImageInput.optional()
+        .describe('A new profile photo (avatar), replacing the current one. LinkedIn\'s own cap is 8 MB.'),
+      background: ProfileImageInput.optional()
+        .describe('A new background (cover) image, replacing the current one.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount, z.object({
-      activity_log: z.object({}).passthrough().describe('The dispatch row (linkedin-account-activity-log), action_type edit_my_profile.'),
+      activity_log: z.object({}).passthrough().describe('The dispatch row (linkedin-account-activity-log) of the call\'s FIRST save: the intro card when it was edited (action_type edit_my_profile), else the first section\'s.'),
       updated_fields: z.array(z.string())
-        .describe('The fields the caller asked to change. NOT a confirmation: LinkedIn answers with a bare ok and does not echo the saved profile.'),
+        .describe('The fields the caller asked to change, sections included (about, top_skills, photo, background). NOT a confirmation: LinkedIn answers a save with a bare ok and does not echo the saved profile.'),
+      sections: z.record(z.object({
+        activity_log: z.object({}).passthrough().describe('The section\'s own dispatch row: edit_my_profile, update_my_about, update_my_photo or update_my_background.'),
+        message: z.string().nullable().optional().describe('The toast LinkedIn showed on the save, when it showed one.'),
+        previous_about: z.string().nullable().optional().describe('About only: the text before the save.'),
+        previous_top_skills: z.array(z.object({ id: z.string(), name: z.string() })).optional().describe('About only: the top skills before the save, with the ProfileSkill ids a later call can pass.'),
+        profile_skills_suggested: z.array(z.string()).optional().describe('About only: profile skills that are not top skills yet, by name, as the form suggests them.'),
+        original_asset_urn: z.string().nullable().optional().describe('photo / background only: the digitalmediaAsset urn of the full-size original.'),
+        display_asset_urn: z.string().nullable().optional().describe('photo / background only: the digitalmediaAsset urn of the displayed crop.'),
+      }).passthrough()).describe('One entry per section saved, in save order: intro_card, about, photo, background.'),
     }).passthrough()),
     annotations: { title: 'Edit my profile', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'set_linkedin_account_my_position',
+    description:
+      "Add, edit or remove ONE position (work experience entry) on the connected account's OWN LinkedIn profile. No position_id = add (title, company_name and start_date required, end_date unless is_current). position_id = edit: send only the fields that change, the backend reads the position's form first and submits it whole (the LinkedIn wire replaces the form); is_current: true drops the end date, an end_date ends a current position. position_id + delete: true = remove it (the backend reads the form and mirrors it into the delete, as LinkedIn's own editor does). position_id is the numeric id each entry carries on the account's own experience list (enrich_linkedin_person_experience on its own profile, or the add's answer). Company, geo and employment-type ids are LinkedIn's own numeric ids; without them the company is free text and the location display text only. Spends one edit_profile slot per call.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/my-position', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    pacedBucket: 'edit_profile',
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      position_id: z.string().regex(/^\d+$/).optional().describe('The position to edit or remove. Omit to add a new one.'),
+      delete: z.boolean().optional().describe('With position_id: remove the position instead of editing it.'),
+      title: z.string().min(1).max(100).optional().describe('Required on an add. LinkedIn\'s cap is 100.'),
+      company_name: z.string().min(1).max(100).optional().describe('Required on an add. Free text unless company_id names a LinkedIn company.'),
+      company_id: z.string().regex(/^\d+$/).optional().describe('LinkedIn\'s numeric company id (lookup_linkedin_param_id with type company gives it).'),
+      employment_type_id: z.string().regex(/^\d+$/).optional().describe('The form\'s employment type code: 12 Full-time, 11 Part-time, 3 Self-employed, 20 Freelance, 2 Contract, 18 Internship, 19 Apprenticeship, 21 Seasonal.'),
+      start_date: PositionDate.optional().describe('Required on an add.'),
+      end_date: PositionDate.nullable().optional().describe('Required on an add unless is_current is true.'),
+      is_current: z.boolean().optional().describe('The position is ongoing: no end date.'),
+      end_current_position_ids: z.array(z.string().regex(/^\d+$/)).optional().describe('Other current positions to end when this one becomes current.'),
+      location: z.string().max(200).nullable().optional().describe('The location as displayed, e.g. Buenos Aires, Argentina.'),
+      geo_location_id: z.string().regex(/^\d+$/).optional().describe('LinkedIn\'s numeric geo id for the location.'),
+      location_type: z.enum(['on_site', 'remote', 'hybrid']).optional(),
+      description: z.string().max(2000).nullable().optional().describe('LinkedIn\'s cap is 2000.'),
+      skills: z.array(z.string().min(1).max(100)).optional().describe('Skill names, or ProfileSkill:<n> ids the position read reports.'),
+      allow_profile_edit_broadcasts: z.boolean().optional().describe('Tell the network about the change (LinkedIn\'s "notify network" toggle). Default false.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, z.object({
+      activity_log: z.object({}).passthrough().describe('The write\'s dispatch row: add_my_position, update_my_position or delete_my_position (an edit or a delete reads the form first, on its own row).'),
+      action: z.string().describe('added, updated or deleted: the branch the body picked.'),
+      position_id: z.string().nullable().describe('The position\'s numeric id: yours on an edit or a delete, the new one on an add (null when LinkedIn named none; read the experience list then).'),
+      position: z.object({}).passthrough().nullable().describe('On an edit or a delete: the position\'s form as read BEFORE the change (every field, the dropdown tables, other_current_positions). Null on an add.'),
+      ok: z.boolean().describe('LinkedIn took the save: 2xx, no errors, no error toast.'),
+      message: z.string().nullable().describe('The toast LinkedIn showed, when it showed one.'),
+      position_id_source: z.string().nullable().describe("On an add: where position_id came from, 'response' (LinkedIn named it) or 'experience_diff' (the one id the experience list gained); null otherwise."),
+    }).passthrough()),
+    annotations: { title: 'Set my position', ...DANGER },
   },
   {
     ...base,

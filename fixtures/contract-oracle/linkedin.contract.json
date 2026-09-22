@@ -7749,8 +7749,36 @@
                     "value": "get_recruiter_inmail_credits"
                 },
                 {
+                    "name": "GetMyPosition",
+                    "value": "get_my_position"
+                },
+                {
                     "name": "EditMyProfile",
                     "value": "edit_my_profile"
+                },
+                {
+                    "name": "UpdateMyAbout",
+                    "value": "update_my_about"
+                },
+                {
+                    "name": "UpdateMyPhoto",
+                    "value": "update_my_photo"
+                },
+                {
+                    "name": "UpdateMyBackground",
+                    "value": "update_my_background"
+                },
+                {
+                    "name": "AddMyPosition",
+                    "value": "add_my_position"
+                },
+                {
+                    "name": "UpdateMyPosition",
+                    "value": "update_my_position"
+                },
+                {
+                    "name": "DeleteMyPosition",
+                    "value": "delete_my_position"
                 },
                 {
                     "name": "SendConnectionRequest",
@@ -25870,6 +25898,394 @@
             "rules_reason": null
         },
         {
+            "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/my-position",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "setMyPosition",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_update_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSetMyPositionRequest",
+            "rules": [
+                {
+                    "field": "position_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "delete",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "title",
+                    "rules": [
+                        "required_without:position_id",
+                        "string",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "company_name",
+                    "rules": [
+                        "required_without:position_id",
+                        "string",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "company_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "employment_type_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "start_date",
+                    "rules": [
+                        "required_without:position_id",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "start_date.month",
+                    "rules": [
+                        "required_with:start_date",
+                        "integer",
+                        "between:1,12"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1,
+                        12
+                    ]
+                },
+                {
+                    "field": "start_date.year",
+                    "rules": [
+                        "required_with:start_date",
+                        "integer",
+                        "between:1900,2100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1900,
+                        2100
+                    ]
+                },
+                {
+                    "field": "end_date",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "end_date.month",
+                    "rules": [
+                        "required_with:end_date",
+                        "integer",
+                        "between:1,12"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1,
+                        12
+                    ]
+                },
+                {
+                    "field": "end_date.year",
+                    "rules": [
+                        "required_with:end_date",
+                        "integer",
+                        "between:1900,2100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1900,
+                        2100
+                    ]
+                },
+                {
+                    "field": "is_current",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "end_current_position_ids",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "end_current_position_ids.*",
+                    "rules": [
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "location",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "geo_location_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^\\d+$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "location_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:on_site,remote,hybrid"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "on_site",
+                        "remote",
+                        "hybrid"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "description",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "skills",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "skills.*",
+                    "rules": [
+                        "string",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allow_profile_edit_broadcasts",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
             "method": "PATCH",
             "uri": "api/linkedin-accounts/{sid}/my-profile",
             "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
@@ -26170,6 +26586,253 @@
                     "required": false,
                     "nullable": false,
                     "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "about",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2600"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2600,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "top_skills",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "max:5"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 5,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "top_skills.*",
+                    "rules": [
+                        "string",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "photo",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "photo.file_base64",
+                    "rules": [
+                        "exclude_without:photo",
+                        "required_without:photo.url",
+                        "prohibits:photo.url",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "photo.url",
+                    "rules": [
+                        "exclude_without:photo",
+                        "required_without:photo.file_base64",
+                        "string",
+                        "max:2048",
+                        "url:https"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "photo.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "photo.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "photo.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "starts_with:image/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "background",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "background.file_base64",
+                    "rules": [
+                        "exclude_without:background",
+                        "required_without:background.url",
+                        "prohibits:background.url",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "background.url",
+                    "rules": [
+                        "exclude_without:background",
+                        "required_without:background.file_base64",
+                        "string",
+                        "max:2048",
+                        "url:https"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "background.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "background.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "background.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "starts_with:image/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
                     "in": null,
                     "min": null,
                     "max": null,

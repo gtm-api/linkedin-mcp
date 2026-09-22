@@ -35,7 +35,10 @@ export const MOUNTS: MountConfig[] = [
       { kind: 'exclude', name: 'get_linkedin_account_my_recruiter_contracts' },
       { kind: 'exclude', name: 'select_linkedin_account_recruiter_contract' },
     ],
-    maxTools: 26,
+    // 26 -> 27 on 2026-09-22: set_linkedin_account_my_position, the one new
+    // tool the own-profile work needed (the About section and the two profile
+    // images ride edit_linkedin_account_my_profile, no tool of their own).
+    maxTools: 27,
     // 26 since 2026-09-10: the account-wide smart-limit switch
     // (set_linkedin_account_smart_limits) is the 26th tool on this mount. It
     // replaces a FIELD that update_linkedin_account_smart_limit used to carry
