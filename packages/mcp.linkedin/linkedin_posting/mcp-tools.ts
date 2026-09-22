@@ -201,7 +201,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     outputSchema: McpActionResponse(z.null(), z.object({
       kind: z.string().describe('instant (a plain repost) or with_thoughts (a share with your text).'),
       activity_urn: z.string().nullable().describe('The feed entry the repost became: what delete_linkedin_post takes.'),
-      post_urn: z.string().nullable().describe('The publication: urn:li:instantRepost:(<root>,<id>) for a plain repost, urn:li:share:<id> for one with thoughts.'),
+      post_urn: z.string().nullable().describe('The publication: urn:li:instantRepost:(<root>,<id>) for a plain repost, the share (urn:li:ugcPost:<id> live, urn:li:share:<id> on older shares) for one with thoughts.'),
       url: z.string().nullable().describe('Public URL of the repost, query string stripped.'),
       created_at: z.string().nullable().describe('ISO 8601.'),
       text: z.string().describe('The commentary LinkedIn published; empty for a plain repost.'),
