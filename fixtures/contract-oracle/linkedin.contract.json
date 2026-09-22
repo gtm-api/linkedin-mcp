@@ -7753,6 +7753,10 @@
                     "value": "get_my_position"
                 },
                 {
+                    "name": "GetMyServices",
+                    "value": "get_my_services"
+                },
+                {
                     "name": "EditMyProfile",
                     "value": "edit_my_profile"
                 },
@@ -7779,6 +7783,18 @@
                 {
                     "name": "DeleteMyPosition",
                     "value": "delete_my_position"
+                },
+                {
+                    "name": "CreateMyServices",
+                    "value": "create_my_services"
+                },
+                {
+                    "name": "UpdateMyServices",
+                    "value": "update_my_services"
+                },
+                {
+                    "name": "UnpublishMyServices",
+                    "value": "unpublish_my_services"
                 },
                 {
                     "name": "SendConnectionRequest",
@@ -7859,6 +7875,14 @@
                 {
                     "name": "DeletePost",
                     "value": "delete_post"
+                },
+                {
+                    "name": "CreateInstantRepost",
+                    "value": "create_instant_repost"
+                },
+                {
+                    "name": "CreateRepostWithThoughts",
+                    "value": "create_repost_with_thoughts"
                 },
                 {
                     "name": "GetScheduledPosts",
@@ -25855,6 +25879,28 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/get-my-services",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "getMyServices",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
+            "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-accounts/{sid}/get-my-sessions",
             "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
             "action": "getMySessions",
@@ -26835,6 +26881,248 @@
                     "type": "string",
                     "in": null,
                     "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/my-services",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "setMyServices",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_update_linkedin_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSetMyServicesRequest",
+            "rules": [
+                {
+                    "field": "unpublish",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "republish",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_slug",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:/^[A-Za-z0-9_-]{1,100}$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "description",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "services",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "min:1",
+                        "max:10"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 10,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "services.*",
+                    "rules": [
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "location_profile",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "location_remote",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "open_messaging",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "review_visibility",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "pricing",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "pricing.kind",
+                    "rules": [
+                        "required_with:pricing",
+                        "string",
+                        "in:contact,starting_at"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "contact",
+                        "starting_at"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "pricing.currency",
+                    "rules": [
+                        "required_if:pricing.kind,starting_at",
+                        "string",
+                        "regex:/^[A-Z]{3}$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "pricing.amount",
+                    "rules": [
+                        "required_if:pricing.kind,starting_at",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
                     "max": null,
                     "size": null,
                     "between": null
@@ -37657,6 +37945,197 @@
                         "interested"
                     ],
                     "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/repost",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "repost",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingRepostRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "post_urn",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:~^urn:li:(activity",
+                        "share",
+                        "ugcPost):\\d+$~"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "text",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:3000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 3000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "visibility",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"ANYONE\",\"CONNECTIONS_ONLY\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ANYONE",
+                        "CONNECTIONS_ONLY"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allowed_commenters_scope",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"ALL\",\"CONNECTIONS_ONLY\",\"NONE\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ALL",
+                        "CONNECTIONS_ONLY",
+                        "NONE"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*",
+                    "rules": [
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.profile_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.start",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:0"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.length",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
                     "max": null,
                     "size": null,
                     "between": null

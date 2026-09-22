@@ -173,6 +173,46 @@ const base = {
 export const linkedinPostingTools: ToolDefinition[] = [
   {
     ...base,
+    name: 'repost_linkedin_post',
+    description:
+      'Repost a LinkedIn post from one of the team accounts (wire create-instant-repost / create-repost-with-thoughts): ONE tool, the body picks which. Without text it is the plain repost (the feed\'s Repost button) and nothing else may be sent. With text it is a repost with your thoughts, a share of your own above the reposted post, which takes visibility, allowed_commenters_scope and mentions exactly as create_linkedin_post does. post_urn is the post being reposted as urn:li:activity, urn:li:share or urn:li:ugcPost (a group post cannot be reposted). Public and outward; retract with delete_linkedin_post on the answered activity_urn. Spends the posting bucket.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/repost' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    pacedBucket: 'posting',
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      post_urn: z.string().regex(/^urn:li:(activity|share|ugcPost):\d+$/).describe('The post to repost: urn:li:activity:<id>, urn:li:share:<id> or urn:li:ugcPost:<id>.'),
+      text: z.string().max(3000).optional().describe('Your own words above the reposted post. Omit (or blank) for a plain repost.'),
+      visibility: LinkedinPostingVisibility.optional().describe('With text only. ANYONE (the default) or CONNECTIONS_ONLY.'),
+      allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional().describe('With text only. ALL (the default), CONNECTIONS_ONLY, or NONE to disable comments.'),
+      mentions: z.array(z.object({
+        profile_id: z.string().min(1).describe('The mentioned member\'s profile id (ACoA... or urn:li:fsd_profile:<id>).'),
+        start: z.number().int().min(0).describe('Offset of the mention in text, UTF-16 code units.'),
+        length: z.number().int().min(1).describe('Length of the mention span in UTF-16 code units.'),
+      })).optional().describe('With text only: profile mentions as ready positions over text, as create_linkedin_post takes them.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), z.object({
+      kind: z.string().describe('instant (a plain repost) or with_thoughts (a share with your text).'),
+      activity_urn: z.string().nullable().describe('The feed entry the repost became: what delete_linkedin_post takes.'),
+      post_urn: z.string().nullable().describe('The publication: urn:li:instantRepost:(<root>,<id>) for a plain repost, urn:li:share:<id> for one with thoughts.'),
+      url: z.string().nullable().describe('Public URL of the repost, query string stripped.'),
+      created_at: z.string().nullable().describe('ISO 8601.'),
+      text: z.string().describe('The commentary LinkedIn published; empty for a plain repost.'),
+      parent_post_urn: z.string().nullable().describe('The backend urn (share / ugcPost) that was reposted.'),
+      message: z.string().nullable().describe('The plain repost\'s success toast, when LinkedIn showed one.'),
+      activity_log: ACTIVITY_LOG,
+    }).passthrough()),
+    annotations: { title: 'Repost LinkedIn post', ...DANGER },
+  },
+  {
+    ...base,
     name: 'create_linkedin_post',
     description:
       'Publish ONE feed post - as the member, AS a company page it administers (author_organization_id), or INTO a group (group_id) - now or scheduled (scheduled_at) - wire create-post. Public; retract with delete_linkedin_post, or delete a scheduled draft with delete_linkedin_scheduled_post. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when media is attached; no text, images or video at all is a 422. Media: up to 20 images XOR one video, each base64 or an https url (see request_media_upload), 35 MB total. Body and alt text publish byte for byte, blank lines included. mentions makes spans of text clickable profile links (positions in UTF-16 code units); brand_partnership adds the "Brand partnership" flag; group_id excludes visibility. Nothing is stored here: the response carries the published post (urn, url, time, body) plus the activity-log row.',
