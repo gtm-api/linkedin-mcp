@@ -4818,6 +4818,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "email_from_address",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_domain",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Values\\WhitelabelEmailDomainValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -4909,6 +4921,18 @@
                     {
                         "name": "email_reply_to",
                         "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_from_address",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_domain",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Values\\WhitelabelEmailDomainValue|array|null",
                         "nullable": true,
                         "has_default": true
                     },
@@ -7159,6 +7183,36 @@
                 {
                     "name": "LoginImage",
                     "value": "login_image"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Enums\\WhitelabelEmailDomainReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "EmailDomainRejected",
+                    "value": "email_domain_rejected"
+                },
+                {
+                    "name": "EmailDomainNotProvenInTime",
+                    "value": "email_domain_not_proven_in_time"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Enums\\WhitelabelEmailDomainStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pending",
+                    "value": "pending"
+                },
+                {
+                    "name": "Verified",
+                    "value": "verified"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
                 }
             ]
         },
