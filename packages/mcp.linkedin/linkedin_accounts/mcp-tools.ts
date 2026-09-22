@@ -78,7 +78,7 @@ const LinkedinAccount = z.object({
   // health summary echoed this field as "all active" while half the fleet was
   // signed out. The field READS like health and is not.
   status: LinkedinAccountStatus
-    .describe('Platform lifecycle (onboarding phases and hold states), NOT health and NOT login state: a sender signed out of LinkedIn still reads "active" here. Login state lives on the bound browser, request include antidetect_browser and read its status (login_issue means signed out).'),
+    .describe('Platform lifecycle (onboarding phases and hold states), NOT health and NOT login state: a sender signed out of LinkedIn still reads "active" here. Login state lives on the bound browser, request include antidetect_browser and read its status (login_issue means signed out, restricted means signed out AND the public profile is gone from LinkedIn, so a re-login alone will not fix it).'),
 
   // Sharing linkage (sharing rework). Non-null only while the account is inside
   // a share; share_role says which side of it this row is.
@@ -213,7 +213,10 @@ const LinkedinAccountCounts = z.object({
   // a backend that predates the counter. Tighten to required once the linkedin
   // service with signed_out_count is on prod.
   signed_out_count: z.number().int().optional()
-    .describe('Accounts whose bound live browser sits in login_issue, meaning SIGNED OUT of LinkedIn. Non-zero says senders need re-login even when every item shows status "active" (that field is lifecycle, not login state). Attribute per row via include antidetect_browser.'),
+    .describe('Accounts whose bound live browser sits in login_issue or restricted, meaning SIGNED OUT of LinkedIn. Non-zero says senders need attention even when every item shows status "active" (that field is lifecycle, not login state). Attribute per row via include antidetect_browser.'),
+  // Optional for the same deploy-order reason as signed_out_count.
+  restricted_count: z.number().int().optional()
+    .describe('The subset of signed_out_count whose browser sits in restricted: right after the logout the platform read the public profile from another account and LinkedIn had none for the member, so the account is restricted (or closed) and a re-login alone will not bring it back. Tell the user to sort it out with LinkedIn first.'),
 }).passthrough();
 
 const LinkedinAccountFilter = z.object({
@@ -693,7 +696,7 @@ const LinkedinAccountInclude = z.enum([
   'linkedin_connection_invitations_counts',
   'linkedin_conversations_counts',
   'linkedin_followers_counts',
-]).describe('antidetect_browser carries the sender LOGIN and runtime state (browser status login_issue means signed out of LinkedIn; also error_reason, logout_count, last_logout_at). The account item alone cannot answer "is this sender signed in": its status field is lifecycle. Health data: linkedin_account_smart_limits (budgets and holds), linkedin_account_snapshot (latest warmup score), linkedin_account_quota_hits / linkedin_account_block_log (last 50 incident rows each), *_counts (child tallies).');
+]).describe('antidetect_browser carries the sender LOGIN and runtime state (browser status login_issue means signed out of LinkedIn, restricted means signed out and the public profile is gone, a LinkedIn restriction; also error_reason, logout_count, last_logout_at). The account item alone cannot answer "is this sender signed in": its status field is lifecycle. Health data: linkedin_account_smart_limits (budgets and holds), linkedin_account_snapshot (latest warmup score), linkedin_account_quota_hits / linkedin_account_block_log (last 50 incident rows each), *_counts (child tallies).');
 
 const LinkedinAccountSortable = z.enum([
   'created_at',

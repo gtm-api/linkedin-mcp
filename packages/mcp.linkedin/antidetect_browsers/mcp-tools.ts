@@ -64,9 +64,16 @@ const VendorProvider = z.enum(['gologin', 'multilogin', 'adspower', 'dolphin']);
 // relay error_reason to the user) and `support_error_investigation` (ours, or
 // unclassified - no user action, our team is paged). Both refuse dispatch with
 // 409 browser_error_investigation and are never auto-restarted.
+// The signed-out floor is a pair too since 2026-09-22: `login_issue` (the
+// session is gone, a re-login brings it back) and `restricted` (the same lost
+// session plus a verdict: right after the logout the platform read the member's
+// public profile from another account and LinkedIn had none for the member's
+// stable id, so the account is restricted or closed and a re-login alone will
+// not fix it). Both are sticky, powered off, never auto-restarted; both refuse
+// dispatch, with 409 browser_logged_out and 409 browser_account_restricted.
 const AntidetectBrowserStatus = z.enum([
   'stopped', 'queued_to_start', 'initializing', 'running', 'idle',
-  'queued_to_stop', 'start_issue', 'running_issue', 'login_issue',
+  'queued_to_stop', 'start_issue', 'running_issue', 'login_issue', 'restricted',
   'client_error_investigation', 'support_error_investigation',
   'maintenance', 'shared_out', 'subscription_required',
 ]);

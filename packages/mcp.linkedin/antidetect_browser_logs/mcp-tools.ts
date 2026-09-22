@@ -27,9 +27,11 @@ const AntidetectBrowserLog = z.object({
     'started_on_schedule', 'stopped_on_schedule', 'started_by_user', 'stopped_by_user',
     'started_after_maintenance', 'stopped_before_delete',
     'stopped_for_maintenance', 'released_after_maintenance',
-    // Error (7)
+    // Error (8). `account_restricted` is the post-logout probe's verdict row: no
+    // public profile for the member's stable id, the parent moved login_issue ->
+    // restricted; its body carries the identities asked and the node's answer.
     'start_failure', 'proxy_error', 'login_issue', 'runtime_error',
-    'started_after_error', 'server_unreachable', 'error_escalation',
+    'started_after_error', 'server_unreachable', 'error_escalation', 'account_restricted',
     // Ops (1)
     'proxy_replaced',
   ]),

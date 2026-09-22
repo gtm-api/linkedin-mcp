@@ -7131,6 +7131,10 @@
                     "value": "login_issue"
                 },
                 {
+                    "name": "AccountRestricted",
+                    "value": "account_restricted"
+                },
+                {
                     "name": "ServerUnreachable",
                     "value": "server_unreachable"
                 },
@@ -7310,6 +7314,10 @@
                 {
                     "name": "LoginIssue",
                     "value": "login_issue"
+                },
+                {
+                    "name": "Restricted",
+                    "value": "restricted"
                 },
                 {
                     "name": "ClientErrorInvestigation",
@@ -51268,7 +51276,7 @@
                     "field": "browser_status.*",
                     "rules": [
                         "string",
-                        "in:\"stopped\",\"queued_to_start\",\"initializing\",\"running\",\"idle\",\"queued_to_stop\",\"start_issue\",\"running_issue\",\"login_issue\",\"client_error_investigation\",\"support_error_investigation\",\"maintenance\",\"shared_out\",\"subscription_required\""
+                        "in:\"stopped\",\"queued_to_start\",\"initializing\",\"running\",\"idle\",\"queued_to_stop\",\"start_issue\",\"running_issue\",\"login_issue\",\"restricted\",\"client_error_investigation\",\"support_error_investigation\",\"maintenance\",\"shared_out\",\"subscription_required\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -51283,6 +51291,7 @@
                         "start_issue",
                         "running_issue",
                         "login_issue",
+                        "restricted",
                         "client_error_investigation",
                         "support_error_investigation",
                         "maintenance",
