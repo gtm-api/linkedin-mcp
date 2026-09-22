@@ -126,6 +126,8 @@ const LinkedinAccount = z.object({
     .describe("The Sales Navigator seat's InMail balance (the LSS_INMAIL grant), read only while the account holds a seat and cleared when the seat goes. Null = never read, the last read failed, or the seat was just lost; not zero."),
   premium_inmail_credits: z.number().nullable()
     .describe("The Premium plan's own InMail balance (Premium Career / Business), read off LinkedIn's Premium page for a Premium account WITHOUT a Sales Navigator seat (a seat holder's linkedin.com InMail is the seat's grant above) and cleared when the plan goes. Null = never read or the last read could not be parsed; not zero."),
+  recruiter_inmail_credits: z.number().nullable()
+    .describe("The Recruiter contract's own InMail balance (what Recruiter's Usage Overview shows as InMail credits), read off the talent API for an account with an ACTIVE Recruiter seat and cleared when the seat goes; a signed-out seat keeps its last number. LinkedIn grants Recruiter InMails per contract and moves nothing between its products, so this is the pool send_linkedin_recruiter_message spends, not the two above. Null = never read or the last read could not be parsed; not zero."),
   last_premium_check_at: z.string().nullable(),
 
   // Per-entity sync clocks
@@ -262,6 +264,8 @@ const LinkedinAccountFilter = z.object({
     .describe('The Sales Navigator seat grant. is_null:true = never read or last parse failed.'),
   premium_inmail_credits: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']).optional()
     .describe('The Premium plan pool (seatless Premium accounts). gte:1 = senders with Premium InMails left; is_null:true = never read.'),
+  recruiter_inmail_credits: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt', 'is_null']).optional()
+    .describe('The Recruiter contract pool (accounts with an active Recruiter seat). eq:0 = seats that cannot open a new Recruiter thread until the monthly refresh; is_null:true = never read.'),
   last_premium_check_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
 
   // Per-entity sync clocks (staleness / scheduler predicates).
@@ -331,7 +335,7 @@ const LinkedinAccountAnalyticsResult = z.object({
       change_direction: z.enum(['up', 'down']).nullable()
         .describe('Often null in practice, including when change_percent is present. Treat null as unknown, never as flat or as up.'),
       daily: z.array(z.object({ date: z.string(), value: z.number().int() }))
-        .describe('One point per day in the window, UTC dates.'),
+        .describe('One point per day in the window, UTC dates. value is SIGNED: engagements is a daily delta and a retracted reaction shows as a below-zero day; never clamp it, the total is the sum.'),
     })).describe('Keyed by wire metric name (impressions, engagements today). An OPEN map: new dashboard cards appear as new keys.'),
   }),
 }).passthrough();
@@ -802,7 +806,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     // the row stale for no gain.
     name: 'check_linkedin_account_premium_subscription',
     description:
-      'Refresh the account\'s subscription state and persist it: Premium, the Sales Navigator and Recruiter seats, and the InMail balance (self-probe, no target, no credits). `checks` picks which of those four to run and omitting it runs all four, which is the call you want when you just need the picture. Ask for a subset when you need one answer cheaply: `recruiter` reads a marker in the already-open tab, while the full run opens a background tab for the profile. Each result is written to the account record, and a probe that fails leaves the previous value alone rather than clearing it, so a failure never reads as "seat lost". On the full run a false Premium settles both seats without probing them, because each includes Premium. A Recruiter seat whose member holds several contracts is bound to the only corporate contract on offer by this check itself; with several on offer the seat stays unstamped until the seat holder picks one in the account\'s browser.',
+      'Refresh the account\'s subscription state and persist it: Premium, the Sales Navigator and Recruiter seats, and the InMail balances (self-probe, no target, no credits). `checks` picks which of those four to run and omitting it runs all four, which is the call you want when you just need the picture. Ask for a subset when you need one answer cheaply: `recruiter` reads a marker in the already-open tab, while the full run opens a background tab for the profile. Each result is written to the account record, and a probe that fails leaves the previous value alone rather than clearing it, so a failure never reads as "seat lost". On the full run a false Premium settles both seats without probing them, because each includes Premium. A Recruiter seat whose member holds several contracts is bound to the only corporate contract on offer by this check itself; with several on offer the seat stays unstamped until the seat holder picks one in the account\'s browser.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/check-premium', sidParam: 'sid' },
     operation: 'action',
@@ -815,7 +819,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     inputSchema: z.object({
       sid: SID,
       checks: z.array(z.enum(['premium', 'sales_nav', 'recruiter', 'inmail_credits'])).min(1).max(4).nullable().optional()
-        .describe('Which steps to run. OMIT for all four, which is the normal call. `premium` reads the profile flag and, on a full run, settles both seats when it comes back false. `sales_nav` and `recruiter` probe one seat each and are the cheap ones. `inmail_credits` reads the pool the plan has: the Sales Navigator grant into inmail_credits with a seat, the Premium plan\'s own balance into premium_inmail_credits for a Premium account without one (LinkedIn keeps the two apart). An account with no Premium has no pool: on a full run the step is skipped (last known balances kept), and naming it in `checks` for one is refused with 422 `premium_required`. Asking for a subset skips the rest entirely, so nothing you did not ask for is re-read or re-written.'),
+        .describe('Which steps to run. OMIT for all four, which is the normal call. `premium` reads the profile flag and, on a full run, settles both seats when it comes back false. `sales_nav` and `recruiter` probe one seat each and are the cheap ones. `inmail_credits` reads the pool the plan has: the Sales Navigator grant into inmail_credits with a seat, the Premium plan\'s own balance into premium_inmail_credits for a Premium account without one, and, next to either, the Recruiter contract\'s own balance into recruiter_inmail_credits for an ACTIVE Recruiter seat (LinkedIn keeps the three pools apart; a signed-out seat is not read and keeps its last number). An account with no Premium has no pool: on a full run the step is skipped (last known balances kept), and naming it in `checks` for one is refused with 422 `premium_required`. Asking for a subset skips the rest entirely, so nothing you did not ask for is re-read or re-written.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount),

@@ -138,6 +138,8 @@ const ExperienceItem = z.object({
   start_date: z.string().nullable(),
   end_date: z.string().nullable(),
   description: z.string().nullable(),
+  position_id: z.string().nullable().optional()
+    .describe("The connected account's OWN profile only: the numeric id behind urn:li:fsd_profilePosition, the key of the position editing verbs. Absent on other members' profiles."),
 }).passthrough();
 
 // person-skills item (row 51): controller renames the wire `id` to `skill_id`.
@@ -362,7 +364,8 @@ const InterestItem = z.object({
 
 // person-services result (row 62): the node's `ProfileServices`, or NULL.
 const ProfileServicesResult = z.object({
-  page_id: z.string().nullable(),
+  page_id: z.string().nullable()
+    .describe('The page\'s vanity slug for a published page (the tail of /services/page/<slug>; an older capture carried a numeric id). The whole result is null while the owner keeps the page unpublished.'),
   page_url: z.string().nullable(),
   business_name: z.string().nullable(),
   provider_name: z.string().nullable(),
@@ -541,7 +544,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_experience',
     description:
-      'Complete, paginated work history ("Show all experiences"), unlike the truncated head on full-profile. One call = one page; loop cursor until paging.next_page_cursor is absent. cached 7d. A public_identifier-only call needs a stored URN (run person-lite-profile first) or is refused not_dispatchable.',
+      'Complete, paginated work history ("Show all experiences"), unlike the truncated head on full-profile. One call = one page; loop cursor until paging.next_page_cursor is absent. cached 7d. A public_identifier-only call needs a stored URN (run person-lite-profile first) or is refused not_dispatchable. On the connected account\'s OWN profile each entry also carries position_id, the key of the position editing verbs.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-experience' },
     operation: 'action',
@@ -771,7 +774,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_services',
     description:
-      'The "Providing services" marketplace page of one service-provider profile: business name, pricing line, page URL and the standardized services they list. Complements scraping-side search-service-providers (that discovers providers, this reads one provider\'s own page). cached 7d, no pagination. result.services is NULL when the member sells no services at all, which is a different fact from a page whose services_provided is empty, and both are a normal completed read.',
+      'The "Providing services" marketplace page of one service-provider profile: business name, pricing line, page URL and the standardized services they list. Complements scraping-side search-service-providers (that discovers providers, this reads one provider\'s own page). cached 7d, no pagination. result.services is NULL when the member sells no services at all, which is a different fact from a page whose services_provided is empty, and both are a normal completed read. A page its owner has UNPUBLISHED reads as null too (LinkedIn drops the link the read follows), which looks the same as never having had one.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-services' },
     operation: 'action',

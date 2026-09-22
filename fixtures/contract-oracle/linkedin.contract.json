@@ -1864,6 +1864,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "recruiter_inmail_credits",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "last_premium_check_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2115,6 +2121,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "recruiter_inmail_credits",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "last_premium_check_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2254,6 +2266,7 @@
                     "smart_limits_enabled",
                     "inmail_credits",
                     "premium_inmail_credits",
+                    "recruiter_inmail_credits",
                     "last_premium_check_at",
                     "last_connections_sync_at",
                     "last_conversations_sync_at",
@@ -7730,6 +7743,10 @@
                 {
                     "name": "GetRecruiterContractOptions",
                     "value": "get_recruiter_contract_options"
+                },
+                {
+                    "name": "GetRecruiterInmailCredits",
+                    "value": "get_recruiter_inmail_credits"
                 },
                 {
                     "name": "EditMyProfile",
@@ -24463,6 +24480,20 @@
                 },
                 {
                     "field": "filter.premium_inmail_credits",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.recruiter_inmail_credits",
                     "rules": [
                         "nullable"
                     ],
