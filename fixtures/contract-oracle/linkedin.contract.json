@@ -17076,14 +17076,14 @@
                         "nullable",
                         "integer",
                         "min:1",
-                        "max:100"
+                        "max:50"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "integer",
                     "in": null,
                     "min": 1,
-                    "max": 100,
+                    "max": 50,
                     "size": null,
                     "between": null
                 },
@@ -40751,14 +40751,14 @@
                         "nullable",
                         "integer",
                         "min:1",
-                        "max:100"
+                        "max:50"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "integer",
                     "in": null,
                     "min": 1,
-                    "max": 100,
+                    "max": 50,
                     "size": null,
                     "between": null
                 },
@@ -51845,6 +51845,7 @@
         "not_a_login_session": "This session is not a login session, so it has no login result to confirm.",
         "not_connected": "The target is not a 1st-degree connection of this account, and this action needs one; send a connection request first, or act from an account that is connected.",
         "operation_blocked": "LinkedIn refused this operation for this account; see context.reason for the cause.",
+        "page_size_above_linkedin_max": "LinkedIn's content search serves at most 50 posts per page and answers a larger request with an empty page, so page_size stops at 50 here; ask for 50 or fewer and follow paging.next_cursor for the rest.",
         "period_inverted": "period.from is after period.to; swap them.",
         "period_start_must_be_monday": "period_start must be the Monday that opens the ISO week.",
         "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",

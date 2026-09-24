@@ -1344,7 +1344,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
       // The one engine on this surface with cursor paging instead of a page
       // number, which is why these two fields are written out here rather than
       // taken from pageField(). Both halves of the XOR page the same way.
-      page_size: z.number().int().min(1).max(100).nullable().optional().describe('Rows per page (1..100); default 10.'),
+      page_size: z.number().int().min(1).max(50).nullable().optional().describe('Rows per page (1..50); default 10. The cap is LinkedIn\'s: its content search serves at most 50 posts per page and answers a larger request with an empty page, so 51+ is refused (422 page_size_above_linkedin_max) rather than returned as 3 rows with has_more false. Ask for 50 or fewer and follow paging.next_cursor. The first page may carry up to 3 rows when you ask for fewer: every content search opens with a cluster of 3.'),
       cursor: z.string().max(2048).nullable().optional().describe('Opaque resume token from paging.next_cursor; null/omitted = first page.'),
       ...usageMetaField,
     }),
