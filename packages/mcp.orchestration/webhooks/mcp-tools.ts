@@ -72,6 +72,7 @@ const WebhookEventType = z.enum([
   'linkedin-account-smart-limits.limit-reached',
   'linkedin-account-smart-limits.limit-released',
   'linkedin-account-smart-limits.smart-limit-recomputed',
+  'linkedin-account-smart-limits.updated',
   // Mirrors a case the adaptive-smart-limits work added to the PHP enum while this
   // change was in flight. Carried here only because the contract-oracle refresh is
   // per service and picks up the whole catalog; the feature itself is not mine.
