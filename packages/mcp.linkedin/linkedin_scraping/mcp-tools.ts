@@ -1328,7 +1328,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_posts',
     description:
-      'LinkedIn content search: find POSTS by keywords, recency or author. The discovery front door for post-engagement plays (feed the returned post_ln_id into the commenters / reactors / resharers tools). Addressed EITHER by `filters` (keywords REQUIRED) OR by a pasted /search/results/content/ `url`, which the node parses back into the same filter object: exactly one of the two, never both, never neither. CURSOR paginated, unlike every other search here: feed paging.next_cursor back verbatim and size the page with page_size.',
+      'LinkedIn content search: find POSTS by keywords, recency or author. The discovery front door for post-engagement plays (feed the returned post_ln_id into the commenters / reactors / resharers tools). Addressed EITHER by `filters` (keywords REQUIRED) OR by a pasted /search/results/content/ `url`, which the node parses back into the same filter object: exactly one of the two, never both, never neither. CURSOR paginated, unlike every other search here: feed paging.next_cursor back verbatim and size the page with page_size. A page is the end only when LinkedIn itself answers that the window is empty; an answer the platform cannot read is refused (503 linkedin_page_unreadable, retry in a minute), never returned as an empty page.',
     toolClass: 'typical',
     route: rt('search-posts'),
     operation: 'action',

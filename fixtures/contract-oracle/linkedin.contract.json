@@ -51823,6 +51823,7 @@
         "invalid_url": "The URL is not a LinkedIn search, post, or people-you-may-know page this auto-scrape can read; paste a linkedin.com search URL or a post link.",
         "latest_refresh_failed": "The live read did not complete; retry in a minute.",
         "linkedin_account_exists": "A LinkedIn account is already bound to this browser; delete it first, or use it.",
+        "linkedin_page_unreadable": "LinkedIn answered this page in a shape the reader could not read (an interstitial, a session surface or a changed page), so nothing is reported rather than a wrong empty page; retry in a minute, and if it repeats the page reader needs an update.",
         "login_already_confirmed": "This session already carries a different login result.",
         "login_error_reason_required": "A login result other than success needs login_error_reason.",
         "login_not_confirmed": "The login of this session was not confirmed, so the browser cannot be run from it.",
