@@ -6334,6 +6334,10 @@
                     "value": "linkedin_account_signed_out"
                 },
                 {
+                    "name": "LinkedinAccountRestricted",
+                    "value": "linkedin_account_restricted"
+                },
+                {
                     "name": "LinkedinAccountRecruiterSignedOut",
                     "value": "linkedin_account_recruiter_signed_out"
                 },
