@@ -107,6 +107,8 @@ const LinkedinConversationFilter = z.object({
     .describe('The Recruiter contract the thread was synced or sent under (a seat holder with several contracts switches with select_recruiter_contract; each contract is its own inbox). Null off the recruiter surface and on rows synced before 2026-09-19.'),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']),
   is_muted: filterOp(z.boolean(), ['eq', 'ne', 'is_null']),
+  is_group: filterOp(z.boolean(), ['eq', 'ne', 'is_null'])
+    .describe('A group chat (2026-09-24). is_null:true finds threads synced before the flag existed, which read as 1:1 until their next sync.'),
   unread_count: filterOp(z.number().int(), ['eq', 'ne', 'gt', 'gte', 'lt', 'lte', 'is_null'])
     .describe('The unread-only inbox view is unread_count gt 0. is_null:true finds threads that have never synced the counter.'),
   event_count: filterOp(z.number().int(), ['eq', 'ne', 'gte', 'lte', 'gt', 'lt']),

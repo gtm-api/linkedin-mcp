@@ -5628,6 +5628,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "is_group",
+                        "type": "?bool",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "title",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "is_muted",
                         "type": "?bool",
                         "nullable": true,
@@ -5753,6 +5765,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "is_group",
+                        "type": "?bool",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "title",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "is_muted",
                         "type": "?bool",
                         "nullable": true,
@@ -5817,6 +5841,7 @@
                     "recruiter_contract_id",
                     "nickname",
                     "is_muted",
+                    "is_group",
                     "unread_count",
                     "event_count",
                     "last_activity_at",
@@ -6300,6 +6325,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "sender_ln_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "sender_ln_member_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "subject",
                         "type": "?string",
                         "nullable": true,
@@ -6402,8 +6439,8 @@
                     },
                     {
                         "name": "ln_member_id",
-                        "type": "string",
-                        "nullable": false,
+                        "type": "?string",
+                        "nullable": true,
                         "has_default": false
                     },
                     {
@@ -6450,6 +6487,18 @@
                     },
                     {
                         "name": "nickname",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "sender_ln_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "sender_ln_member_id",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -9752,6 +9801,10 @@
                 {
                     "name": "ConnectionNote",
                     "value": "connection_note"
+                },
+                {
+                    "name": "System",
+                    "value": "system"
                 }
             ]
         },

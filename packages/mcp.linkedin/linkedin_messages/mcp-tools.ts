@@ -24,8 +24,8 @@ const CONVERSATION_SID = z.string().length(18).startsWith('ln_cv_')
 
 const MessengerType = z.enum(['linkedin', 'sales_navigator', 'recruiter'])
   .describe('Messenger surface: the basic LinkedIn messenger, Sales Navigator, or the LinkedIn Recruiter inbox.');
-const LinkedinMessageLinkedinType = z.enum(['message', 'inmail', 'connection_note'])
-  .describe('Channel sub-kind: regular DM / premium InMail / system-seeded connection note.');
+const LinkedinMessageLinkedinType = z.enum(['message', 'inmail', 'connection_note', 'system'])
+  .describe('Channel sub-kind: regular DM / premium InMail / system-seeded connection note / a notice LinkedIn posted into the thread on someone\'s action (system: a rename, a member added or removed, a member leaving; the body is LinkedIn\'s own sentence, the sender the acting member; not a message: it takes no reaction and no recall, draw it as history).');
 const LinkedinMessageDirection = z.enum(['inbox', 'outbox'])
   .describe('Direction relative to our account: received / sent.');
 const LinkedinMessageAutomation = z.enum(['auto', 'manual', 'synced'])
