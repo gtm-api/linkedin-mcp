@@ -161,6 +161,16 @@ const AntidetectBrowser = z.object({
   // Cloud-browser access
   cloud_browser_access: z.array(CloudBrowserAccessEntry)
     .describe('The smart links minted on this browser; the key itself only for a caller holding can_manage_cloud_browser_external_links, null otherwise (2026-09-16). Each console open used to leave a throwaway entry here; minting now sweeps entries that expired over 24h ago, so this is the live link list rather than a log.'),
+  // Who the platform-minted GoLogin profile is shared with as a guest (2026-09-27,
+  // share-vendor-profile, web app only): they open the same signed-in session in
+  // their own GoLogin app. Null on a browser never shared from here, and on a
+  // profile the customer brought (shared in their own vendor account).
+  vendor_profile_shares: z.array(z.object({
+    email: z.string(),
+    role: z.string(),
+    shared_at: z.string().nullable(),
+    shared_by: z.string().nullable(),
+  })).nullable(),
   // Audit
   created_by: AccessIdentityValue,
   deleted_by: AccessIdentityValue.nullable(),

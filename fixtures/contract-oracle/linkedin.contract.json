@@ -150,6 +150,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "vendor_profile_shares",
+                        "type": "?array",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_by",
                         "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
                         "nullable": true,
@@ -11143,6 +11149,58 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "api/antidetect-browsers/share-vendor-profile",
+            "controller": "App\\Entities\\AntidetectBrowser\\AntidetectBrowserController",
+            "action": "shareVendorProfile",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserShareVendorProfileRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "email",
+                    "rules": [
+                        "required",
+                        "string",
+                        "email:rfc",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
