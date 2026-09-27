@@ -110,6 +110,7 @@ const PERMISSION_TOKEN = z.enum([
   'can_edit_schedule',
   'can_manage_smart_limits',
   'can_manage_cloud_browser_external_links',
+  'can_share_vendor_profiles',
   'can_act_linkedin_custom_requests',
   'can_view_mass_actions', 'can_manage_mass_actions',
   'can_view_webhooks', 'can_manage_webhooks',

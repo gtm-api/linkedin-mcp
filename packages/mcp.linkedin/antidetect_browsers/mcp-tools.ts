@@ -170,6 +170,9 @@ const AntidetectBrowser = z.object({
     role: z.string(),
     shared_at: z.string().nullable(),
     shared_by: z.string().nullable(),
+    // GoLogin's id of the share, what unshare-vendor-profile takes back; null on
+    // an entry from before the id was kept (looked up by email at the vendor then).
+    vendor_share_id: z.string().nullable(),
   })).nullable(),
   // Audit
   created_by: AccessIdentityValue,

@@ -11259,6 +11259,58 @@
         },
         {
             "method": "POST",
+            "uri": "api/antidetect-browsers/unshare-vendor-profile",
+            "controller": "App\\Entities\\AntidetectBrowser\\AntidetectBrowserController",
+            "action": "unshareVendorProfile",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Entities\\AntidetectBrowser\\Requests\\AntidetectBrowserUnshareVendorProfileRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "email",
+                    "rules": [
+                        "required",
+                        "string",
+                        "email:rfc",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/antidetect-browsers/update-proxy",
             "controller": "App\\Entities\\AntidetectBrowser\\AntidetectBrowserController",
             "action": "updateProxy",
@@ -35769,6 +35821,22 @@
                     "between": null
                 },
                 {
+                    "field": "stop_if_replied_after",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "attachments",
                     "rules": [
                         "sometimes",
@@ -36005,6 +36073,22 @@
                     "in": null,
                     "min": null,
                     "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "stop_if_replied_after",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -51972,6 +52056,8 @@
         "recipient_unresolvable": "This thread stores no id of its counterpart, so a new Recruiter message cannot be addressed; sync the recruiter inbox and retry, or send by recipient id.",
         "recruiter_reauth_required": "The Recruiter session of this account expired; sign in to Recruiter again from the account page.",
         "release_not_supported": "A share is recalled, not released; use recall.",
+        "replied": "The person wrote in this thread after stop_if_replied_after, so nothing was sent; read their message (context.linkedin_message_sid) before you send again.",
+        "reply_check_unavailable": "The thread could not be read from LinkedIn right now, and stop_if_replied_after asks for that read before the send; nothing was sent, retry after retry_after.",
         "resolver_unavailable": "The subject profile could not be resolved right now; retry later.",
         "run_in_progress": "A run of this auto-scrape is still in flight; wait for it to finish or stop it.",
         "run_window_expired": "More than 15 minutes passed since the login was confirmed; open a new session.",

@@ -15853,7 +15853,7 @@
                     "rules": [
                         "string",
                         "max:128",
-                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_act_linkedin_custom_requests\",\"can_view_email_messages\",\"can_act_email_messages\",\"can_view_email_engagements\",\"can_view_email_accounts\",\"can_update_email_accounts\",\"can_manage_email_accounts\",\"can_view_email_suppressions\",\"can_manage_email_suppressions\",\"can_view_email_tracking_domains\",\"can_manage_email_tracking_domains\",\"can_view_email_sending_domains\",\"can_manage_email_sending_domains\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
+                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_share_vendor_profiles\",\"can_act_linkedin_custom_requests\",\"can_view_email_messages\",\"can_act_email_messages\",\"can_view_email_engagements\",\"can_view_email_accounts\",\"can_update_email_accounts\",\"can_manage_email_accounts\",\"can_view_email_suppressions\",\"can_manage_email_suppressions\",\"can_view_email_tracking_domains\",\"can_manage_email_tracking_domains\",\"can_view_email_sending_domains\",\"can_manage_email_sending_domains\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -15897,6 +15897,7 @@
                         "can_edit_schedule",
                         "can_manage_smart_limits",
                         "can_manage_cloud_browser_external_links",
+                        "can_share_vendor_profiles",
                         "can_act_linkedin_custom_requests",
                         "can_view_email_messages",
                         "can_act_email_messages",
@@ -16328,7 +16329,7 @@
                     "rules": [
                         "string",
                         "max:128",
-                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_act_linkedin_custom_requests\",\"can_view_email_messages\",\"can_act_email_messages\",\"can_view_email_engagements\",\"can_view_email_accounts\",\"can_update_email_accounts\",\"can_manage_email_accounts\",\"can_view_email_suppressions\",\"can_manage_email_suppressions\",\"can_view_email_tracking_domains\",\"can_manage_email_tracking_domains\",\"can_view_email_sending_domains\",\"can_manage_email_sending_domains\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
+                        "in:\"can_view_teams\",\"can_manage_teams\",\"can_view_team_members\",\"can_manage_team_members\",\"can_view_api_keys\",\"can_manage_api_keys\",\"can_view_oauth_clients\",\"can_manage_oauth_clients\",\"can_view_sessions\",\"can_manage_sessions\",\"can_view_account_shares\",\"can_manage_account_shares\",\"can_manage_account_transfers\",\"can_view_billing\",\"can_manage_billing\",\"can_view_ssl_certificates\",\"can_manage_ssl_certificates\",\"can_view_notifications\",\"can_manage_notifications\",\"can_view_support_requests\",\"can_manage_support_requests\",\"can_view_linkedin_connections\",\"can_act_linkedin_connections\",\"can_view_linkedin_messages\",\"can_act_linkedin_messages\",\"can_act_linkedin_engagements\",\"can_view_linkedin_searches\",\"can_act_linkedin_searches\",\"can_view_linkedin_enrichment\",\"can_act_linkedin_enrichment\",\"can_view_linkedin_accounts\",\"can_update_linkedin_accounts\",\"can_manage_linkedin_accounts\",\"can_open_cloud_browser\",\"can_change_proxy\",\"can_edit_schedule\",\"can_manage_smart_limits\",\"can_manage_cloud_browser_external_links\",\"can_share_vendor_profiles\",\"can_act_linkedin_custom_requests\",\"can_view_email_messages\",\"can_act_email_messages\",\"can_view_email_engagements\",\"can_view_email_accounts\",\"can_update_email_accounts\",\"can_manage_email_accounts\",\"can_view_email_suppressions\",\"can_manage_email_suppressions\",\"can_view_email_tracking_domains\",\"can_manage_email_tracking_domains\",\"can_view_email_sending_domains\",\"can_manage_email_sending_domains\",\"can_view_mass_actions\",\"can_manage_mass_actions\",\"can_view_webhooks\",\"can_manage_webhooks\",\"*\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -16372,6 +16373,7 @@
                         "can_edit_schedule",
                         "can_manage_smart_limits",
                         "can_manage_cloud_browser_external_links",
+                        "can_share_vendor_profiles",
                         "can_act_linkedin_custom_requests",
                         "can_view_email_messages",
                         "can_act_email_messages",
@@ -17569,6 +17571,22 @@
                     "between": null
                 },
                 {
+                    "field": "timezone",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "utm",
                     "rules": [
                         "nullable",
@@ -17580,6 +17598,117 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.gclid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.ga_client_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbc",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbp",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbclid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.ga_session_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 }
@@ -18170,7 +18299,7 @@
                     "between": null
                 },
                 {
-                    "field": "timezone",
+                    "field": "invitation_code",
                     "rules": [
                         "nullable",
                         "string",
@@ -18186,7 +18315,7 @@
                     "between": null
                 },
                 {
-                    "field": "invitation_code",
+                    "field": "timezone",
                     "rules": [
                         "nullable",
                         "string",
@@ -18512,6 +18641,148 @@
                     "max": 255,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "timezone",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "utm",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.gclid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.ga_client_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbc",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbp",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbclid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.ga_session_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -18614,6 +18885,182 @@
                     "in": null,
                     "min": 8,
                     "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "auth/signup-context",
+            "controller": "App\\Http\\Controllers\\AuthController",
+            "action": "signupContext",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Http\\Requests\\Auth\\SignupContextRequest",
+            "rules": [
+                {
+                    "field": "utm_captured_at",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "timezone",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "utm",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.gclid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.ga_client_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbc",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbp",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.fbclid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:512"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ads_pixels.ga_session_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 }

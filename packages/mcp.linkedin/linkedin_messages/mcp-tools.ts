@@ -367,6 +367,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       public_identifier: z.string().max(2048).nullable().optional().describe("For a new thread when all you have is the person's vanity slug or linkedin.com/in/<slug> URL: resolved server-side to the URN (own rows, then the corpus, then a lite-profile read on the sender that spends enrichment). One addressing form per call: linkedin_conversation_sid, ln_id / sn_id, or public_identifier."),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
+      stop_if_replied_after: z.string().datetime().nullable().optional()
+        .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 503 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
       client_reference: z.string().max(255).nullable().optional()
         .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
@@ -425,6 +427,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       subject: z.string().min(1).max(200).describe('REQUIRED InMail subject; 1..200 chars.'),
       text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
+      stop_if_replied_after: z.string().datetime().nullable().optional()
+        .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 503 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
       client_reference: z.string().max(255).nullable().optional()
         .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
       ...usageMetaField,
