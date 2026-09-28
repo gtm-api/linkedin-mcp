@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { z } from 'zod';
-import { httpErrorResult, mapErrorEnvelope } from './error-map';
+import { httpErrorResult, mapErrorEnvelope, transportErrorResult } from './error-map';
 import type { DispatchContext, RuntimeDeps, ToolDefinition } from './types';
 
 const deps = {
@@ -106,5 +106,63 @@ describe('httpErrorResult (backend error without the platform envelope)', () => 
     const r = httpErrorResult(ctx, 403, 'nope');
     expect(r.isError).toBe(true);
     expect(r.structuredContent).toEqual({ body: 'nope' });
+  });
+});
+
+// A timeout is this server giving up on the wait, not the backend refusing: the
+// backend may have completed the call. Until 2026-09-28 every timeout said
+// "retry" and a scrape that had completed was run again at a second slot (the
+// MCP audit report, 17.09 item 15).
+describe('transportErrorResult on a timeout', () => {
+  const timeout = { reason: 'timeout', detail: 'AbortError' };
+  const writeTool = (over: Partial<ToolDefinition>): ToolDefinition => ({
+    ...tool,
+    operation: 'action', envelope: 'action',
+    annotations: { title: 't', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+    ...over,
+  });
+
+  it('lets a read retry', () => {
+    const r = transportErrorResult(({ tool, args: {} } as unknown as DispatchContext), timeout);
+    expect(r.isError).toBe(true);
+    expect(r.content[0].text).toContain('A read repeats safely');
+  });
+
+  it('tells a scrape with an idempotency_key to retry with the same key', () => {
+    const scrape = writeTool({
+      name: 'scrape_linkedin_search_people',
+      inputSchema: z.object({ url: z.string(), idempotency_key: z.string().optional(), _meta: z.any().optional() }),
+    });
+    const r = transportErrorResult(({ tool: scrape, args: { url: 'https://x', idempotency_key: 'walk-42-p3' } } as unknown as DispatchContext), timeout);
+    expect(r.content[0].text).toContain('may have completed the call');
+    expect(r.content[0].text).toContain('SAME idempotency_key (walk-42-p3)');
+    expect(r.content[0].text).not.toContain('Retry, or narrow');
+  });
+
+  it('tells a scrape without a key to read the ledger first and to carry a key from now on', () => {
+    const scrape = writeTool({
+      name: 'scrape_linkedin_search_people',
+      inputSchema: z.object({ url: z.string(), idempotency_key: z.string().optional(), _meta: z.any().optional() }),
+    });
+    const r = transportErrorResult(({ tool: scrape, args: { url: 'https://x' } } as unknown as DispatchContext), timeout);
+    expect(r.content[0].text).toContain('search_data_requests');
+    expect(r.content[0].text).toContain('Pass an idempotency_key on every attempt');
+  });
+
+  it('tells a send to read the thread before sending again', () => {
+    const send = writeTool({ name: 'send_linkedin_message' });
+    const r = transportErrorResult(({ tool: send, args: {} } as unknown as DispatchContext), timeout);
+    expect(r.content[0].text).toContain('must not be sent twice');
+  });
+
+  it('tells any other write to check what landed', () => {
+    const post = writeTool({ name: 'create_linkedin_post' });
+    const r = transportErrorResult(({ tool: post, args: {} } as unknown as DispatchContext), timeout);
+    expect(r.content[0].text).toContain('Check first what landed');
+  });
+
+  it('keeps the plain retry line for a transport failure that is not a timeout', () => {
+    const r = transportErrorResult(({ tool, args: {} } as unknown as DispatchContext), { reason: 'connection_refused', detail: 'ECONNREFUSED' });
+    expect(r.content[0].text).toContain('Retry shortly');
   });
 });

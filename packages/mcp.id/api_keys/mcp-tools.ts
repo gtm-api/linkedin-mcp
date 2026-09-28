@@ -164,7 +164,7 @@ export const apiKeysTools: ToolDefinition[] = [
     ...base,
     name: 'update_api_key',
     description:
-      'Partial update of name / permissions / account_sids (the key\'s identity and secret are untouched; use rotate_api_key to change the secret). Each list is a FULL replacement, clamped to the STORED issuer\'s current authority on its axis (403, reason grant_exceeds_ceiling): permissions inside their token set, account_sids inside their slice (null = all accounts, grantable only under an unrestricted issuer slice). At least one field is required.',
+      'Partial update of name / permissions / account_sids (the key\'s identity and secret are untouched; use rotate_api_key to change the secret). Each list is a FULL replacement, clamped to the STORED issuer\'s current authority on its axis (403, reason grant_exceeds_ceiling): permissions inside their token set, account_sids inside their slice (null = all accounts, grantable only under an unrestricted issuer slice). At least one field is required. A change takes effect at once: id tells every channel service to forget the key\'s cached verdict (a peer the fan-out cannot reach falls back to its 5-minute cache).',
     toolClass: 'typical',
     route: { service: 'id', method: 'PATCH', pathTemplate: '/api/api-keys/{sid}', sidParam: 'sid' },
     operation: 'update',
@@ -187,7 +187,7 @@ export const apiKeysTools: ToolDefinition[] = [
     ...base,
     name: 'delete_api_key',
     description:
-      'Revoke a key (simple soft-delete): status=revoked, deleted_at set. Verify rejects it from the next request (cache invalidated). Irreversible: a revoked key never re-activates; issue a fresh one. Idempotent: re-deleting → already_deleted.',
+      'Revoke a key (simple soft-delete): status=revoked, deleted_at set. The key stops verifying at once: id tells every channel service to forget its cached verdict (a peer the fan-out cannot reach falls back to its 5-minute cache). Irreversible: a revoked key never re-activates; issue a fresh one. Idempotent: re-deleting → already_deleted.',
     toolClass: 'trivial',
     route: { service: 'id', method: 'DELETE', pathTemplate: '/api/api-keys/{sid}', sidParam: 'sid' },
     operation: 'delete',

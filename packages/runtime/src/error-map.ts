@@ -211,11 +211,49 @@ export function transportErrorResult(
     `${ctx.tool.name} could not reach the backend (${err.reason}).`,
   ];
   if (err.status) lines.push(`HTTP ${err.status}.`);
-  if (err.reason === 'timeout') lines.push('The request timed out. Retry, or narrow the query.');
+  if (err.reason === 'timeout') lines.push(...timeoutAdvice(ctx));
   else lines.push('This is a transport/gateway problem, not a bad request. Retry shortly.');
   if (err.detail) lines.push(`detail: ${err.detail.slice(0, 300)}`);
   return {
     content: [{ type: 'text', text: lines.join('\n') }],
     isError: true,
   };
+}
+
+// A timeout is THIS server giving up on the wait, not the backend refusing:
+// the call may have completed on the backend, spent its budget and stored its
+// result. Until 2026-09-28 every timeout said "retry", and a scrape that had
+// completed was re-run at a second slot, which for a send would have been a
+// second message (the MCP audit report, 17.09 item 15). A read repeats safely;
+// a write is told how to find out what landed before repeating it.
+function timeoutAdvice(ctx: DispatchContext): string[] {
+  const { tool, args } = ctx;
+  if (tool.annotations.readOnlyHint) {
+    return ['The request timed out. A read repeats safely: retry, or narrow the query.'];
+  }
+  const lines = [
+    'The request timed out at this server, not at the backend: the backend may have completed the call ' +
+      'and spent its budget, so do not repeat it blindly.',
+  ];
+  if ('idempotency_key' in (tool.inputSchema.shape ?? {})) {
+    const key = args.idempotency_key;
+    lines.push(
+      typeof key === 'string' && key !== ''
+        ? `Retry with the SAME idempotency_key (${key}): the replay returns the stored row instead of running again.`
+        : 'Before repeating, read the newest data request of the account (search_data_requests, newest first) and take ' +
+            'its result if it completed. Pass an idempotency_key on every attempt from now on: a replay with the same key ' +
+            'returns the stored row instead of running again.',
+    );
+  } else if (tool.name.startsWith('send_')) {
+    lines.push(
+      'Read the thread first (search_linkedin_messages on the conversation, or the get_my_latest read of it): ' +
+        'a message that landed must not be sent twice.',
+    );
+  } else {
+    lines.push(
+      "Check first what landed (the account's activity log, or the row this call would have created) and repeat " +
+        'only when nothing did.',
+    );
+  }
+  return lines;
 }
