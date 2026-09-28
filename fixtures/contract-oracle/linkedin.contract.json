@@ -335,6 +335,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "vendor_profile_shares",
+                        "type": "?array",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_by",
                         "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
                         "nullable": true,
@@ -9181,6 +9187,10 @@
                 {
                     "name": "WireUnauthorized",
                     "value": "wire_401"
+                },
+                {
+                    "name": "SessionUnconfirmed",
+                    "value": "session_unconfirmed"
                 }
             ]
         },
@@ -9891,6 +9901,103 @@
                 {
                     "name": "Inconclusive",
                     "value": "inconclusive"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\Enums\\SignalKeyEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "AwaitingReply",
+                    "value": "awaiting_reply"
+                },
+                {
+                    "name": "OpenedNotReplied",
+                    "value": "opened_not_replied"
+                },
+                {
+                    "name": "ClickedNotReplied",
+                    "value": "clicked_not_replied"
+                },
+                {
+                    "name": "MultiOpened",
+                    "value": "multi_opened"
+                },
+                {
+                    "name": "AcceptedNotReplied",
+                    "value": "accepted_not_replied"
+                },
+                {
+                    "name": "NoteReadNotReplied",
+                    "value": "note_read_not_replied"
+                },
+                {
+                    "name": "ReactedNotReplied",
+                    "value": "reacted_not_replied"
+                },
+                {
+                    "name": "InvitedUs",
+                    "value": "invited_us"
+                },
+                {
+                    "name": "FollowedUs",
+                    "value": "followed_us"
+                },
+                {
+                    "name": "LeadMessagedFirst",
+                    "value": "lead_messaged_first"
+                },
+                {
+                    "name": "UnansweredInbound",
+                    "value": "unanswered_inbound"
+                },
+                {
+                    "name": "DraftPending",
+                    "value": "draft_pending"
+                },
+                {
+                    "name": "EscalatedOpen",
+                    "value": "escalated_open"
+                },
+                {
+                    "name": "TaskOverdue",
+                    "value": "task_overdue"
+                },
+                {
+                    "name": "WentQuiet",
+                    "value": "went_quiet"
+                },
+                {
+                    "name": "Reactivated",
+                    "value": "reactivated"
+                },
+                {
+                    "name": "InvitePending",
+                    "value": "invite_pending"
+                },
+                {
+                    "name": "ConnectionRemoved",
+                    "value": "connection_removed"
+                },
+                {
+                    "name": "Bounced",
+                    "value": "bounced"
+                },
+                {
+                    "name": "BouncedHard",
+                    "value": "bounced_hard"
+                },
+                {
+                    "name": "Complained",
+                    "value": "complained"
+                },
+                {
+                    "name": "BookingLinkSent",
+                    "value": "booking_link_sent"
+                },
+                {
+                    "name": "ObjectiveReached",
+                    "value": "objective_reached"
                 }
             ]
         }
@@ -52046,6 +52153,7 @@
         "period_start_must_be_monday": "period_start must be the Monday that opens the ISO week.",
         "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",
         "plugin_unavailable": "The browser plugin did not answer; retry once the browser is running.",
+        "post_not_created": "LinkedIn did not publish this post: its answer named no post, so nothing was spent. A company-page post (author_organization_id) needs an account that administers that page; check the page role, then retry.",
         "post_not_deleted": "LinkedIn did not delete this post: it is not this account's, or it is already gone.",
         "post_not_resolvable": "The post link could not be turned into a post id (a shortlink that does not expand, a URL without an activity id); paste the full linkedin.com post URL or the urn:li:activity id.",
         "post_target_missing": "source_input names no post: pass activity_urn, or a post URL.",
