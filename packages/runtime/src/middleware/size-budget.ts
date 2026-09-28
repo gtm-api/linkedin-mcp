@@ -32,6 +32,13 @@ import type { ToolMiddleware } from '../chain';
 /** Lists that are a page of DATA, so dropping the tail loses nothing but data. */
 const TRIMMABLE_LISTS = ['items', 'groups'] as const;
 
+// The scrape and enrich actions answer a page as `result.rows` (the search
+// envelope's `items`, one level down, next to `result.paging`). Until 2026-09-28
+// the trimmer looked at the top level only, so a 134 752-character Sales
+// Navigator company page went out whole under "this payload has no row list"
+// and never reached the client (the MCP audit report, 17.09 item 14).
+const TRIMMABLE_RESULT_LISTS = ['rows'] as const;
+
 // Deliberately not trimmable, though both are arrays that can grow:
 //   error.blockers  each blocker is an INSTRUCTION (what to resolve before a
 //                   delete goes through). Dropping one tells the agent a delete
@@ -47,19 +54,48 @@ export function resultChars(result: ToolResult): number {
   return text + structured;
 }
 
-function findTrimmableList(
-  structured: Record<string, unknown>,
-): { key: string; rows: unknown[] } | null {
+interface TrimmableList {
+  /** The list's path as the notice names it: `items`, or `result.rows`. */
+  key: string;
+  rows: unknown[];
+  /** Rebuild the envelope with the list cut to `kept` rows, everything else as it was. */
+  withRows: (structured: Record<string, unknown>, kept: unknown[]) => Record<string, unknown>;
+}
+
+function findTrimmableList(structured: Record<string, unknown>): TrimmableList | null {
   for (const key of TRIMMABLE_LISTS) {
     const value = structured[key];
-    if (Array.isArray(value) && value.length > 1) return { key, rows: value };
+    if (Array.isArray(value) && value.length > 1) {
+      return { key, rows: value, withRows: (envelope, kept) => ({ ...envelope, [key]: kept }) };
+    }
+  }
+  const result = structured.result;
+  if (result && typeof result === 'object' && !Array.isArray(result)) {
+    for (const key of TRIMMABLE_RESULT_LISTS) {
+      const value = (result as Record<string, unknown>)[key];
+      if (Array.isArray(value) && value.length > 1) {
+        return {
+          key: `result.${key}`,
+          rows: value,
+          withRows: (envelope, kept) => ({
+            ...envelope,
+            result: { ...(envelope.result as Record<string, unknown>), [key]: kept },
+          }),
+        };
+      }
+    }
   }
   return null;
 }
 
 function hasCursor(structured: Record<string, unknown>): boolean {
   const pagination = structured.pagination;
-  return !!pagination && typeof pagination === 'object' && 'next_cursor' in pagination;
+  if (!!pagination && typeof pagination === 'object' && 'next_cursor' in pagination) return true;
+  // The scrape actions page under result.paging (a cursor, or a page number
+  // the caller re-sends as `page`); either way the rest is reachable.
+  const result = structured.result;
+  const paging = result && typeof result === 'object' ? (result as Record<string, unknown>).paging : undefined;
+  return !!paging && typeof paging === 'object' && ('next_cursor' in paging || 'page' in paging);
 }
 
 function howToGetTheRest(
@@ -75,6 +111,14 @@ function howToGetTheRest(
     return (
       `${head} This response has no cursor to resume from, so narrow the filter (or drop entries from ` +
       "'include') until the whole set fits."
+    );
+  }
+  if (listKey.startsWith('result.')) {
+    return (
+      `${head} Do NOT page on from result.paging to collect the missing rows: that page resumes AFTER ` +
+      `row ${total}, so rows ${kept + 1}..${total} would be skipped without a trace. Re-run this exact call ` +
+      `with page_size: ${kept} (or smaller) and page on from THAT response, which resumes at row ${kept + 1}. ` +
+      'Each re-run is a fresh scrape and spends the bucket again, so pick the page_size once.'
     );
   }
   return (
@@ -177,7 +221,7 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
       full_response_chars: fullChars,
       how_to_get_the_rest: howToGetTheRest(structured, list.key, kept, total),
     };
-    return { ...structured, [list.key]: list.rows.slice(0, kept), truncation };
+    return { ...list.withRows(structured, list.rows.slice(0, kept)), truncation };
   };
 
   const noticeAt = (kept: number, overBudget: boolean): string => {

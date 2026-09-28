@@ -130,8 +130,12 @@ const DataRequest = z.object({
   cached_from_sid: z.string().nullable(),
   idempotency_key: z.string().nullable(),
   // Polymorphic result reference: a string pointer OR the inline result payload
-  // (object/array) depending on the request kind.
-  result_ref: z.union([z.string(), z.record(z.unknown()), z.array(z.unknown())]).nullable(),
+  // (object/array) depending on the request kind. Null on the row a scrape or
+  // enrich response embeds as result.data_request (a receipt: that response
+  // already projects the payload as rows / the item, 2026-09-28); the stored
+  // payload reads back here, on the row itself.
+  result_ref: z.union([z.string(), z.record(z.unknown()), z.array(z.unknown())]).nullable()
+    .describe('The stored result payload (inline object/array, or a string pointer). Null on the receipt a scrape / enrich response embeds as result.data_request: that response carries the data as rows / the item, and get_data_request by sid reads the stored payload back.'),
   error_code: z.string().nullable(),
 
   // Audit: AccessIdentityValue (general/KNOWLEDGE.md "Authorization model").

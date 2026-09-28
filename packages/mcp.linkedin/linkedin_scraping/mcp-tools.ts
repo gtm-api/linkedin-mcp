@@ -527,7 +527,7 @@ const RecruiterTypeaheadType = z.enum([
 ]).describe('The Recruiter search-filter typeahead kind (node talentTypeaheads `q`, passed through verbatim). Every kind is a text facet, so `query` is required. Where each id lands in the search_recruiter_people filters: occupation → job_titles / occupations, skill → skills, company → companies / current_companies, geo → locations, zip → postal_codes, industry → industries, school → schools (the row id is the school\'s organization urn, what the facet matches on), fieldOfStudy → fields_of_study, degree → degrees, language → spoken_languages (the id is the lowercase language name), group → no search member yet. Pass the row\'s display_name as the chip text on job_titles / occupations / skills / companies / postal_codes. The closed enums of the search (seniority, function, company size, …) have no typeahead: their code sets are inline in the filters.');
 
 const DataRequestJournalRow = z.object({}).passthrough()
-  .describe('The kind="scrape" DataRequest journal row for this call (terminal completed), embedded as result.data_request; served_from_cache always false. Full DataRequestDomain shape owned by ./data_requests.md, so it is left passthrough here.');
+  .describe('The kind="scrape" DataRequest journal row for this call (terminal completed), embedded as result.data_request; served_from_cache always false. A receipt: its result_ref is null here, the page is result.rows next to it; get_data_request by sid reads the stored payload back. Full DataRequestDomain shape owned by ./data_requests.md, so it is left passthrough here.');
 
 const PageNumberPaging = z.object({
   page: z.number().int(),

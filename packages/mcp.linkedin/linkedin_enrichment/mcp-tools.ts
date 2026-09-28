@@ -95,7 +95,7 @@ const companyPostsTargetField = {
 // The kind="enrich" DataRequestDomain ledger row: its full field set is owned
 // by data_requests.md, so it stays loose here (not this surface's projection).
 const DataRequestRow = z.object({}).passthrough()
-  .describe('The kind="enrich" DataRequest journal row (status / served_from_cache / cached_from_sid). The public audit anchor for this call.');
+  .describe('The kind="enrich" DataRequest journal row (status / served_from_cache / cached_from_sid). The public audit anchor for this call. A receipt: its result_ref is null here, the payload is the item next to it; get_data_request by sid reads the stored payload back.');
 
 // Generic loose item, used for full-profile's RAW-WIRE truncated sub-record
 // heads, which diverge from the dedicated methods' projected shapes (the head

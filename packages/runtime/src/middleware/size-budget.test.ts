@@ -309,6 +309,74 @@ describe('size budget', () => {
   });
 });
 
+// A scrape action answers its page one level down, as result.rows next to
+// result.paging and the ledger receipt result.data_request. Until 2026-09-28
+// the trimmer looked at the top level only and let such a page out whole,
+// flagged "no row list", which is how a 134 752-character Sales Navigator
+// company page never reached its client (the MCP audit report, 17.09 item 14).
+function personPreview(i: number): Record<string, unknown> {
+  return {
+    ln_id: `ACoAAA${String(i).padStart(12, '0')}`,
+    ln_member_id: String(700_000_000 + i),
+    nickname: `firstname-lastname-${i}`,
+    full_name: `Firstname Lastname the ${i}th`,
+    headline: 'Head of Growth at a company whose name is long enough to make a row cost something',
+    location: 'Amsterdam, North Holland, The Netherlands',
+    avatar_url: `https://media.licdn.com/dms/image/v2/D4E03AQH${i}/profile-displayphoto-shrink_800_800/0/1700000000000?e=1735000000&v=beta&t=abcdefghijklmnopqrstuvwxyz012345678`,
+    connection_degree: '2nd',
+  };
+}
+
+function scrapeEnvelope(rows: number): Record<string, unknown> {
+  return {
+    success: true,
+    operation: 'action',
+    action: 'search-people',
+    item: null,
+    result: {
+      rows: Array.from({ length: rows }, (_, i) => personPreview(i)),
+      paging: { page: 1, page_size: rows, has_more: true, total: null },
+      commercial_use_limit_hit: false,
+      data_request: { sid: 'er_rq_000000000001', kind: 'scrape', method: 'search_people_by_url', status: 'completed', served_from_cache: false, result_ref: null },
+    },
+    meta: { trace_id: '01920000-0000-7000-8000-000000000000', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 9120 },
+  };
+}
+
+describe('a scrape page under result.rows', () => {
+  const BUDGET = 12_000;
+
+  it('is trimmed on result.rows, keeps the receipt and the paging, and says how to page', () => {
+    const out = applySizeBudget(rendered(scrapeEnvelope(100)), BUDGET, 'scrape_linkedin_search_people');
+    const structured = out.structuredContent as { result: Record<string, unknown> };
+    const rows = structured.result.rows as unknown[];
+
+    expect(resultChars(out)).toBeLessThanOrEqual(BUDGET);
+    expect(rows.length).toBeGreaterThan(0);
+    expect(rows.length).toBeLessThan(100);
+    expect(rows[0]).toEqual(personPreview(0));
+    expect(structured.result.paging).toEqual({ page: 1, page_size: 100, has_more: true, total: null });
+    expect(structured.result.data_request).toMatchObject({ sid: 'er_rq_000000000001', result_ref: null });
+    expect(truncationOf(out)).toMatchObject({
+      truncated: true,
+      over_budget: false,
+      list: 'result.rows',
+      returned: rows.length,
+      omitted: 100 - rows.length,
+      rows_on_this_page: 100,
+      tool: 'scrape_linkedin_search_people',
+    });
+    expect(truncationOf(out).how_to_get_the_rest).toContain('result.paging');
+    expect(truncationOf(out).how_to_get_the_rest).toContain(`page_size: ${rows.length}`);
+    expect(out.content[0].text).toContain('TRUNCATED BY THE MCP SERVER');
+  });
+
+  it('leaves a page that fits alone', () => {
+    const small = rendered(scrapeEnvelope(3));
+    expect(applySizeBudget(small, BUDGET)).toBe(small);
+  });
+});
+
 describe('size-budget middleware', () => {
   const tool: ToolDefinition = {
     name: 'search_linkedin_accounts',
