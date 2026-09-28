@@ -155,7 +155,7 @@ Safety is enforced by the server itself, under every tool call. Six mechanisms:
 - **Randomized pacing.** Bulk work is spread with per-gap randomized intervals, because a fixed cadence is itself a detectable pattern.
 - **Preview then confirm.** Outward actions return a preview and require confirmation, so an over-eager agent cannot burn an account.
 
-On this setup, gtm-api reports 20,000+ LinkedIn accounts at under a 1% ban rate. Full method: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
+On this setup, 20,000+ LinkedIn accounts run on gtm-api.com, and under 1% of them have ever been restricted. Full method: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
 
 ## How it compares to open-source LinkedIn MCP servers
 
@@ -167,7 +167,7 @@ Cookie-driven servers such as [`stickerdaniel/linkedin-mcp-server`](https://gith
 | Safety layer | Anti-detect browser, dedicated proxy, limits | Not built in |
 | Limit enforcement | Server side, before every action | You build it |
 | Sends (connect, message, InMail) | Yes, with preview then confirm | Partial or none |
-| Published ban rate | Self-reported: under 1% across 20,000+ accounts | Not published |
+| Published restriction figure | Under 1% of 20,000+ accounts ever restricted | Not published |
 | Support | Managed | Community |
 | Price | From $39 per connected account per month, $10 at volume | Free, run it yourself |
 | Self-hosted, auditable code | No, managed service | Yes |
@@ -178,7 +178,7 @@ Volume pricing per connected account per month, from $10/account at scale, with 
 
 ## A note on LinkedIn's terms
 
-[LinkedIn's User Agreement](https://www.linkedin.com/legal/user-agreement) does not permit third-party automation, so every tool in this space carries risk and no vendor can honestly promise otherwise. gtm-api reduces that risk by acting only on accounts you own, with warm-up, human-like pacing and enforced limits, which is why the reported ban rate is under 1%. This is not legal advice.
+[LinkedIn's User Agreement](https://www.linkedin.com/legal/user-agreement) does not permit third-party automation, so every tool in this space carries risk and no vendor can honestly promise otherwise. gtm-api reduces that risk by acting only on accounts you own, with warm-up, human-like pacing and enforced limits, which is why under 1% of the accounts on it have ever been restricted. This is not legal advice.
 
 ## Links
 

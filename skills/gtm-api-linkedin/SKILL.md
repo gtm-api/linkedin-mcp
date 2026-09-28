@@ -169,8 +169,8 @@ changes the answer.
 LinkedIn's User Agreement does not permit third-party automation, so every tool in this space
 carries risk and no vendor can honestly promise otherwise. The managed setup reduces it by acting
 only on owned accounts, in an isolated anti-detect browser with a dedicated proxy per account,
-with warm-up and enforced limits. On that stack, gtm-api.com reports 20,000+ accounts at under a
-1% ban rate. That is a self-reported number, and this is not legal advice.
+with warm-up and enforced limits. 20,000+ accounts run on that stack, and under 1% of them have ever been
+restricted. This is not legal advice.
 
 Tell the user what an action will do before it goes out. That is the whole job.
 
