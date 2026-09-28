@@ -1,13 +1,13 @@
 {
   "identifier": "gtm-api-linkedin-mcp",
   "name": "gtm-api: LinkedIn MCP Server",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "author": "gtm-api",
   "authorUrl": "https://github.com/gtm-api",
   "cloudEndpoint": "https://mcp.gtm-api.com/mcp",
   "homepage": "https://gtm-api.com/linkedin-mcp-server/",
   "icon": "https://gtm-api.com/wp-content/themes/gtm-api/assets/img/icon-512.png",
-  "description": "The LinkedIn API and MCP server for AI agents: search, connect, message and enrich on accounts you own, with safety enforced server-side. One key exposes 250+ typed actions behind 3 meta-tools; outward actions support preview and confirm. On that stack, gtm-api reports 20,000+ connected accounts at under a 1% ban rate.",
+  "description": "The LinkedIn API and MCP server for AI agents: search, connect, message and enrich on accounts you own, with limits enforced on our server. One URL exposes 250+ typed actions behind three meta tools, and every outward action goes through preview and confirm. 20,000+ LinkedIn accounts run on this stack, and under 1% of them have ever been restricted.",
   "tags": ["linkedin", "outreach", "sales", "automation", "enrichment", "api"],
   "tools": [
     {
