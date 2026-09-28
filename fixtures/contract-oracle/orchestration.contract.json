@@ -2032,6 +2032,103 @@
                     "value": "failed"
                 }
             ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\Enums\\SignalKeyEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "AwaitingReply",
+                    "value": "awaiting_reply"
+                },
+                {
+                    "name": "OpenedNotReplied",
+                    "value": "opened_not_replied"
+                },
+                {
+                    "name": "ClickedNotReplied",
+                    "value": "clicked_not_replied"
+                },
+                {
+                    "name": "MultiOpened",
+                    "value": "multi_opened"
+                },
+                {
+                    "name": "AcceptedNotReplied",
+                    "value": "accepted_not_replied"
+                },
+                {
+                    "name": "NoteReadNotReplied",
+                    "value": "note_read_not_replied"
+                },
+                {
+                    "name": "ReactedNotReplied",
+                    "value": "reacted_not_replied"
+                },
+                {
+                    "name": "InvitedUs",
+                    "value": "invited_us"
+                },
+                {
+                    "name": "FollowedUs",
+                    "value": "followed_us"
+                },
+                {
+                    "name": "LeadMessagedFirst",
+                    "value": "lead_messaged_first"
+                },
+                {
+                    "name": "UnansweredInbound",
+                    "value": "unanswered_inbound"
+                },
+                {
+                    "name": "DraftPending",
+                    "value": "draft_pending"
+                },
+                {
+                    "name": "EscalatedOpen",
+                    "value": "escalated_open"
+                },
+                {
+                    "name": "TaskOverdue",
+                    "value": "task_overdue"
+                },
+                {
+                    "name": "WentQuiet",
+                    "value": "went_quiet"
+                },
+                {
+                    "name": "Reactivated",
+                    "value": "reactivated"
+                },
+                {
+                    "name": "InvitePending",
+                    "value": "invite_pending"
+                },
+                {
+                    "name": "ConnectionRemoved",
+                    "value": "connection_removed"
+                },
+                {
+                    "name": "Bounced",
+                    "value": "bounced"
+                },
+                {
+                    "name": "BouncedHard",
+                    "value": "bounced_hard"
+                },
+                {
+                    "name": "Complained",
+                    "value": "complained"
+                },
+                {
+                    "name": "BookingLinkSent",
+                    "value": "booking_link_sent"
+                },
+                {
+                    "name": "ObjectiveReached",
+                    "value": "objective_reached"
+                }
+            ]
         }
     },
     "routes": [
@@ -4810,6 +4907,23 @@
         },
         {
             "method": "POST",
+            "uri": "internal/api-keys/forget",
+            "controller": "Gtm\\Lib\\Common\\Core\\Controllers\\InternalApiKeyVerifyCacheController",
+            "action": "forget",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
             "uri": "internal/api-requests/metrics",
             "controller": "App\\Entities\\ApiRequest\\InternalApiRequestController",
             "action": "metrics",
@@ -6559,6 +6673,7 @@
         }
     ],
     "error_catalog": {
+        "commit_in_progress": "This commit_token is being committed by another request right now; wait a moment and send the same commit again, it answers the run that request created.",
         "commit_token_expired": "commit_token has expired; run the preview again and commit with the new token.",
         "email_box_not_replaceable": "The current email box is not in a state a new one can replace (see context.status or context.detail); only an active or suspended box is replaced.",
         "invalid_commit_token": "commit_token does not match this plan: preview the same title, scope, plan and schedule again and commit with the token the preview returns.",
