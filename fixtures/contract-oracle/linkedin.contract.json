@@ -47962,6 +47962,23 @@
         },
         {
             "method": "POST",
+            "uri": "internal/api-keys/forget",
+            "controller": "Gtm\\Lib\\Common\\Core\\Controllers\\InternalApiKeyVerifyCacheController",
+            "action": "forget",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
             "uri": "internal/api-requests/metrics",
             "controller": "App\\Entities\\ApiRequest\\InternalApiRequestController",
             "action": "metrics",
