@@ -1,0 +1,14 @@
+{
+  "name": "gtm-api",
+  "version": "1.0.0",
+  "description": "LinkedIn for Claude: search people, work Sales Navigator, send invitations and messages, enrich profiles and read the inbox on LinkedIn accounts you own, through the hosted gtm-api MCP server. Every send goes through a preview step and daily limits are enforced on the server.",
+  "author": {
+    "name": "gtm-api",
+    "email": "support@gtm-api.com",
+    "url": "https://gtm-api.com"
+  },
+  "homepage": "https://gtm-api.com/linkedin-mcp-server/",
+  "repository": "https://github.com/gtm-api/linkedin-mcp",
+  "license": "MIT",
+  "keywords": ["linkedin", "mcp", "sales-navigator", "outreach", "ai-agents"]
+}
