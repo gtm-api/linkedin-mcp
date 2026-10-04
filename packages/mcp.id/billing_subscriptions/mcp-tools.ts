@@ -236,7 +236,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     ...base,
     name: 'add_billing_subscription_addon',
     description:
-      'Add a recurring add-on item to the SAME subscription (one Paddle PATCH, one prorated charge). DANGEROUS: money moves; server-side confirm gate applies. The proration rides the subscription\'s own next invoice (prorated_next_billing_period) so the buyer sees one charge on one date, except while a cancel or pause is scheduled, where Paddle refuses a next-period mode and the prorated amount is charged immediately instead. result.proration_mode reports which of the two was used. Idempotent per request_id: a retry with the same token does not re-charge. Requires billing.manage.',
+      'Add a recurring add-on item to the SAME subscription (one Paddle PATCH, one prorated charge). DANGEROUS: money moves; server-side confirm gate applies. The proration rides the subscription\'s own next invoice (prorated_next_billing_period) so the buyer sees one charge on one date, except while a cancel or pause is scheduled, where Paddle refuses a next-period mode and the prorated amount is charged immediately instead. result.proration_mode reports which of the two was used. Not idempotent: every call buys quantity more units. When Paddle\'s answer to the change is lost, or it answers 5xx, the service reads the subscription back: the call succeeds when Paddle carries the change, and anything else is 409 billing_change_unconfirmed, which is not a retry: read the subscription again before buying more. Requires billing.manage.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/{sid}/add-addon', sidParam: 'sid' },
     operation: 'action',
@@ -249,7 +249,6 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
       sid: SID,
       price_sid: PRICE_SID.describe('The add-on price (product.type=addon).'),
       quantity: z.number().int().min(1).describe('Units of the add-on.'),
-      request_id: z.string().max(64).describe('Client idempotency token; a retry with the same token does not re-charge.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(BillingSubscription),
@@ -259,7 +258,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     ...base,
     name: 'remove_billing_subscription_addon',
     description:
-      'Remove add-on units from the subscription, effective next period (no refund, no immediate charge). Pass quantity to give back part of the line, or omit it to drop the whole line; result.remaining_quantity reports what is left (0 means the line is gone). The price_sid must be a live item on this subscription (422 addon_not_on_subscription otherwise). Works while a cancel or pause is scheduled. DANGEROUS state change (server-side confirm gate). Requires billing.manage.',
+      'Remove add-on units from the subscription, effective next period (no refund, no immediate charge). Pass quantity to give back part of the line, or omit it to drop the whole line; result.remaining_quantity reports what is left (0 means the line is gone). The price_sid must be a live item on this subscription (422 addon_not_on_subscription otherwise). Works while a cancel or pause is scheduled. A give-back Paddle did not confirm (its answer lost, or a 5xx) is 409 billing_change_unconfirmed: read the subscription again before repeating it. DANGEROUS state change (server-side confirm gate). Requires billing.manage.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/{sid}/remove-addon', sidParam: 'sid' },
     operation: 'action',

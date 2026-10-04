@@ -21522,6 +21522,7 @@
         "acme_unreachable": "The certificate authority did not answer; retry in a minute.",
         "addon_not_on_subscription": "This add-on is not on the subscription, so there is nothing to remove or change.",
         "already_erased": "This account was erased; nothing of it remains to act on.",
+        "billing_change_unconfirmed": "The billing provider did not confirm this change, and it may have gone through; check the subscription before trying again.",
         "cannot_issue_deleted_certificate": "This certificate was deleted; add the domain again to issue a new one.",
         "cannot_rotate_inactive_key": "Only an active API key can be rotated; this one is revoked or expired.",
         "channel_busy": "The channel is handling its maximum number of handovers; retry this call unchanged in a minute.",
