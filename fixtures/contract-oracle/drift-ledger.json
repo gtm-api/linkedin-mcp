@@ -24,7 +24,7 @@
     "uncovered_routes": []
   },
   "email": {
-    "_note": "uncovered_routes is the ENTIRE public surface of gtm.service.email: 49 routes (44 on 2026-07-27, plus the five email-oauth-apps routes the service gained in September 2026), because this service has no MCP package at all. It is listed here route by route for the same reason every other gap is: the freshness gate reads a service list, and a service missing from that list is not covered debt, it is invisible debt. Added 2026-07-27, when email joined the registry-keyed gates with an empty package set. stale_routes is empty and will stay empty until an @gtm/mcp-email package exists to point anywhere. Burn down by authoring packages: every route a new tool covers must be deleted from this list and taken off ratchet.json in the same change.",
+    "_note": "uncovered_routes is the ENTIRE public surface of gtm.service.email: 51 routes (44 on 2026-07-27, plus the five email-oauth-apps routes the service gained in September 2026 and the two check-sent routes of October 2026), because this service has no MCP package at all. It is listed here route by route for the same reason every other gap is: the freshness gate reads a service list, and a service missing from that list is not covered debt, it is invisible debt. Added 2026-07-27, when email joined the registry-keyed gates with an empty package set. stale_routes is empty and will stay empty until an @gtm/mcp-email package exists to point anywhere. Burn down by authoring packages: every route a new tool covers must be deleted from this list and taken off ratchet.json in the same change.",
     "stale_routes": [],
     "uncovered_routes": [
       "DELETE api/email-accounts/{sid}",
@@ -56,9 +56,11 @@
       "POST api/email-engagements/metrics",
       "POST api/email-engagements/search",
       "POST api/email-folders/search",
+      "POST api/email-messages/check-sent",
       "POST api/email-messages/metrics",
       "POST api/email-messages/search",
       "POST api/email-messages/send",
+      "POST api/email-messages/{sid}/check-sent",
       "POST api/email-messages/{sid}/get-attachment",
       "POST api/email-oauth-apps",
       "POST api/email-oauth-apps/search",

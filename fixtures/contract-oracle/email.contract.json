@@ -6939,6 +6939,188 @@
         },
         {
             "method": "POST",
+            "uri": "api/email-messages/check-sent",
+            "controller": "App\\Entities\\EmailMessage\\EmailMessageController",
+            "action": "checkSentByClientReference",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_email_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailMessage\\Requests\\EmailMessageCheckSentByReferenceRequest",
+            "rules": [
+                {
+                    "field": "email_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "required_without:activity_log_sid",
+                        "prohibits:activity_log_sid",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "activity_log_sid",
+                    "rules": [
+                        "required_without:client_reference",
+                        "prohibits:to,cc,bcc",
+                        "nullable",
+                        "string",
+                        "starts_with:em_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "to",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "to.*",
+                    "rules": [
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cc",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cc.*",
+                    "rules": [
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "bcc",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "bcc.*",
+                    "rules": [
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/email-messages/metrics",
             "controller": "App\\Entities\\EmailMessage\\EmailMessageController",
             "action": "metrics",
@@ -7874,6 +8056,41 @@
                     "between": null
                 },
                 {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
                     "field": "idempotency_key",
                     "rules": [
                         "nullable",
@@ -8140,6 +8357,28 @@
                 }
             ],
             "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-messages/{sid}/check-sent",
+            "controller": "App\\Entities\\EmailMessage\\EmailMessageController",
+            "action": "checkSent",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_email_messages",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
         },
         {
             "method": "POST",
@@ -10729,6 +10968,184 @@
         },
         {
             "method": "POST",
+            "uri": "internal/email-messages/check-sent",
+            "controller": "App\\Entities\\EmailMessage\\InternalEmailMessageController",
+            "action": "checkSent",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailMessage\\Requests\\InternalEmailMessageCheckSentRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "required_without:activity_log_sid",
+                        "prohibits:activity_log_sid",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "activity_log_sid",
+                    "rules": [
+                        "required_without:client_reference",
+                        "prohibits:to,cc,bcc",
+                        "nullable",
+                        "string",
+                        "starts_with:em_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "to",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "to.*",
+                    "rules": [
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cc",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cc.*",
+                    "rules": [
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "bcc",
+                    "rules": [
+                        "nullable",
+                        "array",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "bcc.*",
+                    "rules": [
+                        "Closure"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/email-messages/ingest-mime",
             "controller": "App\\Entities\\EmailMessage\\InternalEmailMessageController",
             "action": "ingestMime",
@@ -11041,6 +11458,41 @@
                     "min": null,
                     "max": null,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
@@ -12252,22 +12704,27 @@
         "attachment_too_large": "The attachments together exceed the size a send may carry (context.max_bytes).",
         "body_fetch_failed": "The message body could not be fetched from the provider (see context.detail); a sync refreshes its locator.",
         "callback_host_registry_unavailable": "The identity service did not answer the callback-host lookup; retry in a minute.",
+        "client_reference_frozen": "This message was already sent (or tried) under its client_reference, which its repeat and check-sent find it by; the client_reference cannot be set, changed or cleared now.",
         "daily_limit_exceeded": "This account has used its daily sending budget; pass scheduled_at and the queue sends when budget allows.",
-        "dispatch_in_flight": "This message is being sent right now; retry once it reaches a terminal status.",
+        "dispatch_in_flight": "A send of this message is on its way (context.send_outcome in_flight), or it went out and its row is not stored (sent); ask again after context.retry_after, or ask check-sent. A sent answer without context.retry_after is final: the mail went out and no row will come.",
         "dns_resolvers_unavailable": "The DNS resolvers did not answer, so the domain could not be verified; retry in a minute.",
         "domain_bound_other_team": "This domain is already registered in another workspace.",
         "email_box_dump_not_ready": "The mailbox dump is not finished (see context.status); retry once it is done.",
         "email_box_ops_disabled": "This deployment is not a workspace mailbox host; box operations are off here.",
-        "idempotency_key_busy": "A send with this idempotency_key is in progress; wait for it to finish.",
+        "held_by_another_send": "Another send of the same mail to the same recipients is on its way or may already have gone out (context.blocking_activity_log_sid names its attempt, context.blocking_email_message_sid its row, when known), so this one was not sent; ask again after context.retry_after.",
+        "idempotency_key_busy": "A send with this idempotency_key is in progress; ask again after context.retry_after.",
         "idempotency_key_reused": "This idempotency_key was used for a different send; use a new key for a new message.",
         "invalid_transition": "This status change is not allowed while the account is connecting.",
+        "message_not_outbound": "Only a message this mailbox sent can be checked for having gone out; this one was received.",
         "no_mailbox_license": "This Microsoft account has no mailbox (no Exchange license), so there is nothing to connect.",
+        "not_this_message": "{field} names the activity_log_sid of an earlier attempt of this same message (the same client_reference and recipients, or without a key the same content and recipients) that is in doubt; this one is not.",
         "oauth_app_failed": "This OAuth app is not verified (see context); fix its credentials and probe it again.",
         "oauth_app_probe_rate_limited": "The OAuth app was probed too often; retry after retry_after.",
         "oauth_grant_invalid": "The provider refused this refresh token (revoked, expired, or from a mailbox that changed); connect the account again with a fresh consent.",
         "oauth_scope_insufficient": "The consent did not grant the mailbox scope this connection needs; connect again and accept the mail permission.",
         "outside_sending_window": "The account's sending window is closed right now; pass scheduled_at, or widen the window on the account.",
         "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",
+        "place_required": "This client_reference names sends to more than one set of recipients; ask with the recipients of the send you mean (to, cc, bcc). context.places lists them.",
         "provider_app_not_configured": "No OAuth client of this provider is configured on this deployment; the connection cannot be probed.",
         "provider_not_reconnectable": "A hosted mailbox has no external provider to reconnect.",
         "provider_probe_failed": "The provider's token endpoint could not be reached or refused our client; retry in a minute.",
@@ -12277,6 +12734,8 @@
         "relation_not_found": "reply_to_email_message_sid names no message this account holds.",
         "scheduled_at_in_past": "scheduled_at is in the past; omit it to send now, or pass a future time.",
         "send_as_denied": "from_email is not an address this account owns or is allowed to send as.",
+        "send_outcome_settled": "confirmed_sent names an attempt that was already proven not sent (context.activity_log_sid, why in context.check_reason), so the word cannot be taken; nothing was sent.",
+        "send_outcome_unknown": "This message may already have gone out (the provider gave no verdict), so it is not sent again until the mailbox shows whether it left; ask again after context.retry_after, or ask check-sent (context.activity_log_sid names the attempt).",
         "sync_in_progress": "A sync of this account is already running (context.open_sync_run_sid); wait for it to finish.",
         "tracking_domain_not_verified": "The account's tracking domain is not verified, so tracking cannot be injected; verify the domain or send without tracking."
     }
