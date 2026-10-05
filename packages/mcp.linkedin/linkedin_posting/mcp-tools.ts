@@ -110,7 +110,7 @@ const CheckSentResult = z.object({
   send_decisive_at: z.string().optional()
     .describe("ISO 8601: the moment a send in doubt can no longer land; a person's confirmed_not_sent is taken from then on. A plain repost carries no deadline of its own, so it is an hour after its answer was lost."),
   unkeyed_activity_log_sids: z.array(z.string()).optional()
-    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts of the verb that a build keeping no key made in the last 48 hours and that may be this send, by activity-log sid, those that recorded a place first, newest first; activity_log_sid is the first. Such a build kept no place for a post or a repost, so those stand for any post or repost key of the account. What a person looks at, and what their word may name.'),
+    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts of the verb that a build keeping no key made in the last 48 hours and that may be this send, by activity-log sid in the order the answer ranks them (asked with a place, those that recorded it first); activity_log_sid is the first. Such a build kept no place for a post or a repost, so those stand for any post or repost key of the account. What a person looks at, and what their word may name.'),
 }).passthrough();
 
 // The form check-sent takes a post's place in (InternalLinkedinPostingCheckSentRequest::POST_PLACE_PATTERN, gtm.lib.common 37961fc).

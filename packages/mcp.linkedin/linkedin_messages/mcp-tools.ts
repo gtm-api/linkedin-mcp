@@ -119,7 +119,7 @@ const CheckSentResult = z.object({
   send_decisive_at: z.string().optional()
     .describe("ISO 8601: the moment a send in doubt can no longer land; a person's confirmed_not_sent is taken from then on."),
   unkeyed_activity_log_sids: z.array(z.string()).optional()
-    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts that a build keeping no key made in the last 48 hours and that may be this message, by activity-log sid, those that recorded a place first, newest first; activity_log_sid is the first. A group or Recruiter send of such a build recorded no place, so it stands for a key asked at a group or Recruiter thread or alone. What a person looks at, and what their word may name.'),
+    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts that a build keeping no key made in the last 48 hours and that may be this message, by activity-log sid in the order the answer ranks them (asked with a place, those that recorded it first); activity_log_sid is the first. Such a build recorded no place for some sends (a group, a Recruiter thread), and those stand for the keys whose place it could not record. What a person looks at, and what their word may name.'),
 }).passthrough();
 
 // Metrics window: required half-open [from, to), ≤ 90 days.

@@ -63,7 +63,7 @@ const CheckSentResult = z.object({
   send_decisive_at: z.string().optional()
     .describe("ISO 8601: the moment an invitation in doubt can no longer land; a person's confirmed_not_sent is taken from then on."),
   unkeyed_activity_log_sids: z.array(z.string()).optional()
-    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts to the person that a build keeping no key made in the last 48 hours and that may be this invitation, by activity-log sid, newest first; activity_log_sid is the first. What a person looks at, and what their word may name.'),
+    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts to the person that a build keeping no key made in the last 48 hours and that may be this invitation, by activity-log sid in the order the answer ranks them; activity_log_sid is the first. What a person looks at, and what their word may name.'),
 }).passthrough();
 
 // Item projection: every field of LinkedinConnectionRequestDomain (research §Domain).
