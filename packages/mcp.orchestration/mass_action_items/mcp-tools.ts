@@ -67,11 +67,13 @@ const MassActionItemWaitReason = z.enum([
 //
 // The backend writes entries as plain arrays and MassActionItemDomain rebuilds
 // each one through MassActionItemStepLogEntryValue, whose toArray() is
-// get_object_vars(): all sixteen keys are present on the wire, absent ones as
-// null or false. Hence nullable (not optional) on the ones that can be empty.
-// The seven send keys (activity_log_sid .. send_in_doubt, gtm.lib.common
-// 0a4fa16, d935194, c6392a9) carry what "one key, one send" needs to come back
-// to a send step. passthrough keeps a future key from failing the contract test.
+// get_object_vars(): every key of the value is present on the wire, absent ones
+// as null or false. Hence nullable (not optional) on the ones that can be empty.
+// The send keys (activity_log_sid .. send_in_doubt, gtm.lib.common 0a4fa16,
+// d935194, c6392a9) carry what "one key, one send" needs to come back to a send
+// step; send_decisive_at left them with f623686 (2026-10-05), since a step no
+// longer repeats an invitation it cannot ask about. passthrough keeps a future
+// key from failing the contract test.
 const MassActionItemStepLogEntry = z.object({
   step_id: z.number().int()
     .describe('Ordinal of the parent plan step this entry records (mass_actions.plan.steps[].id).'),
@@ -96,8 +98,6 @@ const MassActionItemStepLogEntry = z.object({
     .describe("A person's word, set by retry_mass_action_items with resend_unverified: the step's next run repeats the send naming activity_log_sid as confirmed_not_sent."),
   send_vouched_at: z.string().nullable()
     .describe('ISO 8601 UTC: when the owning service first answered that the send went out with no row for it. Such a send is never sent again and ends as sent.'),
-  send_decisive_at: z.string().nullable()
-    .describe('ISO 8601 UTC: an invitation in doubt may still land until this moment, and it is not repeated before it.'),
   send_unconfirmed: z.boolean()
     .describe('Marks the failed entry of a send nobody could confirm within 24 h: with executor_ref a retry asks the owning service again; without one only a retry by sid with resend_unverified sends it.'),
   blocked_since: z.string().nullable()
@@ -195,7 +195,7 @@ const MassActionItemRetryResult = z.object({
   resend_unverified_count: z.number().int().nonnegative().optional()
     .describe('Only with resend_unverified: how many of the re-entered items kept the word (a send nobody could confirm).'),
   left_unconfirmed_count: z.number().int().positive().optional()
-    .describe('Only when above 0: failed items left failed because their send carries no key, so nobody can be asked whether it went out. Each got a note in error_message; only a retry by sid with resend_unverified sends it.'),
+    .describe('Only when above 0: failed items left failed because their send carries no key (an entry written before its tool carried one, such as a comment before 2026-10-05), so nobody can be asked whether it went out. Each got a note in error_message; only a retry by sid with resend_unverified sends it.'),
   left_at_retry_limit_count: z.number().int().positive().optional()
     .describe('Only when above 0: failed items left failed because they were retried 10 times already.'),
 }).passthrough();

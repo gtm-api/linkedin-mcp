@@ -34,7 +34,8 @@ const SID = z.string().length(18).startsWith('wh_hk_')
 const WebhookStatus = z.enum(['on', 'off', 'failed']);
 
 // The subscribable event vocabulary, verbatim from the create/update rules()
-// (WebhookEventTypeEnum, 97 values). It has to be a closed set on this side:
+// (WebhookEventTypeEnum, 105 cases at gtm.lib.common 1f7da8f, and the '*'
+// wildcard the rules add). It has to be a closed set on this side:
 // an in: rule 422s with "invalid", never with the list, and an agent cannot
 // subscribe to an event it has to guess the name of.
 //
@@ -66,6 +67,10 @@ const WebhookEventType = z.enum([
   'linkedin-accounts.heartbeat-restored',
   'linkedin-accounts.subscription-hold-applied',
   'linkedin-accounts.subscription-hold-released',
+  // A call an account dispatched ended failed (2026-10-05; gtm.service.linkedin
+  // adf6798, gtm.lib.common 1e87662): one event per activity-log row, with
+  // failure_source and, on a send verb's row, send_outcome.
+  'linkedin-account-activity-log.task-failed',
   'linkedin-account-block-log.recorded',
   'linkedin-account-snapshot.captured',
   'linkedin-account-quota-hits.recorded',
@@ -207,9 +212,9 @@ const Webhook = z.object({
   name: z.string(),
   target_url: z.string(),
   // WebhookEventTypeEnum[], deliberately NOT the closed WebhookEventType here.
-  // The vocabulary is 89 values, ~2.4KB of JSON schema per occurrence, and every
-  // occurrence is registration-time context for every agent that loads the
-  // server (KNOWLEDGE §4.32). It is worth paying on create and update, where the
+  // The vocabulary is 105 values and the wildcard, ~3.7KB of JSON schema per
+  // occurrence, and every occurrence is registration-time context for every
+  // agent that loads the server (KNOWLEDGE §4.32). It is worth paying on create and update, where the
   // backend's in: rule 422s on a token the agent had to guess. It is not worth
   // paying on the read path or in the filter: those values come back FROM the
   // backend, a wrong filter value returns no rows rather than an error, and no

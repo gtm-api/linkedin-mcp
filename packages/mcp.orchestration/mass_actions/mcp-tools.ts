@@ -79,7 +79,9 @@ const MassActionStepToolCanonical = z.enum([
   // Added 2026-08-13. Spends comment_posts (30/day at a 360 s floor), a much tighter
   // budget than the reaction above: size a run accordingly. Takes `text` from the step
   // args, and replies in-thread when the item payload carries a parent comment urn,
-  // which a get-post-comments row does.
+  // which a get-post-comments row does. A keyed send since 2026-10-05 (linkedin's
+  // round 5 of one key, one send; gtm.service.orchestration f26c0b9): each comment
+  // goes out under its own key and is asked about before it goes again.
   'linkedin-posting.comment',
   // Added 2026-08-13. Send-class, so a plan containing it requires a schedule.
   // Spends send_messages (50/day at a 480 s floor). Takes `text` from the step args
@@ -137,7 +139,7 @@ const MassActionStepTool = z.union([
 const MassActionPlanStep = z.object({
   tool: MassActionStepTool,
   args: z.record(z.unknown()).optional()
-    .describe("The verb's own arguments, EXCLUDING the target: the target is injected per item from the object cursor or the item payload. Shared across every item of the run, and sent verbatim: the platform renders no merge fields, so a {{first_name}} in a note or body goes out as those braces to every recipient (preview_mass_action warns about it). Two args are worth stating explicitly. On 'antidetect-browsers.generate-cloud-browser-access-key', `purpose` is 'relogin' unless you pass 'share': a relogin link ends in a confirm that re-binds the browser to the account, a share link just lets the visitor drive it, and the two look identical, so an omitted `purpose` mints N re-login links without complaining. On a keyed send step (a connection request, a message, an email), `client_reference` T is a run tag, never one message's key: each message goes out under 'T:{item sid}:{step id}' (a run without one under '{item sid}:{step id}'), so an exact match on T finds no row. Find the rows by each item's created_object_sid or by the exact keys (eq / in, there is no prefix search; a webhook subscriber matches the 'T:' prefix in its own code), and never create the run again because T matched nothing: that sends every message twice."),
+    .describe("The verb's own arguments, EXCLUDING the target: the target is injected per item from the object cursor or the item payload. Shared across every item of the run, and sent verbatim: the platform renders no merge fields, so a {{first_name}} in a note or body goes out as those braces to every recipient (preview_mass_action warns about it). Two args are worth stating explicitly. On 'antidetect-browsers.generate-cloud-browser-access-key', `purpose` is 'relogin' unless you pass 'share': a relogin link ends in a confirm that re-binds the browser to the account, a share link just lets the visitor drive it, and the two look identical, so an omitted `purpose` mints N re-login links without complaining. On a keyed send step (a connection request, a comment, a message, an email), `client_reference` T is a run tag, never one message's key: each message goes out under 'T:{item sid}:{step id}' (a run without one under '{item sid}:{step id}'), so an exact match on T finds no row. Find the rows by each item's created_object_sid or by the exact keys (eq / in, there is no prefix search; a webhook subscriber matches the 'T:' prefix in its own code), and never create the run again because T matched nothing: that sends every message twice."),
 }).passthrough();
 
 const MassActionPlan = z.object({
