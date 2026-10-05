@@ -37,45 +37,74 @@ const MassActionItemStatus = z.enum([
 
 // Per-STEP state inside step_log[]. 'running' is the started-marker: it is
 // committed BEFORE the outbound call, so a crash leaves it dangling and the
-// outcome of that call is genuinely unknown (never read it as "did not happen").
+// outcome of that call is genuinely unknown (never read it as "did not happen";
+// a send step's next run reads it as a doubt and asks the owning service first).
+// 'deferred' is a parked step: a window, a rate limit, or a send in doubt or held
+// back. It is not finished, so it carries no finished_at.
 const MassActionItemStepStatus = z.enum([
   'running', 'deferred', 'succeeded', 'failed', 'skipped',
 ]);
 
-// Why an item is parked mid-cascade. 'task_pending': an async plugin task is in
-// flight. 'maintenance' (backend 2026-08-24): the owning service answered the
-// planned-window 503, so the item is pending with scheduled_at at the window's
-// retry_after and the minutely tick redispatches it. 'rate_limited' (backend
-// 2026-09-10): the owning service answered 429 rate_limited (a smart-limit hold
-// or spent budget, a LinkedIn lock, the per-minute guard), so the item is
-// pending until the clock the envelope named. Closed by design pass.
-const MassActionItemWaitReason = z.enum(['task_pending', 'maintenance', 'rate_limited']);
+// Why an item is parked mid-cascade. 'maintenance' (backend 2026-08-24): the
+// owning service answered the planned-window 503, so the item is pending with
+// scheduled_at at the window's retry_after and the minutely tick redispatches it.
+// 'rate_limited' (backend 2026-09-10): the owning service answered 429
+// rate_limited (a smart-limit hold or spent budget, a LinkedIn lock, the
+// per-minute guard), so the item is pending until the clock the envelope named.
+// 'send_outcome_unknown' (2026-10-04, product KNOWLEDGE §4.9a "one key, one
+// send"): a send that may have gone out and whose outcome nobody knows yet; the
+// item waits under the send's key (the step entry's executor_ref) and its next
+// run asks the owning service (check-sent) before anything goes again.
+// 'send_blocked' (2026-10-04): the owning service refused the send because
+// ANOTHER message's attempt to the same place is on its way or in doubt; nothing
+// of this one went out, and it goes at the refusal's retry_after. 'task_pending'
+// (an async plugin task in flight) is a value of gtm.lib.common's enum that
+// nothing writes: no arm dispatches an async task. Closed by design pass.
+const MassActionItemWaitReason = z.enum([
+  'task_pending', 'maintenance', 'rate_limited', 'send_outcome_unknown', 'send_blocked',
+]);
 
 // ─── step_log[] entry: the forensic record of one plan step ───
 //
 // The backend writes entries as plain arrays and MassActionItemDomain rebuilds
 // each one through MassActionItemStepLogEntryValue, whose toArray() is
-// get_object_vars(): all nine keys are present on the wire, absent ones as null.
-// Hence nullable (not optional) on the six that can be empty. passthrough keeps
-// a future key from failing the contract test.
+// get_object_vars(): all sixteen keys are present on the wire, absent ones as
+// null or false. Hence nullable (not optional) on the ones that can be empty.
+// The seven send keys (activity_log_sid .. send_in_doubt, gtm.lib.common
+// 0a4fa16, d935194, c6392a9) carry what "one key, one send" needs to come back
+// to a send step. passthrough keeps a future key from failing the contract test.
 const MassActionItemStepLogEntry = z.object({
   step_id: z.number().int()
     .describe('Ordinal of the parent plan step this entry records (mass_actions.plan.steps[].id).'),
   status: MassActionItemStepStatus,
   started_at: z.string()
-    .describe('ISO 8601 UTC. Committed BEFORE the outbound call (started-marker).'),
+    .describe('ISO 8601 UTC. Committed BEFORE the outbound call (started-marker). A send in doubt keeps the moment its doubt began across runs.'),
   finished_at: z.string().nullable()
-    .describe('Terminal commit of this step; null while running or deferred.'),
+    .describe('When the step ended (succeeded, failed, skipped); null while running or deferred: a parked step is not finished.'),
   duration_ms: z.number().int().nullable()
-    .describe('Wall clock for the step, defer waits included.'),
+    .describe('started_at to finished_at: the run that ended the step, or for a send that was in doubt, from the moment its doubt began. Null while running or deferred; entries written before 2026-10-04 carry 0.'),
   executor_ref: z.string().nullable()
-    .describe('Async steps: sid of the dispatched task. The poll handle for a deferred item; null on sync steps.'),
+    .describe('A keyed send step: the client_reference its message went out under, on every entry it writes (the started-marker included). Null on every other step, and on a send nobody could confirm that has no key.'),
   created_object_type: z.string().nullable()
     .describe('creates-steps: entity family of the object this step minted.'),
   created_object_sid: z.string().nullable()
     .describe('creates-steps: sid of the minted object. Survives a later failure, so it is the cleanup surface.'),
   error_message: z.string().nullable()
-    .describe("Step-local failure cause. The item-level error_message repeats it behind a 'step {k} {tool}:' prefix."),
+    .describe("Step-local failure cause, or a parked step's note. The item-level error_message repeats a failure behind a 'step {k} {tool}:' prefix."),
+  activity_log_sid: z.string().nullable()
+    .describe("The owning service's attempt in doubt (ln_al_ or em_al_), as its check-sent or a refusal named it: what a person's word names. Never another message's blocking attempt."),
+  resend_unverified: z.boolean()
+    .describe("A person's word, set by retry_mass_action_items with resend_unverified: the step's next run repeats the send naming activity_log_sid as confirmed_not_sent."),
+  send_vouched_at: z.string().nullable()
+    .describe('ISO 8601 UTC: when the owning service first answered that the send went out with no row for it. Such a send is never sent again and ends as sent.'),
+  send_decisive_at: z.string().nullable()
+    .describe('ISO 8601 UTC: an invitation in doubt may still land until this moment, and it is not repeated before it.'),
+  send_unconfirmed: z.boolean()
+    .describe('Marks the failed entry of a send nobody could confirm within 24 h: with executor_ref a retry asks the owning service again; without one only a retry by sid with resend_unverified sends it.'),
+  blocked_since: z.string().nullable()
+    .describe("ISO 8601 UTC: when another message's attempt to the same place began holding this send back (wait_reason send_blocked)."),
+  send_in_doubt: z.boolean()
+    .describe('Marks a park of a send whose outcome nobody knows yet: its next run asks the owning service (check-sent) before anything goes again.'),
 }).passthrough();
 
 // ─── Item projection: every MassActionItemDomain field, in Domain order ───
@@ -109,7 +138,7 @@ const MassActionItem = z.object({
   scheduled_at: z.string().nullable()
     .describe('"Not before" moment: pacing chain slot, retry re-plan, or the re-poll horizon of a deferred item.'),
   wait_reason: MassActionItemWaitReason.nullable()
-    .describe("Why the item is deferred mid-cascade. Null when it is not waiting; a parent-level pause leaves this null."),
+    .describe("Why the item is deferred mid-cascade, due again at scheduled_at: maintenance, rate_limited, send_outcome_unknown (a send in doubt, asked about under its key before it goes again) or send_blocked (another message to the same place holds the send back; nothing of this one went out). Null when it is not waiting; a parent-level pause leaves this null."),
   // Current-attempt state
   error_message: z.string().nullable()
     .describe("Failure text with a machine-readable prefix: 'step {k} {tool}:' or 'item_timeout:' (reaper force-fail, outcome unknown)."),
@@ -138,7 +167,7 @@ const MassActionItemFilter = z.object({
   current_step: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional()
     .describe('Which plan step the row sits on: "everyone stuck at step 2".'),
   wait_reason: filterOp(MassActionItemWaitReason, ['eq', 'is_null']).optional()
-    .describe("eq:'task_pending' selects the items deferred on an async task; eq:'maintenance' the ones parked by a planned maintenance window; eq:'rate_limited' the ones parked by the owning service's rate limit (a smart-limit hold or spent budget, a LinkedIn lock, the per-minute guard), due again at scheduled_at."),
+    .describe("eq:'maintenance' selects the items parked by a planned maintenance window; eq:'rate_limited' the ones parked by the owning service's rate limit (a smart-limit hold or spent budget, a LinkedIn lock, the per-minute guard); eq:'send_outcome_unknown' the sends in doubt; eq:'send_blocked' the sends another message holds back. All due again at scheduled_at. 'task_pending' has no writer and matches nothing."),
   retry_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
   scheduled_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
     .describe('Due horizon: what runs next and when.'),
@@ -155,12 +184,21 @@ const MassActionItemSortable = z.enum([
   'position', 'created_at', 'scheduled_at', 'started_at', 'finished_at', 'duration_ms', 'retry_count',
 ]);
 
-// The retry envelope: mcpAction(action:'retry', item: null, result: ['retried_count' => n]).
-// No mode / per-item errors[] block: research described a richer shape than the
-// controller ships, and the controller is what answers the call.
+// The retry envelope: mcpAction(action:'retry', item: null, result: [...]), read
+// against MassActionItemController::retry (gtm.service.orchestration 03d84db):
+// retried_count always; resend_unverified_count only when the flag was given;
+// left_unconfirmed_count and left_at_retry_limit_count only when above 0. No mode /
+// per-item errors[] block: research described a richer shape than the controller
+// ships, and the controller is what answers the call.
 const MassActionItemRetryResult = z.object({
   retried_count: z.number().int().nonnegative()
     .describe('How many failed items were re-entered. 0 means nothing matched, not an error.'),
+  resend_unverified_count: z.number().int().nonnegative().optional()
+    .describe('Only with resend_unverified: how many of the re-entered items kept the word (a send nobody could confirm).'),
+  left_unconfirmed_count: z.number().int().positive().optional()
+    .describe('Only when above 0: failed items left failed because their send carries no key, so nobody can be asked whether it went out. Each got a note in error_message; only a retry by sid with resend_unverified sends it.'),
+  left_at_retry_limit_count: z.number().int().positive().optional()
+    .describe('Only when above 0: failed items left failed because they were retried 10 times already.'),
 }).passthrough();
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
@@ -181,7 +219,7 @@ export const massActionItemsTools: ToolDefinition[] = [
     // is the only channel the step_log semantics have, and it needs the room.
     toolClass: 'complex',
     description:
-      'Per-target drill-down of a mass action: one row per target with current_step, the object cursor (object_type / object_sid, on a generative run what the row created) and step_log[], one entry per plan step with status (running / deferred / succeeded / failed / skipped), executor_ref for async steps, created_object_sid for steps that minted one, and error_message. The last step_log entry says what failed and why, earlier ones what completed: a failed item keeps the effects of its finished steps (fail-forward), created_object_sid is the cleanup surface. Filter by mass_action_sid, then narrow by status / current_step / wait_reason; object_sid is parent-scoped, so always pair it with mass_action_sid (unpaired it degrades to a full team scan). Sort defaults to position asc (insertion order; position 1 is the canary); page_size 0 returns pagination.total_count alone. No include[] and no counts block; run-level aggregation lives on the parent, mass-actions metrics.',
+      'Per-target drill-down of a mass action: one row per target with current_step, the object cursor (object_type / object_sid, on a generative run what the row created) and step_log[], one entry per plan step with status (running / deferred / succeeded / failed / skipped), executor_ref (the key a send step went out under, next to its doubt fields), created_object_sid for steps that minted one, and error_message. The last step_log entry says what failed and why, earlier ones what completed: a failed item keeps the effects of its finished steps (fail-forward), created_object_sid is the cleanup surface. Filter by mass_action_sid, then narrow by status / current_step / wait_reason; object_sid is parent-scoped, so always pair it with mass_action_sid (unpaired it degrades to a full team scan). Sort defaults to position asc (insertion order; position 1 is the canary); page_size 0 returns pagination.total_count alone. No include[] and no counts block; run-level aggregation lives on the parent, mass-actions metrics.',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-action-items/search' },
     operation: 'search',
     envelope: 'search',
@@ -199,7 +237,7 @@ export const massActionItemsTools: ToolDefinition[] = [
     name: 'retry_mass_action_items',
     toolClass: 'complex',
     description:
-      'Re-enter FAILED items of a mass action AT their current_step: completed steps are never re-executed, so no duplicate creates and no double sends; their step_log entries and minted objects survive untouched. Target EXACTLY ONE of sid (ma_im_…) or filter; both or neither is a 422 on the sid field. The filter arm re-enqueues every matching failed item in one call and is not parent-scoped, so pass mass_action_sid unless you mean every run. Per item: status becomes pending, retry_count++, error_message and finished_at cleared; the failed step\'s log entry is overwritten by the next attempt. Every affected parent un-settles (settled_at cleared) and settles again when its items drain. Only status=failed rows match: succeeded, skipped, cancelled and in-flight are left alone, so a retry matching nothing returns retried_count 0, not an error. An "item_timeout:" failure is retryable, but that message means the outbound call MAY have landed: check the target before retrying a non-idempotent step such as a send.',
+      'Re-enter FAILED items of a mass action AT their current_step: completed steps never run again, their step_log entries and minted objects stay. Target EXACTLY ONE of sid (ma_im_…) or filter (both or neither: 422 sid_xor_filter_required); the filter arm is not parent-scoped, so pass mass_action_sid unless you mean every run. Per item: status pending, retry_count++, the error, timings and wait_reason cleared; parents settle again when drained. Only failed items match (retried_count 0 is not an error), 10 retries each at most, never an item of a deleted run or a cancelled one: by sid 422 retry_limit_exceeded and 409 cancelled_cannot_retry, by filter left alone. A send is never sent again blind: one failed send_unconfirmed or item_timeout is asked about under its key first; one with no key stays failed (left_unconfirmed_count) until a person checks the channel and retries it by sid with resend_unverified.',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-action-items/retry' },
     operation: 'action',
     envelope: 'action',
@@ -216,6 +254,8 @@ export const massActionItemsTools: ToolDefinition[] = [
         .describe('Single-item mode. Mutually exclusive with filter.'),
       filter: MassActionItemFilter.optional()
         .describe('Bulk mode: every failed item matching this filter is re-entered. Mutually exclusive with sid.'),
+      resend_unverified: z.boolean().optional()
+        .describe("A person's word that the one send they checked did not arrive (its step failed send_unconfirmed). With sid only: with a filter it is 422 resend_unverified_needs_sid. The step goes again naming the attempt in doubt as confirmed_not_sent, and the owning service still waits while that attempt may land (the item waits with it); a send with no key goes as a new message. Any other failed item ignores it."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), MassActionItemRetryResult),

@@ -1383,6 +1383,14 @@
                 {
                     "name": "RateLimited",
                     "value": "rate_limited"
+                },
+                {
+                    "name": "SendOutcomeUnknown",
+                    "value": "send_outcome_unknown"
+                },
+                {
+                    "name": "SendBlocked",
+                    "value": "send_blocked"
                 }
             ]
         },
@@ -2178,6 +2186,21 @@
                     "required": false,
                     "nullable": false,
                     "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "resend_unverified",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
                     "in": null,
                     "min": null,
                     "max": null,
@@ -6673,6 +6696,7 @@
         }
     ],
     "error_catalog": {
+        "cancelled_cannot_retry": "This item's run was deleted (see context.status): a deleted run stays stopped and its items are not retried. Create a new run to reach this target again.",
         "commit_in_progress": "This commit_token is being committed by another request right now; wait a moment and send the same commit again, it answers the run that request created.",
         "commit_token_expired": "commit_token has expired; run the preview again and commit with the new token.",
         "email_box_not_replaceable": "The current email box is not in a state a new one can replace (see context.status or context.detail); only an active or suspended box is replaced.",
@@ -6682,6 +6706,8 @@
         "period_inverted": "period.from is after period.to; swap them.",
         "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",
         "registry_unavailable": "The identity service did not answer the email-box registry call; retry in a minute.",
+        "resend_unverified_needs_sid": "resend_unverified is your word that one send nobody could confirm did not arrive: give it with the sid of the item you checked, never with a filter.",
+        "retry_limit_exceeded": "This item has been retried 10 times, the most one item takes; check why its step keeps failing (error_message), then create a new run for this target if it should still go.",
         "run_not_active": "This run does not take new items (see context.detail: it is paused or deleted); resume it, or create a new run.",
         "run_not_failed": "Only a failed provisioning run can be retried; this one has not failed.",
         "sid_xor_filter_required": "Provide sid for one item or filter for a set, not neither.",
