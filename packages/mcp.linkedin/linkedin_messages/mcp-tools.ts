@@ -75,7 +75,7 @@ const AttachmentPayload = z.object({
   file_byte_size: z.number().describe('Decoded size in bytes.'),
 }).passthrough();
 
-// ─── One key, one send (product KNOWLEDGE §4.9a; gtm.service.linkedin d5982a5) ───
+// ─── One key, one send (product KNOWLEDGE §4.9a; gtm.service.linkedin d5982a5, 06a879a) ───
 //
 // The six send tools share what the key means, the person's two words and the
 // rule of the answers, so they are written once here. Under a client_reference
@@ -86,32 +86,40 @@ const AttachmentPayload = z.object({
 // (not_sent, in_flight, unknown, sent), the request's own 422 included, and
 // activity_log_sid names the caller's own attempt only: another message's is
 // blocking_activity_log_sid. check_linkedin_message_sent asks without sending.
+// Round 5 (2026-10-05) put invitations, comments, posts and reposts under the
+// same rule (linkedin_connection_requests, linkedin_posting) and named
+// send_decisive_at on the message answers too.
 const sendKey = (place: string) => z.string().max(255).nullable().optional()
-  .describe(`Your key for this ONE message (max 255, byte for byte): one key per message, the same key on every repeat of it. The key and its place (${place}) are one message whatever it says, and a repeat never goes out twice: it answers 200 with the row the first send stored (result.idempotent_replay, result.content_differs when this request says something else) or 409 naming error.context.send_outcome (in_flight, unknown or sent; not_sent with blocking_activity_log_sid when another message holds the place). The same key at another place is another message. Without a key the same words to the same place count as a repeat for an hour after they went out. Stored on the row and searchable; check_linkedin_message_sent asks by it.`);
+  .describe(`Your key for this ONE message (max 255, byte for byte): one key per message, the same key on every repeat of it. The key and its place (${place}) are one message whatever it says, and a repeat never goes out twice: it answers 200 with the row the first send stored (result.idempotent_replay, result.content_differs when this request says something else) or 409 naming error.context.send_outcome (in_flight, unknown with retry_after and send_decisive_at, or sent; not_sent with blocking_activity_log_sid when another message holds the place). The same key at another place is another message. Without a key the same words to the same place count as a repeat for an hour after they went out. Stored on the row and searchable; check_linkedin_message_sent asks by it.`);
 
 const CONFIRMED_NOT_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
-  .describe("A person's word that an earlier attempt of THIS message is not on LinkedIn: its activity_log_sid (ln_al_...), from the 409 or check_linkedin_message_sent, given only after someone looked at the conversation. Taken once the attempt can no longer land (before that: 409 send_outcome_unknown, waiting_for may_still_land, retry_after that moment): it settles that attempt not_sent and this request goes out. Moot when the attempt is no longer in doubt; another message's sid is 422 not_this_message.");
+  .describe("A person's word that an earlier attempt of THIS message is not on LinkedIn: its activity_log_sid (ln_al_...), from the 409 or check_linkedin_message_sent, given only after someone looked at the conversation. Taken once the attempt can no longer land (before that: 409 send_outcome_unknown, waiting_for may_still_land, retry_after and send_decisive_at that moment): it settles that attempt not_sent and this request goes out. An attempt check-sent named in unkeyed_activity_log_sids is not settled: the word counts for this key only, check-sent stops naming it, and the request goes through the usual checks (it may still wait behind that attempt, 409 not_sent). Moot when the attempt is no longer in doubt; another message's sid is 422 not_this_message.");
 
 const CONFIRMED_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
-  .describe("A person's word that an earlier attempt of THIS message IS on LinkedIn: its activity_log_sid, as for confirmed_not_sent (never both). Taken at once; it settles the attempt sent and sends nothing: the answer is 409 concurrent_send_in_flight with send_outcome sent, or 200 with the row once it is stored. Another message's sid is 422 not_this_message; an attempt already proved not sent is 409 confirmed_sent_contradicts.");
+  .describe("A person's word that an earlier attempt of THIS message IS on LinkedIn: its activity_log_sid, as for confirmed_not_sent (never both). Taken at once; it settles the attempt sent (an attempt check-sent named in unkeyed_activity_log_sids takes this key) and sends nothing: the answer is 409 concurrent_send_in_flight with send_outcome sent, or 200 with the row once it is stored. Another message's sid is 422 not_this_message; an attempt already proved not sent is 409 confirmed_sent_contradicts.");
 
 /** The one sentence every send tool's description carries about sending once. */
 const sendOnce = (place: string) =>
   `Sends once per client_reference and ${place}: a repeat is answered, never sent twice; on a 409 read error.context.send_outcome, never resend under a new key.`;
 
-// check-sent's `result` (LinkedinMessageSentCheckResult::toResult at d5982a5):
-// outcome and reason always, retry_after and activity_log_sid when known. Plain
-// strings rather than z.enum: the values are the service's constants, and no PHP
-// enum backs them for the enum-parity gate to pin.
+// check-sent's `result` (LinkedinMessageSentCheckResult::toResult at 06a879a):
+// outcome and reason always; retry_after, activity_log_sid, send_decisive_at and
+// unkeyed_activity_log_sids when known. Plain strings rather than z.enum: the
+// values are the service's constants, and no PHP enum backs them for the
+// enum-parity gate to pin.
 const CheckSentResult = z.object({
   outcome: z.string()
     .describe('sent | not_sent | in_flight | unknown. Send the same request again only on not_sent; on in_flight or unknown ask again after retry_after.'),
   reason: z.string().nullable()
-    .describe('Why. sent: null (item is the row), message_row_pending (it went out, its row comes later), caller_confirmed (a person said so; no row). not_sent: no_send_under_key, refused, not_in_thread, caller_confirmed. unknown: answer_lost, may_still_land, thread_unreadable, unexplained_message, unprovable.'),
+    .describe('Why. sent: null (item is the row), message_row_pending (it went out, its row comes later), caller_confirmed (a person said so; no row). not_sent: no_send_under_key, refused, not_in_thread, caller_confirmed. unknown: answer_lost, may_still_land, thread_unreadable, unexplained_message, unprovable, unkeyed_attempt_at_place.'),
   retry_after: z.string().optional()
     .describe('ISO 8601: for a send in doubt, when its thread is read next or the moment it can no longer land.'),
   activity_log_sid: z.string().optional()
     .describe("The attempt the answer is about (in flight, in doubt or landed): what confirmed_not_sent / confirmed_sent name on the send tools."),
+  send_decisive_at: z.string().optional()
+    .describe("ISO 8601: the moment a send in doubt can no longer land; a person's confirmed_not_sent is taken from then on."),
+  unkeyed_activity_log_sids: z.array(z.string()).optional()
+    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts that a build keeping no key made in the last 48 hours and that may be this message, by activity-log sid, those that recorded a place first, newest first; activity_log_sid is the first. A group or Recruiter send of such a build recorded no place, so it stands for a key asked at a group or Recruiter thread or alone. What a person looks at, and what their word may name.'),
 }).passthrough();
 
 // Metrics window: required half-open [from, to), ≤ 90 days.
@@ -692,7 +700,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'check_linkedin_message_sent',
     description:
-      'Ask what a LinkedIn message send came to, without sending: by the client_reference it went out under (optionally at one place: linkedin_conversation_sid, ln_member_id or profile_urn), or by the activity_log_sid a 409 named. result.outcome: sent (item is the message, or null with reason message_row_pending or caller_confirmed), in_flight, unknown (its answer was lost and the thread has not shown it yet; retry_after), or not_sent (no_send_under_key, refused, not_in_thread, caller_confirmed). Send the same request again only on not_sent, under the same key. result.activity_log_sid is the attempt a person\'s word names (confirmed_not_sent / confirmed_sent on the send tools). A send in doubt has its thread read now when the last look is old enough, so a call can take as long as a head read. A key sent to several places is 422 place_required, a place given in another form than the sends recorded 422 place_unmatched (context.places lists them). Invitations, comments and reactions have no check yet.',
+      'Ask what a LinkedIn message send came to, without sending: by the client_reference it went out under (optionally at one place: linkedin_conversation_sid, ln_member_id or profile_urn), or by the activity_log_sid a 409 named. result.outcome: sent (item is the message, or null with reason message_row_pending or caller_confirmed), in_flight, unknown (the thread has not shown it yet; retry_after, send_decisive_at), or not_sent (no_send_under_key, refused, not_in_thread, caller_confirmed). Send the same request again only on not_sent, under the same key. result.activity_log_sid is the attempt a person\'s word names (confirmed_not_sent / confirmed_sent on the send tools). A send in doubt has its thread read now when a look is due, so a call can be slow. A key sent to several places is 422 place_required, a place in another form than the sends recorded 422 place_unmatched (context.places). Invitations: check_linkedin_connection_request_sent; comments, posts, reposts: check_linkedin_posting_sent.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/check-sent' },
     operation: 'action',

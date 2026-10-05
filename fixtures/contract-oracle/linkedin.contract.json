@@ -29348,6 +29348,121 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-connection-requests/check-sent",
+            "controller": "App\\Entities\\LinkedinConnectionRequest\\LinkedinConnectionRequestController",
+            "action": "checkSent",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_connections",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinConnectionRequest\\Requests\\LinkedinConnectionRequestCheckSentRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "required_without:activity_log_sid",
+                        "prohibits:activity_log_sid",
+                        "nullable",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "activity_log_sid",
+                    "rules": [
+                        "required_without:client_reference",
+                        "prohibits:profile_id,ln_member_id",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "profile_id",
+                    "rules": [
+                        "sometimes",
+                        "prohibits:ln_member_id",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-connection-requests/get-my-latest",
             "controller": "App\\Entities\\LinkedinConnectionRequest\\LinkedinConnectionRequestController",
             "action": "getMyLatestLinkedinConnectionRequests",
@@ -29960,6 +30075,43 @@
                     "min": null,
                     "max": 255,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
@@ -37663,6 +37815,162 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-posting/check-sent",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "checkSent",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingCheckSentRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "required_without:activity_log_sid",
+                        "prohibits:activity_log_sid",
+                        "nullable",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "activity_log_sid",
+                    "rules": [
+                        "required_without:client_reference",
+                        "prohibits:verb,entity_urn,parent_comment_urn,post_place",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "verb",
+                    "rules": [
+                        "required_with:client_reference",
+                        "nullable",
+                        "string",
+                        "in:\"comment\",\"create-post\",\"repost\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "comment",
+                        "create-post",
+                        "repost"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "entity_urn",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:512",
+                        "prohibited_if:verb,create-post"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "parent_comment_urn",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:512",
+                        "prohibited_unless:verb,comment"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "post_place",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "regex:~^(?:feed:member",
+                        "feed:org:\\d+",
+                        "group:\\d+(?::org:\\d+)?)(?::scheduled:\\d+)?$~",
+                        "prohibited_unless:verb,create-post"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-posting/comment",
             "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
             "action": "comment",
@@ -37808,6 +38116,60 @@
                     "min": 1,
                     "max": null,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
@@ -38269,6 +38631,60 @@
                     "min": null,
                     "max": null,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
@@ -38804,6 +39220,60 @@
                     "min": 1,
                     "max": null,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
@@ -50985,6 +51455,132 @@
         },
         {
             "method": "POST",
+            "uri": "internal/linkedin-connection-requests/check-sent",
+            "controller": "App\\Entities\\LinkedinConnectionRequest\\InternalLinkedinConnectionRequestController",
+            "action": "checkSent",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinConnectionRequest\\Requests\\InternalLinkedinConnectionRequestCheckSentRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "required_without:activity_log_sid",
+                        "prohibits:activity_log_sid",
+                        "nullable",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "activity_log_sid",
+                    "rules": [
+                        "required_without:client_reference",
+                        "prohibits:profile_id,ln_member_id",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "profile_id",
+                    "rules": [
+                        "sometimes",
+                        "prohibits:ln_member_id",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/linkedin-connection-requests/send",
             "controller": "App\\Entities\\LinkedinConnectionRequest\\InternalLinkedinConnectionRequestController",
             "action": "send",
@@ -51092,6 +51688,41 @@
                     "min": null,
                     "max": 255,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
@@ -51530,6 +52161,173 @@
         },
         {
             "method": "POST",
+            "uri": "internal/linkedin-posting/check-sent",
+            "controller": "App\\Entities\\LinkedinPosting\\InternalLinkedinPostingController",
+            "action": "checkSent",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\InternalLinkedinPostingCheckSentRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "required_without:activity_log_sid",
+                        "prohibits:activity_log_sid",
+                        "nullable",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "activity_log_sid",
+                    "rules": [
+                        "required_without:client_reference",
+                        "prohibits:verb,entity_urn,parent_comment_urn,post_place",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "verb",
+                    "rules": [
+                        "required_with:client_reference",
+                        "nullable",
+                        "string",
+                        "in:\"comment\",\"create-post\",\"repost\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "comment",
+                        "create-post",
+                        "repost"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "entity_urn",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:512",
+                        "prohibited_if:verb,create-post"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "parent_comment_urn",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:512",
+                        "prohibited_unless:verb,comment"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "post_place",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "regex:~^(?:feed:member",
+                        "feed:org:\\d+",
+                        "group:\\d+(?::org:\\d+)?)(?::scheduled:\\d+)?$~",
+                        "prohibited_unless:verb,create-post"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/linkedin-posting/comment",
             "controller": "App\\Entities\\LinkedinPosting\\InternalLinkedinPostingController",
             "action": "comment",
@@ -51622,6 +52420,57 @@
                     "min": null,
                     "max": 512,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
@@ -52639,7 +53488,7 @@
         "account_missing_ln_id": "The LinkedIn account behind this call has no profile URN of its own yet, so it cannot address the wire; wait for its initial sync to finish (linkedin_accounts.ln_id fills on the first profile read).",
         "account_not_in_team": "That LinkedIn account is not usable here: it is missing, deleted, or belongs to another workspace.",
         "account_not_lendable": "This account cannot be lent: it has not completed its login yet.",
-        "account_shared_out": "This LinkedIn member is lent to another workspace right now; recall the share before connecting it again.",
+        "account_shared_out": "This LinkedIn member is lent to another workspace right now, and only that workspace acts with it; recall the share before connecting it again or sending from it.",
         "attachments_too_large": "The attachments together exceed the 35 MB a send may carry; send fewer or smaller files.",
         "attributes_not_supported_in_thread": "Rich-text attributes apply to the first message that opens a Recruiter thread only; a reply into an existing thread takes plain text.",
         "audio_transcoder_unavailable": "The audio converter is not available on this host right now; retry in a minute.",
@@ -52658,6 +53507,8 @@
         "bucket_saturated": "This account has used its budget for this action type; retry after retry_after.",
         "comment_not_deleted": "LinkedIn did not delete this comment: it is not this account's, or it is already gone.",
         "company_anchor_not_numeric": "source_input.anchor_company_ln_id must be the numeric LinkedIn company id, not a slug or a URL.",
+        "concurrent_send_in_flight": "An earlier attempt of this send, or another send to the same place, is in the browser, in doubt or already went out (context.send_outcome says which, context.activity_log_sid or blocking_activity_log_sid names it), so nothing was sent now. Repeat the same request after retry_after, or ask check-sent about the attempt the context names.",
+        "confirmed_sent_contradicts": "The attempt confirmed_sent names was proved not sent, so the word is not taken and nothing was sent now. Look on LinkedIn again: if it is there, do not send it again; if it is not, repeat the request without confirmed_sent.",
         "conversation_deleted": "This thread was deleted and cannot be acted on; sync the inbox again if it should still exist.",
         "conversation_not_deletable": "This thread has no LinkedIn-side object to delete yet (it was opened by a send that never landed); nothing to remove.",
         "counterpart_copy_exists": "The receiving workspace already holds a copy of this account.",
@@ -52700,13 +53551,16 @@
         "no_recognised_filter_members": "None of the keys in source_input.filters is a filter this search understands; use the keys the tool lists.",
         "not_a_login_session": "This session is not a login session, so it has no login result to confirm.",
         "not_connected": "The target is not a 1st-degree connection of this account, and this action needs one; send a connection request first, or act from an account that is connected.",
+        "not_this_message": "{field} names no attempt of this same send that is in doubt; name the activity_log_sid a 409 or check-sent gave for this client_reference and place, or for these words and this place without a key.",
         "operation_blocked": "LinkedIn refused this operation for this account; see context.reason for the cause.",
         "page_size_above_linkedin_max": "LinkedIn's content search serves at most 50 posts per page and answers a larger request with an empty page, so page_size stops at 50 here; ask for 50 or fewer and follow paging.next_cursor for the rest.",
         "period_inverted": "period.from is after period.to; swap them.",
         "period_start_must_be_monday": "period_start must be the Monday that opens the ISO week.",
         "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",
+        "place_required": "This client_reference names sends to more than one place, so check-sent cannot answer for one; ask again with one of the places in context.places.",
+        "place_unmatched": "The place asked about is none of the places this client_reference was sent to; ask with one of the places in context.places, or by the activity_log_sid of the send.",
         "plugin_unavailable": "The browser plugin did not answer; retry once the browser is running.",
-        "post_not_created": "LinkedIn did not publish this post: its answer named no post, so nothing was spent. A company-page post (author_organization_id) needs an account that administers that page; check the page role, then retry.",
+        "post_not_created": "LinkedIn answered the publish without naming a post, so whether this post went out is not known yet and LinkedIn is read to find out; do not publish it again, repeat this same request after retry_after. A company-page post (author_organization_id) also needs an account that administers that page.",
         "post_not_deleted": "LinkedIn did not delete this post: it is not this account's, or it is already gone.",
         "post_not_resolvable": "The post link could not be turned into a post id (a shortlink that does not expand, a URL without an activity id); paste the full linkedin.com post URL or the urn:li:activity id.",
         "post_target_missing": "source_input names no post: pass activity_urn, or a post URL.",
@@ -52719,17 +53573,20 @@
         "release_not_supported": "A share is recalled, not released; use recall.",
         "replied": "The person wrote in this thread after stop_if_replied_after, so nothing was sent; read their message (context.linkedin_message_sid) before you send again.",
         "reply_check_unavailable": "The thread could not be read from LinkedIn right now, and stop_if_replied_after asks for that read before the send; nothing was sent, retry after retry_after.",
+        "resend_not_available": "An earlier connection request from this account to this member stands in the way: it is pending, accepted, cooling down or left on record by a sync reset (context.cause says which). Withdraw a pending one, message an accepted member, or wait for context.resend_available_at.",
         "resolver_unavailable": "The subject profile could not be resolved right now; retry later.",
         "run_in_progress": "A run of this auto-scrape is still in flight; wait for it to finish or stop it.",
         "run_window_expired": "More than 15 minutes passed since the login was confirmed; open a new session.",
         "sales_nav_required": "This source reads Sales Navigator and the account has no Sales Navigator seat; pick an account with one, or a LinkedIn-search source.",
         "sales_session_stale": "LinkedIn refused this Sales Navigator call for a stale seat session; the platform re-arms the session or moves the call off the seat on the next attempt, retry after retry_after.",
         "scheduled_post_not_deleted": "LinkedIn did not delete this scheduled post: it is not this account's, or it was already published or removed.",
+        "send_outcome_unknown": "The answer of an attempt of this send never came back, so it may or may not be on LinkedIn, and nothing more is sent until that is known. Repeat the same request after retry_after, or settle it with confirmed_not_sent or confirmed_sent naming context.activity_log_sid.",
         "session_already_disconnected": "This session is already disconnected.",
         "shadowban_check_not_pending": "This check is not pending, so its send cannot be confirmed.",
         "skill_discovery_failed": "Reading the target's skills from LinkedIn failed; retry, or endorse a skill by id.",
         "source_not_parked": "The source rows are not parked under a handover; park them before exporting.",
         "subject_already_connected": "The subject is already connected to every canary; the check needs a canary that is not connected to them.",
+        "subscription_required": "This LinkedIn account does not fit the workspace's plan right now, so it takes no action; add a seat to the plan or free one, then retry.",
         "sync_in_progress": "A sync of the same kind is running on this account; retry after retry_after.",
         "target_unresolvable": "LinkedIn answered no profile for the target nickname; check the vanity slug, or address the person by their profile URN.",
         "too_many_splits": "group_by would produce more than 500 groups; narrow the filter or split on a field with fewer values.",
