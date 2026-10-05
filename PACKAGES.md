@@ -83,7 +83,7 @@ queue lives on LinkedIn and nothing is stored on this service), `antidetect_brow
 without a raise: `content` sits at 8 / 25 and `browsers` at 20 / 25, and messaging spent one of its
 three free slots.
 
-## mcp.orchestration: 2 mounts / 22 tools
+## mcp.orchestration: 2 mounts / 23 tools
 
 `gtm.service.orchestration` owns the cross-service plumbing: one webhook registry and one delivery
 log for every producer service, plus mass actions. Base URL `ORCHESTRATION_BASE_URL` (local `:8025`,
@@ -91,8 +91,12 @@ log for every producer service, plus mass actions. Base URL `ORCHESTRATION_BASE_
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| webhooks | `/mcp/orchestration/webhooks` | webhooks (6), webhook_logs (4) | 10 | ✅ |
+| webhooks | `/mcp/orchestration/webhooks` | webhooks (7), webhook_logs (4) | 11 | ✅ |
 | mass_actions | `/mcp/orchestration/mass-actions` | mass_actions (10), mass_action_items (2) | 12 | ✅ |
+
+2026-10-05 - the header went 22 to 23 and the webhooks row 10 to 11, which is this file catching up
+with the registry rather than the surface changing: `replay_webhook` (the paced re-arm of failed and
+platform-cancelled deliveries) joined the `webhooks` package on 2026-09-09 and was never counted here.
 
 ⚠️ `webhooks` + `webhook_logs` moved here from `mcp.linkedin/platform` at the 2026-07-26
 orchestration cutover: the registry is platform-wide, so the log carries `account_sid`
