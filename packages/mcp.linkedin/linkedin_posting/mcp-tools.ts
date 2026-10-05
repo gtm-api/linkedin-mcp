@@ -93,9 +93,34 @@ const PostingSendItem = z.object({
 }).passthrough()
   .describe('What the send made, in the shape its own verb answers: a comment the comment_urn; a post its urns, url, time and body; a repost its kind, urns, url, time, body and the reposted post.');
 
-// check-sent's `result` (LinkedinSendCheckResult::toResult at 06a879a, the shape
-// every family answers): outcome and reason always; retry_after,
-// activity_log_sid, send_decisive_at and unkeyed_activity_log_sids when known.
+// One candidate of unkeyed_attempt_at_place as check-sent names it
+// (LinkedinAccountActivityLogService::recordedAttemptOf, gtm.service.linkedin
+// aab9687, review r5d LOW-1): the attempt, its verb, its start and the place it
+// recorded when it was sent, as its own target columns keep it.
+const UnkeyedAttempt = z.object({
+  activity_log_sid: z.string()
+    .describe("The attempt (ln_al_...): what a person's word names."),
+  action_type: z.string()
+    .describe('Its verb, as the activity log names it: comment_post, create_post, create_repost_with_thoughts or create_instant_repost.'),
+  created_at: z.string().nullable()
+    .describe('ISO 8601: when the attempt started.'),
+  place: z.object({
+    ln_member_id: z.string().optional(),
+    ln_id: z.string().optional(),
+    sn_id: z.string().optional(),
+    recruiter_id: z.string().optional(),
+    entity_type: z.string().optional(),
+    entity_urn: z.string().optional(),
+  }).passthrough().nullable()
+    .describe('The place the attempt recorded when it was sent, only the fields it set: the post a comment went to, or the comment a reply answers (entity_type and entity_urn). Null when it recorded none, as for every post and repost of such a build.'),
+  nickname: z.string().optional()
+    .describe("The person's slug, when the attempt kept one."),
+}).passthrough();
+
+// check-sent's `result` (LinkedinSendCheckResult::toResult at 06a879a, with
+// aab9687's unkeyed_attempts; the shape every family answers): outcome and reason
+// always; retry_after, activity_log_sid, send_decisive_at, unkeyed_activity_log_sids
+// and unkeyed_attempts when known.
 // Plain strings rather than z.enum: the values are the service's constants, and
 // no PHP enum backs them for the enum-parity gate to pin.
 const CheckSentResult = z.object({
@@ -110,7 +135,9 @@ const CheckSentResult = z.object({
   send_decisive_at: z.string().optional()
     .describe("ISO 8601: the moment a send in doubt can no longer land; a person's confirmed_not_sent is taken from then on. A plain repost carries no deadline of its own, so it is an hour after its answer was lost."),
   unkeyed_activity_log_sids: z.array(z.string()).optional()
-    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts of the verb that a build keeping no key made in the last 48 hours and that may be this send, by activity-log sid in the order the answer ranks them (asked with a place, those that recorded it first); activity_log_sid is the first. Such a build kept no place for a post or a repost, so those stand for any post or repost key of the account. What a person looks at, and what their word may name.'),
+    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts of the verb that a build keeping no key made in the last 48 hours and that may be this send, by activity-log sid: newest first when the key is asked alone; asked with a place, those that recorded it first. activity_log_sid is the first. Such a build kept no place for a post or a repost, so those stand for any post or repost key of the account. What a person looks at, and what their word may name.'),
+  unkeyed_attempts: z.array(UnkeyedAttempt).optional()
+    .describe('With reason unkeyed_attempt_at_place, in the order of unkeyed_activity_log_sids: each candidate with its verb, when it started and the place it recorded, so a person knows where to look.'),
 }).passthrough();
 
 // The form check-sent takes a post's place in (InternalLinkedinPostingCheckSentRequest::POST_PLACE_PATTERN, gtm.lib.common 37961fc).

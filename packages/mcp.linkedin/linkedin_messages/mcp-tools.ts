@@ -102,9 +102,34 @@ const CONFIRMED_SENT = z.string().length(18).startsWith('ln_al_').nullable().opt
 const sendOnce = (place: string) =>
   `Sends once per client_reference and ${place}: a repeat is answered, never sent twice; on a 409 read error.context.send_outcome, never resend under a new key.`;
 
-// check-sent's `result` (LinkedinMessageSentCheckResult::toResult at 06a879a):
-// outcome and reason always; retry_after, activity_log_sid, send_decisive_at and
-// unkeyed_activity_log_sids when known. Plain strings rather than z.enum: the
+// One candidate of unkeyed_attempt_at_place as check-sent names it
+// (LinkedinAccountActivityLogService::recordedAttemptOf, gtm.service.linkedin
+// aab9687, review r5d LOW-1): the attempt, its verb, its start and the place it
+// recorded when it was sent, as its own target columns keep it.
+const UnkeyedAttempt = z.object({
+  activity_log_sid: z.string()
+    .describe("The attempt (ln_al_...): what a person's word names."),
+  action_type: z.string()
+    .describe('Its verb, as the activity log names it: send_message, send_voice_message, send_inmail, send_sales_message, send_recruiter_initial_message, send_recruiter_message_in_conversation or start_group_conversation.'),
+  created_at: z.string().nullable()
+    .describe('ISO 8601: when the attempt started.'),
+  place: z.object({
+    ln_member_id: z.string().optional(),
+    ln_id: z.string().optional(),
+    sn_id: z.string().optional(),
+    recruiter_id: z.string().optional(),
+    entity_type: z.string().optional(),
+    entity_urn: z.string().optional(),
+  }).passthrough().nullable()
+    .describe("The place the attempt recorded when it was sent, only the fields it set: the person's ids (ln_member_id, ln_id, sn_id, recruiter_id) or the thread (entity_type conversation, entity_urn its hash). Null when it recorded none."),
+  nickname: z.string().optional()
+    .describe("The person's slug, when the attempt kept one."),
+}).passthrough();
+
+// check-sent's `result` (LinkedinMessageSentCheckResult::toResult at 06a879a, with
+// aab9687's unkeyed_attempts): outcome and reason always; retry_after,
+// activity_log_sid, send_decisive_at, unkeyed_activity_log_sids and
+// unkeyed_attempts when known. Plain strings rather than z.enum: the
 // values are the service's constants, and no PHP enum backs them for the
 // enum-parity gate to pin.
 const CheckSentResult = z.object({
@@ -119,7 +144,9 @@ const CheckSentResult = z.object({
   send_decisive_at: z.string().optional()
     .describe("ISO 8601: the moment a send in doubt can no longer land; a person's confirmed_not_sent is taken from then on."),
   unkeyed_activity_log_sids: z.array(z.string()).optional()
-    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts that a build keeping no key made in the last 48 hours and that may be this message, by activity-log sid in the order the answer ranks them (asked with a place, those that recorded it first); activity_log_sid is the first. Such a build recorded no place for some sends (a group, a Recruiter thread), and those stand for the keys whose place it could not record. What a person looks at, and what their word may name.'),
+    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts that a build keeping no key made in the last 48 hours and that may be this message, by activity-log sid: newest first when the key is asked alone; asked with a place, those that recorded it first. activity_log_sid is the first. An attempt that recorded no place stands only where it may have gone (a group send for a group thread, a Recruiter send for a Recruiter thread or a person asked by member id). What a person looks at, and what their word may name.'),
+  unkeyed_attempts: z.array(UnkeyedAttempt).optional()
+    .describe('With reason unkeyed_attempt_at_place, in the order of unkeyed_activity_log_sids: each candidate with its verb, when it started and the place it recorded, so a person knows where to look.'),
 }).passthrough();
 
 // Metrics window: required half-open [from, to), ≤ 90 days.

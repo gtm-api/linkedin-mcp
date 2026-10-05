@@ -46,9 +46,34 @@ const CONFIRMED_NOT_SENT = z.string().length(18).startsWith('ln_al_').nullable()
 const CONFIRMED_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
   .describe("A person's word that an earlier attempt of THIS invitation IS on LinkedIn: its activity_log_sid, as for confirmed_not_sent (never both). Taken at once; it settles the attempt sent (an attempt check-sent named in unkeyed_activity_log_sids takes this key) and sends nothing: the answer is 409 concurrent_send_in_flight with send_outcome sent, or 200 with the request once it is stored. Another invitation's sid is 422 not_this_message; an attempt already proved not sent is 409 confirmed_sent_contradicts.");
 
-// check-sent's `result` (LinkedinSendCheckResult::toResult at 06a879a, the shape
-// every family answers): outcome and reason always; retry_after,
-// activity_log_sid, send_decisive_at and unkeyed_activity_log_sids when known.
+// One candidate of unkeyed_attempt_at_place as check-sent names it
+// (LinkedinAccountActivityLogService::recordedAttemptOf, gtm.service.linkedin
+// aab9687, review r5d LOW-1): the attempt, its verb, its start and the place it
+// recorded when it was sent, as its own target columns keep it.
+const UnkeyedAttempt = z.object({
+  activity_log_sid: z.string()
+    .describe("The attempt (ln_al_...): what a person's word names."),
+  action_type: z.string()
+    .describe('Its verb, as the activity log names it: send_connection_request.'),
+  created_at: z.string().nullable()
+    .describe('ISO 8601: when the attempt started.'),
+  place: z.object({
+    ln_member_id: z.string().optional(),
+    ln_id: z.string().optional(),
+    sn_id: z.string().optional(),
+    recruiter_id: z.string().optional(),
+    entity_type: z.string().optional(),
+    entity_urn: z.string().optional(),
+  }).passthrough().nullable()
+    .describe("The place the attempt recorded when it was sent, only the fields it set: the person's ids (ln_member_id, ln_id, sn_id). Null when it recorded none."),
+  nickname: z.string().optional()
+    .describe("The person's slug, when the attempt kept one."),
+}).passthrough();
+
+// check-sent's `result` (LinkedinSendCheckResult::toResult at 06a879a, with
+// aab9687's unkeyed_attempts; the shape every family answers): outcome and reason
+// always; retry_after, activity_log_sid, send_decisive_at, unkeyed_activity_log_sids
+// and unkeyed_attempts when known.
 // Plain strings rather than z.enum: the values are the service's constants, and
 // no PHP enum backs them for the enum-parity gate to pin.
 const CheckSentResult = z.object({
@@ -63,7 +88,9 @@ const CheckSentResult = z.object({
   send_decisive_at: z.string().optional()
     .describe("ISO 8601: the moment an invitation in doubt can no longer land; a person's confirmed_not_sent is taken from then on."),
   unkeyed_activity_log_sids: z.array(z.string()).optional()
-    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts to the person that a build keeping no key made in the last 48 hours and that may be this invitation, by activity-log sid in the order the answer ranks them; activity_log_sid is the first. What a person looks at, and what their word may name.'),
+    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts to the person that a build keeping no key made in the last 48 hours and that may be this invitation, by activity-log sid, newest first; activity_log_sid is the first. What a person looks at, and what their word may name.'),
+  unkeyed_attempts: z.array(UnkeyedAttempt).optional()
+    .describe('With reason unkeyed_attempt_at_place, in the order of unkeyed_activity_log_sids: each candidate with its verb, when it started and the person it recorded, so a person knows where to look.'),
 }).passthrough();
 
 // Item projection: every field of LinkedinConnectionRequestDomain (research §Domain).
