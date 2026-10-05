@@ -12711,6 +12711,10 @@
         "domain_bound_other_team": "This domain is already registered in another workspace.",
         "email_box_dump_not_ready": "The mailbox dump is not finished (see context.status); retry once it is done.",
         "email_box_ops_disabled": "This deployment is not a workspace mailbox host; box operations are off here.",
+        "header_not_allowed": "A send may set X-* headers, List-Unsubscribe and Reply-To, each named in printable ASCII with no space or colon; drop or rename the header {field} names.",
+        "header_reserved": "X-Gtm-Message-Sid is the mark the platform stamps on every send, by which check-sent and the Sent-folder sync find it, so a send cannot set it; drop it.",
+        "header_set_by_platform": "This send carries the platform's own one-click List-Unsubscribe, which records an unsubscribe on the stop-list, so it cannot carry another; send without the header, or with track_opens and track_clicks off and no unsubscribe link in the body.",
+        "header_value_invalid": "A header value cannot hold a line break, and Reply-To takes one or more email addresses separated by commas; fix the value {field} names.",
         "held_by_another_send": "Another send of the same mail to the same recipients is on its way or may already have gone out (context.blocking_activity_log_sid names its attempt, context.blocking_email_message_sid its row, when known), so this one was not sent; ask again after context.retry_after.",
         "idempotency_key_busy": "A send with this idempotency_key is in progress; ask again after context.retry_after.",
         "idempotency_key_reused": "This idempotency_key was used for a different send; use a new key for a new message.",
@@ -12737,6 +12741,7 @@
         "send_outcome_settled": "confirmed_sent names an attempt that was already proven not sent (context.activity_log_sid, why in context.check_reason), so the word cannot be taken; nothing was sent.",
         "send_outcome_unknown": "This message may already have gone out (the provider gave no verdict), so it is not sent again until the mailbox shows whether it left; ask again after context.retry_after, or ask check-sent (context.activity_log_sid names the attempt).",
         "sync_in_progress": "A sync of this account is already running (context.open_sync_run_sid); wait for it to finish.",
+        "too_many_recipients": "A send reaches at most 50 recipients across to, cc and bcc together; split it into several sends.",
         "tracking_domain_not_verified": "The account's tracking domain is not verified, so tracking cannot be injected; verify the domain or send without tracking."
     }
 }
