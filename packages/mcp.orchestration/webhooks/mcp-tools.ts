@@ -185,12 +185,12 @@ const WebhookFilters = z.object({
       'Payload delivery gate: a FilterAst node tree evaluated against the delivery envelope, '
       + 'so leaves address payload.* plus the envelope fields type and occurred_at. null or absent = no gate. '
       + 'Grammar is strict: unknown keys and atoms are rejected, nesting depth is capped at 5, and a subscription '
-      + 'may spend at most 20 leaves (a leaf is one {field, op} node; group / not / any wrappers are free, so a '
+      + 'may spend at most 20 leaves (a leaf is one {field, op} node whose op is an object of atoms, {"eq": value}, {"in": [...]}, {"is_null": true}; group / not / any wrappers are free, so a '
       + 'scoped condition like or[not type in [...], leaf] costs two). Use is_null rather than eq: null, which is refused. '
       + 'Errors: filter_grammar_invalid, filter_leaves_limit_exceeded. '
       + 'A filtered-out event is SKIPPED before any webhook_logs row exists, so a gated delivery leaves no trace in the log. '
       + 'Example, routing one hosted connect link to one tenant: '
-      + '{"where":{"and":[{"field":"payload.antidetect_browser_sid","op":"eq","value":"ab_br_X"}]}}'
+      + '{"where":{"and":[{"field":"payload.antidetect_browser_sid","op":{"eq":"ab_br_X"}}]}}'
     ),
 });
 // CLOSED on purpose, and the .passthrough() that used to be here is gone. It existed
