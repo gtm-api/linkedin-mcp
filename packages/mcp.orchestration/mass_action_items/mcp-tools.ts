@@ -57,11 +57,10 @@ const MassActionItemStepStatus = z.enum([
 // run asks the owning service (check-sent) before anything goes again.
 // 'send_blocked' (2026-10-04): the owning service refused the send because
 // ANOTHER message's attempt to the same place is on its way or in doubt; nothing
-// of this one went out, and it goes at the refusal's retry_after. 'task_pending'
-// (an async plugin task in flight) is a value of gtm.lib.common's enum that
-// nothing writes: no arm dispatches an async task. Closed by design pass.
+// of this one went out, and it goes at the refusal's retry_after. Closed by
+// design pass.
 const MassActionItemWaitReason = z.enum([
-  'task_pending', 'maintenance', 'rate_limited', 'send_outcome_unknown', 'send_blocked',
+  'maintenance', 'rate_limited', 'send_outcome_unknown', 'send_blocked',
 ]);
 
 // ─── step_log[] entry: the forensic record of one plan step ───
@@ -167,7 +166,7 @@ const MassActionItemFilter = z.object({
   current_step: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional()
     .describe('Which plan step the row sits on: "everyone stuck at step 2".'),
   wait_reason: filterOp(MassActionItemWaitReason, ['eq', 'is_null']).optional()
-    .describe("eq:'maintenance' selects the items parked by a planned maintenance window; eq:'rate_limited' the ones parked by the owning service's rate limit (a smart-limit hold or spent budget, a LinkedIn lock, the per-minute guard); eq:'send_outcome_unknown' the sends in doubt; eq:'send_blocked' the sends another message holds back. All due again at scheduled_at. 'task_pending' has no writer and matches nothing."),
+    .describe("eq:'maintenance' selects the items parked by a planned maintenance window; eq:'rate_limited' the ones parked by the owning service's rate limit (a smart-limit hold or spent budget, a LinkedIn lock, the per-minute guard); eq:'send_outcome_unknown' the sends in doubt; eq:'send_blocked' the sends another message holds back. All due again at scheduled_at."),
   retry_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
   scheduled_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional()
     .describe('Due horizon: what runs next and when.'),

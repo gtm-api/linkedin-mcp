@@ -1373,10 +1373,6 @@
             "backing": "string",
             "cases": [
                 {
-                    "name": "TaskPending",
-                    "value": "task_pending"
-                },
-                {
                     "name": "Maintenance",
                     "value": "maintenance"
                 },
