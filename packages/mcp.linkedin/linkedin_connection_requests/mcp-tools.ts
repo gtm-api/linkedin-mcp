@@ -148,7 +148,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_connection_request',
     description:
-      'Send one outbound LinkedIn connection request (outward action). Address the person by profile_id (the URN, ln_id OR sn_id) or by public_identifier (a vanity slug or linkedin.com/in/ URL, resolved server-side). Server-side checks run first: the daily send limit, the premium-aware note cap (200 free / 300 premium), and the 21-day resend cooldown. Fire-on-success: a row is created only when LinkedIn confirms the send. NOT idempotent: a second send while a request is pending 409s (already_pending).',
+      'Send one outbound LinkedIn connection request (outward action). Address the person by profile_id (the URN, ln_id OR sn_id) or by public_identifier (a vanity slug or linkedin.com/in/ URL, resolved server-side). Server-side checks run first: the daily send limit, the premium-aware note cap (200 free / 300 premium), and the 21-day resend cooldown. Fire-on-success: a row is created only when LinkedIn confirms the send. NOT idempotent by key yet: a person with a request on record is refused 422 resend_not_available, context.cause pending, accepted, cooldown (resend_available_at) or sync_reset. Every refusal names error.context.send_outcome: not_sent (nothing went out), unknown (the invitation may be out: read get_my_latest_linkedin_connection_requests before sending again) or sent (it went out and its row was not written).',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-requests/send' },
     operation: 'action',

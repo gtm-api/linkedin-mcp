@@ -107,11 +107,13 @@ export const MOUNTS: MountConfig[] = [
       // The Recruiter (talent) messenger's four verbs (2026-09-03) are declared
       // in these two packages (the recruiter inbox is the third messenger_type
       // of the same conversations / messages tables) but RIDE ON
-      // /mcp/linkedin/recruiter: this mount sits at 27 of its signed 28, and the
+      // /mcp/linkedin/recruiter: this mount sat at 27 of its signed 28, and the
       // recruiting inbox is one job to an agent, so the six recruiter tools
       // mount together. Stored recruiter rows are still reachable here through
       // search_linkedin_conversations / search_linkedin_messages
-      // (filter.messenger_type = 'recruiter').
+      // (filter.messenger_type = 'recruiter'). check_linkedin_message_sent
+      // (2026-10-05, one key, one send) took the last slot: 28 of 28. A tool
+      // this mount needs next moves something out or asks for a raise.
       { kind: 'exclude', name: 'sync_my_recruiter_conversations' },
       { kind: 'exclude', name: 'get_my_latest_linkedin_conversations_recruiter' },
       { kind: 'exclude', name: 'get_my_latest_linkedin_messages_recruiter' },
@@ -148,6 +150,10 @@ export const MOUNTS: MountConfig[] = [
       { kind: 'tool', name: 'get_my_latest_linkedin_conversations_recruiter' },
       { kind: 'tool', name: 'get_my_latest_linkedin_messages_recruiter' },
       { kind: 'tool', name: 'send_linkedin_recruiter_message' },
+      // The status question of a send (2026-10-05): a Recruiter InMail whose
+      // answer was lost is asked about here, without the messaging mount. The
+      // tool's home is messaging; it is served on both.
+      { kind: 'tool', name: 'check_linkedin_message_sent' },
     ],
     maxTools: 25,
     facade: 'none',

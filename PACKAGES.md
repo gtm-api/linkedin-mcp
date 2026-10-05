@@ -11,7 +11,7 @@ Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below 
 a plan. Every row below is ✅ shipped: three services are at full MCP coverage and the only remaining
 gap is `gtm.service.email`, which has no package and therefore no row.
 
-## mcp.linkedin: 12 mounts / 177 tools
+## mcp.linkedin: 12 mounts / 187 tools
 
 > 2026-07-24 service split: `linkedin-tracked-posts` / `-comments` / `-engagements` / `-searches` /
 > `-search-results` left this backend for `gs.service.signals`, and the outbound authoring verbs
@@ -24,8 +24,8 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 |---|---|---|---|---|
 | accounts | `/mcp/linkedin/accounts` | linkedin_accounts (23 of its 29: the explicit-skill endorse pair rides on content, the four Recruiter self reads on recruiter), linkedin_account_smart_limits (3) | 26 | ✅ (at cap) |
 | account_monitor | `/mcp/linkedin/account-monitor` | linkedin_account_snapshots (1), linkedin_benchmarks (1), linkedin_account_quota_hits (1), linkedin_account_block_log (1), linkedin_account_activity_log (2), linkedin_account_sync_runs (3) | 9 | ✅ |
-| messaging | `/mcp/linkedin/messaging` | linkedin_conversations (14 of its 16), linkedin_messages (13 of its 15): the four Recruiter messenger verbs ride on recruiter | 27 | ✅ (budget **28**, 1 free) |
-| recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 4 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects, get-my-recruiter-contracts, select-recruiter-contract) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 2 from linkedin_messages (get-my-latest-recruiter, send-recruiter). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 8 | ✅ |
+| messaging | `/mcp/linkedin/messaging` | linkedin_conversations (14 of its 16), linkedin_messages (14 of its 16): the four Recruiter messenger verbs ride on recruiter | 28 | ✅ (budget **28**, at cap) |
+| recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 4 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects, get-my-recruiter-contracts, select-recruiter-contract) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 3 from linkedin_messages (get-my-latest-recruiter, send-recruiter, and check-sent, which is served on messaging too). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 9 | ✅ |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (6), linkedin_connection_invitations (6), linkedin_followers (3) | 21 | ✅ |
 | content | `/mcp/linkedin/content` | linkedin_posting (8: create-post, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 10 | ✅ |
 | scraping | `/mcp/linkedin/scraping` | linkedin_scraping (23; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not) | 23 | ✅ (budget 25, 2 free) |
@@ -59,8 +59,8 @@ parent. Neither existing candidate was honest:
 It sits at **13 / 25**, which leaves room for the surface to grow (the research defers a
 pool-executor mode and a v2 signals consumer) without another budget conversation.
 
-⚠️ `/mcp/linkedin/messaging` is the one mount off the default budget: **26 / 28**, raised from 25 on
-2026-07-27 (Eugene). The 28 is a product decision, not a test fix. The inbox is a single job to a
+⚠️ `/mcp/linkedin/messaging` is one of the two mounts off the default budget: **28 / 28**, raised from 25 on
+2026-07-27 (Eugene); `check_linkedin_message_sent` (2026-10-05, one key, one send) took its last slot. The 28 is a product decision, not a test fix. The inbox is a single job to a
 client (find the thread, read it, answer it), so the alternative - splitting `linkedin_conversations`
 from `linkedin_messages` onto two URLs - would make a client mount twice to do one thing.
 2026-09-16 - `media_uploads` was built in this package set next to `linkedin_posting` and moved to
@@ -190,11 +190,12 @@ from `fixtures/contract-oracle/mass-action-allowlist.json` (`recall` and `return
 `massAction: true`, which is what closes the waiver; declaring `false` would have failed the parity
 gate the other way).
 
-## mcp.email: no package, 44 routes of debt
+## mcp.email: no package, 51 routes of debt
 
 `gtm.service.email` has no MCP package at all, so nothing in this file describes it and
-nothing in the worker serves it. That is a coverage gap the size of a service: **44** public
-routes, 13 of them ACTION, 0 covered.
+nothing in the worker serves it. That is a coverage gap the size of a service: **51** public
+routes (44 on 2026-07-27, the five email-oauth-apps routes of September 2026 and the two check-sent
+routes of October 2026), 16 of them ACTION, 0 covered.
 
 ⚠️ `POST api/email-messages/send` is `stepEligible: true` + `scheduleRequired: true`. The
 orchestration engine may name it as a mass-action plan step and call it once per item over its
@@ -203,8 +204,8 @@ inspect or call. It is waived by name in `fixtures/contract-oracle/step-eligible
 until the tool ships.
 
 Since 2026-07-27 the three registry-keyed gates carry email with an empty package set instead
-of skipping it, so the 44 routes are counted like any other debt: `ratchet.json` baseline `44`,
-all 44 listed in `drift-ledger.json`. Authoring the package burns both down route by route.
+of skipping it, so the routes are counted like any other debt: `ratchet.json` baseline `51`,
+all 51 listed in `drift-ledger.json`. Authoring the package burns both down route by route.
 
 ## mcp.support: 1 mount / 2 tools
 
@@ -219,8 +220,8 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **264 tools**
-(linkedin 168 + id 72 + orchestration 22 + support 2).
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **287 tools**
+(linkedin 187 + id 75 + orchestration 23 + support 2).
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
 service". That was wrong twice over. `support` is a `ServiceId` like the other three, and the
@@ -235,13 +236,13 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **49 registry packages / 282 tools**, served over **18 mounts + 1 facade**. By service:
-linkedin 182 (27 packages), id 75 (17), orchestration 23 (4), support 2 (1). Every number in this
+Totals: **49 registry packages / 287 tools**, served over **18 mounts + 1 facade**. By service:
+linkedin 187 (27 packages), id 75 (17), orchestration 23 (4), support 2 (1). Every number in this
 file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
 `MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
 run, so re-run it rather than editing a count by hand.
 
-Remaining coverage debt is **44** routes and all of it is `gtm.service.email`. `gtm.service.linkedin`,
+Remaining coverage debt is **51** routes and all of it is `gtm.service.email`. `gtm.service.linkedin`,
 `gtm.service.id` and `gtm.service.orchestration` are each at full coverage (ratchet 0, empty ledger):
 linkedin and id got there on 2026-07-27 with the auto-scrapes and account-shares packages.
 

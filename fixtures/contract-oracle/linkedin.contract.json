@@ -35167,6 +35167,140 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-messages/check-sent",
+            "controller": "App\\Entities\\LinkedinMessage\\LinkedinMessageController",
+            "action": "checkSent",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinMessage\\Requests\\LinkedinMessageCheckSentRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "required_without:activity_log_sid",
+                        "prohibits:activity_log_sid",
+                        "nullable",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "activity_log_sid",
+                    "rules": [
+                        "required_without:client_reference",
+                        "prohibits:linkedin_conversation_sid,ln_member_id,profile_urn",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_conversation_sid",
+                    "rules": [
+                        "sometimes",
+                        "prohibits:ln_member_id,profile_urn",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_cv_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "prohibits:profile_urn",
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "profile_urn",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-messages/download-attachment",
             "controller": "App\\Entities\\LinkedinMessage\\LinkedinMessageController",
             "action": "downloadMessageAttachment",
@@ -35928,6 +36062,43 @@
                     "between": null
                 },
                 {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
                     "field": "stop_if_replied_after",
                     "rules": [
                         "sometimes",
@@ -36181,6 +36352,43 @@
                     "min": null,
                     "max": 255,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 },
                 {
@@ -36552,6 +36760,43 @@
                     "max": 255,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -36679,6 +36924,43 @@
                     "min": null,
                     "max": 255,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 },
                 {
@@ -36953,6 +37235,43 @@
                     "max": 255,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -37110,6 +37429,43 @@
                     "min": null,
                     "max": 255,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 },
                 {
@@ -50862,6 +51218,151 @@
         },
         {
             "method": "POST",
+            "uri": "internal/linkedin-messages/check-sent",
+            "controller": "App\\Entities\\LinkedinMessage\\InternalLinkedinMessageStepController",
+            "action": "checkSent",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinMessage\\Requests\\InternalLinkedinMessageCheckSentRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "required_without:activity_log_sid",
+                        "prohibits:activity_log_sid",
+                        "nullable",
+                        "string",
+                        "min:1",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "activity_log_sid",
+                    "rules": [
+                        "required_without:client_reference",
+                        "prohibits:linkedin_conversation_sid,ln_member_id,profile_urn",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_conversation_sid",
+                    "rules": [
+                        "sometimes",
+                        "prohibits:ln_member_id,profile_urn",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_cv_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "prohibits:profile_urn",
+                        "nullable",
+                        "string",
+                        "max:64",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "profile_urn",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/linkedin-messages/send",
             "controller": "App\\Entities\\LinkedinMessage\\InternalLinkedinMessageStepController",
             "action": "send",
@@ -50987,6 +51488,41 @@
                     "min": null,
                     "max": 255,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],

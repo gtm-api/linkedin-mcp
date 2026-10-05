@@ -1,8 +1,10 @@
 // Entity: LinkedIn Message (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/linkedin_messages.md
 // Format: registry v2, where each tool carries route metadata so the generic
-// dispatcher can drive it. 12 tools (the linkedin-messages route group);
-// they share the /mcp/linkedin/messaging mount with linkedin-conversations.
+// dispatcher can drive it. 16 tools (the linkedin-messages route group); they
+// share the /mcp/linkedin/messaging mount with linkedin-conversations, except
+// the two Recruiter verbs, which ride on /mcp/linkedin/recruiter (check-sent is
+// mounted there too, see apps/worker/src/mounts.config.ts).
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -71,6 +73,45 @@ const AttachmentPayload = z.object({
   data_url: z.string().describe('data:<mime>;base64,… . The whole payload, inline.'),
   content_type: z.string().describe('MIME type LinkedIn served the asset with.'),
   file_byte_size: z.number().describe('Decoded size in bytes.'),
+}).passthrough();
+
+// ─── One key, one send (product KNOWLEDGE §4.9a; gtm.service.linkedin d5982a5) ───
+//
+// The six send tools share what the key means, the person's two words and the
+// rule of the answers, so they are written once here. Under a client_reference
+// the key and its place (the thread the send names or the person resolves to,
+// else the person; for a new group the attendee set) are ONE message, whatever
+// its words say: a repeat is answered with what the first send came to and never
+// goes out twice. Every refusal of a send tool names error.context.send_outcome
+// (not_sent, in_flight, unknown, sent), the request's own 422 included, and
+// activity_log_sid names the caller's own attempt only: another message's is
+// blocking_activity_log_sid. check_linkedin_message_sent asks without sending.
+const sendKey = (place: string) => z.string().max(255).nullable().optional()
+  .describe(`Your key for this ONE message (max 255, byte for byte): one key per message, the same key on every repeat of it. The key and its place (${place}) are one message whatever it says, and a repeat never goes out twice: it answers 200 with the row the first send stored (result.idempotent_replay, result.content_differs when this request says something else) or 409 naming error.context.send_outcome (in_flight, unknown or sent; not_sent with blocking_activity_log_sid when another message holds the place). The same key at another place is another message. Without a key the same words to the same place count as a repeat for an hour after they went out. Stored on the row and searchable; check_linkedin_message_sent asks by it.`);
+
+const CONFIRMED_NOT_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
+  .describe("A person's word that an earlier attempt of THIS message is not on LinkedIn: its activity_log_sid (ln_al_...), from the 409 or check_linkedin_message_sent, given only after someone looked at the conversation. Taken once the attempt can no longer land (before that: 409 send_outcome_unknown, waiting_for may_still_land, retry_after that moment): it settles that attempt not_sent and this request goes out. Moot when the attempt is no longer in doubt; another message's sid is 422 not_this_message.");
+
+const CONFIRMED_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
+  .describe("A person's word that an earlier attempt of THIS message IS on LinkedIn: its activity_log_sid, as for confirmed_not_sent (never both). Taken at once; it settles the attempt sent and sends nothing: the answer is 409 concurrent_send_in_flight with send_outcome sent, or 200 with the row once it is stored. Another message's sid is 422 not_this_message; an attempt already proved not sent is 409 confirmed_sent_contradicts.");
+
+/** The one sentence every send tool's description carries about sending once. */
+const sendOnce = (place: string) =>
+  `Sends once per client_reference and ${place}: a repeat is answered, never sent twice; on a 409 read error.context.send_outcome, never resend under a new key.`;
+
+// check-sent's `result` (LinkedinMessageSentCheckResult::toResult at d5982a5):
+// outcome and reason always, retry_after and activity_log_sid when known. Plain
+// strings rather than z.enum: the values are the service's constants, and no PHP
+// enum backs them for the enum-parity gate to pin.
+const CheckSentResult = z.object({
+  outcome: z.string()
+    .describe('sent | not_sent | in_flight | unknown. Send the same request again only on not_sent; on in_flight or unknown ask again after retry_after.'),
+  reason: z.string().nullable()
+    .describe('Why. sent: null (item is the row), message_row_pending (it went out, its row comes later), caller_confirmed (a person said so; no row). not_sent: no_send_under_key, refused, not_in_thread, caller_confirmed. unknown: answer_lost, may_still_land, thread_unreadable, unexplained_message, unprovable.'),
+  retry_after: z.string().optional()
+    .describe('ISO 8601: for a send in doubt, when its thread is read next or the moment it can no longer land.'),
+  activity_log_sid: z.string().optional()
+    .describe("The attempt the answer is about (in flight, in doubt or landed): what confirmed_not_sent / confirmed_sent name on the send tools."),
 }).passthrough();
 
 // Metrics window: required half-open [from, to), ≤ 90 days.
@@ -348,7 +389,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_message',
     description:
-      'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id or by public_identifier (slug or linkedin.com/in/ URL, resolved server-side). Guards run first: in-flight dedup, send_messages daily cap, 8000-char body cap, connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row is inserted only on terminal success. When NOT: InMail to a non-connection → send_linkedin_inmail; voice note → send_linkedin_voice_message; Sales Navigator thread → send_linkedin_sales_nav_message; the connection-request note lives on linkedin-connection-requests. Bulk send: loop client-side and respect the daily cap.',
+      'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id or by public_identifier (slug or linkedin.com/in/ URL, resolved server-side). Guards run first: send_messages daily cap, 8000-char body cap, connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row is inserted only on terminal success. '
+      + sendOnce('place (the thread, else the person)')
+      + ' When NOT: InMail to a non-connection → send_linkedin_inmail; voice note → send_linkedin_voice_message; Sales Navigator thread → send_linkedin_sales_nav_message; the connection-request note lives on linkedin-connection-requests. Bulk send: loop client-side and respect the daily cap.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send' },
     operation: 'action',
@@ -369,8 +412,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
       stop_if_replied_after: z.string().datetime().nullable().optional()
         .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 503 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
-      client_reference: z.string().max(255).nullable().optional()
-        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
+      client_reference: sendKey('the thread, else the person'),
+      confirmed_not_sent: CONFIRMED_NOT_SENT,
+      confirmed_sent: CONFIRMED_SENT,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -380,7 +424,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_voice_message',
     description:
-      'Send one voice note on the basic LinkedIn messenger (outward action). audio arrives as a https:// url or base64 (any common format) and is normalized server-side to AAC/m4a, hard-capped at 60 s. Same guard chain as send_linkedin_message plus audio validation. Fire-on-success: a row is inserted only on terminal success; no text body. When NOT: text DM → send_linkedin_message; SN threads → send_linkedin_sales_nav_message; audio longer than 60 s is rejected, so trim client-side first.',
+      'Send one voice note on the basic LinkedIn messenger (outward action). audio arrives as a https:// url or base64 (any common format) and is normalized server-side to AAC/m4a, hard-capped at 60 s. Same guard chain as send_linkedin_message plus audio validation. Fire-on-success: a row is inserted only on terminal success; no text body. '
+      + sendOnce('place (the thread, else the person)')
+      + ' A keyed repeat is answered before its audio is read. When NOT: text DM → send_linkedin_message; SN threads → send_linkedin_sales_nav_message; audio longer than 60 s is rejected, so trim client-side first.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send-voice' },
     operation: 'action',
@@ -399,8 +445,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
         url: z.string().optional().describe('An https URL of the audio file, downloaded by the backend (public hosts on port 443 only, no credentials in the URL, up to 32 MB before normalization). Refused 422 before anything is dispatched: audio_url_invalid (not https, a port other than 443, credentials), audio_url_host_forbidden (a private or reserved address), audio_fetch_failed, audio_too_large.'),
         base64: z.string().optional().describe('Inline payload (~15 MB cap pre-normalization).'),
       }).describe('Exactly one of url / base64; normalized server-side to AAC/m4a ≤ 60 s.'),
-      client_reference: z.string().max(255).nullable().optional()
-        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
+      client_reference: sendKey('the thread, else the person'),
+      confirmed_not_sent: CONFIRMED_NOT_SENT,
+      confirmed_sent: CONFIRMED_SENT,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -410,7 +457,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_inmail',
     description:
-      'Send one premium InMail to a person (outward action). Person-addressed only via ln_id / sn_id, subject required (≤ 200), body ≤ 1900. Guards: in-flight dedup, send_inmails daily cap, Premium guard, InMail-credits guard (422 no_inmail_credits when the account\'s pool is known empty: the seat\'s grant inmail_credits with a Sales Navigator seat, premium_inmail_credits without; a balance never read does not block). Fire-on-success; the plugin\'s inmail_credits_remaining is written back onto that pool, and LinkedIn\'s own NOT_ENOUGH_INMAIL_CREDIT answers 422 no_inmail_credits and zeroes it (it is not a block of the target). When NOT: 1st-degree connection → send_linkedin_message (free); no Premium / zero credits → the guards 422; SN thread continuation → send_linkedin_sales_nav_message.',
+      'Send one premium InMail to a person (outward action). Person-addressed only via ln_id / sn_id, subject required (≤ 200), body ≤ 1900. '
+      + sendOnce('person')
+      + ' Guards: send_inmails daily cap, Premium guard, InMail-credits guard (422 no_inmail_credits when the account\'s pool is known empty: the seat\'s grant inmail_credits with a Sales Navigator seat, premium_inmail_credits without; a balance never read does not block). Fire-on-success; the plugin\'s inmail_credits_remaining is written back onto that pool, and LinkedIn\'s own NOT_ENOUGH_INMAIL_CREDIT answers 422 no_inmail_credits and zeroes it (it is not a block of the target). When NOT: 1st-degree connection → send_linkedin_message (free); no Premium / zero credits → the guards 422; SN thread continuation → send_linkedin_sales_nav_message.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send-inmail' },
     operation: 'action',
@@ -429,8 +478,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
       stop_if_replied_after: z.string().datetime().nullable().optional()
         .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 503 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
-      client_reference: z.string().max(255).nullable().optional()
-        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
+      client_reference: sendKey('the thread, else the person'),
+      confirmed_not_sent: CONFIRMED_NOT_SENT,
+      confirmed_sent: CONFIRMED_SENT,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -440,7 +490,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_sales_nav_message',
     description:
-      'Send one Sales Navigator message (outward action): continue an existing SN thread via linkedin_conversation_sid (messenger_type=sales_navigator), or open a new SN thread via ln_id / sn_id. Body ≤ 8000. Guards: in-flight dedup, send_inmails daily cap, SN-seat guard, SN surface guard, and on a NEW thread to someone outside the network the InMail-credits guard (422 no_inmail_credits when the seat\'s grant inmail_credits is known to be 0). Fire-on-success. A 403 SALES_SEAT_REQUIRED from LinkedIn is a stale Sales Navigator session, not a lost seat: the send re-arms it once (the sales_nav probe) and retries; a second refusal is 409 sales_session_stale (recoverable: run check_linkedin_account_premium_subscription with checks ["sales_nav"], retry), a seat the probe finds gone is 422 sales_nav_required. When NOT: basic-messenger threads → send_linkedin_message / send_linkedin_voice_message; cold InMail outside SN → send_linkedin_inmail; no SN seat is 422, so check linkedin-accounts.has_sn first.',
+      'Send one Sales Navigator message (outward action): continue an SN thread via linkedin_conversation_sid (messenger_type=sales_navigator), or open a new one via ln_id / sn_id. Guards: send_inmails daily cap, SN seat and surface, and on a NEW thread outside the network the InMail-credits guard (422 no_inmail_credits when the seat\'s inmail_credits are known to be 0). Fire-on-success. '
+      + sendOnce('place')
+      + ' LinkedIn\'s 403 SALES_SEAT_REQUIRED is a stale SN session, not a lost seat: the send re-arms it once and retries; a second refusal is 409 sales_session_stale (run check_linkedin_account_premium_subscription with checks ["sales_nav"], retry), a seat the probe finds gone 422 sales_nav_required. When NOT: basic threads → send_linkedin_message / send_linkedin_voice_message; cold InMail outside SN → send_linkedin_inmail; no SN seat is 422, so check linkedin-accounts.has_sn first.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send-sales-nav' },
     operation: 'action',
@@ -457,8 +509,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (preferred on the SN surface); interchangeable with ln_id.'),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
-      client_reference: z.string().max(255).nullable().optional()
-        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
+      client_reference: sendKey('the thread, else the person'),
+      confirmed_not_sent: CONFIRMED_NOT_SENT,
+      confirmed_sent: CONFIRMED_SENT,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -469,7 +522,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     mount: 'linkedin.recruiter',
     name: 'send_linkedin_recruiter_message',
     description:
-      "Send one LinkedIn Recruiter InMail (outward action): open a NEW recruiter thread via recruiter_id (AEMAA… id; ln_id / sn_id work too), or reply INTO an existing thread via linkedin_conversation_sid (messenger_type='recruiter'). subject required (≤ 200), text ≤ 1900; rich-text attributes on a NEW thread only. Guards, in order: Recruiter seat (422 recruiter_required); live Recruiter session (409 recruiter_reauth_required: Recruiter has its own 30-day session that only the seat holder renews by signing in to Recruiter again in the account's browser, so tell the user, do not retry); stamped seat on a reply (422 recruiter_seat_unresolvable); LinkedIn's one-InMail-per-candidate-per-24h rule (429 recruiter_inmail_cooldown with cooldown_ends_at: refresh the thread with get_my_latest_linkedin_recruiter_messages if a reply may have landed, else wait and explain the rule). Spends send_inmails and an InMail credit. When NOT: basic threads → send_linkedin_message; SN → send_linkedin_sales_nav_message.",
+      "Send one LinkedIn Recruiter InMail (outward action): open a NEW recruiter thread via recruiter_id (AEMAA… id; ln_id / sn_id work too), or reply INTO an existing thread via linkedin_conversation_sid (messenger_type='recruiter'). Guards, in order: Recruiter seat (422 recruiter_required); live Recruiter session (409 recruiter_reauth_required: only the seat holder renews Recruiter's 30-day session, by signing in again in the account's browser; tell the user, do not retry); stamped seat on a reply (422 recruiter_seat_unresolvable); LinkedIn's one InMail per candidate per 24 h (429 recruiter_inmail_cooldown, cooldown_ends_at: refresh the thread with get_my_latest_linkedin_messages_recruiter if a reply may have landed, else wait). Spends send_inmails and an InMail credit. "
+      + sendOnce('place')
+      + ' When NOT: basic threads → send_linkedin_message; SN → send_linkedin_sales_nav_message.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send-recruiter' },
     operation: 'action',
@@ -492,8 +547,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
         length: z.number().int().min(1).describe('Run length in UTF-16 code units; start + length must fit inside text.'),
         kind: z.record(z.unknown()).describe('The formatting, an object with exactly one key: {"bold":{}}, {"italic":{}}, {"listItem":{}}, {"list":{"ordered":false}}, {"hyperlink":{"url":"https://..."}}.'),
       })).max(200).optional().describe('Rich-text runs over text. NEW THREAD ONLY: a reply with attributes is refused 422 attributes_not_supported_in_thread.'),
-      client_reference: z.string().max(255).nullable().optional()
-        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
+      client_reference: sendKey('the thread, else the person'),
+      confirmed_not_sent: CONFIRMED_NOT_SENT,
+      confirmed_sent: CONFIRMED_SENT,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
@@ -595,7 +651,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'start_linkedin_group_conversation',
     description:
-      'Start a new multi-attendee (group) chat on the basic messenger and send an opening message (outward action). Provide the executor account, 2..20 attendee URNs and the opening body (1..8000 chars, optional attachments, optional conversation_title to name the group); mints the group thread and dispatches the first message. Spends the messaging_general bucket.',
+      'Start a new multi-attendee (group) chat on the basic messenger and send an opening message (outward action). Provide the executor account, 2..20 attendee URNs and the opening body (1..8000 chars, optional attachments, optional conversation_title to name the group); mints the group thread and dispatches the first message. Spends the send_messages bucket. '
+      + sendOnce('attendee set')
+      + ' A group has no place check_linkedin_message_sent takes: ask it by the key alone or by activity_log_sid.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/start-group' },
     operation: 'action',
@@ -615,11 +673,49 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       conversation_title: z.string().max(100).nullable().optional()
         .describe('Optional group name, max 100 chars; omitted leaves the thread unnamed.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
-      client_reference: z.string().max(255).nullable().optional()
-        .describe("Your own key for this send (a task id, an idempotency token; max 255), stored as given on the row and searchable, so you can ask whether the send landed before repeating it."),
+      client_reference: sendKey('the attendee set'),
+      confirmed_not_sent: CONFIRMED_NOT_SENT,
+      confirmed_sent: CONFIRMED_SENT,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinMessage),
     annotations: { title: 'Start group conversation', ...DANGER },
+  },
+  // check-sent (2026-10-05; product KNOWLEDGE §4.9a): what a send came to, asked
+  // without sending. It sends nothing, but a send in doubt has its thread read in
+  // the request when the last look is old enough (through the account's browser,
+  // on its self_account_sync budget), so it is a live read, not readOnlyHint. It
+  // carries no pacedBucket on purpose: a look the budget or a running sync holds
+  // back reads nothing and the call still answers (unknown, with retry_after),
+  // never 429, so the pacing contract would promise the wrong thing.
+  {
+    ...base,
+    name: 'check_linkedin_message_sent',
+    description:
+      'Ask what a LinkedIn message send came to, without sending: by the client_reference it went out under (optionally at one place: linkedin_conversation_sid, ln_member_id or profile_urn), or by the activity_log_sid a 409 named. result.outcome: sent (item is the message, or null with reason message_row_pending or caller_confirmed), in_flight, unknown (its answer was lost and the thread has not shown it yet; retry_after), or not_sent (no_send_under_key, refused, not_in_thread, caller_confirmed). Send the same request again only on not_sent, under the same key. result.activity_log_sid is the attempt a person\'s word names (confirmed_not_sent / confirmed_sent on the send tools). A send in doubt has its thread read now when the last look is old enough, so a call can take as long as a head read. A key sent to several places is 422 place_required, a place given in another form than the sends recorded 422 place_unmatched (context.places lists them). Invitations, comments and reactions have no check yet.',
+    toolClass: 'complex',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/check-sent' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID.describe('The account that sent (ln_ac_…). A key is looked up on this account only.'),
+      client_reference: z.string().min(1).max(255).nullable().optional()
+        .describe('The key the send went out under, byte for byte. Exactly one of client_reference / activity_log_sid. Found at any age: a send in doubt never ages out of its key.'),
+      activity_log_sid: z.string().length(18).startsWith('ln_al_').nullable().optional()
+        .describe('The attempt a 409 or an earlier check named (ln_al_…); it takes no place. An attempt of another account is 404.'),
+      linkedin_conversation_sid: CONVERSATION_SID.nullable().optional()
+        .describe('Place, next to client_reference: the thread the send named or landed in. One place at most; a thread of another account is 404.'),
+      ln_member_id: z.string().max(64).nullable().optional()
+        .describe("Place, next to client_reference: the person's member id (digits)."),
+      profile_urn: z.string().max(128).nullable().optional()
+        .describe('Place, next to client_reference: the recipient id the send was given (ln_id ACoAA…, sn_id ACwAA…, or a Recruiter id).'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinMessage, CheckSentResult),
+    annotations: { title: 'Check whether a LinkedIn message went out', ...LIVE_READ },
   },
 ];
