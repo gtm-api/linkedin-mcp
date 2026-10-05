@@ -2,7 +2,8 @@
 
 The registry holds one `mcp.{service}/{entity}` package per entity; a **mount** groups several of
 them behind one URL and is the thing that carries a tool budget. The default budget is **25 tools**;
-a mount may declare its own `maxTools`, and exactly one does today (`/mcp/linkedin/messaging`, 28).
+a mount may declare its own `maxTools`, and two do today (`/mcp/linkedin/accounts`, 29, and
+`/mcp/linkedin/messaging`, 28).
 Tool authoring reads this file to place a new tool, `apps/worker/src/mounts.config.ts` declares
 the mounts, and the coverage gate tracks progress toward full coverage.
 
@@ -11,7 +12,7 @@ Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below 
 a plan. Every row below is ✅ shipped: three services are at full MCP coverage and the only remaining
 gap is `gtm.service.email`, which has no package and therefore no row.
 
-## mcp.linkedin: 12 mounts / 187 tools
+## mcp.linkedin: 12 mounts / 189 tools
 
 > 2026-07-24 service split: `linkedin-tracked-posts` / `-comments` / `-engagements` / `-searches` /
 > `-search-results` left this backend for `gs.service.signals`, and the outbound authoring verbs
@@ -22,12 +23,12 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| accounts | `/mcp/linkedin/accounts` | linkedin_accounts (23 of its 29: the explicit-skill endorse pair rides on content, the four Recruiter self reads on recruiter), linkedin_account_smart_limits (3) | 26 | ✅ (at cap) |
+| accounts | `/mcp/linkedin/accounts` | linkedin_accounts (26 of its 32: the explicit-skill endorse pair rides on content, the four Recruiter self reads on recruiter), linkedin_account_smart_limits (3) | 29 | ✅ (budget **29**, at cap) |
 | account_monitor | `/mcp/linkedin/account-monitor` | linkedin_account_snapshots (1), linkedin_benchmarks (1), linkedin_account_quota_hits (1), linkedin_account_block_log (1), linkedin_account_activity_log (2), linkedin_account_sync_runs (3) | 9 | ✅ |
 | messaging | `/mcp/linkedin/messaging` | linkedin_conversations (14 of its 16), linkedin_messages (14 of its 16): the four Recruiter messenger verbs ride on recruiter | 28 | ✅ (budget **28**, at cap) |
 | recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 4 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects, get-my-recruiter-contracts, select-recruiter-contract) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 3 from linkedin_messages (get-my-latest-recruiter, send-recruiter, and check-sent, which is served on messaging too). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 9 | ✅ |
-| network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (6), linkedin_connection_invitations (6), linkedin_followers (3) | 21 | ✅ |
-| content | `/mcp/linkedin/content` | linkedin_posting (8: create-post, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 10 | ✅ |
+| network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (7), linkedin_connection_invitations (6), linkedin_followers (3) | 22 | ✅ |
+| content | `/mcp/linkedin/content` | linkedin_posting (10: create-post, repost, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post, check-sent) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 12 | ✅ |
 | scraping | `/mcp/linkedin/scraping` | linkedin_scraping (23; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not) | 23 | ✅ (budget 25, 2 free) |
 | auto_scrapes | `/mcp/linkedin/auto-scrapes` | linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2), linkedin_auto_scrape_results (1) | 13 | ✅ |
 | enrichment | `/mcp/linkedin/enrichment` | linkedin_enrichment (22) | 22 | ✅ |
@@ -66,6 +67,13 @@ from `linkedin_messages` onto two URLs - would make a client mount twice to do o
 2026-09-16 - `media_uploads` was built in this package set next to `linkedin_posting` and moved to
 `mcp.id` the same day (see the id section): uploading a file is a platform primitive, not a LinkedIn
 one. content is back at 10 of 25, linkedin at 177; create-post keeps its `url` arm.
+
+2026-10-05 - linkedin 187 to 189: `check_linkedin_connection_request_sent` (network 21 to 22) and
+`check_linkedin_posting_sent` (content), the check-sent of round 5 of one key, one send. Two rows were
+behind the registry and are read off it now: content counted 8 posting tools and 10 on the mount
+(`repost_linkedin_post` joined the package on 2026-09-22 and was never counted, so it is 10 and 12 with
+check-sent), and accounts counted 23 of 29 and 26 on the mount (the 2026-09-22 raise to 29: the
+position and services tools), which is 26 of 32 and 29.
 
 `resolveMounts` throws at module scope on the 29th tool, which kills the worker isolate rather than
 degrading one mount, and `tests/worker-boot.test.ts` is the only thing that catches it: read its
@@ -224,8 +232,8 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **287 tools**
-(linkedin 187 + id 75 + orchestration 23 + support 2).
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **289 tools**
+(linkedin 189 + id 75 + orchestration 23 + support 2).
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
 service". That was wrong twice over. `support` is a `ServiceId` like the other three, and the
@@ -240,8 +248,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **49 registry packages / 287 tools**, served over **18 mounts + 1 facade**. By service:
-linkedin 187 (27 packages), id 75 (17), orchestration 23 (4), support 2 (1). Every number in this
+Totals: **49 registry packages / 289 tools**, served over **18 mounts + 1 facade**. By service:
+linkedin 189 (27 packages), id 75 (17), orchestration 23 (4), support 2 (1). Every number in this
 file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
 `MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
 run, so re-run it rather than editing a count by hand.
