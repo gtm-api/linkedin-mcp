@@ -41,59 +41,27 @@ const INVITATION_KEY = z.string().max(255).nullable().optional()
   .describe('Your key for this ONE invitation (max 255, byte for byte): one key per invitation, the same key on every repeat of it. The key and the person (the member the URN decodes to) are one invitation whatever its note says, and a repeat never goes out twice: it answers 200 with the request the first send stored (result.idempotent_replay, result.content_differs when this note differs) or 409 naming error.context.send_outcome (in_flight, unknown with retry_after and send_decisive_at, or sent; not_sent with blocking_activity_log_sid when another invitation to the person is on its way or in doubt). Without a key the same note to the same person counts as a repeat for an hour after it went out. Stored on the row and searchable; check_linkedin_connection_request_sent asks by it.');
 
 const CONFIRMED_NOT_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
-  .describe("A person's word that an earlier attempt of THIS invitation is not on LinkedIn: its activity_log_sid (ln_al_...), from the 409 or check_linkedin_connection_request_sent, given only after someone looked at the account's sent invitations. Taken once the attempt can no longer land (before that: 409 send_outcome_unknown, waiting_for may_still_land, retry_after and send_decisive_at that moment): it settles that attempt not_sent and this request goes out. An attempt check-sent named in unkeyed_activity_log_sids is not settled: the word counts for this key only, check-sent stops naming it, and the request goes through the usual checks. Moot when the attempt is no longer in doubt; another invitation's sid is 422 not_this_message.");
+  .describe("A person's word that an earlier attempt of THIS invitation is not on LinkedIn: its activity_log_sid (ln_al_...), from the 409 or check_linkedin_connection_request_sent, given only after someone looked at the account's sent invitations. Taken once the attempt can no longer land (before that: 409 send_outcome_unknown, waiting_for may_still_land, retry_after and send_decisive_at that moment): it settles that attempt not_sent and this request goes out. Moot when the attempt is no longer in doubt; another invitation's sid is 422 not_this_message.");
 
 const CONFIRMED_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
-  .describe("A person's word that an earlier attempt of THIS invitation IS on LinkedIn: its activity_log_sid, as for confirmed_not_sent (never both). Taken at once; it settles the attempt sent (an attempt check-sent named in unkeyed_activity_log_sids takes this key) and sends nothing: the answer is 409 concurrent_send_in_flight with send_outcome sent, or 200 with the request once it is stored. Another invitation's sid is 422 not_this_message; an attempt already proved not sent is 409 confirmed_sent_contradicts.");
+  .describe("A person's word that an earlier attempt of THIS invitation IS on LinkedIn: its activity_log_sid, as for confirmed_not_sent (never both). Taken at once; it settles the attempt sent and sends nothing: the answer is 409 concurrent_send_in_flight with send_outcome sent, or 200 with the request once it is stored. Another invitation's sid is 422 not_this_message; an attempt already proved not sent is 409 confirmed_sent_contradicts.");
 
-// One candidate of unkeyed_attempt_at_place as check-sent names it
-// (LinkedinAccountActivityLogService::recordedAttemptOf, gtm.service.linkedin
-// aab9687, review r5d LOW-1): the attempt, its verb, its start and the place it
-// recorded when it was sent, as its own target columns keep it.
-const UnkeyedAttempt = z.object({
-  activity_log_sid: z.string()
-    .describe("The attempt (ln_al_...): what a person's word names."),
-  action_type: z.string()
-    .describe('Its verb, as the activity log names it: send_connection_request.'),
-  created_at: z.string().nullable()
-    .describe('ISO 8601: when the attempt started.'),
-  place: z.object({
-    ln_member_id: z.string().optional(),
-    ln_id: z.string().optional(),
-    sn_id: z.string().optional(),
-    recruiter_id: z.string().optional(),
-    entity_type: z.string().optional(),
-    entity_urn: z.string().optional(),
-  }).passthrough().nullable()
-    .describe("The place the attempt recorded when it was sent, only the fields it set: the person's ids (ln_member_id, ln_id, sn_id). Null when it recorded none."),
-  nickname: z.string().optional()
-    .describe("The person's slug, when the attempt kept one."),
-}).passthrough();
-
-// check-sent's `result` (LinkedinSendCheckResult::toResult at master a55d76c: round
-// 5, then aab9687's unkeyed_attempts and 8e4d04b's unkeyed_attempts_capped; the
-// shape every family answers): outcome and reason always; retry_after,
-// activity_log_sid, send_decisive_at, unkeyed_activity_log_sids, unkeyed_attempts
-// and unkeyed_attempts_capped when known.
+// check-sent's `result` (LinkedinSendCheckResult::toResult, the shape every family
+// answers; the S1 candidates, attempts of a build that kept no key, were removed on
+// 2026-10-06): outcome and reason always; retry_after, activity_log_sid and send_decisive_at when known.
 // Plain strings rather than z.enum: the values are the service's constants, and
 // no PHP enum backs them for the enum-parity gate to pin.
 const CheckSentResult = z.object({
   outcome: z.string()
     .describe('sent | not_sent | in_flight | unknown. Send the same request again only on not_sent; on in_flight or unknown ask again after retry_after.'),
   reason: z.string().nullable()
-    .describe('Why. sent: null (item is the request), request_row_pending (it went out, its row comes later), caller_confirmed (a person said so; no row). not_sent: no_send_under_key, refused, not_in_invitations, caller_confirmed. unknown: answer_lost, may_still_land, unreadable, unexplained, unkeyed_attempt_at_place.'),
+    .describe('Why. sent: null (item is the request), request_row_pending (it went out, its row comes later), caller_confirmed (a person said so; no row). not_sent: no_send_under_key, refused, not_in_invitations, caller_confirmed. unknown: answer_lost, may_still_land, unreadable, unexplained.'),
   retry_after: z.string().optional()
     .describe('ISO 8601: for an invitation in doubt, when the sent invitations are read next.'),
   activity_log_sid: z.string().optional()
     .describe('The attempt the answer is about (in flight, in doubt or landed): what confirmed_not_sent / confirmed_sent name on send_linkedin_connection_request.'),
   send_decisive_at: z.string().optional()
     .describe("ISO 8601: the moment an invitation in doubt can no longer land; a person's confirmed_not_sent is taken from then on."),
-  unkeyed_activity_log_sids: z.array(z.string()).optional()
-    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts to the person that a build keeping no key made in the last 48 hours and that may be this invitation, by activity-log sid, newest first; activity_log_sid is the first. What a person looks at, and what their word may name.'),
-  unkeyed_attempts: z.array(UnkeyedAttempt).optional()
-    .describe('With reason unkeyed_attempt_at_place, in the order of unkeyed_activity_log_sids: each candidate with its verb, when it started and the person it recorded, so a person knows where to look.'),
-  unkeyed_attempts_capped: z.boolean().optional()
-    .describe('With reason unkeyed_attempt_at_place: true when the read of the account\'s old attempts was cut at its limit (500 by default), so attempts past the cut may be this send too. A cut read that leaves no candidate answers unknown with both lists empty and no activity_log_sid, never no_send_under_key: ask again after retry_after.'),
 }).passthrough();
 
 // Item projection: every field of LinkedinConnectionRequestDomain (research §Domain).
@@ -258,7 +226,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     ...base,
     name: 'check_linkedin_connection_request_sent',
     description:
-      "Ask what a LinkedIn connection request came to, without sending: by the client_reference it went out under (optionally for one person: profile_id or ln_member_id), or by the activity_log_sid a 409 named. result.outcome: sent (item is the request, or null with reason request_row_pending or caller_confirmed), in_flight, unknown (the answer was lost and the sent invitations have not shown it yet; retry_after, send_decisive_at), or not_sent (no_send_under_key, refused, not_in_invitations, caller_confirmed). Send the same request again only on not_sent, under the same key. result.activity_log_sid is the attempt a person's word names (confirmed_not_sent / confirmed_sent on the send); reason unkeyed_attempt_at_place lists in unkeyed_activity_log_sids the attempts of a build that kept no key that may be this one. An invitation in doubt has the sent invitations read now when the last look is old enough, so a call can take as long as a head read. A key sent to several persons is 422 place_required (context.places).",
+      "Ask what a LinkedIn connection request came to, without sending: by the client_reference it went out under (optionally for one person: profile_id or ln_member_id), or by the activity_log_sid a 409 named. result.outcome: sent (item is the request, or null with reason request_row_pending or caller_confirmed), in_flight, unknown (the answer was lost and the sent invitations have not shown it yet; retry_after, send_decisive_at), or not_sent (no_send_under_key, refused, not_in_invitations, caller_confirmed). Send the same request again only on not_sent, under the same key. result.activity_log_sid is the attempt a person's word names (confirmed_not_sent / confirmed_sent on the send). An invitation in doubt has the sent invitations read now when the last look is old enough, so a call can take as long as a head read. A key sent to several persons is 422 place_required (context.places).",
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connection-requests/check-sent' },
     operation: 'action',

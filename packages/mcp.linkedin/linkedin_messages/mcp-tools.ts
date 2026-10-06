@@ -93,63 +93,31 @@ const sendKey = (place: string) => z.string().max(255).nullable().optional()
   .describe(`Your key for this ONE message (max 255, byte for byte): one key per message, the same key on every repeat of it. The key and its place (${place}) are one message whatever it says, and a repeat never goes out twice: it answers 200 with the row the first send stored (result.idempotent_replay, result.content_differs when this request says something else) or 409 naming error.context.send_outcome (in_flight, unknown with retry_after and send_decisive_at, or sent; not_sent with blocking_activity_log_sid when another message holds the place). The same key at another place is another message. Without a key the same words to the same place count as a repeat for an hour after they went out. Stored on the row and searchable; check_linkedin_message_sent asks by it.`);
 
 const CONFIRMED_NOT_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
-  .describe("A person's word that an earlier attempt of THIS message is not on LinkedIn: its activity_log_sid (ln_al_...), from the 409 or check_linkedin_message_sent, given only after someone looked at the conversation. Taken once the attempt can no longer land (before that: 409 send_outcome_unknown, waiting_for may_still_land, retry_after and send_decisive_at that moment): it settles that attempt not_sent and this request goes out. An attempt check-sent named in unkeyed_activity_log_sids is not settled: the word counts for this key only, check-sent stops naming it, and the request goes through the usual checks (it may still wait behind that attempt, 409 not_sent). Moot when the attempt is no longer in doubt; another message's sid is 422 not_this_message.");
+  .describe("A person's word that an earlier attempt of THIS message is not on LinkedIn: its activity_log_sid (ln_al_...), from the 409 or check_linkedin_message_sent, given only after someone looked at the conversation. Taken once the attempt can no longer land (before that: 409 send_outcome_unknown, waiting_for may_still_land, retry_after and send_decisive_at that moment): it settles that attempt not_sent and this request goes out. Moot when the attempt is no longer in doubt; another message's sid is 422 not_this_message.");
 
 const CONFIRMED_SENT = z.string().length(18).startsWith('ln_al_').nullable().optional()
-  .describe("A person's word that an earlier attempt of THIS message IS on LinkedIn: its activity_log_sid, as for confirmed_not_sent (never both). Taken at once; it settles the attempt sent (an attempt check-sent named in unkeyed_activity_log_sids takes this key) and sends nothing: the answer is 409 concurrent_send_in_flight with send_outcome sent, or 200 with the row once it is stored. Another message's sid is 422 not_this_message; an attempt already proved not sent is 409 confirmed_sent_contradicts.");
+  .describe("A person's word that an earlier attempt of THIS message IS on LinkedIn: its activity_log_sid, as for confirmed_not_sent (never both). Taken at once; it settles the attempt sent and sends nothing: the answer is 409 concurrent_send_in_flight with send_outcome sent, or 200 with the row once it is stored. Another message's sid is 422 not_this_message; an attempt already proved not sent is 409 confirmed_sent_contradicts.");
 
 /** The one sentence every send tool's description carries about sending once. */
 const sendOnce = (place: string) =>
   `Sends once per client_reference and ${place}: a repeat is answered, never sent twice; on a 409 read error.context.send_outcome, never resend under a new key.`;
 
-// One candidate of unkeyed_attempt_at_place as check-sent names it
-// (LinkedinAccountActivityLogService::recordedAttemptOf, gtm.service.linkedin
-// aab9687, review r5d LOW-1): the attempt, its verb, its start and the place it
-// recorded when it was sent, as its own target columns keep it.
-const UnkeyedAttempt = z.object({
-  activity_log_sid: z.string()
-    .describe("The attempt (ln_al_...): what a person's word names."),
-  action_type: z.string()
-    .describe('Its verb, as the activity log names it: send_message, send_voice_message, send_inmail, send_sales_message, send_recruiter_initial_message, send_recruiter_message_in_conversation or start_group_conversation.'),
-  created_at: z.string().nullable()
-    .describe('ISO 8601: when the attempt started.'),
-  place: z.object({
-    ln_member_id: z.string().optional(),
-    ln_id: z.string().optional(),
-    sn_id: z.string().optional(),
-    recruiter_id: z.string().optional(),
-    entity_type: z.string().optional(),
-    entity_urn: z.string().optional(),
-  }).passthrough().nullable()
-    .describe("The place the attempt recorded when it was sent, only the fields it set: the person's ids (ln_member_id, ln_id, sn_id, recruiter_id) or the thread (entity_type conversation, entity_urn its hash). Null when it recorded none."),
-  nickname: z.string().optional()
-    .describe("The person's slug, when the attempt kept one."),
-}).passthrough();
-
-// check-sent's `result` (LinkedinMessageSentCheckResult::toResult at master
-// a55d76c: aab9687's unkeyed_attempts, 8e4d04b's unkeyed_attempts_capped): outcome
-// and reason always; retry_after, activity_log_sid, send_decisive_at,
-// unkeyed_activity_log_sids, unkeyed_attempts and unkeyed_attempts_capped when
-// known. Plain strings rather than z.enum: the
-// values are the service's constants, and no PHP enum backs them for the
-// enum-parity gate to pin.
+// check-sent's `result` (LinkedinMessageSentCheckResult::toResult; the S1 candidates,
+// attempts of a build that kept no key, were removed on 2026-10-06): outcome and reason always;
+// retry_after, activity_log_sid and send_decisive_at when known. Plain strings
+// rather than z.enum: the values are the service's constants, and no PHP enum
+// backs them for the enum-parity gate to pin.
 const CheckSentResult = z.object({
   outcome: z.string()
     .describe('sent | not_sent | in_flight | unknown. Send the same request again only on not_sent; on in_flight or unknown ask again after retry_after.'),
   reason: z.string().nullable()
-    .describe('Why. sent: null (item is the row), message_row_pending (it went out, its row comes later), caller_confirmed (a person said so; no row). not_sent: no_send_under_key, refused, not_in_thread, caller_confirmed. unknown: answer_lost, may_still_land, thread_unreadable, unexplained_message, unprovable, unkeyed_attempt_at_place.'),
+    .describe('Why. sent: null (item is the row), message_row_pending (it went out, its row comes later), caller_confirmed (a person said so; no row). not_sent: no_send_under_key, refused, not_in_thread, caller_confirmed. unknown: answer_lost, may_still_land, thread_unreadable, unexplained_message, unprovable.'),
   retry_after: z.string().optional()
     .describe('ISO 8601: for a send in doubt, when its thread is read next or the moment it can no longer land.'),
   activity_log_sid: z.string().optional()
     .describe("The attempt the answer is about (in flight, in doubt or landed): what confirmed_not_sent / confirmed_sent name on the send tools."),
   send_decisive_at: z.string().optional()
     .describe("ISO 8601: the moment a send in doubt can no longer land; a person's confirmed_not_sent is taken from then on."),
-  unkeyed_activity_log_sids: z.array(z.string()).optional()
-    .describe('With reason unkeyed_attempt_at_place: the candidates, attempts that a build keeping no key made in the last 48 hours and that may be this message, by activity-log sid: newest first when the key is asked alone; asked with a place, those that recorded it first. activity_log_sid is the first. An attempt that recorded no place stands only where it may have gone (a group send for a group thread, a Recruiter send for a Recruiter thread or a person asked by member id). What a person looks at, and what their word may name.'),
-  unkeyed_attempts: z.array(UnkeyedAttempt).optional()
-    .describe('With reason unkeyed_attempt_at_place, in the order of unkeyed_activity_log_sids: each candidate with its verb, when it started and the place it recorded, so a person knows where to look.'),
-  unkeyed_attempts_capped: z.boolean().optional()
-    .describe('With reason unkeyed_attempt_at_place: true when the read of the account\'s old attempts was cut at its limit (500 by default), so attempts past the cut may be this send too. A cut read that leaves no candidate answers unknown with both lists empty and no activity_log_sid, never no_send_under_key: ask again after retry_after.'),
 }).passthrough();
 
 // Metrics window: required half-open [from, to), ≤ 90 days.
