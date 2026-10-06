@@ -2462,6 +2462,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Core\\Services\\LatestPerGroup\\LatestPerGroupNarrowEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Only",
+                    "value": "only"
+                },
+                {
+                    "name": "Without",
+                    "value": "without"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccountActivityLog\\Enums\\EmailAccountActivityLogActionTypeEnum": {
             "backing": "string",
             "cases": [
@@ -3198,6 +3211,760 @@
                 {
                     "name": "ObjectiveReached",
                     "value": "objective_reached"
+                },
+                {
+                    "name": "ViewedOurProfile",
+                    "value": "viewed_our_profile"
+                },
+                {
+                    "name": "VisitedOurSite",
+                    "value": "visited_our_site"
+                },
+                {
+                    "name": "VisitedNotReplied",
+                    "value": "visited_not_replied"
+                },
+                {
+                    "name": "VisitedKeyPage",
+                    "value": "visited_key_page"
+                },
+                {
+                    "name": "MultiVisited",
+                    "value": "multi_visited"
+                },
+                {
+                    "name": "SubmittedForm",
+                    "value": "submitted_form"
+                },
+                {
+                    "name": "CompanyVisitedOurSite",
+                    "value": "company_visited_our_site"
+                },
+                {
+                    "name": "NoPeople",
+                    "value": "no_people"
+                },
+                {
+                    "name": "ThinCoverage",
+                    "value": "thin_coverage"
+                },
+                {
+                    "name": "NobodyReached",
+                    "value": "nobody_reached"
+                },
+                {
+                    "name": "NoEngagement",
+                    "value": "no_engagement"
+                },
+                {
+                    "name": "NoReply",
+                    "value": "no_reply"
+                },
+                {
+                    "name": "Exhausted",
+                    "value": "exhausted"
+                },
+                {
+                    "name": "Dormant",
+                    "value": "dormant"
+                },
+                {
+                    "name": "DmMissing",
+                    "value": "dm_missing"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\ProfileViewCollectorState\\Enums\\ProfileViewCollectResultEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Collected",
+                    "value": "collected"
+                },
+                {
+                    "name": "RateLimited",
+                    "value": "rate_limited"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                },
+                {
+                    "name": "SkippedFreeSeat",
+                    "value": "skipped_free_seat"
+                },
+                {
+                    "name": "SkippedNoAccount",
+                    "value": "skipped_no_account"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\ProfileViewSighting\\Enums\\ProfileViewSightingGroupableFieldsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "IsAnonymous",
+                    "value": "is_anonymous"
+                },
+                {
+                    "name": "SenderProfileSid",
+                    "value": "sender_profile_sid"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\ProfileViewSighting\\Enums\\ProfileViewSightingSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "FirstSeenAt",
+                    "value": "first_seen_at"
+                },
+                {
+                    "name": "LastSeenAt",
+                    "value": "last_seen_at"
+                },
+                {
+                    "name": "TimesSeen",
+                    "value": "times_seen"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\SignalPreference\\Enums\\SignalPreferenceSeatScopeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "All",
+                    "value": "all"
+                },
+                {
+                    "name": "Mine",
+                    "value": "mine"
+                },
+                {
+                    "name": "Chosen",
+                    "value": "chosen"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\SignalPreference\\Enums\\SignalPreferenceViewEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "All",
+                    "value": "all"
+                },
+                {
+                    "name": "Website",
+                    "value": "website"
+                },
+                {
+                    "name": "Linkedin",
+                    "value": "linkedin"
+                },
+                {
+                    "name": "Email",
+                    "value": "email"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteFingerprintIdentity\\Enums\\WebsiteFingerprintIdentityKindEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Email",
+                    "value": "email"
+                },
+                {
+                    "name": "LnMemberId",
+                    "value": "ln_member_id"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteFingerprintIdentity\\Enums\\WebsiteFingerprintIdentitySourceEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Code",
+                    "value": "code"
+                },
+                {
+                    "name": "Identify",
+                    "value": "identify"
+                },
+                {
+                    "name": "Form",
+                    "value": "form"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteHit\\Enums\\WebsiteHitConsentEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Granted",
+                    "value": "granted"
+                },
+                {
+                    "name": "Denied",
+                    "value": "denied"
+                },
+                {
+                    "name": "Unknown",
+                    "value": "unknown"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteHit\\Enums\\WebsiteHitDeviceEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Desktop",
+                    "value": "desktop"
+                },
+                {
+                    "name": "Mobile",
+                    "value": "mobile"
+                },
+                {
+                    "name": "Tablet",
+                    "value": "tablet"
+                },
+                {
+                    "name": "Unknown",
+                    "value": "unknown"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteHit\\Enums\\WebsiteHitDropReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "UnknownSite",
+                    "value": "unknown_site"
+                },
+                {
+                    "name": "SiteDisabled",
+                    "value": "site_disabled"
+                },
+                {
+                    "name": "OriginMismatch",
+                    "value": "origin_mismatch"
+                },
+                {
+                    "name": "Malformed",
+                    "value": "malformed"
+                },
+                {
+                    "name": "RateLimited",
+                    "value": "rate_limited"
+                },
+                {
+                    "name": "UnknownCode",
+                    "value": "unknown_code"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteHit\\Enums\\WebsiteHitKindEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pageview",
+                    "value": "pageview"
+                },
+                {
+                    "name": "Ping",
+                    "value": "ping"
+                },
+                {
+                    "name": "Identify",
+                    "value": "identify"
+                },
+                {
+                    "name": "Form",
+                    "value": "form"
+                },
+                {
+                    "name": "Event",
+                    "value": "event"
+                },
+                {
+                    "name": "Fingerprint",
+                    "value": "fingerprint"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteKeyPage\\Enums\\WebsiteKeyPageSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CreatedAt",
+                    "value": "created_at"
+                },
+                {
+                    "name": "Key",
+                    "value": "key"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSessionOwner\\Enums\\WebsiteSessionOwnerGroupableFieldsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "OwnerType",
+                    "value": "owner_type"
+                },
+                {
+                    "name": "Fresh",
+                    "value": "fresh"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSessionOwner\\Enums\\WebsiteSessionOwnerTypeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Person",
+                    "value": "person"
+                },
+                {
+                    "name": "Company",
+                    "value": "company"
+                },
+                {
+                    "name": "Visitor",
+                    "value": "visitor"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSession\\Enums\\WebsiteSessionAttributionEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Code",
+                    "value": "code"
+                },
+                {
+                    "name": "Identified",
+                    "value": "identified"
+                },
+                {
+                    "name": "Fingerprint",
+                    "value": "fingerprint"
+                },
+                {
+                    "name": "Manual",
+                    "value": "manual"
+                },
+                {
+                    "name": "CompanyNetwork",
+                    "value": "company_network"
+                },
+                {
+                    "name": "None",
+                    "value": "none"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSession\\Enums\\WebsiteSessionEventKindEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Event",
+                    "value": "event"
+                },
+                {
+                    "name": "Form",
+                    "value": "form"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSession\\Enums\\WebsiteSessionGroupableFieldsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Attribution",
+                    "value": "attribution"
+                },
+                {
+                    "name": "NetworkType",
+                    "value": "network_type"
+                },
+                {
+                    "name": "ReferrerType",
+                    "value": "referrer_type"
+                },
+                {
+                    "name": "Device",
+                    "value": "device"
+                },
+                {
+                    "name": "KeyPage",
+                    "value": "key_page"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSession\\Enums\\WebsiteSessionMomentEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "FormSubmitted",
+                    "value": "website_form_submitted"
+                },
+                {
+                    "name": "KeyPageVisited",
+                    "value": "website_key_page_visited"
+                },
+                {
+                    "name": "Event",
+                    "value": "website_event"
+                },
+                {
+                    "name": "Visited",
+                    "value": "website_visited"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSession\\Enums\\WebsiteSessionNetworkStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pending",
+                    "value": "pending"
+                },
+                {
+                    "name": "Resolved",
+                    "value": "resolved"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                },
+                {
+                    "name": "Private",
+                    "value": "private"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSession\\Enums\\WebsiteSessionReferrerTypeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Direct",
+                    "value": "direct"
+                },
+                {
+                    "name": "Internal",
+                    "value": "internal"
+                },
+                {
+                    "name": "Search",
+                    "value": "search"
+                },
+                {
+                    "name": "Social",
+                    "value": "social"
+                },
+                {
+                    "name": "Email",
+                    "value": "email"
+                },
+                {
+                    "name": "Ads",
+                    "value": "ads"
+                },
+                {
+                    "name": "Referral",
+                    "value": "referral"
+                },
+                {
+                    "name": "AiAssistant",
+                    "value": "ai_assistant"
+                },
+                {
+                    "name": "Unknown",
+                    "value": "unknown"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSession\\Enums\\WebsiteSessionSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "StartedAt",
+                    "value": "started_at"
+                },
+                {
+                    "name": "LastSeenAt",
+                    "value": "last_seen_at"
+                },
+                {
+                    "name": "EngagedSeconds",
+                    "value": "engaged_seconds"
+                },
+                {
+                    "name": "PageviewsCount",
+                    "value": "pageviews_count"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteBrokenReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "LoaderMissing",
+                    "value": "loader_missing"
+                },
+                {
+                    "name": "FetchFailed",
+                    "value": "fetch_failed"
+                },
+                {
+                    "name": "SiteKeyMismatch",
+                    "value": "site_key_mismatch"
+                },
+                {
+                    "name": "NoHits",
+                    "value": "no_hits"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteCarrierEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Fragment",
+                    "value": "fragment"
+                },
+                {
+                    "name": "Query",
+                    "value": "query"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteCheckOutcomeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Found",
+                    "value": "found"
+                },
+                {
+                    "name": "SiteKeyMismatch",
+                    "value": "site_key_mismatch"
+                },
+                {
+                    "name": "LoaderMissing",
+                    "value": "loader_missing"
+                },
+                {
+                    "name": "FetchFailed",
+                    "value": "fetch_failed"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteConsentModeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "NotRequired",
+                    "value": "not_required"
+                },
+                {
+                    "name": "Required",
+                    "value": "required"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteFetchFailureEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "InvalidUrl",
+                    "value": "invalid_url"
+                },
+                {
+                    "name": "SchemeNotAllowed",
+                    "value": "scheme_not_allowed"
+                },
+                {
+                    "name": "CredentialsInUrl",
+                    "value": "credentials_in_url"
+                },
+                {
+                    "name": "PortNotAllowed",
+                    "value": "port_not_allowed"
+                },
+                {
+                    "name": "IpLiteral",
+                    "value": "ip_literal"
+                },
+                {
+                    "name": "HostUnresolvable",
+                    "value": "host_unresolvable"
+                },
+                {
+                    "name": "PrivateAddress",
+                    "value": "private_address"
+                },
+                {
+                    "name": "RedirectWithoutLocation",
+                    "value": "redirect_without_location"
+                },
+                {
+                    "name": "TooManyRedirects",
+                    "value": "too_many_redirects"
+                },
+                {
+                    "name": "RedirectedOffSite",
+                    "value": "redirected_off_site"
+                },
+                {
+                    "name": "ConnectionFailed",
+                    "value": "connection_failed"
+                },
+                {
+                    "name": "HttpStatus",
+                    "value": "http_status"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteFingerprintModeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "On",
+                    "value": "on"
+                },
+                {
+                    "name": "Consent",
+                    "value": "consent"
+                },
+                {
+                    "name": "Off",
+                    "value": "off"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteLiveAlertsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Off",
+                    "value": "off"
+                },
+                {
+                    "name": "KeyPages",
+                    "value": "key_pages"
+                },
+                {
+                    "name": "AllKnown",
+                    "value": "all_known"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CreatedAt",
+                    "value": "created_at"
+                },
+                {
+                    "name": "UpdatedAt",
+                    "value": "updated_at"
+                },
+                {
+                    "name": "Domain",
+                    "value": "domain"
+                },
+                {
+                    "name": "LastHitAt",
+                    "value": "last_hit_at"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pending",
+                    "value": "pending"
+                },
+                {
+                    "name": "Verified",
+                    "value": "verified"
+                },
+                {
+                    "name": "Broken",
+                    "value": "broken"
+                },
+                {
+                    "name": "Disabled",
+                    "value": "disabled"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteTrackedEvent\\Enums\\WebsiteTrackedEventSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CreatedAt",
+                    "value": "created_at"
+                },
+                {
+                    "name": "Event",
+                    "value": "event"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteVisitor\\Enums\\WebsiteVisitorBoundByEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Code",
+                    "value": "code"
+                },
+                {
+                    "name": "Identify",
+                    "value": "identify"
+                },
+                {
+                    "name": "Fingerprint",
+                    "value": "fingerprint"
+                },
+                {
+                    "name": "Manual",
+                    "value": "manual"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteVisitor\\Enums\\WebsiteVisitorGroupableFieldsEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "BoundBy",
+                    "value": "bound_by"
+                },
+                {
+                    "name": "NetworkType",
+                    "value": "network_type"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteVisitor\\Enums\\WebsiteVisitorSortableFieldEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "LastSeenAt",
+                    "value": "last_seen_at"
+                },
+                {
+                    "name": "FirstSeenAt",
+                    "value": "first_seen_at"
+                },
+                {
+                    "name": "SessionsCount",
+                    "value": "sessions_count"
                 }
             ]
         }
