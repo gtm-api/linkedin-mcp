@@ -70,10 +70,11 @@ const UnkeyedAttempt = z.object({
     .describe("The person's slug, when the attempt kept one."),
 }).passthrough();
 
-// check-sent's `result` (LinkedinSendCheckResult::toResult at 06a879a, with
-// aab9687's unkeyed_attempts; the shape every family answers): outcome and reason
-// always; retry_after, activity_log_sid, send_decisive_at, unkeyed_activity_log_sids
-// and unkeyed_attempts when known.
+// check-sent's `result` (LinkedinSendCheckResult::toResult at master a55d76c: round
+// 5, then aab9687's unkeyed_attempts and 8e4d04b's unkeyed_attempts_capped; the
+// shape every family answers): outcome and reason always; retry_after,
+// activity_log_sid, send_decisive_at, unkeyed_activity_log_sids, unkeyed_attempts
+// and unkeyed_attempts_capped when known.
 // Plain strings rather than z.enum: the values are the service's constants, and
 // no PHP enum backs them for the enum-parity gate to pin.
 const CheckSentResult = z.object({
@@ -91,6 +92,8 @@ const CheckSentResult = z.object({
     .describe('With reason unkeyed_attempt_at_place: the candidates, attempts to the person that a build keeping no key made in the last 48 hours and that may be this invitation, by activity-log sid, newest first; activity_log_sid is the first. What a person looks at, and what their word may name.'),
   unkeyed_attempts: z.array(UnkeyedAttempt).optional()
     .describe('With reason unkeyed_attempt_at_place, in the order of unkeyed_activity_log_sids: each candidate with its verb, when it started and the person it recorded, so a person knows where to look.'),
+  unkeyed_attempts_capped: z.boolean().optional()
+    .describe('With reason unkeyed_attempt_at_place: true when the read of the account\'s old attempts was cut at its limit (500 by default), so attempts past the cut may be this send too. A cut read that leaves no candidate answers unknown with both lists empty and no activity_log_sid, never no_send_under_key: ask again after retry_after.'),
 }).passthrough();
 
 // Item projection: every field of LinkedinConnectionRequestDomain (research §Domain).

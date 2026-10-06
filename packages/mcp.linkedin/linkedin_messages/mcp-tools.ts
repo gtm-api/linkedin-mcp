@@ -126,10 +126,11 @@ const UnkeyedAttempt = z.object({
     .describe("The person's slug, when the attempt kept one."),
 }).passthrough();
 
-// check-sent's `result` (LinkedinMessageSentCheckResult::toResult at 06a879a, with
-// aab9687's unkeyed_attempts): outcome and reason always; retry_after,
-// activity_log_sid, send_decisive_at, unkeyed_activity_log_sids and
-// unkeyed_attempts when known. Plain strings rather than z.enum: the
+// check-sent's `result` (LinkedinMessageSentCheckResult::toResult at master
+// a55d76c: aab9687's unkeyed_attempts, 8e4d04b's unkeyed_attempts_capped): outcome
+// and reason always; retry_after, activity_log_sid, send_decisive_at,
+// unkeyed_activity_log_sids, unkeyed_attempts and unkeyed_attempts_capped when
+// known. Plain strings rather than z.enum: the
 // values are the service's constants, and no PHP enum backs them for the
 // enum-parity gate to pin.
 const CheckSentResult = z.object({
@@ -147,6 +148,8 @@ const CheckSentResult = z.object({
     .describe('With reason unkeyed_attempt_at_place: the candidates, attempts that a build keeping no key made in the last 48 hours and that may be this message, by activity-log sid: newest first when the key is asked alone; asked with a place, those that recorded it first. activity_log_sid is the first. An attempt that recorded no place stands only where it may have gone (a group send for a group thread, a Recruiter send for a Recruiter thread or a person asked by member id). What a person looks at, and what their word may name.'),
   unkeyed_attempts: z.array(UnkeyedAttempt).optional()
     .describe('With reason unkeyed_attempt_at_place, in the order of unkeyed_activity_log_sids: each candidate with its verb, when it started and the place it recorded, so a person knows where to look.'),
+  unkeyed_attempts_capped: z.boolean().optional()
+    .describe('With reason unkeyed_attempt_at_place: true when the read of the account\'s old attempts was cut at its limit (500 by default), so attempts past the cut may be this send too. A cut read that leaves no candidate answers unknown with both lists empty and no activity_log_sid, never no_send_under_key: ask again after retry_after.'),
 }).passthrough();
 
 // Metrics window: required half-open [from, to), ≤ 90 days.
