@@ -41,7 +41,7 @@ const executorFields = {
   linkedin_account_sid: z.string().length(18).startsWith('ln_ac_').nullable().optional()
     .describe('Executor account (ln_ac_...). Given: the call runs on that account ONLY; a saturated or held enrichment bucket refuses 429 bucket_saturated (with retry_after). Omitted: the service auto-picks one of your connected accounts with remaining capacity (422 no_connected_accounts when none is ready, 429 when all are at capacity).'),
   idempotency_key: z.string().max(128).nullable().optional()
-    .describe('Replay guard (team_sid, idempotency_key). A repeat with the same key returns the stored ledger outcome: no re-execution.'),
+    .describe('Replay guard (team_sid, idempotency_key). A repeat with the same key returns the stored ledger outcome without running again, except a failure that answered with retry_after: once that time has passed, a repeat under the same key runs again.'),
   trust_cache_max_age_days: z.number().int().min(1).max(3650).nullable().optional()
     .describe('Accept a stored payload this many days old instead of fetching (probe tier 2, §9.5): a hit answers with served_from_cache / cache_source "data_cluster", spending no browser run and no bucket slot. Omitted, the stored payload is never consulted and the call always dispatches.'),
 };
