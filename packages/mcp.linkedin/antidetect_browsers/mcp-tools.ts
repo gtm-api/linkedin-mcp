@@ -81,10 +81,9 @@ const AntidetectBrowserStatus = z.enum([
 ]);
 
 // Customer bring-your-own proxy tuple. Allowed on any browser whose vendor
-// profile the platform holds (browser_owner=platform: our profile, their proxy;
-// and since 2026-10-08 a profile bound by id that lives in our own GoLogin
-// account); forbidden on a profile shared to us from the customer's own vendor
-// account, whose proxy is set there. Both write paths PROBE the tuple first and refuse an
+// profile WE minted (browser_owner=platform included: our profile, their proxy);
+// forbidden on a profile bound by id, whose proxy lives in the customer's own
+// vendor account. Both write paths PROBE the tuple first and refuse an
 // unreachable one (422 custom_proxy_unreachable_*), and the probe's exit country
 // is what lands in proxy_country_code: the blob itself states no geo.
 const CustomProxyConfig = z.object({
@@ -484,7 +483,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'update_antidetect_browser_proxy',
     description:
-      'Change the proxy of an antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. Needs a vendor profile the platform holds (minted here, or bound by id from the platform GoLogin account); one from a customer GoLogin account keeps its proxy there (422 managed_proxy_forbidden_for_owner / custom_proxy_forbidden_for_owner; 503 vendor_unreachable if GoLogin cannot tell). custom_proxy_config is probed first (422 custom_proxy_unreachable_* changes nothing), takes the measured exit country and RELEASES any armed 5G slot. Zero sources 422 proxy_assignment_missing, several 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty, 5G on a BYO proxy 422 proxy_5g_requires_managed_proxy. proxy_5g alone moves the add-on binding only. DANGEROUS: a location flip mid-campaign can trip a LinkedIn risk check; a running browser restarts. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
+      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. EVERY arm needs browser_owner=platform: a profile bound by id keeps its proxy in the vendor (422 managed_proxy_forbidden_for_owner / 422 custom_proxy_forbidden_for_owner). custom_proxy_config is probed first (422 custom_proxy_unreachable_* changes nothing), takes the exit country measured there, and RELEASES any armed 5G slot. Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty, 5G on a BYO proxy 422 proxy_5g_requires_managed_proxy. proxy_5g alone is a valid body: it moves the add-on binding only. DANGEROUS twice over: a location flip mid-campaign can trip a LinkedIn risk check, and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/update-proxy' },
     operation: 'action',
@@ -510,7 +509,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'replace_antidetect_browser_proxy',
     description:
-      'Rotate an antidetect browser onto another MANAGED proxy of the SAME country. Geo-binding is preserved, so this is the safe way to drop a flagged IP. Omit antidetect_browser_proxy_sid to take the least-loaded active proxy of that country, or pin one (a pin from another country is refused, 422 proxy_country_mismatch). Only on a vendor profile the platform holds, as update_antidetect_browser_proxy (else 422 managed_proxy_forbidden_for_owner; 503 vendor_unreachable when GoLogin cannot say); a platform row that never got a proxy is 422 proxy_not_managed; a country with no other active proxy is 422 proxy_replacement_unavailable. A running browser is stopped and started again so the new IP takes effect; result.restarted reports whether it came back.',
+      'Rotate an antidetect browser onto another MANAGED proxy of the SAME country. Geo-binding is preserved, so this is the safe way to drop a flagged IP. Omit antidetect_browser_proxy_sid to take the least-loaded active proxy of that country, or pin one (a pin from another country is refused, 422 proxy_country_mismatch). Platform-owned browsers only, 422 managed_proxy_forbidden_for_owner; a platform row that never got a proxy is 422 proxy_not_managed; a country with no other active proxy is 422 proxy_replacement_unavailable. A running browser is stopped and started again so the new IP takes effect; result.restarted reports whether it came back.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/replace-proxy' },
     operation: 'action',
