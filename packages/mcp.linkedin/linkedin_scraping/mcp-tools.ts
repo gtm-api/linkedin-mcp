@@ -43,6 +43,12 @@
 // the service auto-picks a capable own account).
 // Envelope is always 'action' (synchronous mcpAction; no async on this
 // surface). Nothing is dangerous: scraping reads data (dangerous:false).
+//
+// One tool here pulls no list (2026-10-08): scrape_linkedin_build_search_url
+// composes the URL of a people or company search from its filters and reads
+// LinkedIn only through the typeaheads its text values need. It closes the gap
+// between the three typeaheads, which answer ids, and the searches, which take
+// ids but never show the URL they open.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -236,6 +242,8 @@ const CompanySearchFilters = z.object({
   industry_ids: z.array(z.string()).max(10).nullable().optional()
     .describe('Numeric LinkedIn industry ids, from scrape_linkedin_param_id_lookup(type: "industry"). Same caveat as geo_ids: the mapping is verified on the people search, not on this one.'),
   company_sizes: z.array(z.enum(['1_to_10', '11_to_50', '51_to_200', '201_to_500', '501_to_1000', '1001_to_5000', '5001_to_10000', '10001_plus'])).max(8).nullable().optional().describe('Headcount ranges; the node maps each range onto the LinkedIn size-bucket id itself.'),
+  network: z.array(z.enum(['1st'])).max(1).nullable().optional().describe('Companies where you have 1st-degree connections; the company search takes the first degree only.'),
+  has_jobs: z.boolean().nullable().optional().describe('true → only companies hiring on LinkedIn right now; false sends nothing.'),
 }).describe(`${XOR} Regular company-search filters. At least one member must be non-empty.`);
 
 const SN_DEPARTMENT_FIELD = z.enum(SN_FUNCTION_IDS)
@@ -281,6 +289,87 @@ const SalesNavCompanySearchFilters = z.object({
   first_degree_connection: z.boolean().nullable().optional().describe('true → only accounts where you have a 1st-degree connection.'),
   saved_accounts_only: z.boolean().nullable().optional().describe('true → only your saved SN accounts.'),
 }).describe(`${XOR} Sales Navigator account-search filters, the COMPLETE SN vocabulary. At least one member must be non-empty (a false toggle counts as empty). lookup = scrape_linkedin_sales_nav_param_id_lookup.`);
+
+// ═══════════════════════════════════════════════════════════════
+// build-search-url: the four search vocabularies again, as BUILD input.
+//
+// Each object is its search's `filters` vocabulary member for member, with one
+// change on the members a typeahead resolves: their values are objects, an id
+// (rides as it is, the search's own id rule) or a text (typed into the search's
+// own typeahead, one lookup per distinct text). The answer's `filters` is back
+// in the search's exact shape. Four objects, not one `filters` plus an engine
+// switch, because the vocabularies reuse member names with different shapes
+// (network is degrees here, F/S/A/O on Sales Navigator, 1st alone on companies)
+// and the backend validates each object by its own rules.
+// ═══════════════════════════════════════════════════════════════
+
+const BUILD_TEXT = z.string().max(100).nullable().optional()
+  .describe('Human text to resolve ("Berlin", "Acme"): typed into the typeahead, which picks the option labelled exactly so, else LinkedIn\'s first.');
+
+const buildValue = (id: z.ZodTypeAny, idNote: string) => z.object({
+  id: id.nullable().optional().describe(idNote),
+  text: BUILD_TEXT,
+}).describe('One value: an id, or a text to resolve (at least one of the two).');
+
+const buildFacet = (value: z.ZodTypeAny, desc: string) => z.array(value).max(10).nullable().optional().describe(desc);
+
+const NumericBuildValue = buildValue(z.string().max(64).regex(/^\d+$/), 'A numeric id, as the search takes it; rides as it is.');
+const ProfileBuildValue = buildValue(z.string().max(128).regex(/^[\w-]+$/), 'A profile id (ACoA…), as the search takes it; rides as it is.');
+
+// A Sales Navigator chip with one more flag: free_text keeps a text as a
+// free-text chip, the search's own text-only chip, instead of resolving it.
+const SnBuildChip = SnFacetValue.extend({
+  text: z.string().max(256).nullable().optional().describe('Text to resolve into an id plus LinkedIn\'s label; one the typeahead offers nothing for stays a free-text chip.'),
+  free_text: z.boolean().nullable().optional().describe('true → send the text as a free-text chip, unresolved (SN matches it server-side).'),
+}).describe('One chip: an id, or a text (at least one of the two).');
+
+const snBuildFacet = (desc: string) => z.array(SnBuildChip).max(10).nullable().optional().describe(desc);
+
+const PeopleBuildFilters = PeopleSearchFilters.extend({
+  locations: buildFacet(NumericBuildValue, 'Geography (location typeahead).'),
+  industries: buildFacet(NumericBuildValue, 'Industries (industry typeahead).'),
+  current_companies: buildFacet(NumericBuildValue, 'Current employer (company typeahead).'),
+  past_companies: buildFacet(NumericBuildValue, 'Past employer (company typeahead).'),
+  service_categories: buildFacet(NumericBuildValue, 'Service categories (service_category typeahead).'),
+  connections_of: buildFacet(ProfileBuildValue, 'People connected to these members: a name resolves through the connections typeahead.'),
+  followers_of: buildFacet(ProfileBuildValue, 'People following these members: a name resolves through the people typeahead.'),
+}).describe('The scrape_linkedin_search_people filters. A text the typeahead offers nothing for is a 422 naming it: these members take ids only.');
+
+const CompanyBuildFilters = CompanySearchFilters.extend({
+  geo_ids: buildFacet(NumericBuildValue, 'HQ geography (location typeahead).'),
+  industry_ids: buildFacet(NumericBuildValue, 'Industries (industry typeahead).'),
+}).describe('The scrape_linkedin_search_companies filters. A text the typeahead offers nothing for is a 422 naming it.');
+
+const SalesNavPeopleBuildFilters = SalesNavPeopleSearchFilters.extend({
+  current_titles: snBuildFacet('Current job titles (TITLE).'),
+  past_titles: snBuildFacet('Past job titles (TITLE).'),
+  locations: snBuildFacet('Person geography (BING_GEO).'),
+  company_headquarters: snBuildFacet('Current company HQ region (BING_GEO).'),
+  industries: snBuildFacet('Industries (INDUSTRY).'),
+  current_companies: snBuildFacet('Current employer (COMPANY_WITH_LIST).'),
+  past_companies: snBuildFacet('Past employer (COMPANY_WITH_LIST).'),
+  groups: snBuildFacet('Group membership (GROUP).'),
+  schools: snBuildFacet('Schools (SCHOOL).'),
+  connections_of: buildFacet(buildValue(z.string().max(64), 'A member token (ACwA…), as the search takes it.'), 'People connected to these members: a name resolves through CONNECTION_OF; a miss is a 422.'),
+}).describe('The scrape_linkedin_search_sales_nav_people filters; resolution through the Sales Navigator typeahead, which needs an SN seat.');
+
+const SalesNavCompanyBuildFilters = SalesNavCompanySearchFilters.extend({
+  company_headquarters: snBuildFacet('HQ region (BING_GEO).'),
+  industries: snBuildFacet('Industries (INDUSTRY).'),
+  account_lists: z.array(SnFacetValue.extend({
+    text: z.string().max(256).nullable().optional().describe('A list NAME: matched against the seat\'s own lists, exactly or as the one name containing it; no match is a 422.'),
+  })).max(10).nullable().optional().describe('Your SN account lists, by id or by name (ACCOUNT_LIST).'),
+}).describe('The scrape_linkedin_search_sales_nav_companies filters; resolution through the Sales Navigator typeahead, which needs an SN seat.');
+
+const BuildResolvedValue = z.object({
+  member: z.string().describe('The filter member the value sits in.'),
+  query: z.string().describe('The text as given (trimmed).'),
+  lookup_type: z.string().describe('The typeahead type it went through (location, company, TITLE, BING_GEO, ACCOUNT_LIST, ...).'),
+  id: z.string().nullable().describe('The id picked; null when the typeahead offered nothing and the text rides as a Sales Navigator free-text chip.'),
+  display_name: z.string().nullable().describe('LinkedIn\'s label of the picked option, also the chip text on Sales Navigator.'),
+  alternatives: z.array(z.object({ id: z.string(), display_name: z.string().nullable() }).passthrough())
+    .describe('The other options LinkedIn offered, best first: resend the value with one of these ids to choose another.'),
+}).passthrough();
 
 const PostSearchFilters = z.object({
   keywords: z.string().max(256).describe('REQUIRED: content search needs a query.'),
@@ -1525,5 +1614,34 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(z.null(), runResult(LinkedinSalesNavParamIdPreview.describe('Same shape as the Sales Navigator lookup rows: id is what the Recruiter filter takes; entity_urn the typeahead entity urn; headline the ISO country code for geo / zip, the organization urn for school; image_url the company logo.'), z.null())),
     annotations: { title: 'Look up LinkedIn Recruiter facet id', ...SCRAPE },
+  },
+  {
+    ...base,
+    name: 'scrape_linkedin_build_search_url',
+    description:
+      'Build the LinkedIn URL of a people or company search, regular or Sales Navigator, from that search\'s filters: send exactly ONE of people / sales_nav_people / companies / sales_nav_companies. Facet values take an id or plain text; each text is resolved by the search\'s own typeahead (the option labelled exactly so, else the first), one lookup per distinct text, at most 10 per call, each a paced scraping read (Sales Navigator ones need an SN seat). Returns url (Sales Navigator in its ?query= form, the one imports read), filters in the exact shape the matching search tool takes, and resolved: per text, the id picked and the alternatives. All ids given: no LinkedIn call at all. Recruiter has no build: its URL comes from running scrape_linkedin_search_recruiter_people.',
+    toolClass: 'complex',
+    route: rt('build-search-url'),
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      ...requestBase,
+      people: PeopleBuildFilters.nullable().optional(),
+      sales_nav_people: SalesNavPeopleBuildFilters.nullable().optional(),
+      companies: CompanyBuildFilters.nullable().optional(),
+      sales_nav_companies: SalesNavCompanyBuildFilters.nullable().optional(),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), z.object({
+      url: z.string().describe('The search URL: open it, paste it into the matching search tool\'s url, or hand it to an import.'),
+      filters: z.object({}).passthrough().describe('The filters in the exact shape the matching search tool takes as `filters`: texts replaced by the ids they resolved to.'),
+      resolved: z.array(BuildResolvedValue).describe('One entry per text value that went through a typeahead, in filter order; empty when every value carried an id.'),
+      data_requests: z.array(DataRequestJournalRow).describe('The kind="scrape" ledger rows of the typeahead lookups this call ran, one per distinct text; empty when nothing was resolved.'),
+    }).passthrough()),
+    annotations: { title: 'Build LinkedIn search URL', ...SCRAPE },
   },
 ];

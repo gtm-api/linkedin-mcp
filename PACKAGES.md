@@ -12,7 +12,7 @@ Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below 
 a plan. Every row below is ✅ shipped: three services are at full MCP coverage and the only remaining
 gap is `gtm.service.email`, which has no package and therefore no row.
 
-## mcp.linkedin: 12 mounts / 189 tools
+## mcp.linkedin: 12 mounts / 190 tools
 
 > 2026-07-24 service split: `linkedin-tracked-posts` / `-comments` / `-engagements` / `-searches` /
 > `-search-results` left this backend for `gs.service.signals`, and the outbound authoring verbs
@@ -29,7 +29,7 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 | recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 4 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects, get-my-recruiter-contracts, select-recruiter-contract) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 3 from linkedin_messages (get-my-latest-recruiter, send-recruiter, and check-sent, which is served on messaging too). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 9 | ✅ |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (7), linkedin_connection_invitations (6), linkedin_followers (3) | 22 | ✅ |
 | content | `/mcp/linkedin/content` | linkedin_posting (10: create-post, repost, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post, check-sent) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 12 | ✅ |
-| scraping | `/mcp/linkedin/scraping` | linkedin_scraping (23; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not) | 23 | ✅ (budget 25, 2 free) |
+| scraping | `/mcp/linkedin/scraping` | linkedin_scraping (24; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not; the search-URL builder 2026-10-08, one tool for the four people and company searches) | 24 | ✅ (budget 25, 1 free) |
 | auto_scrapes | `/mcp/linkedin/auto-scrapes` | linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2), linkedin_auto_scrape_results (1) | 13 | ✅ |
 | enrichment | `/mcp/linkedin/enrichment` | linkedin_enrichment (22) | 22 | ✅ |
 | data | `/mcp/linkedin/data` | data_requests (2) | 2 | ✅ |

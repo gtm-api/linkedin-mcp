@@ -192,7 +192,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/scraping',
     name: 'gtm-linkedin-scraping',
     instructions:
-      'GTM LinkedIn scraping of people (the regular, Sales Navigator and Recruiter engines), companies, posts, job postings, events, groups, LinkedIn Learning courses, products and schools, plus lookalikes, company employees, decision-makers, post engagers and the three facet-id typeaheads. Every search verb is ONE tool per vertical taking either a structured filter object or a pasted LinkedIn search URL, never both; runs land on your own connected accounts. These are run-now, one-page pulls that return the rows inline. For a saved job over the same sources that repeats on a schedule, dedupes across runs and feeds new leads to a mass action, use /mcp/linkedin/auto-scrapes instead (people and companies only: posts, job postings, events, groups, courses, products and schools are not saveable sources).',
+      'GTM LinkedIn scraping of people (the regular, Sales Navigator and Recruiter engines), companies, posts, job postings, events, groups, LinkedIn Learning courses, products and schools, plus lookalikes, company employees, decision-makers, post engagers, the three facet-id typeaheads and a search-URL builder that resolves text through them. Every search verb is ONE tool per vertical taking either a structured filter object or a pasted LinkedIn search URL, never both; runs land on your own connected accounts. These are run-now, one-page pulls that return the rows inline. For a saved job over the same sources that repeats on a schedule, dedupes across runs and feeds new leads to a mass action, use /mcp/linkedin/auto-scrapes instead (people and companies only: posts, job postings, events, groups, courses, products and schools are not saveable sources).',
     selectors: [p('linkedin_scraping')],
     // NO maxTools, so the platform default of 25 applies again.
     //
@@ -220,6 +220,12 @@ export const MOUNTS: MountConfig[] = [
     // list, seat gate or not (the Sales Navigator search is seat-gated too):
     // scraping is the one concept for "run it now, get a list of other
     // entities", and the Recruiter mount stays the inbox (Eugene, 2026-09-05).
+    //
+    // 2026-10-08: scrape_linkedin_build_search_url took one more, 24/25. It
+    // composes the URL of the four people and company searches as ONE tool with
+    // one key per search (four separate tools would not fit), and it belongs
+    // here because it is these searches' URL and resolves through these
+    // typeaheads.
     facade: 'none',
   },
   {
