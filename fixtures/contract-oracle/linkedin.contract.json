@@ -7960,6 +7960,10 @@
                     "value": "unfollow_profile"
                 },
                 {
+                    "name": "InviteToEvent",
+                    "value": "invite_to_event"
+                },
+                {
                     "name": "EndorseSkills",
                     "value": "endorse_skills"
                 },
@@ -30189,6 +30193,112 @@
             "internal": false,
             "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountSelfGetterRequest",
             "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-accounts/{sid}/invite-to-event",
+            "controller": "App\\Entities\\LinkedinAccount\\LinkedinAccountController",
+            "action": "inviteToEvent",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_connections",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\LinkedinAccountInviteToEventRequest",
+            "rules": [
+                {
+                    "field": "event_ln_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^[0-9]{1,32}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:25"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 25,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*.ln_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                }
+            ],
             "rules_reason": null
         },
         {
@@ -60966,6 +61076,7 @@
         "degree_indeterminate": "LinkedIn did not expose a network distance for this profile (the account itself, a hidden profile, or a page that carries none), so no degree can be recorded.",
         "disconnect_in_progress": "This cloud browser is disconnecting; wait for it to finish.",
         "duplicate_host_port": "An automation server is already registered at this ip and port.",
+        "event_invite_rejected": "LinkedIn refused at least one invitation of this batch and the wire does not say which; check that this account may invite to the event (LinkedIn offers it the Invite button there) and that every target is a 1st-degree connection, then retry with the targets that are.",
         "facet_id_required": "{field} needs the id: LinkedIn Sales Navigator matches this filter by id only and ignores a value without one. Resolve the text with sales-nav-param-id-lookup, or build the search with build-search-url.",
         "facet_value_not_found": "LinkedIn's typeahead offers nothing for this text, and this filter takes ids only; check the spelling, or pass an id from the lookup tool.",
         "filters_must_be_a_non_empty_object": "source_input.filters must be an object with at least one search filter.",

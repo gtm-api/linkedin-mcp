@@ -34,6 +34,11 @@ export const MOUNTS: MountConfig[] = [
       // The Recruiter contract chooser pair (2026-09-15) rides with them.
       { kind: 'exclude', name: 'get_linkedin_account_my_recruiter_contracts' },
       { kind: 'exclude', name: 'select_linkedin_account_recruiter_contract' },
+      // The event invitation batch (2026-10-08) rides on /mcp/linkedin/network
+      // with the invitation verbs it is gated with (can_act_linkedin_connections):
+      // this mount sits at 29 of its 29, and an agent inviting connections to an
+      // event is doing network work, not account administration.
+      { kind: 'exclude', name: 'invite_linkedin_members_to_event' },
     ],
     // 26 -> 29 on 2026-09-22: set_linkedin_account_my_position (the About
     // section and the two profile images ride edit_linkedin_account_my_profile,
@@ -162,12 +167,16 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/network',
     name: 'gtm-linkedin-network',
     instructions:
-      'GTM LinkedIn network graph: connections, connection requests, invitations, followers. Outward actions (send request, withdraw, accept, ignore, remove) are protected (preview → confirm).',
+      'GTM LinkedIn network graph: connections, connection requests, invitations, followers, and inviting connections to a LinkedIn event. Outward actions (send request, withdraw, accept, ignore, remove, invite to event) are protected (preview → confirm).',
     selectors: [
       p('linkedin_connections'),
       p('linkedin_connection_requests'),
       p('linkedin_connection_invitations'),
       p('linkedin_followers'),
+      // Declared in linkedin_accounts (its route is /api/linkedin-accounts/{sid}/
+      // invite-to-event and that file is the research home), mounted here with
+      // the other invitation verbs; 22 -> 23 of the default 25 on 2026-10-08.
+      { kind: 'tool', name: 'invite_linkedin_members_to_event' },
     ],
     maxTools: 25,
     facade: 'none',

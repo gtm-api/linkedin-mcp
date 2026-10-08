@@ -18,6 +18,13 @@
 // history and the reason it is still unsigned, in
 // apps/worker/src/mounts.config.ts. Read it before adding the 28th tool: the
 // answer there may well be a collapse or a split, not another raise.
+//
+// 2026-10-08: invite_linkedin_members_to_event is declared here (its route is
+// /api/linkedin-accounts/{sid}/invite-to-event and this file is the research
+// home) but RIDES ON /mcp/linkedin/network, with the invitation verbs it is
+// gated with (can_act_linkedin_connections); the accounts mount sits at 29 of
+// its 29. The exclusion on the accounts mount, the tool selector on the network
+// mount and the tool's own `mount` field are the whole binding.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -774,6 +781,28 @@ const UnfollowResult = z.object({
   is_retryable: z.boolean().describe('LinkedIn\'s own retry hint, passed through untouched.'),
 }).passthrough();
 
+// invite_linkedin_members_to_event (2026-10-08). The wire takes voyager member
+// ids only (the SDK puts each into urn:li:fsd_profile:<id>), so a target is a
+// member id or a nickname and never a Sales Navigator id; the backend restates
+// the same rule (LinkedinAccountInviteToEventRequest) and resolves a
+// nickname-only target with one profile read before the batch.
+const EventInviteTarget = z.object({
+  ln_id: z.string().max(128).nullable().optional()
+    .describe('LinkedIn member id (ACoAA...), sent as is in the batch. The address to prefer: it costs no lookup.'),
+  nickname: z.string().max(100).nullable().optional()
+    .describe('Public profile slug, the vanity name in the profile URL. A nickname-ONLY target costs one profile read (self_account_sync) before the batch; next to ln_id it is ignored, the id is the address.'),
+}).describe('One person to invite; ln_id or nickname (a Sales Navigator id is not an address for an event invitation).');
+
+const EventInviteResult = z.object({
+  activity_log: z.object({}).passthrough()
+    .describe('The one dispatch row of the batch (linkedin-account-activity-log) per §4.12a; action_type invite_to_event.'),
+  success: z.boolean()
+    .describe("The wire's own flag, mirrored: true when LinkedIn took the batch and every element it answered was 200 (already invited) or 201 (created). Always true in a 200; a false is the 409 event_invite_rejected."),
+  event_ln_id: z.string().describe('The event the batch went to, echoed.'),
+  profile_ids: z.array(z.string())
+    .describe('The member ids LinkedIn was given, resolved and deduped, in the order of the targets: a caller who addressed people by nickname learns the ids here.'),
+}).passthrough();
+
 export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
@@ -1455,6 +1484,32 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     inputSchema: z.object({ sid: SID, target: Target, ...usageMetaField }),
     outputSchema: McpActionResponse(LinkedinAccount),
     annotations: { title: 'Visit profile', ...DANGER },
+  },
+  {
+    ...base,
+    mount: 'linkedin.network',
+    name: 'invite_linkedin_members_to_event',
+    description:
+      "Invite up to 25 members to a LinkedIn event, in ONE call: one invitation batch from the account's open LinkedIn tab, one browser round and one networking_general unit (40 a day, 180 s apart; 429 on saturation). event_ln_id is the digits of the event urn, the event_ln_id of a search_linkedin_events row (the number in /events/<id>/). A target is a member id (ln_id, preferred) or a nickname; a nickname alone costs one profile read first, and a Sales Navigator id is not an address here. LinkedIn decides who may invite and who may be invited: a member inviting 1st-degree connections to a public event it does not organize went through live, as LinkedIn's own Invite button allows. The answer is one flag for the batch; a false is 409 event_invite_rejected with the ids sent, without saying which member was refused or whether the others landed. A member already invited counts as success, one who already accepted is skipped. Writes nothing locally.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/invite-to-event', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    pacedBucket: 'networking_general',
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      event_ln_id: z.string().regex(/^[0-9]{1,32}$/)
+        .describe("The event's numeric id: the digits of urn:li:fsd_professionalEvent:<id>, the event_ln_id of a search_linkedin_events row, the number in https://www.linkedin.com/events/<id>/ ."),
+      targets: z.array(EventInviteTarget).min(1).max(25)
+        .describe('1 to 25 people, one batch. A member named twice is sent once.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, EventInviteResult),
+    annotations: { title: 'Invite members to event', ...DANGER_IDEM },
   },
   {
     ...base,
