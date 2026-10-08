@@ -63,7 +63,9 @@ const VendorProvider = z.enum(['gologin', 'multilogin', 'adspower', 'dolphin']);
 // customer fixes it: their vendor profile, their LinkedIn session, their proxy -
 // relay error_reason to the user) and `support_error_investigation` (ours, or
 // unclassified - no user action, our team is paged). Both refuse dispatch with
-// 409 browser_error_investigation and are never auto-restarted.
+// 409 browser_error_investigation. Since 2026-10-08 the restart reaper tries a
+// support parking, and a client parking whose cause is the proxy, again three
+// hours after the last failure; the customer's other causes stay until they act.
 // The signed-out floor is a pair too since 2026-09-22: `login_issue` (the
 // session is gone, a re-login brings it back) and `restricted` (the same lost
 // session plus a verdict: right after the logout the platform read the member's
