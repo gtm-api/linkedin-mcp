@@ -17576,12 +17576,11 @@
                 {
                     "field": "sales_nav_people.locations.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -17591,12 +17590,11 @@
                 {
                     "field": "sales_nav_people.company_headquarters.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -17606,12 +17604,11 @@
                 {
                     "field": "sales_nav_people.industries.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -17651,12 +17648,11 @@
                 {
                     "field": "sales_nav_people.groups.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -17666,12 +17662,11 @@
                 {
                     "field": "sales_nav_people.schools.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -18703,12 +18698,11 @@
                 {
                     "field": "sales_nav_companies.company_headquarters.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -18718,12 +18712,25 @@
                 {
                     "field": "sales_nav_companies.industries.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sales_nav_companies.account_lists.*.free_text",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -24675,13 +24682,12 @@
                 {
                     "field": "filters.company_headquarters.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.company_headquarters.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -24694,8 +24700,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.company_headquarters.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -24754,13 +24759,12 @@
                 {
                     "field": "filters.industries.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.industries.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -24773,8 +24777,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.industries.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -24833,13 +24836,12 @@
                 {
                     "field": "filters.account_lists.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.account_lists.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -24852,8 +24854,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.account_lists.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25706,13 +25707,12 @@
                 {
                     "field": "filters.locations.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.locations.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -25725,8 +25725,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.locations.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25785,13 +25784,12 @@
                 {
                     "field": "filters.company_headquarters.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.company_headquarters.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -25804,8 +25802,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.company_headquarters.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -25864,13 +25861,12 @@
                 {
                     "field": "filters.industries.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.industries.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -25883,8 +25879,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.industries.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26101,13 +26096,12 @@
                 {
                     "field": "filters.groups.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.groups.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -26120,8 +26114,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.groups.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -26180,13 +26173,12 @@
                 {
                     "field": "filters.schools.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.schools.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -26199,8 +26191,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.schools.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -45288,12 +45279,11 @@
                 {
                     "field": "sales_nav_people.locations.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -45303,12 +45293,11 @@
                 {
                     "field": "sales_nav_people.company_headquarters.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -45318,12 +45307,11 @@
                 {
                     "field": "sales_nav_people.industries.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -45363,12 +45351,11 @@
                 {
                     "field": "sales_nav_people.groups.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -45378,12 +45365,11 @@
                 {
                     "field": "sales_nav_people.schools.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -46415,12 +46401,11 @@
                 {
                     "field": "sales_nav_companies.company_headquarters.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -46430,12 +46415,25 @@
                 {
                     "field": "sales_nav_companies.industries.*.free_text",
                     "rules": [
-                        "nullable",
-                        "boolean"
+                        "prohibited"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "boolean",
+                    "nullable": false,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sales_nav_companies.account_lists.*.free_text",
+                    "rules": [
+                        "prohibited"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -52387,13 +52385,12 @@
                 {
                     "field": "filters.company_headquarters.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.company_headquarters.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -52406,8 +52403,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.company_headquarters.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -52466,13 +52462,12 @@
                 {
                     "field": "filters.industries.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.industries.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -52485,8 +52480,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.industries.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -52545,13 +52539,12 @@
                 {
                     "field": "filters.account_lists.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.account_lists.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -52564,8 +52557,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.account_lists.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -53418,13 +53410,12 @@
                 {
                     "field": "filters.locations.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.locations.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -53437,8 +53428,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.locations.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -53497,13 +53487,12 @@
                 {
                     "field": "filters.company_headquarters.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.company_headquarters.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -53516,8 +53505,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.company_headquarters.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -53576,13 +53564,12 @@
                 {
                     "field": "filters.industries.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.industries.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -53595,8 +53582,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.industries.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -53813,13 +53799,12 @@
                 {
                     "field": "filters.groups.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.groups.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -53832,8 +53817,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.groups.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -53892,13 +53876,12 @@
                 {
                     "field": "filters.schools.*.id",
                     "rules": [
-                        "nullable",
+                        "required",
                         "string",
-                        "max:128",
-                        "required_without:filters.schools.*.text"
+                        "max:128"
                     ],
-                    "required": false,
-                    "nullable": true,
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -53911,8 +53894,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:256",
-                        "required_without:filters.schools.*.id"
+                        "max:256"
                     ],
                     "required": false,
                     "nullable": true,
@@ -60984,6 +60966,7 @@
         "degree_indeterminate": "LinkedIn did not expose a network distance for this profile (the account itself, a hidden profile, or a page that carries none), so no degree can be recorded.",
         "disconnect_in_progress": "This cloud browser is disconnecting; wait for it to finish.",
         "duplicate_host_port": "An automation server is already registered at this ip and port.",
+        "facet_id_required": "{field} needs the id: LinkedIn Sales Navigator matches this filter by id only and ignores a value without one. Resolve the text with sales-nav-param-id-lookup, or build the search with build-search-url.",
         "facet_value_not_found": "LinkedIn's typeahead offers nothing for this text, and this filter takes ids only; check the spelling, or pass an id from the lookup tool.",
         "filters_must_be_a_non_empty_object": "source_input.filters must be an object with at least one search filter.",
         "handover_in_progress": "Another handover of this account is still in progress; finish or cancel it first.",

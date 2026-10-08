@@ -102,15 +102,28 @@ const PeopleSearchFilters = z.object({
 
 // One selected chip in an SN typeahead facet - the node FilterValue verbatim.
 // id comes from scrape_linkedin_sales_nav_param_id_lookup (the member's describe
-// names the lookup type); text is a free-text label SN matches server-side (no
-// id needed); exclude flips the chip to a negative filter.
+// names the lookup type); exclude flips the chip to a negative filter.
+//
+// 🛑 Free text is real on the job titles and the companies ONLY. Measured live
+// on a seat (2026-10-08): a text-only title or company chip changes the page,
+// while a text-only location, headquarters region, industry or school chip
+// leaves it exactly as it was without the filter. So the free-text members take
+// SnFacetValue (an id or a text) and every other typeahead member takes
+// SnIdFacetValue (the id required; the backend answers a text-only value there
+// with 422 facet_id_required).
 const SnFacetValue = z.object({
   id: z.string().max(128).nullable().optional().describe('Opaque SN facet id, VERBATIM from scrape_linkedin_sales_nav_param_id_lookup.'),
-  text: z.string().max(256).nullable().optional().describe('Free-text label - SN matches it server-side; use when no id is at hand.'),
+  text: z.string().max(256).nullable().optional().describe('Free text when no id is given (SN matches it on titles and companies), else the id\'s label.'),
   exclude: z.boolean().nullable().optional().describe('true → EXCLUDED (negative filter); omitted/false → INCLUDED.'),
 }).describe('One facet value: at least one of id / text.');
 
+const SnIdFacetValue = SnFacetValue.extend({
+  id: z.string().max(128).describe('Opaque SN facet id, VERBATIM from scrape_linkedin_sales_nav_param_id_lookup. REQUIRED: LinkedIn ignores a value without its id on this facet.'),
+  text: z.string().max(256).nullable().optional().describe('The id\'s label, optional.'),
+}).describe('One facet value, by id.');
+
 const snFacet = (desc: string) => z.array(SnFacetValue).max(10).nullable().optional().describe(desc);
+const snIdFacet = (desc: string) => z.array(SnIdFacetValue).max(10).nullable().optional().describe(desc);
 
 const TENURE_LEGEND = "'1' <1 year, '2' 1-2, '3' 3-5, '4' 6-10, '5' 10+ years";
 const TENURE_IDS = ['1', '2', '3', '4', '5'] as const;
@@ -129,13 +142,13 @@ const SalesNavPeopleSearchFilters = z.object({
   // Typeahead facets - [{id, text, exclude}] values; lookup type named per member.
   current_titles: snFacet('Current job titles. Ids via lookup(type: "TITLE") (numeric, e.g. "5" Director) - or just free text: [{text: "VP Marketing"}].'),
   past_titles: snFacet('Past job titles. Ids via lookup(type: "TITLE") or free text.'),
-  locations: snFacet('Person geography. Ids via lookup(type: "BING_GEO") (e.g. "103644278" United States); regions like DACH/EMEA exist too.'),
-  company_headquarters: snFacet('CURRENT COMPANY HQ region (not the person’s own location). Ids via lookup(type: "BING_GEO").'),
-  industries: snFacet('Industries. Ids via lookup(type: "INDUSTRY") (numeric).'),
-  current_companies: snFacet('Current employer. Ids via lookup(type: "COMPANY_WITH_LIST") - id shape urn:li:organization:N. exclude: true is the classic "not my customers" move.'),
-  past_companies: snFacet('Past employer. Ids via lookup(type: "COMPANY_WITH_LIST").'),
-  groups: snFacet('LinkedIn group membership. Ids via lookup(type: "GROUP").'),
-  schools: snFacet('Schools attended. Ids via lookup(type: "SCHOOL") or free text.'),
+  locations: snIdFacet('Person geography, by id via lookup(type: "BING_GEO") (e.g. "103644278" United States); regions like DACH/EMEA exist too.'),
+  company_headquarters: snIdFacet('CURRENT COMPANY HQ region (not the person’s own location), by id via lookup(type: "BING_GEO").'),
+  industries: snIdFacet('Industries, by id via lookup(type: "INDUSTRY") (numeric).'),
+  current_companies: snFacet('Current employer. Ids via lookup(type: "COMPANY_WITH_LIST") - id shape urn:li:organization:N - or free text. exclude: true is the classic "not my customers" move.'),
+  past_companies: snFacet('Past employer. Ids via lookup(type: "COMPANY_WITH_LIST") or free text.'),
+  groups: snIdFacet('LinkedIn group membership, by id via lookup(type: "GROUP").'),
+  schools: snIdFacet('Schools attended, by id via lookup(type: "SCHOOL").'),
   // Static closed-enum facets - full id sets inline, NO lookup call needed. A negative
   // selection is expressed by including the complement (the sets are closed).
   seniority_levels: z.array(z.enum(['100', '110', '120', '130', '200', '210', '220', '300', '310', '320'])).max(10).nullable().optional()
@@ -252,9 +265,9 @@ const SN_DEPARTMENT_FIELD = z.enum(SN_FUNCTION_IDS)
 const SalesNavCompanySearchFilters = z.object({
   keywords: z.string().max(256).nullable().optional(),
   // Typeahead facets - [{id, text, exclude}] values.
-  company_headquarters: snFacet('HQ region. Ids via lookup(type: "BING_GEO"); exclude supported (e.g. exclude APAC).'),
-  industries: snFacet('Industries. Ids via lookup(type: "INDUSTRY").'),
-  account_lists: snFacet('Your SN account lists. Ids via lookup(type: "ACCOUNT_LIST") - numeric list ids or the "ALL" sentinel; exclude: true skips a list (e.g. current book of business).'),
+  company_headquarters: snIdFacet('HQ region, by id via lookup(type: "BING_GEO"); exclude supported (e.g. exclude APAC).'),
+  industries: snIdFacet('Industries, by id via lookup(type: "INDUSTRY").'),
+  account_lists: snIdFacet('Your SN account lists, by id via lookup(type: "ACCOUNT_LIST") - numeric list ids or the "ALL" sentinel; exclude: true skips a list (e.g. current book of business).'),
   // Static closed-enum facets - full id sets inline, NO lookup call needed.
   company_headcounts: z.array(z.enum(['B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'])).max(10).nullable().optional()
     .describe("Company size: 'B' 1-10, 'C' 11-50, 'D' 51-200, 'E' 201-500, 'F' 501-1000, 'G' 1001-5000, 'H' 5001-10000, 'I' 10001+ (account search has no 'A')."),
@@ -316,14 +329,22 @@ const buildFacet = (value: z.ZodTypeAny, desc: string) => z.array(value).max(10)
 const NumericBuildValue = buildValue(z.string().max(64).regex(/^\d+$/), 'A numeric id, as the search takes it; rides as it is.');
 const ProfileBuildValue = buildValue(z.string().max(128).regex(/^[\w-]+$/), 'A profile id (ACoA…), as the search takes it; rides as it is.');
 
-// A Sales Navigator chip with one more flag: free_text keeps a text as a
-// free-text chip, the search's own text-only chip, instead of resolving it.
+// A Sales Navigator chip in build input: an id, or a text to resolve. On the
+// titles and the companies (the members SN matches as text) a text the
+// typeahead does not know stays a free-text chip, and free_text sends one on
+// purpose; on every other member a miss is a 422, because LinkedIn ignores a
+// text-only chip there.
 const SnBuildChip = SnFacetValue.extend({
-  text: z.string().max(256).nullable().optional().describe('Text to resolve into an id plus LinkedIn\'s label; one the typeahead offers nothing for stays a free-text chip.'),
-  free_text: z.boolean().nullable().optional().describe('true → send the text as a free-text chip, unresolved (SN matches it server-side).'),
+  text: z.string().max(256).nullable().optional().describe('Text to resolve into an id plus LinkedIn\'s label; one the typeahead offers nothing for is a 422 naming the closest options.'),
 }).describe('One chip: an id, or a text (at least one of the two).');
 
+const SnFreeTextBuildChip = SnBuildChip.extend({
+  text: z.string().max(256).nullable().optional().describe('Text to resolve into an id plus LinkedIn\'s label; one the typeahead offers nothing for stays a free-text chip, which SN matches on this facet.'),
+  free_text: z.boolean().nullable().optional().describe('true → send the text as a free-text chip, unresolved.'),
+});
+
 const snBuildFacet = (desc: string) => z.array(SnBuildChip).max(10).nullable().optional().describe(desc);
+const snFreeTextBuildFacet = (desc: string) => z.array(SnFreeTextBuildChip).max(10).nullable().optional().describe(desc);
 
 const PeopleBuildFilters = PeopleSearchFilters.extend({
   locations: buildFacet(NumericBuildValue, 'Geography (location typeahead).'),
@@ -341,13 +362,13 @@ const CompanyBuildFilters = CompanySearchFilters.extend({
 }).describe('The scrape_linkedin_search_companies filters. A text the typeahead offers nothing for is a 422 naming it.');
 
 const SalesNavPeopleBuildFilters = SalesNavPeopleSearchFilters.extend({
-  current_titles: snBuildFacet('Current job titles (TITLE).'),
-  past_titles: snBuildFacet('Past job titles (TITLE).'),
+  current_titles: snFreeTextBuildFacet('Current job titles (TITLE).'),
+  past_titles: snFreeTextBuildFacet('Past job titles (TITLE).'),
   locations: snBuildFacet('Person geography (BING_GEO).'),
   company_headquarters: snBuildFacet('Current company HQ region (BING_GEO).'),
   industries: snBuildFacet('Industries (INDUSTRY).'),
-  current_companies: snBuildFacet('Current employer (COMPANY_WITH_LIST).'),
-  past_companies: snBuildFacet('Past employer (COMPANY_WITH_LIST).'),
+  current_companies: snFreeTextBuildFacet('Current employer (COMPANY_WITH_LIST).'),
+  past_companies: snFreeTextBuildFacet('Past employer (COMPANY_WITH_LIST).'),
   groups: snBuildFacet('Group membership (GROUP).'),
   schools: snBuildFacet('Schools (SCHOOL).'),
   connections_of: buildFacet(buildValue(z.string().max(64), 'A member token (ACwA…), as the search takes it.'), 'People connected to these members: a name resolves through CONNECTION_OF; a miss is a 422.'),
@@ -1619,7 +1640,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_build_search_url',
     description:
-      'Build the LinkedIn URL of a people or company search, regular or Sales Navigator, from that search\'s filters: send exactly ONE of people / sales_nav_people / companies / sales_nav_companies. Facet values take an id or plain text; each text is resolved by the search\'s own typeahead (the option labelled exactly so, else the first), one lookup per distinct text, at most 10 per call, each a paced scraping read (Sales Navigator ones need an SN seat). Returns url (Sales Navigator in its ?query= form, the one imports read), filters in the exact shape the matching search tool takes, and resolved: per text, the id picked and the alternatives. All ids given: no LinkedIn call at all. Recruiter has no build: its URL comes from running scrape_linkedin_search_recruiter_people.',
+      'Build the LinkedIn URL of a people or company search, regular or Sales Navigator, from that search\'s filters: send exactly ONE of people / sales_nav_people / companies / sales_nav_companies. Facet values take an id or plain text; each text is resolved by the search\'s own typeahead (the option labelled exactly so, else the first; a multi-word miss is retried by its first word), at most 10 lookups per call, each a paced scraping read (Sales Navigator ones need an SN seat). A text nothing matches is a 422 naming the closest options, except on Sales Navigator titles and companies, where it stays free text. Returns url (Sales Navigator in its ?query= form, the one imports read), filters in the exact shape the matching search tool takes, and resolved: per text, the id picked and the alternatives. All ids given: no LinkedIn call at all. Recruiter has no build: its URL comes from running scrape_linkedin_search_recruiter_people.',
     toolClass: 'complex',
     route: rt('build-search-url'),
     operation: 'action',
