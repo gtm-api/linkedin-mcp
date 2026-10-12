@@ -395,9 +395,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_message',
     description:
-      'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id or by public_identifier (slug or linkedin.com/in/ URL, resolved server-side). Guards run first: send_messages daily cap, 8000-char body cap, connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row is inserted only on terminal success. '
+      'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id or by public_identifier (slug or linkedin.com/in/ URL). Guards run first: send_messages daily cap, 8000-char body cap, block guard (a member who blocked this account is refused 422 target_blocked, no browser call), connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row only on terminal success. '
       + sendOnce('place (the thread, else the person)')
-      + ' When NOT: InMail to a non-connection → send_linkedin_inmail; voice note → send_linkedin_voice_message; Sales Navigator thread → send_linkedin_sales_nav_message; the connection-request note lives on linkedin-connection-requests. Bulk send: loop client-side and respect the daily cap.',
+      + ' When NOT: InMail to a non-connection → send_linkedin_inmail; voice note → send_linkedin_voice_message; Sales Navigator thread → send_linkedin_sales_nav_message; the connection note lives on linkedin-connection-requests. Bulk: loop client-side within the daily cap.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send' },
     operation: 'action',
