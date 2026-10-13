@@ -69,7 +69,7 @@ const companyTargetFields = {
   company_url: z.string().max(2048).nullable().optional()
     .describe('https://www.linkedin.com/company/{slug}/ (or a Sales Nav company URL). Provide company_url XOR domain.'),
   domain: z.string().max(191).nullable().optional()
-    .describe('The company website instead of its LinkedIn URL ("acme.com", "www.acme.com" and "https://acme.com/pricing" all fold to the same host): resolved to a LinkedIn identity through the stored corpus, so a miss is refused company_not_resolvable rather than searched for live. This is the way to turn a domain you already have into the company profile. Provide domain XOR company_url.'),
+    .describe('The company website instead of its LinkedIn URL (`acme.com`, `www.acme.com` and `https://acme.com/pricing` all fold to the same host): resolved to a LinkedIn identity through the stored corpus, so a miss is refused company_not_resolvable rather than searched for live. This is the way to turn a domain you already have into the company profile. Provide domain XOR company_url.'),
 };
 
 // Company target, company-posts only: NESTED and id-first. The wire getter has
