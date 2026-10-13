@@ -176,7 +176,7 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     ...base,
     name: 'sync_my_linkedin_connections',
     description:
-      'Kick off a full background connections sync for one account by inserting a sync_run (upsert-only: new/updated rows only, no removal detection). ASYNC: returns pending refs to poll or await the linkedin-connections.sync-completed webhook. For an in-request head refresh use get_my_latest_linkedin_connections instead.',
+      'Kick off a background connections sync for one account by inserting a sync_run. The pages add and update rows; a live row the run should have listed and did not goes to the check-target-block, whose read removes a severed edge (linkedin-connections.removed lands shortly after the run). ASYNC: returns pending refs to poll or await the linkedin-connections.sync-completed webhook. For an in-request head refresh use get_my_latest_linkedin_connections instead.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connections/sync-my-linkedin-connections' },
     operation: 'action',
