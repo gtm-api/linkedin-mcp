@@ -13,6 +13,9 @@
 #     research content into public Actions logs on any diff. They stay
 #     workstation gates, enforced by the pre-push hook (pnpm hooks:install).
 #   pnpm openapi:public:check  Same umbrella dependency, same home.
+#   reasons-drift  Runs, but answers SKIP here: it compares the fixtures with
+#     the docs repo's concepts/reasons.mdx (marketing/docs/gtm.docs next to the
+#     umbrella), which this job does not clone. Workstation gate as well.
 #   pnpm oracle:check / test:e2e  Need the live Laravel backends; workstation
 #     gates, named in DEPLOY.md. Unchanged from the Bitbucket setup.
 #
