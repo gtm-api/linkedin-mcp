@@ -11489,6 +11489,24 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
                 }
             ],
             "rules_reason": null

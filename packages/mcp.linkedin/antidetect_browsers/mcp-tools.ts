@@ -297,7 +297,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'check_antidetect_browser_proxy',
     description:
-      'Probe a customer-supplied proxy tuple and report the exit it reaches: country, IP and round-trip latency. Nothing is written, and no browser is named: call it for a proxy you are about to pass as custom_proxy_config, on create or on update-proxy. A proxy that refuses is a SUCCESSFUL call with ok:false plus error_kind (timeout | tls | network | http_error); only a malformed tuple is a 422. The write paths run the same probe themselves, so this verb is for showing the operator what a tuple resolves to BEFORE committing to it.',
+      'Probe a customer-supplied proxy tuple and report the exit it reaches: country, IP and round-trip latency. Nothing is written: call it for a proxy you are about to pass as custom_proxy_config, on create or on update-proxy. A proxy that refuses is a SUCCESSFUL call with ok:false plus error_kind (timeout | tls | network | http_error); only a malformed tuple is a 422. The write paths run the same probe themselves, so this verb is for showing the operator what a tuple resolves to BEFORE committing to it. Checking an edit of a browser that already rides its own proxy? Pass its sid and leave the password out: the stored one is probed, as update-proxy keeps it, for the same ip and username only.',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/check-proxy' },
     operation: 'action',
@@ -312,6 +312,8 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
       mode: z.enum(['http', 'socks4', 'socks5']).optional().describe('Default http.'),
       username: z.string().nullable().optional(),
       password: z.string().nullable().optional(),
+      sid: SID.optional()
+        .describe('The browser whose own proxy is being edited. A password left out is then the one that browser stores, for the same ip and username only; another host never receives it.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), z.object({
@@ -497,7 +499,8 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
       antidetect_browser_proxy_sid: PROXY_SID.optional()
         .describe('Pin a specific pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
       proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy. The default way to pick a proxy.'),
-      custom_proxy_config: CustomProxyConfig.optional(),
+      custom_proxy_config: CustomProxyConfig.optional()
+        .describe('Custom proxy connection tuple (customer BYO path). Probed before it is written; 5G Proxy cannot ride it. A password left out keeps the one this browser stores when ip and username stay the same, never for another host.'),
       proxy_5g: z.boolean().optional()
         .describe('Arm (true) or release (false) the 5G Proxy add-on binding on this browser. Omit to leave the binding untouched. A body carrying proxy_5g alone is a valid source-less call: it moves only the add-on binding and leaves the IP where it is.'),
       ...usageMetaField,
