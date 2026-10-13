@@ -9,7 +9,10 @@ import { fileURLToPath } from 'node:url';
 // (bin/error-reasons.mjs). Nobody edits it by hand, so the only way it can be
 // wrong is by going stale after an oracle refresh: someone adds a code and its
 // sentence to a service's ErrorCatalog, refreshes the fixture, and forgets
-// `pnpm docs:reasons`. Same shape as the public OpenAPI drift gate.
+// `pnpm docs:reasons`. Same shape as the public OpenAPI drift gate. Where the
+// docs checkout is absent (GitHub Actions clones this public repo alone) the
+// script answers SKIP and the gate passes: a workstation gate, like the two
+// corpus gates the CI header names.
 const script = fileURLToPath(new URL('../bin/error-reasons.mjs', import.meta.url));
 
 describe('docs reasons page', () => {
@@ -21,6 +24,6 @@ describe('docs reasons page', () => {
       const failure = error as { stdout?: string; stderr?: string };
       throw new Error(`${failure.stderr ?? ''}${failure.stdout ?? ''}\nRegenerate and commit the page: pnpm docs:reasons`);
     }
-    expect(output).toContain('OK:');
+    expect(output).toMatch(/^(OK|SKIP): /);
   });
 });

@@ -73,7 +73,15 @@ ${rows.join('\n')}
 `;
 
 if (check) {
-  const committed = existsSync(outFile) ? readFileSync(outFile, 'utf8') : '';
+  if (!existsSync(outFile)) {
+    // The docs repo is a sibling checkout of the umbrella (marketing/docs/gtm.docs,
+    // github.com/gtm-api/docs). Where it is absent, GitHub Actions above all (this
+    // repo is public and clones nothing else), there is nothing to compare: say so
+    // and pass, as the other umbrella-dependent gates stay workstation gates.
+    console.log(`SKIP: ${outFile} is not checked out, nothing to compare (clone gtm-api/docs there to run this gate)`);
+    process.exit(0);
+  }
+  const committed = readFileSync(outFile, 'utf8');
   if (committed !== page) {
     console.error(`DRIFT: ${outFile} does not match the contract-oracle fixtures. Run: pnpm docs:reasons`);
     process.exit(1);

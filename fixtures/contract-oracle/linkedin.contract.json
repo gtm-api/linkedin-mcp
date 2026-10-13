@@ -739,6 +739,247 @@
                 ]
             }
         },
+        "AntidetectBrowserProxySignInCheck": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowserProxySignInCheck\\AntidetectBrowserProxySignInCheckDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "antidetect_browser_proxy_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "linkedin_sign_in_check_account_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "attempt",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "started_at",
+                        "type": "Carbon\\Carbon|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "automation_server_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "vendor_provider",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "vendor_profile_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "vendor_profile_deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "dispatched_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "finished_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "outcome",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "landed_path",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "challenge_key",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_text",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "failure_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "trace_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowserProxySignInCheck\\Responses\\AntidetectBrowserProxySignInCheckResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "antidetect_browser_proxy_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "linkedin_sign_in_check_account_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "attempt",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "started_at",
+                        "type": "Carbon\\Carbon|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "automation_server_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "vendor_provider",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "vendor_profile_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "vendor_profile_deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "dispatched_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "finished_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "outcome",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "landed_path",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "challenge_key",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "error_text",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "failure_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "trace_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": null
+        },
         "AutomationServer": {
             "domain": {
                 "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AutomationServer\\AutomationServerDomain",
@@ -6904,6 +7145,151 @@
                 ]
             },
             "filter": null
+        },
+        "LinkedinSignInCheckAccount": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinSignInCheckAccount\\LinkedinSignInCheckAccountDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "login",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "country_code",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "enabled",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "disabled_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "disabled_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "runs_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_run_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_outcome",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinSignInCheckAccount\\Responses\\LinkedinSignInCheckAccountResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "login",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "country_code",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "enabled",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "disabled_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "disabled_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "runs_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_run_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_outcome",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": null
         }
     },
     "enums": {
@@ -7232,6 +7618,47 @@
                 {
                     "name": "Error",
                     "value": "error"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowserProxySignInCheck\\Enums\\AntidetectBrowserProxySignInCheckOutcomeEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "LoggedIn",
+                    "value": "logged_in"
+                },
+                {
+                    "name": "VerificationCode",
+                    "value": "verification_code"
+                },
+                {
+                    "name": "Captcha",
+                    "value": "captcha"
+                },
+                {
+                    "name": "AppChallenge",
+                    "value": "app_challenge"
+                },
+                {
+                    "name": "OtherChallenge",
+                    "value": "other_challenge"
+                },
+                {
+                    "name": "WrongCredentials",
+                    "value": "wrong_credentials"
+                },
+                {
+                    "name": "AccountRestricted",
+                    "value": "account_restricted"
+                },
+                {
+                    "name": "NoConnect",
+                    "value": "no_connect"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
                 }
             ]
         },
@@ -9951,6 +10378,23 @@
                 {
                     "name": "Inconclusive",
                     "value": "inconclusive"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinSignInCheckAccount\\Enums\\LinkedinSignInCheckAccountDisabledReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "WrongCredentials",
+                    "value": "wrong_credentials"
+                },
+                {
+                    "name": "AccountRestricted",
+                    "value": "account_restricted"
+                },
+                {
+                    "name": "Operator",
+                    "value": "operator"
                 }
             ]
         },
@@ -55250,6 +55694,131 @@
         },
         {
             "method": "POST",
+            "uri": "internal/antidetect-browser-proxy-sign-in-checks/{sid}/result",
+            "controller": "App\\Entities\\AntidetectBrowserProxySignInCheck\\InternalAntidetectBrowserProxySignInCheckController",
+            "action": "result",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\AntidetectBrowserProxySignInCheck\\Requests\\InternalAntidetectBrowserProxySignInCheckResultRequest",
+            "rules": [
+                {
+                    "field": "outcome",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"logged_in\",\"verification_code\",\"captcha\",\"app_challenge\",\"other_challenge\",\"wrong_credentials\",\"account_restricted\",\"no_connect\",\"failed\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "logged_in",
+                        "verification_code",
+                        "captcha",
+                        "app_challenge",
+                        "other_challenge",
+                        "wrong_credentials",
+                        "account_restricted",
+                        "no_connect",
+                        "failed"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "landed_path",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "challenge_key",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "error_text",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "failure_reason",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "stage",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:32"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 32,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/antidetect-browsers",
             "controller": "App\\Entities\\AntidetectBrowser\\InternalAntidetectBrowserStepController",
             "action": "create",
@@ -60059,6 +60628,120 @@
         },
         {
             "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-sign-in-checks/search",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "searchAntidetectBrowserProxySignInChecks",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxySignInCheckSearchRequest",
+            "rules": [
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "outcome",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "in:\"logged_in\",\"verification_code\",\"captcha\",\"app_challenge\",\"other_challenge\",\"wrong_credentials\",\"account_restricted\",\"no_connect\",\"failed\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "logged_in",
+                        "verification_code",
+                        "captcha",
+                        "app_challenge",
+                        "other_challenge",
+                        "wrong_credentials",
+                        "account_restricted",
+                        "no_connect",
+                        "failed"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "antidetect_browser_proxy_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ab_px_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "linkedin_sign_in_check_account_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_sa_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/ops/cloud-browser-sessions/recording",
             "controller": "App\\Ops\\InternalOpsController",
             "action": "cloudBrowserSessionRecording",
@@ -60747,6 +61430,293 @@
                     "in": null,
                     "min": 1,
                     "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/linkedin-sign-in-check-accounts/create",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "createLinkedinSignInCheckAccount",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsSignInCheckAccountCreateRequest",
+            "rules": [
+                {
+                    "field": "login",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:320"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "password",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:400"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 400,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "country_code",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:2",
+                        "regex:/^[A-Z]{2}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 2,
+                    "between": null
+                },
+                {
+                    "field": "enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/linkedin-sign-in-check-accounts/delete",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "deleteLinkedinSignInCheckAccount",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsSignInCheckAccountDeleteRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_sa_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/linkedin-sign-in-check-accounts/search",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "searchLinkedinSignInCheckAccounts",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsSignInCheckAccountSearchRequest",
+            "rules": [
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "enabled",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/linkedin-sign-in-check-accounts/update",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "updateLinkedinSignInCheckAccount",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsSignInCheckAccountUpdateRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_sa_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "login",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:320"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "password",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:400"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 400,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "country_code",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "size:2",
+                        "regex:/^[A-Z]{2}$/"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 2,
+                    "between": null
+                },
+                {
+                    "field": "enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }
