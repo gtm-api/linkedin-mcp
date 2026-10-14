@@ -10474,6 +10474,10 @@
                     "value": "connection_removed"
                 },
                 {
+                    "name": "BlockedUs",
+                    "value": "blocked_us"
+                },
+                {
                     "name": "Bounced",
                     "value": "bounced"
                 },
@@ -10571,8 +10575,8 @@
                     "value": "failed"
                 },
                 {
-                    "name": "SkippedFreeSeat",
-                    "value": "skipped_free_seat"
+                    "name": "SkippedFreeSenderProfile",
+                    "value": "skipped_free_sender_profile"
                 },
                 {
                     "name": "SkippedNoAccount",
@@ -10610,7 +10614,7 @@
                 }
             ]
         },
-        "Gtm\\Lib\\Common\\Microservices\\Signals\\SignalPreference\\Enums\\SignalPreferenceSeatScopeEnum": {
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\SignalPreference\\Enums\\SignalPreferenceSenderProfileScopeEnum": {
             "backing": "string",
             "cases": [
                 {
@@ -10835,6 +10839,10 @@
                 {
                     "name": "Manual",
                     "value": "manual"
+                },
+                {
+                    "name": "CompanyCode",
+                    "value": "company_code"
                 },
                 {
                     "name": "CompanyNetwork",
@@ -11123,6 +11131,19 @@
                 {
                     "name": "Off",
                     "value": "off"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteIdentificationEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Companies",
+                    "value": "companies"
+                },
+                {
+                    "name": "People",
+                    "value": "people"
                 }
             ]
         },
@@ -62141,6 +62162,8 @@
         "subject_already_connected": "The subject is already connected to every canary; the check needs a canary that is not connected to them.",
         "subscription_required": "This LinkedIn account does not fit the workspace's plan right now, so it takes no action; add a seat to the plan or free one, then retry.",
         "sync_in_progress": "A sync of the same kind is running on this account; retry after retry_after.",
+        "target_blocked": "This member blocked this account on LinkedIn (visible to another account of the team, invisible to this one), so nothing can be sent to them from it and a retry changes nothing; context.block_log_sid names the verdict. Reach them from another account, or leave them.",
+        "target_unavailable": "This member's LinkedIn account is unavailable right now (invisible from two accounts of the team: deleted, restricted or hibernated), so there is nobody to send to and the stored connection is marked gone. Retry after context.retry_after, when the check looks again.",
         "target_unresolvable": "LinkedIn answered no profile for the target nickname; check the vanity slug, or address the person by their profile URN.",
         "too_many_lookups": "These filters need more typeahead lookups than one call resolves; pass ids for some values (the lookup tools return them), or split the search.",
         "too_many_splits": "group_by would produce more than 500 groups; narrow the filter or split on a field with fewer values.",

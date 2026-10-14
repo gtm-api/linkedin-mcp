@@ -3193,6 +3193,10 @@
                     "value": "connection_removed"
                 },
                 {
+                    "name": "BlockedUs",
+                    "value": "blocked_us"
+                },
+                {
                     "name": "Bounced",
                     "value": "bounced"
                 },
@@ -3290,8 +3294,8 @@
                     "value": "failed"
                 },
                 {
-                    "name": "SkippedFreeSeat",
-                    "value": "skipped_free_seat"
+                    "name": "SkippedFreeSenderProfile",
+                    "value": "skipped_free_sender_profile"
                 },
                 {
                     "name": "SkippedNoAccount",
@@ -3329,7 +3333,7 @@
                 }
             ]
         },
-        "Gtm\\Lib\\Common\\Microservices\\Signals\\SignalPreference\\Enums\\SignalPreferenceSeatScopeEnum": {
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\SignalPreference\\Enums\\SignalPreferenceSenderProfileScopeEnum": {
             "backing": "string",
             "cases": [
                 {
@@ -3554,6 +3558,10 @@
                 {
                     "name": "Manual",
                     "value": "manual"
+                },
+                {
+                    "name": "CompanyCode",
+                    "value": "company_code"
                 },
                 {
                     "name": "CompanyNetwork",
@@ -3842,6 +3850,19 @@
                 {
                     "name": "Off",
                     "value": "off"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSite\\Enums\\WebsiteSiteIdentificationEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Companies",
+                    "value": "companies"
+                },
+                {
+                    "name": "People",
+                    "value": "people"
                 }
             ]
         },
