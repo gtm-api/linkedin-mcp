@@ -154,8 +154,11 @@ const LinkedinMessage = z.object({
   //   - synced rows carry the get-messages wire element VERBATIM (the sync
   //     handlers store `$el['attachments']` unmapped): { id, urn, name?,
   //     content_type, content_url, file_byte_size? }.
-  //   - rows inserted by our own send verbs carry the request value:
-  //     { name, path, size }.
+  //   - rows inserted by our own send verbs keep the metadata of what was sent,
+  //     never the bytes (AttachmentMaterializerService::storedProjection, research
+  //     LinkedinMessageAttachmentValue): { file_name, file_type, file_byte_size }.
+  //     Until 2026-10-16 this schema published { name, path, size } here, the
+  //     request shape retired on 2026-08-13, which no row ever carried.
   // `urn` is the one to feed download_linkedin_message_attachment.
   attachments: z.array(z.object({
     id: z.string().optional(),
@@ -164,8 +167,8 @@ const LinkedinMessage = z.object({
     content_type: z.string().optional(),
     content_url: z.string().optional(),
     file_byte_size: z.number().optional(),
-    path: z.string().optional().describe('Outbound rows only: the https:// URL we uploaded from.'),
-    size: z.number().optional().describe('Outbound rows only.'),
+    file_name: z.string().optional().describe('Rows our send verbs wrote: the file name as sent.'),
+    file_type: z.string().optional().describe('Rows our send verbs wrote: the MIME type as sent.'),
   }).passthrough()),
   // JSON [ro]: emoji reactions aggregated per emoji, exactly as the get-messages /
   // get-conversations wire reports them (voyager reactionSummaries). NULL when never observed
