@@ -10635,8 +10635,20 @@
             "backing": "string",
             "cases": [
                 {
+                    "name": "NeedsMe",
+                    "value": "needs_me"
+                },
+                {
                     "name": "All",
                     "value": "all"
+                },
+                {
+                    "name": "Posts",
+                    "value": "posts"
+                },
+                {
+                    "name": "Moments",
+                    "value": "moments"
                 },
                 {
                     "name": "Website",
