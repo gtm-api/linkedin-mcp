@@ -678,20 +678,50 @@ const ResolvedPost = z.object({
 // Coverage per engine: the regular people search fills headline, location and
 // connection_degree from the search card since 2026-09-16 (the node read the
 // identity only before that, the MCP audit report item 3); position and
-// company_name are structured facts only the Recruiter search carries.
+// company_name are structured facts the Sales Navigator (since 2026-10-16) and
+// Recruiter engines carry and the regular card does not print.
 const LinkedinPersonPreview = z.object({
   ln_member_id: z.string().nullable().describe('Canonical member id (decoded in-process).'),
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
   full_name: z.string().nullable(),
-  headline: z.string().nullable().describe('The card\'s headline line on the regular and Recruiter engines; null on Sales Navigator people search.'),
-  position: z.string().nullable().describe('Recruiter search only; the regular card prints no structured position (read the headline).'),
-  company_name: z.string().nullable().describe('Recruiter search only; the regular card prints no structured company (read the headline).'),
-  location: z.string().nullable().describe('The card\'s location line on the regular and Recruiter engines; null on Sales Navigator people search.'),
+  headline: z.string().nullable().describe('The card\'s headline line on the regular and Recruiter engines; null on the Sales Navigator people search, which carries position and company_name instead.'),
+  position: z.string().nullable().describe('Sales Navigator (the title of the current position) and Recruiter engines; the regular card prints no structured position (read the headline).'),
+  company_name: z.string().nullable().describe('Sales Navigator (the current position\'s company) and Recruiter engines; the regular card prints no structured company (read the headline).'),
+  location: z.string().nullable().describe('The card\'s location line on the regular and Recruiter engines; the member\'s region on Sales Navigator.'),
   avatar_url: z.string().nullable().describe('Best effort on the regular engines (a DOM lookup, null when the card image had not rendered).'),
-  connection_degree: z.string().nullable().describe('The degree badge as the card prints it: 1st, 2nd, 3rd or 3rd+ on the regular engines; Recruiter spells 1st, 2nd, 3rd, out_of_network.'),
+  connection_degree: z.string().nullable().describe('The degree as the engine prints it: 1st, 2nd, 3rd or 3rd+ on the regular engines; 1st, 2nd, 3rd or out_of_network on Sales Navigator (its 3rd covers the 3rd degree and beyond) and Recruiter.'),
 }).passthrough();
+
+// The Sales Navigator lead: the common set, filled from the search page's own
+// decorated answer (node 2026-10-16; identity and picture only before that),
+// and the Sales Navigator facts after it. Degree, pending_invitation and the
+// relationship badges are relative to the account that ran the search, the one
+// data_request.linkedin_account_sid names.
+const LinkedinSalesNavPersonPreview = LinkedinPersonPreview.extend({
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable().describe('As LinkedIn shows it: an initial ("K.") for some members, by their choice or out of network.'),
+  company_ln_id: z.string().nullable().describe('The numeric id of the current company, the one every company tool and /company/N/ take; null when the position names a company without a LinkedIn page.'),
+  company_industry: z.string().nullable(),
+  about: z.string().nullable().describe('The profile\'s About text, whole.'),
+  months_in_position: z.number().int().nullable().describe('Time in the current position, in months.'),
+  months_at_company: z.number().int().nullable().describe('Time at the current company, in months.'),
+  seniority: z.string().nullable().describe('The first seniority Sales Navigator assigns ("Vice President", "CXO", "Director").'),
+  premium: z.boolean().nullable().describe('The member holds a LinkedIn Premium subscription.'),
+  open_profile: z.boolean().nullable().describe('An Open Profile: the member takes InMail from anyone, with no credit spent.'),
+  pending_invitation: z.boolean().nullable().describe('The executor has a connection invitation out to this member.'),
+  spotlights: z.array(z.string()).describe('Sales Navigator\'s badges on the lead, lowercased: recently_hired, recently_promoted, posted_on_linkedin (in the last 30 days), follows_your_company, second_degree_connection (a mutual connection with the executor). Empty when none.'),
+  sales_navigator_url: z.string().nullable().describe('The lead\'s page in Sales Navigator.'),
+  profile_url: z.string().nullable().describe('The member\'s LinkedIn profile, addressed by the sn id (/in/ACwAA…), which LinkedIn resolves to their own page.'),
+}).passthrough();
+
+// The Sales Navigator people search is the one page-numbered people engine
+// whose wire counts: `total` is LinkedIn's own result count, an estimate on a
+// large search ("8M+" on the page), and `has_more` ends the walk at the last
+// page of a small one instead of one empty page later.
+const SalesNavPageNumberPaging = PageNumberPaging
+  .describe('Page-numbered paging: re-call with page + 1 while has_more. total is LinkedIn\'s own count of the search, exact on a small search and an estimate on a large one; Sales Navigator serves 100 pages of 25 at most whatever it says.');
 
 // The services screen answers with the SAME card shape as the people search,
 // so a provider preview IS a person preview. It used to be declared with
@@ -1120,7 +1150,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_search_sales_nav_people',
     description:
-      'One page of a Sales Navigator people search: richer facets than the regular engine (seniority, function, tenure, headcount, company type), no commercial-use limit, SN URNs (sn_id) on the rows. Addressed EITHER by `filters`, which carry the COMPLETE SN facet vocabulary, OR by a pasted /sales/search/people `url`: exactly one of the two. Typeahead members take [{id, text, exclude}] values from scrape_linkedin_sales_nav_param_id_lookup; the static-enum members list their ids inline and need no lookup. Needs an SN-capable executor (a non-SN own account gets 422 sales_nav_required; the auto-pick filters to SN seats).',
+      'One page of a Sales Navigator people search: richer facets than the regular engine (seniority, function, tenure, headcount, company type), no commercial-use limit, SN URNs (sn_id) on the rows. Every row carries the lead\'s current position and company (with the numeric company_ln_id), region, degree, seniority, tenure, About text and Sales Navigator badges, read from the search page\'s own answer at no extra cost, and paging.total is LinkedIn\'s count of the search. Addressed EITHER by `filters`, which carry the COMPLETE SN facet vocabulary, OR by a pasted /sales/search/people `url`: exactly one of the two. Typeahead members take [{id, text, exclude}] values from scrape_linkedin_sales_nav_param_id_lookup; the static-enum members list their ids inline and need no lookup. Needs an SN-capable executor (a non-SN own account gets 422 sales_nav_required; the auto-pick filters to SN seats).',
     toolClass: 'typical',
     route: rt('search-sales-nav-people'),
     operation: 'action',
@@ -1136,7 +1166,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
       page: pageField(),
       ...usageMetaField,
     }),
-    outputSchema: McpActionResponse(z.null(), runResult(LinkedinPersonPreview, PageNumberPaging)),
+    outputSchema: McpActionResponse(z.null(), runResult(LinkedinSalesNavPersonPreview, SalesNavPageNumberPaging)),
     annotations: { title: 'Scrape Sales Navigator people search', ...SCRAPE },
   },
   {
@@ -1416,7 +1446,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_company_decision_makers',
     description:
-      `Sales Navigator’s decision-makers panel for ONE company: the bounded, seniority-weighted leadership/buying-committee list SN computes. SN-capable executor required.`,
+      `Sales Navigator’s decision-makers panel for ONE company: the bounded, seniority-weighted leadership/buying-committee list SN computes, in the Sales Navigator row shape (position, company, region, degree, seniority, tenure, About text, badges). SN-capable executor required.`,
     toolClass: 'typical',
     route: rt('company-decision-makers'),
     operation: 'action',
@@ -1431,7 +1461,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
       limit: z.number().int().min(1).max(50).optional().describe('Default 25.'),
       ...usageMetaField,
     }),
-    outputSchema: McpActionResponse(z.null(), runResult(LinkedinPersonPreview, z.null())),
+    outputSchema: McpActionResponse(z.null(), runResult(LinkedinSalesNavPersonPreview, z.null())),
     annotations: { title: 'Scrape company decision makers', ...SCRAPE },
   },
   {
