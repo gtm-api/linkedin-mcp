@@ -682,6 +682,27 @@ const SkillVerbResult = z.object({
     .describe('The global endorser counter for the skill. Moves with everyone\'s endorsements, so assert direction not an absolute; null when absent.'),
 }).passthrough();
 
+// The platform cadence of each sync track in minutes, the floor of its interval
+// entry: the sync worker never runs a track sooner (its due scan cuts here,
+// gtm.lib.common LinkedinAccountSyncConfigKeyEnum::defaultIntervalMinutes()),
+// and since 2026-10-17 update-sync-config refuses an entry below it with 422
+// interval_below_platform_cadence instead of storing a value that never ran.
+const SYNC_TRACK_CADENCE_MINUTES = {
+  connections: 180,
+  conversations: 180,
+  sales_navigator_conversations: 120,
+  recruiter_conversations: 120,
+  connection_requests: 720,
+  connection_invitations: 720,
+  premium_check: 360,
+  snapshot_check: 1320,
+} as const;
+
+const SyncTrackInterval = (track: keyof typeof SYNC_TRACK_CADENCE_MINUTES) => z.object({
+  interval_minutes: z.number().int().min(SYNC_TRACK_CADENCE_MINUTES[track])
+    .describe(`Minutes between two ${track} syncs: ${SYNC_TRACK_CADENCE_MINUTES[track]} (the platform cadence) or more.`),
+});
+
 const base = {
   service: 'linkedin',
   entity: 'linkedin_accounts',
@@ -1588,7 +1609,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'update_linkedin_account_sync_config',
     description:
-      "Set the account's weekly sync schedule: the timezone, the allowed per-weekday time windows, and per-track cadence entries. Replaces the stored sync_config wholesale (send the full desired config, not a delta). Returns the updated account. SINGLE account: to reschedule a fleet, author a mass action on /mcp/orchestration/mass-actions with the step `linkedin-accounts.update-sync-config` (scope objects) so the whole change rides ONE approval.",
+      "Set the account's weekly sync schedule: the timezone, the allowed per-weekday time windows, and per-track interval entries, each its track's platform cadence or longer (an entry only slows a track down; one below the cadence is refused with 422). Replaces the stored sync_config wholesale (send the full desired config, not a delta). Returns the updated account. SINGLE account: to reschedule a fleet, author a mass action on /mcp/orchestration/mass-actions with the step `linkedin-accounts.update-sync-config` (scope objects) so the whole change rides ONE approval.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/update-sync-config', sidParam: 'sid' },
     operation: 'action',
@@ -1608,15 +1629,15 @@ export const linkedinAccountsTools: ToolDefinition[] = [
           end_minute: z.number().int().min(1).max(1440).describe('Window end, minutes from local midnight (1..1440); must be after start_minute.'),
         })).optional().describe('Allowed sync hours per weekday. Omit it, or send an empty list, to sync around the clock; an empty window never means off.'),
         entries: z.object({
-          connections: z.object({ interval_minutes: z.number().int().min(5) }),
-          conversations: z.object({ interval_minutes: z.number().int().min(5) }),
-          sales_navigator_conversations: z.object({ interval_minutes: z.number().int().min(5) }),
-          recruiter_conversations: z.object({ interval_minutes: z.number().int().min(5) }),
-          connection_requests: z.object({ interval_minutes: z.number().int().min(5) }),
-          connection_invitations: z.object({ interval_minutes: z.number().int().min(5) }),
-          premium_check: z.object({ interval_minutes: z.number().int().min(5) }),
-          snapshot_check: z.object({ interval_minutes: z.number().int().min(5) }),
-        }).partial().optional().describe('Per-track cadence overrides (minutes, ≥5), keyed by sync track.'),
+          connections: SyncTrackInterval('connections'),
+          conversations: SyncTrackInterval('conversations'),
+          sales_navigator_conversations: SyncTrackInterval('sales_navigator_conversations'),
+          recruiter_conversations: SyncTrackInterval('recruiter_conversations'),
+          connection_requests: SyncTrackInterval('connection_requests'),
+          connection_invitations: SyncTrackInterval('connection_invitations'),
+          premium_check: SyncTrackInterval('premium_check'),
+          snapshot_check: SyncTrackInterval('snapshot_check'),
+        }).partial().optional().describe('Per-track interval overrides in minutes, keyed by sync track. An entry can only slow its track down: the worker never syncs a track sooner than its platform cadence (connections and conversations 180, sales_navigator_conversations and recruiter_conversations 120, premium_check 360, connection_requests and connection_invitations 720, snapshot_check 1320), and an entry below it is refused with 422 interval_below_platform_cadence. Leave a track out to sync it at its cadence. New messages do not wait for a sync on a paid plan: while the browser of the account runs they arrive through the realtime push (linkedin-messages.received), so a shorter interval is not the way to get them sooner.'),
       }).describe('Weekly sync schedule for the account (replaces the stored config wholesale).'),
       ...usageMetaField,
     }),
