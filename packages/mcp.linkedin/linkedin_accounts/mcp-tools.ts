@@ -166,7 +166,8 @@ const LinkedinAccount = z.object({
       connection_invitations: z.object({ interval_minutes: z.number() }),
       premium_check: z.object({ interval_minutes: z.number() }),
       snapshot_check: z.object({ interval_minutes: z.number() }),
-    }).partial().describe('Per-track sync-interval overrides, keyed by sync track.'),
+      followers: z.object({ interval_minutes: z.number() }),
+    }).partial().describe('Per-track sync-interval overrides, keyed by sync track. An inbox track at 15 is real-time mode: the browser stays awake inside the sync window.'),
     timezone: z.string().describe('IANA timezone the window is evaluated in.'),
     window: z.array(z.object({
       day_of_week: z.number().int().min(1).max(7),
@@ -682,25 +683,30 @@ const SkillVerbResult = z.object({
     .describe('The global endorser counter for the skill. Moves with everyone\'s endorsements, so assert direction not an absolute; null when absent.'),
 }).passthrough();
 
-// The platform cadence of each sync track in minutes, the floor of its interval
-// entry: the sync worker never runs a track sooner (its due scan cuts here,
-// gtm.lib.common LinkedinAccountSyncConfigKeyEnum::defaultIntervalMinutes()),
-// and since 2026-10-17 update-sync-config refuses an entry below it with 422
-// interval_below_platform_cadence instead of storing a value that never ran.
-const SYNC_TRACK_CADENCE_MINUTES = {
-  connections: 180,
-  conversations: 180,
-  sales_navigator_conversations: 120,
-  recruiter_conversations: 120,
-  connection_requests: 720,
-  connection_invitations: 720,
-  premium_check: 360,
-  snapshot_check: 1320,
+// Each sync track's floor and default in minutes (gtm.lib.common
+// LinkedinAccountSyncConfigKeyEnum::floorIntervalMinutes() / defaultIntervalMinutes()).
+// The sync worker never runs a track sooner than its floor (its due scan cuts
+// there), and since 2026-10-17 update-sync-config refuses an entry below it with
+// 422 interval_below_platform_floor instead of storing a value that never ran.
+// The three inboxes go down to 15, which is real-time mode: the browser of the
+// account stays awake for as long as its sync window is open, so the realtime
+// push delivers new messages in seconds and the pass every 15 minutes is the
+// net under it. The rest go down to an hour; the snapshot keeps its day.
+const SYNC_TRACKS = {
+  connections: { floor: 60, default: 180 },
+  conversations: { floor: 15, default: 180 },
+  sales_navigator_conversations: { floor: 15, default: 120 },
+  recruiter_conversations: { floor: 15, default: 120 },
+  connection_requests: { floor: 60, default: 720 },
+  connection_invitations: { floor: 60, default: 720 },
+  premium_check: { floor: 60, default: 360 },
+  snapshot_check: { floor: 1320, default: 1320 },
+  followers: { floor: 60, default: 1440 },
 } as const;
 
-const SyncTrackInterval = (track: keyof typeof SYNC_TRACK_CADENCE_MINUTES) => z.object({
-  interval_minutes: z.number().int().min(SYNC_TRACK_CADENCE_MINUTES[track])
-    .describe(`Minutes between two ${track} syncs: ${SYNC_TRACK_CADENCE_MINUTES[track]} (the platform cadence) or more.`),
+const SyncTrackInterval = (track: keyof typeof SYNC_TRACKS) => z.object({
+  interval_minutes: z.number().int().min(SYNC_TRACKS[track].floor)
+    .describe(`Minutes between two ${track} syncs: ${SYNC_TRACKS[track].floor} or more (${SYNC_TRACKS[track].default} when the track is left out).`),
 });
 
 const base = {
@@ -1609,7 +1615,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'update_linkedin_account_sync_config',
     description:
-      "Set the account's weekly sync schedule: the timezone, the allowed per-weekday time windows, and per-track interval entries, each its track's platform cadence or longer (an entry only slows a track down; one below the cadence is refused with 422). Replaces the stored sync_config wholesale (send the full desired config, not a delta). Returns the updated account. SINGLE account: to reschedule a fleet, author a mass action on /mcp/orchestration/mass-actions with the step `linkedin-accounts.update-sync-config` (scope objects) so the whole change rides ONE approval.",
+      "Set the account's weekly sync schedule: the timezone, the allowed per-weekday time windows, and per-track interval entries, each its track's floor or longer (15 minutes for an inbox, which is real-time mode: the browser stays awake inside the window; an hour for the rest; one below the floor is refused with 422). Replaces the stored sync_config wholesale (send the full desired config, not a delta). Returns the updated account. SINGLE account: to reschedule a fleet, author a mass action on /mcp/orchestration/mass-actions with the step `linkedin-accounts.update-sync-config` (scope objects) so the whole change rides ONE approval.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/update-sync-config', sidParam: 'sid' },
     operation: 'action',
@@ -1637,7 +1643,8 @@ export const linkedinAccountsTools: ToolDefinition[] = [
           connection_invitations: SyncTrackInterval('connection_invitations'),
           premium_check: SyncTrackInterval('premium_check'),
           snapshot_check: SyncTrackInterval('snapshot_check'),
-        }).partial().optional().describe('Per-track interval overrides in minutes, keyed by sync track. An entry can only slow its track down: the worker never syncs a track sooner than its platform cadence (connections and conversations 180, sales_navigator_conversations and recruiter_conversations 120, premium_check 360, connection_requests and connection_invitations 720, snapshot_check 1320), and an entry below it is refused with 422 interval_below_platform_cadence. Leave a track out to sync it at its cadence. New messages do not wait for a sync on a paid plan: while the browser of the account runs they arrive through the realtime push (linkedin-messages.received), so a shorter interval is not the way to get them sooner.'),
+          followers: SyncTrackInterval('followers'),
+        }).partial().optional().describe('Per-track interval overrides in minutes, keyed by sync track; a track left out syncs at its default (connections and conversations 180, sales_navigator_conversations and recruiter_conversations 120, premium_check 360, connection_requests and connection_invitations 720, snapshot_check 1320, followers 1440). Each track has a floor the worker never syncs sooner than, and an entry below it is refused with 422 interval_below_platform_floor: 15 for the three inboxes, 60 for connections, connection_requests, connection_invitations, premium_check and followers, 1320 for snapshot_check. An inbox at 15 is real-time mode: the browser of the account stays awake for as long as its sync window is open, so on a paid plan new messages arrive through the realtime push (linkedin-messages.received) in seconds and the pass every 15 minutes is the net under it; at any longer interval the browser rests between passes. The free plan floors every track at a day.'),
       }).describe('Weekly sync schedule for the account (replaces the stored config wholesale).'),
       ...usageMetaField,
     }),
