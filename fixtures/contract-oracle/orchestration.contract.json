@@ -3336,6 +3336,42 @@
                     "between": null
                 },
                 {
+                    "field": "scope.targets.*.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.public_identifier",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "scope.count",
                     "rules": [
                         "sometimes",
@@ -3764,6 +3800,42 @@
                     "in": null,
                     "min": null,
                     "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scope.targets.*.public_identifier",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -4237,6 +4309,42 @@
                     "in": null,
                     "min": null,
                     "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "identities.*.public_identifier",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }

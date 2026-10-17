@@ -164,7 +164,7 @@ const MassActionScope = z.union([
   z.object({
     kind: z.literal('targets'),
     targets: z.array(z.record(z.unknown())).min(1).max(100)
-      .describe("1..100 payload-kind identities (send-class) plus per-item params (note, text, client_reference). A person is named by ln_id (a profile URN, ACoAA...) or sn_id (a Sales Navigator id, ACwAA...); profile_id takes either. ln_member_id is the decoded member NUMBER (digits), never a slug or a URN, and alone cannot be dispatched by a send verb; a vanity slug goes in nickname (or public_identifier). One person named twice is one item: the run dedups by member id. A target's client_reference is the key of its message, sent as given when the plan sends with that tool once; a plan that sends with one tool twice tags each step's key with it ('{key}:{item sid}:{step id}'), since two messages cannot share a key."),
+      .describe("1..100 payload-kind identities (send-class) plus per-item params (note, text, client_reference). A person is named by ln_id (a profile URN, ACoAA...) or sn_id (a Sales Navigator id, ACwAA...); profile_id takes either. Or by a vanity slug in nickname (or public_identifier; a linkedin.com/in/ link works too), which the send step resolves to the URN when it runs: free when the team or the corpus (30 days) already knows the person, else a lite-profile read on the sending account's enrichment budget. ln_member_id is the decoded member NUMBER (digits), never a slug or a URN, and no step dispatches on it alone: a connect, message or follow target with no URN and no slug (a message may name a linkedin_conversation_sid instead) is refused at preview with target_identity_required on that target. One person named twice is one item: the run dedups by member id. A target's client_reference is the key of its message, sent as given when the plan sends with that tool once; a plan that sends with one tool twice tags each step's key with it ('{key}:{item sid}:{step id}'), since two messages cannot share a key."),
   }),
   z.object({
     kind: z.literal('generate'),
@@ -507,7 +507,7 @@ export const massActionsTools: ToolDefinition[] = [
     inputSchema: z.object({
       sid: SID,
       identities: z.array(z.record(z.unknown())).min(1).max(100)
-        .describe('Payload-kind leads. Identity fields (ln_member_id / ln_id / sn_id / company_ln_id / nickname) are the dedup axis; any other key rides along as per-target extras the plan steps can read.'),
+        .describe("Payload-kind leads. Identity fields (ln_member_id / ln_id / sn_id / company_ln_id / nickname) are the dedup axis; any other key rides along as per-target extras the plan steps can read. A lead the run's connect, message or follow step cannot reach (no URN and no slug; a message may name a linkedin_conversation_sid instead) refuses the batch with 422 target_identity_required on identities.{i}, as the preview refuses such a target: those steps send to a URN, or to a slug they resolve when they run."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(MassAction, MassActionAppendItemsResult),

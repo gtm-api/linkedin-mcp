@@ -34594,7 +34594,7 @@
                         "nullable",
                         "string",
                         "max:2048",
-                        "Closure"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -40743,7 +40743,7 @@
                         "max:2048",
                         "prohibits:ln_id",
                         "prohibits:sn_id",
-                        "Closure"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -59569,17 +59569,38 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required",
+                        "required_without:public_identifier",
+                        "prohibits:public_identifier",
+                        "nullable",
                         "string",
                         "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without:profile_id",
+                        "prohibits:profile_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -60026,6 +60047,25 @@
                     "in": null,
                     "min": null,
                     "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "prohibits:ln_id",
+                        "prohibits:sn_id",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
