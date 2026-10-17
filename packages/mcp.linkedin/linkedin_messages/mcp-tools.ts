@@ -252,6 +252,8 @@ const LinkedinMessageFilter = z.object({
     .describe('The Recruiter contract the thread was synced or sent under (a seat holder with several contracts switches with select_recruiter_contract; each contract is its own inbox). Null off the recruiter surface and on rows synced before 2026-09-19.'),
   nickname: filterOp(z.string(), ['eq', 'in', 'is_null']),
   message_hash: filterOp(z.string(), ['eq', 'in']),
+  is_deleted: filterOp(z.boolean(), ['eq'])
+    .describe('Deleted for everyone on LinkedIn (a recall, the counterpart\'s or the account\'s own): the row stays with its text emptied. Each one is told once as linkedin-messages.deleted.'),
   client_reference: filterOp(z.string(), ['eq', 'ne', 'in', 'nin', 'is_null']).describe("The caller's own key given at send time. The way to ask whether a send landed before repeating it: search by the key you sent."),
   subject: filterOp(z.string(), ['eq', 'in', 'is_null']).optional()
     .describe('The InMail subject, exact match; is_null:false = every message that carried one. For a text search use q.'),

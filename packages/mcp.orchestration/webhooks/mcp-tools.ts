@@ -100,6 +100,7 @@ const WebhookEventType = z.enum([
   'linkedin-messages.received',
   'linkedin-messages.sent',
   'linkedin-messages.send-failed',
+  'linkedin-messages.deleted',
   'linkedin-conversations.created',
   'linkedin-conversations.sync-completed',
   'data-requests.completed',

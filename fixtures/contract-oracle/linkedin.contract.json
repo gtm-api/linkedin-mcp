@@ -6826,6 +6826,7 @@
                     "subject",
                     "message_hash",
                     "client_reference",
+                    "is_deleted",
                     "sent_at",
                     "created_at",
                     "updated_at",
