@@ -250,7 +250,7 @@ export const massActionItemsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID.optional()
-        .describe('Single-item mode. Mutually exclusive with filter.'),
+        .describe('Single-item mode. Mutually exclusive with filter. The canary of a canary_failed run goes here: retry it, then resume_mass_action; release_mass_action_canary opens the gate without it.'),
       filter: MassActionItemFilter.optional()
         .describe('Bulk mode: every failed item matching this filter is re-entered. Mutually exclusive with sid.'),
       resend_unverified: z.boolean().optional()

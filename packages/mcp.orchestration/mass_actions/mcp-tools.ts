@@ -257,6 +257,9 @@ const MassActionFilter = z.object({
   sid: filterOp(z.string(), ['eq', 'in']).optional(),
   team_sid: filterOp(z.string(), ['eq']).optional()
     .describe('Auto-applied from the JWT scope; not overridable.'),
+  title: filterOp(z.string(), ['eq', 'in']).optional()
+    .describe('The label the run was created with, exact; q searches it.'),
+  q: z.string().optional().describe('Full-text over title.'),
   target_entity: filterOp(z.string(), ['eq', 'ne', 'in', 'nin']).optional(),
   status: filterOp(MassActionStatus, ['eq', 'in']).optional(),
   paused_reason: filterOp(MassActionPausedReason, ['eq', 'in', 'is_null']).optional(),
@@ -309,7 +312,7 @@ export const massActionsTools: ToolDefinition[] = [
     ...base,
     name: 'search_mass_actions',
     description:
-      "List the team's bulk runs with filter, sort and cursor pagination. Filter by status (active / paused), paused_reason, target_entity, canary_satisfied_at (is_null:true = the canary gate is still closed), or the created / updated / started / settled time ranges. status is a CONTROL axis, not an outcome: to learn how a run went call get_mass_actions_metrics or get_mass_action with include=metrics. Stopped runs are excluded unless deleted_at is filtered explicitly. page_size:0 returns the count alone.",
+      "List the team's bulk runs with filter, sort and cursor pagination. Filter by title (eq / in, or q to search it), status (active / paused), paused_reason, target_entity, canary_satisfied_at (is_null:true = the canary gate is still closed), or the created / updated / started / settled time ranges. status is a CONTROL axis, not an outcome: to learn how a run went call get_mass_actions_metrics or get_mass_action with include=metrics. Stopped runs are excluded unless deleted_at is filtered explicitly. page_size:0 returns the count alone.",
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/search' },
     operation: 'search',
@@ -360,7 +363,8 @@ export const massActionsTools: ToolDefinition[] = [
         .describe("Kebab-plural entity family the plan's steps operate on, e.g. 'linkedin-connection-requests', 'linkedin-posting' or 'email-messages'. The compatibility anchor a linked auto-scrape checks against."),
       scope: MassActionScope
         .describe('What the run enrols: existing rows (objects), payload identities (targets), generated slots (generate), or nothing yet (none, a standing run an auto-scrape feeds).'),
-      plan: MassActionPlan,
+      plan: MassActionPlan
+        .describe('1..3 steps. A step that acts as one of the team\'s accounts names it in its args (linkedin_account_sid for a connect, message, follow, react or comment step, email_account_sid for email), else 422 sender_required on plan.steps.{i}.args; a message or comment step carries the one text every target gets in args.text, else 422 text_required. A target\'s payload carries the target and its per-send extras (note, client_reference), never the sender.'),
       schedule: MassActionSchedule.nullable().optional()
         .describe('Omit for an ASAP drain. Required when the plan carries a send-class step, else 422 schedule_required.'),
       canary_mode: MassActionCanaryMode.optional()
@@ -377,9 +381,9 @@ export const massActionsTools: ToolDefinition[] = [
       [
         'Commit a previewed plan into a running bulk dispatch. Requires the commit_token from preview_mass_action over EXACTLY these inputs: the server re-derives the HMAC, so an edited plan, a changed scope or a different caller is 422 invalid_commit_token, and a token older than 15 minutes is 422 commit_token_expired. Re-preview in either case.',
         '',
-        'Re-runs the full preview validation, then inserts the run plus its items and starts dispatching in one transaction. Always asynchronous, even for one item: the returned sid IS the monitoring handle. Poll get_mass_action with include=metrics or get_mass_actions_metrics, or subscribe to the mass-actions.settled / .paused webhooks.',
+        'Re-runs the preview validation, inserts the run and its items and starts dispatching. Always asynchronous: the returned sid is the monitoring handle (get_mass_action with include=metrics, get_mass_actions_metrics, or the mass-actions.settled / .paused webhooks).',
         '',
-        'With canary_mode=first_item only item 1 runs until it succeeds; a canary failure pauses the run with paused_reason=canary_failed. A none-scope run is created empty (total_count 0) and dispatches nothing until an auto-scrape appends leads into it. Replaying a still-valid token creates a SECOND identical run, so discard the token after use.',
+        'With canary_mode=first_item only item 1 runs until it succeeds; a canary failure pauses the run with paused_reason=canary_failed (retry the item and resume, release the gate, or delete; left for 7 days it settles itself). A sender\'s spent daily budget pauses the run with limit_reached and hold_till at the budget\'s reset, and it resumes by itself. A none-scope run starts empty until leads are appended.',
       ].join('\n'),
     toolClass: 'complex',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions' },
@@ -398,7 +402,7 @@ export const massActionsTools: ToolDefinition[] = [
       schedule: MassActionSchedule.nullable().optional(),
       canary_mode: MassActionCanaryMode.optional(),
       commit_token: z.string().max(512)
-        .describe('The token preview_mass_action returned for these exact inputs. Not the confirmation token of the protected-tool preview flow: it comes from preview_mass_action and nowhere else.'),
+        .describe('The token preview_mass_action returned for these exact inputs. Not the confirmation token of the protected-tool preview flow: it comes from preview_mass_action and nowhere else. Replaying a still-valid token creates a SECOND identical run: discard it after use.'),
       ...usageMetaField,
     }),
     outputSchema: McpCreateResponse(MassAction),
@@ -423,7 +427,7 @@ export const massActionsTools: ToolDefinition[] = [
     ...base,
     name: 'pause_mass_action',
     description:
-      "Freeze dispatch: status becomes paused with paused_reason='manual'. Queued jobs roll back at pre-flight and in-flight items finish their current step, then stop at the boundary; vendor calls already on the wire are never aborted. Pass hold_till to arm auto-resume at that moment, omit it to wait for an explicit resume_mass_action. Idempotent: pausing a paused run refreshes it.",
+      "Freeze dispatch: status becomes paused with paused_reason='manual'. Queued jobs roll back at pre-flight and in-flight items finish their current step, then stop at the boundary; vendor calls already on the wire are never aborted. Pass hold_till to arm auto-resume at that moment, omit it to wait for an explicit resume_mass_action. Idempotent: pausing a paused run refreshes it, and a manual pause replaces a limit_reached hold (its hold_till goes).",
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/{sid}/pause', sidParam: 'sid' },
     operation: 'action',
@@ -446,7 +450,7 @@ export const massActionsTools: ToolDefinition[] = [
     ...base,
     name: 'resume_mass_action',
     description:
-      'Unfreeze dispatch: status becomes active, paused_reason and hold_till are cleared, and pending items are re-planned onto a fresh jitter chain from now. Items that deferred mid-cascade restart at their current step, so completed steps are not re-run. Does NOT touch the canary gate: after a canary_failed pause only the retried canary dispatches, and release_mass_action_canary is what opens the gate. 409 invalid_transition if the run is not paused.',
+      'Unfreeze dispatch: status becomes active, paused_reason and hold_till are cleared, and pending items are re-planned onto a fresh jitter chain from now. Items that deferred mid-cascade restart at their current step, so completed steps are not re-run. Does NOT touch the canary gate: after a canary_failed pause only the retried canary dispatches, and release_mass_action_canary is what opens the gate. Resumed before its hold_till, a limit_reached run holds again at the first item the budget refuses. 409 invalid_transition if the run is not paused.',
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/{sid}/resume', sidParam: 'sid' },
     operation: 'action',
@@ -467,7 +471,7 @@ export const massActionsTools: ToolDefinition[] = [
     ...base,
     name: 'release_mass_action_canary',
     description:
-      'Open the canary gate by hand: stamps canary_satisfied_at and releases every remaining item, the same sweep the canary would have triggered by succeeding. Use it when the first item failed for a reason you accept, or when you do not want to wait for it. Valid only while the run is live, canary_mode=first_item and the gate is still closed, else 409 invalid_transition. Releasing a PAUSED run stamps the gate but dispatches nothing until resume_mass_action: the pause dominates.',
+      'Open the canary gate by hand: stamps canary_satisfied_at and releases every remaining item, the same sweep the canary would have triggered by succeeding. Use it when the first item failed for a reason you accept, or when you do not want to wait for it. Valid only while the run is live, canary_mode=first_item and the gate is still closed, else 409 invalid_transition. Releasing a PAUSED run stamps the gate but dispatches nothing until resume_mass_action: the pause dominates. A canary_failed run nobody decides on for 7 days (retry, release or delete) settles itself: its pending items are cancelled.',
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/{sid}/release', sidParam: 'sid' },
     operation: 'action',
@@ -489,11 +493,11 @@ export const massActionsTools: ToolDefinition[] = [
     name: 'append_mass_action_items',
     description:
       [
-        'Feed more leads into a run that is already going, without a second preview or consent token: the plan they execute is the one already approved, and appended items join the pacing chain BEHIND the tail.',
+        'Feed more leads into a run already going, without a second preview or token: they run the approved plan and join the pacing chain BEHIND the tail.',
         '',
-        'Identities are payload-kind leads, the shape a targets-scope create takes: at least one of ln_member_id (the decoded member NUMBER), ln_id / sn_id / profile_id (a LinkedIn URN), company_ln_id or nickname (a slug). A lead already enrolled comes back in skipped_duplicate_count, not run twice: the dedup is by member id, whichever URN each source used. Up to 100 per call; repeat to keep a standing run fed.',
+        'Identities are payload-kind leads, as a targets-scope create takes them: at least one of ln_member_id (the member NUMBER), ln_id / sn_id / profile_id (a URN), company_ln_id or nickname (a slug). A lead already enrolled comes back in skipped_duplicate_count, not run twice (dedup by member id). Up to 100 per call; repeat to keep a standing run fed.',
         '',
-        'The run has to be active (a paused one is 409 run_not_active, a stopped one too) and payload-addressed: created with scope targets or none. A generate run (step 1 is a creates: verb) is 422 run_not_payload_addressed, each appended lead would provision one more paid browser beyond the count consented to; an objects run is 422 too, its items address existing rows. The canary gate still applies.',
+        'The run has to be live and payload-addressed (scope targets or none). Held for a spent limit (limit_reached) it still takes leads, which wait with it; paused otherwise, or stopped, it is 409 run_not_active, context.reason_detail saying which (canary_failed: retry the canary and release the gate, or start a new run). A generate run (step 1 is a creates: verb) is 422 run_not_payload_addressed: each lead would provision one more paid browser than consented to; an objects run is 422 too. The canary gate still applies.',
       ].join('\n'),
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/{sid}/append-items', sidParam: 'sid' },

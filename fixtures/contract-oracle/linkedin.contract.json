@@ -9855,6 +9855,10 @@
                 {
                     "name": "SnapshotCheck",
                     "value": "snapshot_check"
+                },
+                {
+                    "name": "Followers",
+                    "value": "followers"
                 }
             ]
         },
@@ -10477,6 +10481,10 @@
                 {
                     "name": "BlockedUs",
                     "value": "blocked_us"
+                },
+                {
+                    "name": "DeletedMessage",
+                    "value": "deleted_message"
                 },
                 {
                     "name": "Bounced",
@@ -56486,7 +56494,7 @@
                     "rules": [
                         "required",
                         "string",
-                        "in:\"LINKEDIN_MESSAGE_RECEIVED\",\"LINKEDIN_MESSAGE_TYPING\",\"LINKEDIN_MESSAGE_READ\""
+                        "in:\"LINKEDIN_MESSAGE_RECEIVED\",\"LINKEDIN_MESSAGE_TYPING\",\"LINKEDIN_MESSAGE_READ\",\"LINKEDIN_MESSAGE_RECALLED\""
                     ],
                     "required": true,
                     "nullable": false,
@@ -56494,7 +56502,8 @@
                     "in": [
                         "LINKEDIN_MESSAGE_RECEIVED",
                         "LINKEDIN_MESSAGE_TYPING",
-                        "LINKEDIN_MESSAGE_READ"
+                        "LINKEDIN_MESSAGE_READ",
+                        "LINKEDIN_MESSAGE_RECALLED"
                     ],
                     "min": null,
                     "max": null,
@@ -62199,7 +62208,7 @@
         "release_not_supported": "A share is recalled, not released; use recall.",
         "replied": "The person wrote in this thread after stop_if_replied_after, so nothing was sent; read their message (context.linkedin_message_sid) before you send again.",
         "reply_check_unavailable": "The thread could not be read from LinkedIn right now, and stop_if_replied_after asks for that read before the send; nothing was sent, retry after retry_after.",
-        "resend_not_available": "An earlier connection request from this account to this member stands in the way: it is pending, accepted, cooling down or left on record by a sync reset (context.cause says which). Withdraw a pending one, message an accepted member, or wait for context.resend_available_at.",
+        "resend_not_available": "An earlier connection request from this account to this member stands in the way: it is pending, accepted, cooling down, left on record by a sync reset, or one LinkedIn alone knows of (context.cause says which). Withdraw a pending one, message an accepted member, wait for context.resend_available_at, or sync the account's connection requests when the cause is linkedin.",
         "resolver_unavailable": "The subject profile could not be resolved right now; retry later.",
         "run_in_progress": "A run of this auto-scrape is still in flight; wait for it to finish or stop it.",
         "run_window_expired": "More than 15 minutes passed since the login was confirmed; open a new session.",

@@ -245,6 +245,7 @@
                 "fields": [
                     "sid",
                     "team_sid",
+                    "title",
                     "target_entity",
                     "status",
                     "paused_reason",
@@ -254,7 +255,8 @@
                     "settled_at",
                     "created_at",
                     "updated_at",
-                    "deleted_at"
+                    "deleted_at",
+                    "q"
                 ]
             }
         },
@@ -2136,6 +2138,10 @@
                 {
                     "name": "BlockedUs",
                     "value": "blocked_us"
+                },
+                {
+                    "name": "DeletedMessage",
+                    "value": "deleted_message"
                 },
                 {
                     "name": "Bounced",
@@ -7628,7 +7634,7 @@
         "registry_unavailable": "The identity service did not answer the email-box registry call; retry in a minute.",
         "resend_unverified_needs_sid": "resend_unverified is your word that one send nobody could confirm did not arrive: give it with the sid of the item you checked, never with a filter.",
         "retry_limit_exceeded": "This item has been retried 10 times, the most one item takes; check why its step keeps failing (error_message), then create a new run for this target if it should still go.",
-        "run_not_active": "This run does not take new items (see context.detail: it is paused or deleted); resume it, or create a new run.",
+        "run_not_active": "This run does not take new items: context.reason_detail says why (deleted, or the pause's reason) and context.detail what to do. A run held for a spent limit still takes them; a canary_failed run needs its canary retried and the gate released, or a new run.",
         "run_not_failed": "Only a failed provisioning run can be retried; this one has not failed.",
         "sid_xor_filter_required": "Provide sid for one item or filter for a set, not neither.",
         "too_many_splits": "group_by would produce more than 500 groups; narrow the filter or split on a field with fewer values.",
