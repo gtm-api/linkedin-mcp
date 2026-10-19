@@ -7705,10 +7705,6 @@
                     "value": "no_connect"
                 },
                 {
-                    "name": "CountryMismatch",
-                    "value": "country_mismatch"
-                },
-                {
                     "name": "FraudFlagged",
                     "value": "fraud_flagged"
                 },
