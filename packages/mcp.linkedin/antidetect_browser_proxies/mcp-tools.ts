@@ -101,7 +101,7 @@ export const antidetectBrowserProxiesTools: ToolDefinition[] = [
     ...base,
     name: 'check_antidetect_browser_proxy_location',
     description:
-      'Run a multi-vendor geo + fraud check on one or many proxies. Target EXACTLY ONE of sid (ab_px_) or filter; filter mode checks up to an inline cap and reports total_matched (truncated:true when the cap was hit). A verdict moves the row: an exit country that disagrees with country_code restamps country_code to the exit (the browsers on the proxy follow; emits antidetect-browser-proxies.country-changed), a fraud score over the threshold flips it to fraud_flagged (emits its event). Rows the vendors could not settle are listed in inconclusive with a reason (no_ip_port / exit_unreachable / no_corroboration) and left untouched, so total_checked counts only rows that got a verdict.',
+      'Run a multi-vendor geo + fraud check on one or many proxies. Target EXACTLY ONE of sid (ab_px_) or filter; filter mode checks up to an inline cap and reports total_matched (truncated:true when the cap was hit). An exit country that disagrees with country_code is listed in country_mismatched and never written (a proxy\'s country follows only what LinkedIn shows for a session through it); a fraud score over the threshold flips the row to fraud_flagged (emits its event). Rows the vendors could not settle are listed in inconclusive with a reason (no_ip_port / exit_unreachable / no_corroboration) and left untouched, so total_checked counts only rows that got a verdict.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browser-proxies/check-proxy-location' },
     operation: 'action',
