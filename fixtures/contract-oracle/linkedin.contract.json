@@ -7734,6 +7734,10 @@
                     "value": "no_connect"
                 },
                 {
+                    "name": "CountryMismatch",
+                    "value": "country_mismatch"
+                },
+                {
                     "name": "FraudFlagged",
                     "value": "fraud_flagged"
                 },
@@ -62737,6 +62741,7 @@
         "browser_unavailable": "The browser could not serve this call (the tab died or the browser is gone); retry once it is running.",
         "browser_unreachable": "The browser is not reachable right now (stopped, restarting, or its host is down); start it and retry.",
         "bucket_saturated": "This account has used its budget for this action type; retry after retry_after.",
+        "client_rate_limited": "This client made more requests in one minute than the API allows (context.limit); wait until retry_after, then spread the calls out or page in larger steps.",
         "comment_not_deleted": "LinkedIn did not delete this comment: it is not this account's, or it is already gone.",
         "comment_urn_not_activity_thread": "comment_urn must name a comment on an activity thread, urn:li:comment:(activity:<postId>,<commentId>) or the fsd form urn:li:fsd_comment:(<commentId>,urn:li:activity:<postId>); the replies under a comment on a ugcPost, share or groupPost thread cannot be read.",
         "company_anchor_not_numeric": "source_input.anchor_company_ln_id must be the numeric LinkedIn company id, not a slug or a URL.",
