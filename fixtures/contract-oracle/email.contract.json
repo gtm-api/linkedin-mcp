@@ -2233,6 +2233,23 @@
         }
     },
     "enums": {
+        "Gtm\\Lib\\Common\\Core\\Analytics\\UsageGoal\\Enums\\UsageGoalMessageRoleEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "User",
+                    "value": "user"
+                },
+                {
+                    "name": "Assistant",
+                    "value": "assistant"
+                },
+                {
+                    "name": "System",
+                    "value": "system"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Core\\Automation\\ProtocolStatus": {
             "backing": "string",
             "cases": [
@@ -3195,6 +3212,10 @@
                 {
                     "name": "BlockedUs",
                     "value": "blocked_us"
+                },
+                {
+                    "name": "DeletedMessage",
+                    "value": "deleted_message"
                 },
                 {
                     "name": "Bounced",
