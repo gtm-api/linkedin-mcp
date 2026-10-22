@@ -153,7 +153,9 @@ const LinkedinMessage = z.object({
   // row does not say which, so every key is optional:
   //   - synced rows carry the get-messages wire element VERBATIM (the sync
   //     handlers store `$el['attachments']` unmapped): { id, urn, name?,
-  //     content_type, content_url, file_byte_size? }.
+  //     content_type, content_url, file_byte_size? }. A voice note that
+  //     send_linkedin_voice_message stored has this shape without content_url,
+  //     { id, urn, content_type: 'audio' } (since 2026-10-22; [] before).
   //   - rows inserted by our own send verbs keep the metadata of what was sent,
   //     never the bytes (AttachmentMaterializerService::storedProjection, research
   //     LinkedinMessageAttachmentValue): { file_name, file_type, file_byte_size }.
