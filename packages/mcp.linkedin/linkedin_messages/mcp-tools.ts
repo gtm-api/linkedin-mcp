@@ -21,6 +21,7 @@ const SID = z.string().length(18).startsWith('ln_ms_')
   .describe('LinkedIn message sid (ln_ms_…).');
 const ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
   .describe('LinkedIn account sid (ln_ac_…).');
+const MESSAGE_SID = z.string().length(18).startsWith('ln_ms_')
 const CONVERSATION_SID = z.string().length(18).startsWith('ln_cv_')
   .describe('LinkedIn conversation sid (ln_cv_…).');
 
@@ -186,6 +187,23 @@ const LinkedinMessage = z.object({
   // sync when ANYBODY recalls - one-way false → true, text emptied with it.
   // The row keeps its place in the thread: "withdrawn" is a fact to show.
   is_deleted: z.boolean(),
+  // The message this one replies to (2026-10-22): the quote LinkedIn shows under a
+  // reply, as the row keeps it. message_hash is the quoted message's LinkedIn id, the
+  // one part LinkedIn vouches for; linkedin_message_sid our row of it when this account
+  // holds it (null until the quoted message is stored, filled when it arrives);
+  // sender_ln_id / sender_ln_member_id who the quote names as its author (null for a
+  // page or a company); text and sent_at the quote as the replying client wrote it.
+  // Null when the message is not a reply, and on rows stored before 2026-10-22 until a
+  // re-read fills them. Regular messenger only: Sales Navigator and Recruiter rows
+  // never carry one.
+  reply_to: z.object({
+    linkedin_message_sid: z.string().nullable().describe('Our row of the quoted message, when this account holds it; null until it is stored.'),
+    message_hash: z.string().describe("The quoted message's LinkedIn id, the one part of the quote LinkedIn vouches for."),
+    sender_ln_id: z.string().nullable(),
+    sender_ln_member_id: z.string().nullable(),
+    text: z.string().describe('The quoted words as the replying client wrote them; LinkedIn does not check them against the message.'),
+    sent_at: z.string().nullable(),
+  }).passthrough().nullable(),
   message_hash: z.string(),
   sent_at: z.string(),
   custom_content: z.record(z.unknown()).nullable(),
@@ -400,7 +418,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_message',
     description:
-      'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id or by public_identifier (slug or linkedin.com/in/ URL). Guards run first: send_messages daily cap, 8000-char body cap, block guard (a member who blocked this account is refused 422 target_blocked, no browser call), connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row only on terminal success. '
+      'Send one outbound regular LinkedIn DM on the basic messenger (outward action). Reply to an existing thread via linkedin_conversation_sid, or open a new thread to a 1st-degree connection via ln_id / sn_id or by public_identifier (slug or linkedin.com/in/ URL). Quote a message of the thread via reply_to_linkedin_message_sid. Guards run first: send_messages daily cap, 8000-char body cap, block guard (422 target_blocked, no browser call), connection guard, attachment https:// reachability, basic-messenger surface guard. Fire-on-success: a row only on terminal success. '
       + sendOnce('place (the thread, else the person)')
       + ' When NOT: InMail to a non-connection → send_linkedin_inmail; voice note → send_linkedin_voice_message; Sales Navigator thread → send_linkedin_sales_nav_message; the connection note lives on linkedin-connection-requests. Bulk: loop client-side within the daily cap.',
     toolClass: 'complex',
@@ -421,6 +439,8 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       public_identifier: z.string().max(2048).nullable().optional().describe("For a new thread when all you have is the person's vanity slug or linkedin.com/in/<slug> URL: resolved server-side to the URN (own rows, then the corpus, then a lite-profile read on the sender that spends enrichment). One addressing form per call: linkedin_conversation_sid, ln_id / sn_id, or public_identifier."),
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
+      reply_to_linkedin_message_sid: MESSAGE_SID.nullable().optional()
+        .describe("Quote one message of the thread under this one, as LinkedIn's own Reply does: our sid of the quoted message (the rows of get_my_latest_linkedin_messages and search_linkedin_messages carry it). The quote (its author and words) is filled from the stored row, never from you. It may stand alone: the quoted message names the thread, so linkedin_conversation_sid can be omitted; given both, they must name the same thread (422 reply_target_other_thread). Refused for a message deleted for everyone (422 reply_target_deleted), for LinkedIn's own notice or a row without a LinkedIn message id (422 reply_target_not_quotable), for a message a page or a company wrote (422 reply_target_sender_unknown), and next to ln_id / sn_id / public_identifier. The sent row carries the quote in reply_to. Regular messenger only."),
       stop_if_replied_after: z.string().datetime().nullable().optional()
         .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 503 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
       client_reference: sendKey('the thread, else the person'),

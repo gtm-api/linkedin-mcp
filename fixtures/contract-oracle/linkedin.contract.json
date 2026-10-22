@@ -6608,6 +6608,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "reply_to",
+                        "type": "?array",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "custom_content",
                         "type": "?array",
                         "nullable": true,
@@ -6772,6 +6778,12 @@
                         "name": "is_deleted",
                         "type": "bool",
                         "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "reply_to",
+                        "type": "?array",
+                        "nullable": true,
                         "has_default": true
                     },
                     {
@@ -7294,6 +7306,23 @@
         }
     },
     "enums": {
+        "Gtm\\Lib\\Common\\Core\\Analytics\\UsageGoal\\Enums\\UsageGoalMessageRoleEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "User",
+                    "value": "user"
+                },
+                {
+                    "name": "Assistant",
+                    "value": "assistant"
+                },
+                {
+                    "name": "System",
+                    "value": "system"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Core\\Automation\\ProtocolStatus": {
             "backing": "string",
             "cases": [
@@ -8090,6 +8119,10 @@
                 {
                     "name": "GetPostComments",
                     "value": "get_post_comments"
+                },
+                {
+                    "name": "GetCommentReplies",
+                    "value": "get_comment_replies"
                 },
                 {
                     "name": "GetPostEngagements",
@@ -8972,6 +9005,10 @@
                 {
                     "name": "GetPostComments",
                     "value": "get_post_comments"
+                },
+                {
+                    "name": "GetCommentReplies",
+                    "value": "get_comment_replies"
                 },
                 {
                     "name": "GetPostReactors",
@@ -19488,6 +19525,96 @@
                     "in": null,
                     "min": 1,
                     "max": 100,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/infra-pool/linkedin-scraping/get-comment-replies",
+            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
+            "action": "getCommentReplies",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_searches",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetCommentRepliesRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "comment_urn",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:512",
+                        "regex:~^(?:urn:li:comment:\\(activity:\\d+,\\d+\\)",
+                        "urn:li:fsd_comment:\\(\\d+,urn:li:activity:\\d+\\))$~"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:1024"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 1024,
                     "size": null,
                     "between": null
                 }
@@ -40847,6 +40974,27 @@
                     "between": null
                 },
                 {
+                    "field": "reply_to_linkedin_message_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ms_",
+                        "size:18",
+                        "prohibits:ln_id",
+                        "prohibits:sn_id",
+                        "prohibits:public_identifier"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
                     "field": "attachments",
                     "rules": [
                         "sometimes",
@@ -47297,6 +47445,96 @@
                     "in": null,
                     "min": 1,
                     "max": 100,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-scraping/get-comment-replies",
+            "controller": "App\\Entities\\DataRequest\\LinkedinScrapingController",
+            "action": "getCommentReplies",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_searches",
+            "internal": false,
+            "request_class": "App\\Entities\\DataRequest\\Requests\\LinkedinScrapingGetCommentRepliesRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "idempotency_key",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "comment_urn",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:512",
+                        "regex:~^(?:urn:li:comment:\\(activity:\\d+,\\d+\\)",
+                        "urn:li:fsd_comment:\\(\\d+,urn:li:activity:\\d+\\))$~"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:1024"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 1024,
                     "size": null,
                     "between": null
                 }
@@ -60141,6 +60379,26 @@
                     "max": null,
                     "size": 18,
                     "between": null
+                },
+                {
+                    "field": "reply_to_linkedin_message_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:ln_ms_",
+                        "size:18",
+                        "prohibits:ln_id",
+                        "prohibits:sn_id",
+                        "prohibits:public_identifier"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -60699,6 +60957,352 @@
                     "in": null,
                     "min": 1,
                     "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-country-changes/search",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "searchAntidetectBrowserProxyCountryChanges",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxyCountryChangeSearchRequest",
+            "rules": [
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "antidetect_browser_proxy_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ab_px_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "method",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "in:\"account_session\",\"sign_in_check\",\"location_check\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "account_session",
+                        "sign_in_check",
+                        "location_check"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-downtime-checks/search",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "searchAntidetectBrowserProxyDowntimeChecks",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxyDowntimeCheckSearchRequest",
+            "rules": [
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "antidetect_browser_proxy_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ab_px_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "country_code",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "size:2",
+                        "regex:/^[A-Z]{2}$/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 2,
+                    "between": null
+                },
+                {
+                    "field": "error_kind",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "in:\"no_connect\",\"auth_refused\",\"timeout\",\"other\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "no_connect",
+                        "auth_refused",
+                        "timeout",
+                        "other"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "relay",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "open",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-downtime-checks/summary",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "antidetectBrowserProxyDowntimeSummary",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxyDowntimeSummaryRequest",
+            "rules": [
+                {
+                    "field": "from",
+                    "rules": [
+                        "required",
+                        "date"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "to",
+                    "rules": [
+                        "required",
+                        "date",
+                        "after:from"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-downtime-monitor/update",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "updateAntidetectBrowserProxyDowntimeMonitor",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxyDowntimeMonitorUpdateRequest",
+            "rules": [
+                {
+                    "field": "paused",
+                    "rules": [
+                        "required",
+                        "boolean"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 }
@@ -62134,6 +62738,7 @@
         "browser_unreachable": "The browser is not reachable right now (stopped, restarting, or its host is down); start it and retry.",
         "bucket_saturated": "This account has used its budget for this action type; retry after retry_after.",
         "comment_not_deleted": "LinkedIn did not delete this comment: it is not this account's, or it is already gone.",
+        "comment_urn_not_activity_thread": "comment_urn must name a comment on an activity thread, urn:li:comment:(activity:<postId>,<commentId>) or the fsd form urn:li:fsd_comment:(<commentId>,urn:li:activity:<postId>); the replies under a comment on a ugcPost, share or groupPost thread cannot be read.",
         "company_anchor_not_numeric": "source_input.anchor_company_ln_id must be the numeric LinkedIn company id, not a slug or a URL.",
         "concurrent_send_in_flight": "An earlier attempt of this send, or another send to the same place, is in the browser, in doubt or already went out (context.send_outcome says which, context.activity_log_sid or blocking_activity_log_sid names it), so nothing was sent now. Repeat the same request after retry_after, or ask check-sent about the attempt the context names.",
         "confirmed_sent_contradicts": "The attempt confirmed_sent names was proved not sent, so the word is not taken and nothing was sent now. Look on LinkedIn again: if it is there, do not send it again; if it is not, repeat the request without confirmed_sent.",
@@ -62204,6 +62809,11 @@
         "release_not_supported": "A share is recalled, not released; use recall.",
         "replied": "The person wrote in this thread after stop_if_replied_after, so nothing was sent; read their message (context.linkedin_message_sid) before you send again.",
         "reply_check_unavailable": "The thread could not be read from LinkedIn right now, and stop_if_replied_after asks for that read before the send; nothing was sent, retry after retry_after.",
+        "reply_target_deleted": "The quoted message was deleted for everyone on LinkedIn, and a deleted message cannot be quoted; reply without the quote.",
+        "reply_target_not_found": "No message of this workspace has the sid reply_to_linkedin_message_sid names; quote a message sid the thread's rows carry (get-my-latest or search lists them).",
+        "reply_target_not_quotable": "This message cannot be quoted: LinkedIn's own notice in the thread, a message of another messenger surface, or a row without a LinkedIn message id (a send that never landed). Quote a regular message of the thread.",
+        "reply_target_other_thread": "The quoted message lives in another thread or belongs to another account than the send addresses; quote a message of the thread you send into, or omit linkedin_conversation_sid and let the quoted message name the thread.",
+        "reply_target_sender_unknown": "The quoted message names no member as its author (a page or a company wrote it, or the row predates the sender columns), and LinkedIn's quote needs a member; reply without the quote, or quote another message.",
         "resend_not_available": "An earlier connection request from this account to this member stands in the way: it is pending, accepted, cooling down, left on record by a sync reset, or one LinkedIn alone knows of (context.cause says which). Withdraw a pending one, message an accepted member, wait for context.resend_available_at, or sync the account's connection requests when the cause is linkedin.",
         "resolver_unavailable": "The subject profile could not be resolved right now; retry later.",
         "run_in_progress": "A run of this auto-scrape is still in flight; wait for it to finish or stop it.",

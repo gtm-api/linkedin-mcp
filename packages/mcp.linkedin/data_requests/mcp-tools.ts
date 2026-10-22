@@ -93,7 +93,9 @@ const DataRequestMethod = z.enum([
   'search_companies_by_url', 'search_companies_by_params',
   'search_sales_nav_companies_by_url', 'search_sales_nav_companies_by_params',
   'similar_companies', 'company_employees', 'company_decision_makers',
-  'search_posts', 'search_posts_by_url', 'get_post_comments', 'get_post_reactors',
+  'search_posts', 'search_posts_by_url', 'get_post_comments',
+  // The replies under one comment (2026-10-22), the half get_post_comments never had.
+  'get_comment_replies', 'get_post_reactors',
   'get_post_resharers', 'search_param_id_lookup',
   'search_sales_nav_param_id_lookup',
   // The Recruiter (talent) search pair (2026-09-05): filters-only, plus its typeahead.

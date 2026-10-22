@@ -1520,6 +1520,32 @@ export const linkedinScrapingTools: ToolDefinition[] = [
   },
   {
     ...base,
+    name: 'scrape_linkedin_get_comment_replies',
+    description:
+      'Direct LinkedIn read (bypasses our DB): one page of the REPLIES under ONE comment, live, the half scrape_linkedin_get_post_comments cannot read (its wire fetches no replies; replies_count there is a count). Same row shape as the comments read: the reply AND who wrote it (content, posted_at, comment_permalink, reactions_count + member id, nickname, name, headline), annotated with is_own. Target the comment by its urn as the comments read returns it in comment_ln_id (urn:li:comment:(activity:<postId>,<commentId>)), or in LinkedIn\'s fsd form (urn:li:fsd_comment:(<commentId>,urn:li:activity:<postId>)); the replies under a comment on a ugcPost, share or groupPost thread are not readable this way (422 comment_urn_not_activity_thread, nothing dispatched). LinkedIn picks the page size, there is no page_size here: the first page holds the newest replies, oldest first, and cursor walks to OLDER ones while paging.has_more says some remain. is_pinned and is_edited are always false on a reply.',
+    toolClass: 'complex',
+    route: rt('get-comment-replies'),
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      ...requestBase,
+      comment_urn: z.string().max(512).describe('The comment whose replies to read: urn:li:comment:(activity:<postId>,<commentId>) as scrape_linkedin_get_post_comments returns it in comment_ln_id, or the fsd form urn:li:fsd_comment:(<commentId>,urn:li:activity:<postId>). Comments on activity threads only.'),
+      cursor: z.string().nullable().optional().describe('Opaque resume token from paging.next_cursor; null = the first page, the newest replies. Each page is older than the one before.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), runResult(LinkedinCommenterPreview, CursorPaging, {
+      post: ResolvedPost.describe('The activity the comment threads under (post_ln_id = urn:li:activity:<postId>), lifted off the comment urn.'),
+      comment: z.object({ comment_ln_id: z.string() }).passthrough().describe('The comment the replies were read under, in the public urn form.'),
+      skipped_invalid_rows: z.number().int().describe('Wire replies with urn=null / no decodable author skipped.'),
+    })),
+    annotations: { title: 'Scrape comment replies', ...SCRAPE },
+  },
+  {
+    ...base,
     name: 'scrape_linkedin_get_post_reactors',
     description:
       'Direct LinkedIn read (bypasses our DB): live pull of who is reacting to ONE post - or ONE COMMENT - right now, as transient reactor objects with reaction_type in OUR write vocabulary (interested = the event-post reaction), annotated with is_own. Target a post by URL or urn in any family (activity, share, ugcPost, groupPost) in post, or target a comment by its urn (either form: urn:li:comment:(...) or the fsd urn:li:fsd_comment:(...)) to read the comment\'s reactors. LinkedIn files a post\'s reactions under its social thread, which is the ugcPost or groupPost urn for those posts and the activity urn for a share post; this tool names the thread for you and result.post.post_ln_id is the urn the feed was read by. One wire page per call; page on with cursor.',
