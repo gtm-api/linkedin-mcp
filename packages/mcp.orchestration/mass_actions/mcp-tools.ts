@@ -364,7 +364,7 @@ export const massActionsTools: ToolDefinition[] = [
       scope: MassActionScope
         .describe('What the run enrols: existing rows (objects), payload identities (targets), generated slots (generate), or nothing yet (none, a standing run an auto-scrape feeds).'),
       plan: MassActionPlan
-        .describe('1..3 steps. A step that acts as one of the team\'s accounts names it in its args (linkedin_account_sid for a connect, message, follow, react or comment step, email_account_sid for email), else 422 sender_required on plan.steps.{i}.args; a message or comment step carries the one text every target gets in args.text, else 422 text_required. A target\'s payload carries the target and its per-send extras (note, client_reference), never the sender.'),
+        .describe('1..3 steps. A step that acts as one of the team\'s accounts names it in its args (linkedin_account_sid for a connect, message, follow, react or comment step, email_account_sid for email), else 422 sender_required on plan.steps.{i}.args; a message or comment step carries the one text every target gets in args.text, else 422 text_required. A LinkedIn sender must be able to send right now: an account still in its first sync, lent to another team (shared_out), parked by the subscription, signed out of LinkedIn, restricted, parked for an error investigation, or not connected in this team is refused with 422 sender_not_ready on plan.steps.{i}.args.linkedin_account_sid, the message naming the state and the way out; create asks again. A target\'s payload carries the target and its per-send extras (note, client_reference), never the sender.'),
       schedule: MassActionSchedule.nullable().optional()
         .describe('Omit for an ASAP drain. Required when the plan carries a send-class step, else 422 schedule_required.'),
       canary_mode: MassActionCanaryMode.optional()
@@ -511,7 +511,7 @@ export const massActionsTools: ToolDefinition[] = [
     inputSchema: z.object({
       sid: SID,
       identities: z.array(z.record(z.unknown())).min(1).max(100)
-        .describe("Payload-kind leads. Identity fields (ln_member_id / ln_id / sn_id / company_ln_id / nickname) are the dedup axis; any other key rides along as per-target extras the plan steps can read. A lead the run's connect, message or follow step cannot reach (no URN and no slug; a message may name a linkedin_conversation_sid instead) refuses the batch with 422 target_identity_required on identities.{i}, as the preview refuses such a target: those steps send to a URN, or to a slug they resolve when they run."),
+        .describe("Payload-kind leads. Identity fields (ln_member_id / ln_id / sn_id / company_ln_id / nickname) are the dedup axis; any other key rides along as per-target extras the plan steps can read. A lead the run's connect, message or follow step cannot reach (no URN and no slug; a message may name a linkedin_conversation_sid instead) refuses the batch with 422 target_identity_required on identities.{i}, as the preview refuses such a target: those steps send to a URN, or to a slug they resolve when they run. A run whose LinkedIn sender cannot send right now (signed out, parked by the subscription, lent out, gone from the team) takes no leads: 409 sender_not_ready, with context.linkedin_account_sid, context.state and context.detail naming the way out."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(MassAction, MassActionAppendItemsResult),

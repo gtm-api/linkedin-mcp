@@ -9692,6 +9692,43 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccount\\Enums\\LinkedinAccountOutboundStateEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Ready",
+                    "value": "ready"
+                },
+                {
+                    "name": "NotFound",
+                    "value": "not_found"
+                },
+                {
+                    "name": "SharedOut",
+                    "value": "shared_out"
+                },
+                {
+                    "name": "SubscriptionRequired",
+                    "value": "subscription_required"
+                },
+                {
+                    "name": "InitialSyncPending",
+                    "value": "initial_sync_pending"
+                },
+                {
+                    "name": "Restricted",
+                    "value": "restricted"
+                },
+                {
+                    "name": "SignedOut",
+                    "value": "signed_out"
+                },
+                {
+                    "name": "ErrorInvestigation",
+                    "value": "error_investigation"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\LinkedinAccount\\Enums\\LinkedinAccountRecruiterSignedOutReasonEnum": {
             "backing": "string",
             "cases": [
@@ -59380,6 +59417,74 @@
                     ],
                     "required": false,
                     "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/linkedin-accounts/outbound-readiness",
+            "controller": "App\\Entities\\LinkedinAccount\\InternalLinkedinAccountStepController",
+            "action": "outboundReadiness",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\LinkedinAccount\\Requests\\InternalLinkedinAccountOutboundReadinessRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,

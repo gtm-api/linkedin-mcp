@@ -7653,6 +7653,7 @@
         "retry_limit_exceeded": "This item has been retried 10 times, the most one item takes; check why its step keeps failing (error_message), then create a new run for this target if it should still go.",
         "run_not_active": "This run does not take new items: context.reason_detail says why (deleted, or the pause's reason) and context.detail what to do. A run held for a spent limit still takes them; a canary_failed run needs its canary retried and the gate released, or a new run.",
         "run_not_failed": "Only a failed provisioning run can be retried; this one has not failed.",
+        "sender_not_ready": "The run's sending account cannot send right now: context.linkedin_account_sid names it, context.state says why (not_found, initial_sync_pending, shared_out, subscription_required, signed_out, restricted, error_investigation) and context.detail what to do; preview refuses such a sender on plan.steps.{i}.args.linkedin_account_sid with the same rule.",
         "sid_xor_filter_required": "Provide sid for one item or filter for a set, not neither.",
         "too_many_splits": "group_by would produce more than 500 groups; narrow the filter or split on a field with fewer values.",
         "wildcard_must_be_alone": "The events wildcard (*) stands alone; do not list other event types next to it."
