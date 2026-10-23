@@ -1,0 +1,19 @@
+{
+  "name": "gtm-api",
+  "displayName": "gtm-api",
+  "version": "1.0.0",
+  "description": "The LinkedIn API and MCP server for AI agents: search, connect, message and enrich on LinkedIn accounts you own, with limits enforced on our server. The plugin adds the hosted MCP server (OAuth on first use, no key to paste) and a skill that teaches the agent the discovery order, the preview-and-confirm step on every send, and how to read a limit refusal instead of retrying it.",
+  "author": {
+    "name": "gtm-api",
+    "email": "support@gtm-api.com",
+    "url": "https://gtm-api.com"
+  },
+  "homepage": "https://gtm-api.com/linkedin-mcp-server/",
+  "repository": "https://github.com/gtm-api/linkedin-mcp",
+  "license": "MIT",
+  "keywords": ["linkedin", "linkedin-api", "sales-navigator", "mcp", "outreach", "prospecting", "enrichment", "inbox", "ai-sdr", "sales", "gtm"],
+  "category": "sales",
+  "logo": "assets/logo.png",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json"
+}

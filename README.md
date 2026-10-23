@@ -86,6 +86,25 @@ The same launcher also ships as a Docker image, [`gtmapi/linkedin-mcp`](https://
 
 The agent discovers the actions and chains them: fetch the latest connection invitations, accept the ones that match, send each new contact a short message. Every outward action runs a preview-then-confirm step and a server-side daily-limit check before it reaches LinkedIn.
 
+## Cursor plugin
+
+This repository is also a Cursor plugin ([`.cursor-plugin/plugin.json`](./.cursor-plugin/plugin.json)). Installing it adds two things:
+
+- The hosted MCP server, `https://mcp.gtm-api.com/mcp`, declared in [`.mcp.json`](./.mcp.json).
+- The [`gtm-api-linkedin`](./skills/gtm-api-linkedin/SKILL.md) skill. It tells the agent to discover tools before calling them, to show you the preview of every send before it commits, and to stop on a limit refusal instead of retrying it.
+
+Install it from the Cursor Marketplace: open **Customize**, search for `gtm-api`, select **Install**. To run it from this repository instead, copy the plugin into Cursor's local plugin folder:
+
+```bash
+git clone https://github.com/gtm-api/linkedin-mcp.git /tmp/linkedin-mcp
+mkdir -p ~/.cursor/plugins/local/gtm-api
+cp -R /tmp/linkedin-mcp/.cursor-plugin /tmp/linkedin-mcp/.mcp.json /tmp/linkedin-mcp/skills /tmp/linkedin-mcp/assets ~/.cursor/plugins/local/gtm-api/
+```
+
+Then run **Developer: Reload Window** and check that **Customize** lists the skill and the MCP server.
+
+The plugin carries no key and needs no configuration. The first tool call opens a consent page in your browser: you sign in to [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and pick the workspace the agent acts in. Cursor registers itself as an OAuth client on that first call, so there is no client ID to create. To add the server without the skill, use the one-click Cursor link on [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
+
 ## MCP tools
 
 The server exposes exactly three MCP tools. Discovery is progressive: an agent lists the toolsets, inspects one, then invokes an action. The 160+ LinkedIn actions never load into the model's context at once, so the schema footprint stays around 400 tokens.
