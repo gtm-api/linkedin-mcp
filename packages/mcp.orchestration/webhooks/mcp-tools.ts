@@ -34,7 +34,7 @@ const SID = z.string().length(18).startsWith('wh_hk_')
 const WebhookStatus = z.enum(['on', 'off', 'failed']);
 
 // The subscribable event vocabulary, verbatim from the create/update rules()
-// (WebhookEventTypeEnum, 105 cases at gtm.lib.common 1f7da8f, and the '*'
+// (WebhookEventTypeEnum, 108 cases at gtm.lib.common c7702d7, and the '*'
 // wildcard the rules add). It has to be a closed set on this side:
 // an in: rule 422s with "invalid", never with the list, and an agent cannot
 // subscribe to an event it has to guess the name of.
@@ -61,6 +61,11 @@ const WebhookEventType = z.enum([
   'linkedin-accounts.login-failed',
   'linkedin-accounts.logged-out',
   'linkedin-accounts.restricted',
+  // The restriction is over (2026-10-23; gtm.service.linkedin 8c9d43c, gtm.lib.common
+  // c7702d7): a read on the re-check ladder found the member's public profile again
+  // and the browser went back to login_issue. Once per lift; the browser-level twin is
+  // antidetect-browsers.restriction-lifted below.
+  'linkedin-accounts.restriction-lifted',
   'linkedin-accounts.recruiter-signed-out',
   'linkedin-accounts.recruiter-signed-in',
   'linkedin-accounts.heartbeat-stale',
@@ -112,6 +117,7 @@ const WebhookEventType = z.enum([
   'antidetect-browsers.login-failed',
   'antidetect-browsers.logged-out',
   'antidetect-browsers.restricted',
+  'antidetect-browsers.restriction-lifted',
   'antidetect-browsers.started',
   'antidetect-browsers.stopped',
   'antidetect-browsers.start-failed',
@@ -213,7 +219,7 @@ const Webhook = z.object({
   name: z.string(),
   target_url: z.string(),
   // WebhookEventTypeEnum[], deliberately NOT the closed WebhookEventType here.
-  // The vocabulary is 105 values and the wildcard, ~3.7KB of JSON schema per
+  // The vocabulary is 108 values and the wildcard, ~3.7KB of JSON schema per
   // occurrence, and every occurrence is registration-time context for every
   // agent that loads the server (KNOWLEDGE §4.32). It is worth paying on create and update, where the
   // backend's in: rule 422s on a token the agent had to guess. It is not worth
