@@ -7801,6 +7801,10 @@
                     "value": "other_workspace"
                 },
                 {
+                    "name": "OtherBrowser",
+                    "value": "other_browser"
+                },
+                {
                     "name": "BrowserUnreachable",
                     "value": "browser_unreachable"
                 },
