@@ -27,11 +27,16 @@ const AntidetectBrowserLog = z.object({
     'started_on_schedule', 'stopped_on_schedule', 'started_by_user', 'stopped_by_user',
     'started_after_maintenance', 'stopped_before_delete',
     'stopped_for_maintenance', 'released_after_maintenance',
-    // Error (8). `account_restricted` is the post-logout probe's verdict row: no
+    // Error (10). `account_restricted` is the post-logout probe's verdict row: no
     // public profile for the member's stable id, the parent moved login_issue ->
     // restricted; its body carries the identities asked and the node's answer.
+    // The re-check ladder (gtm.service.linkedin c7702d7, 2026-10-23) reads a
+    // restricted member again from another account of the fleet:
+    // `account_restriction_rechecked` is one such read, `account_restriction_lifted`
+    // the read that found the profile served again (the browser moves to login_issue).
     'start_failure', 'proxy_error', 'login_issue', 'runtime_error',
     'started_after_error', 'server_unreachable', 'error_escalation', 'account_restricted',
+    'account_restriction_rechecked', 'account_restriction_lifted',
     // Ops (1)
     'proxy_replaced',
   ]),
