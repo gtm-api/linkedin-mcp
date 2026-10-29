@@ -145,6 +145,22 @@ const LinkedinPostingImageValue = z.object({
   alt_text: z.string().nullable().optional().describe('Accessibility alt text; may be empty.'),
 });
 
+// One mention of a post: a member OR a company page, exactly one of the two ids
+// per entry (the backend refuses both and neither, as the node's builder does).
+// A company page (2026-10-29) rides as LinkedIn's companyName text attribute;
+// a member as profileMention. Shared by create_linkedin_post and the repost
+// with thoughts, which takes create-post's mentions word for word.
+const LinkedinPostingMention = z.object({
+  profile_id: z.string().min(1).optional()
+    .describe('A member to mention: a bare ACoA… profile id or the full urn:li:fsd_profile:<id>. Exactly one of profile_id or company_id.'),
+  company_id: z.string().min(1).optional()
+    .describe('A company page to mention: the bare numeric company id (same form get_linkedin_company_posts takes) or the full urn:li:fsd_company:<id>. Exactly one of profile_id or company_id.'),
+  start: z.number().int().min(0)
+    .describe('Span start in text, in UTF-16 code units (JS String offsets).'),
+  length: z.number().int().min(1)
+    .describe('Span length in UTF-16 code units. start+length must fit inside text - out of bounds is a 422 here, not a spent dispatch.'),
+});
+
 // The §4.12a dispatch row (linkedin-account-activity-log). Kept open rather than
 // re-declaring LinkedinAccountActivityLogDomain here: that Domain is owned by
 // packages/mcp.linkedin/linkedin_account_activity_log, and this file owns no entity.
@@ -278,11 +294,8 @@ export const linkedinPostingTools: ToolDefinition[] = [
       text: z.string().max(3000).optional().describe('Your own words above the reposted post. Omit (or blank) for a plain repost.'),
       visibility: LinkedinPostingVisibility.optional().describe('With text only. ANYONE (the default) or CONNECTIONS_ONLY.'),
       allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional().describe('With text only. ALL (the default), CONNECTIONS_ONLY, or NONE to disable comments.'),
-      mentions: z.array(z.object({
-        profile_id: z.string().min(1).describe('The mentioned member\'s profile id (ACoA... or urn:li:fsd_profile:<id>).'),
-        start: z.number().int().min(0).describe('Offset of the mention in text, UTF-16 code units.'),
-        length: z.number().int().min(1).describe('Length of the mention span in UTF-16 code units.'),
-      })).optional().describe('With text only: profile mentions as ready positions over text, as create_linkedin_post takes them.'),
+      mentions: z.array(LinkedinPostingMention).optional()
+        .describe('With text only: mentions of members (profile_id) and company pages (company_id) as ready positions over text, as create_linkedin_post takes them.'),
       client_reference: postingKey('repost', 'the post it reposts, as LinkedIn files it', 'a repost of the same post with the same words'),
       confirmed_not_sent: CONFIRMED_NOT_SENT,
       confirmed_sent: CONFIRMED_SENT,
@@ -343,15 +356,8 @@ export const linkedinPostingTools: ToolDefinition[] = [
         .describe('ONE video, image-shaped minus alt_text. Mutually exclusive with images (LinkedIn does not mix them in a share - 422 here). Shares the 35 MB media budget. The upload is a single large PUT through the browser and is SLOW: the synchronous call can outlive your client timeout while the post still publishes, so repeat it only under the same client_reference.'),
       scheduled_at: z.string().optional()
         .describe('Schedule the post instead of publishing now: ISO 8601 with timezone, must be in the future (a strictly-past time is a 422; within a minute of now is passed through for LinkedIn to judge). A SCHEDULED share legitimately answers with null activity_urn/url - post_urn is the handle. Read and clean the queue with get_linkedin_scheduled_posts / delete_linkedin_scheduled_post. Scheduling is LinkedIn-side: the draft lives in ITS queue, nothing is stored here. The slot is no part of a key: a retry under the same client_reference that computes a new scheduled_at is the same post. Without a key the slot tells two posts apart.'),
-      mentions: z.array(z.object({
-        profile_id: z.string().min(1)
-          .describe('Who to mention: a bare ACoA… profile id or the full urn:li:fsd_profile:<id>.'),
-        start: z.number().int().min(0)
-          .describe('Span start in text, in UTF-16 code units (JS String offsets).'),
-        length: z.number().int().min(1)
-          .describe('Span length in UTF-16 code units. start+length must fit inside text - out of bounds is a 422 here, not a spent dispatch.'),
-      })).optional()
-        .describe('Profile mentions as READY POSITIONS over text (2026-08-21) - unlike create_linkedin_comment\'s {profile_id, name} search pairs. Require non-blank text.'),
+      mentions: z.array(LinkedinPostingMention).optional()
+        .describe('Mentions of members (profile_id) and company pages (company_id, 2026-10-29) as READY POSITIONS over text (2026-08-21) - unlike create_linkedin_comment\'s {profile_id, name} search pairs. Each entry names exactly one of the two ids. Require non-blank text.'),
       brand_partnership: z.boolean().optional()
         .describe('true adds LinkedIn\'s "Brand partnership" label (paid endorsement). false and absent both send nothing - the wire\'s own shape.'),
       author_organization_id: z.string().regex(/^\d+$/).optional()

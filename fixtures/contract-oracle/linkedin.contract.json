@@ -7378,6 +7378,47 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Core\\Enums\\AppLocaleEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "English",
+                    "value": "en"
+                },
+                {
+                    "name": "Spanish",
+                    "value": "es"
+                },
+                {
+                    "name": "French",
+                    "value": "fr"
+                },
+                {
+                    "name": "Portuguese",
+                    "value": "pt"
+                },
+                {
+                    "name": "German",
+                    "value": "de"
+                },
+                {
+                    "name": "Hindi",
+                    "value": "hi"
+                },
+                {
+                    "name": "Chinese",
+                    "value": "zh"
+                },
+                {
+                    "name": "Arabic",
+                    "value": "ar"
+                },
+                {
+                    "name": "Russian",
+                    "value": "ru"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Core\\Enums\\EmailStatus": {
             "backing": "string",
             "cases": [
@@ -7623,6 +7664,14 @@
                 {
                     "name": "AccountRestricted",
                     "value": "account_restricted"
+                },
+                {
+                    "name": "AccountRestrictionRechecked",
+                    "value": "account_restriction_rechecked"
+                },
+                {
+                    "name": "AccountRestrictionLifted",
+                    "value": "account_restriction_lifted"
                 },
                 {
                     "name": "ServerUnreachable",
@@ -43314,11 +43363,28 @@
                 {
                     "field": "mentions.*.profile_id",
                     "rules": [
-                        "required",
+                        "required_without:mentions.*.company_id",
+                        "prohibits:mentions.*.company_id",
                         "string",
                         "min:1"
                     ],
-                    "required": true,
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.company_id",
+                    "rules": [
+                        "required_without:mentions.*.profile_id",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -43950,11 +44016,28 @@
                 {
                     "field": "mentions.*.profile_id",
                     "rules": [
-                        "required",
+                        "required_without:mentions.*.company_id",
+                        "prohibits:mentions.*.company_id",
                         "string",
                         "min:1"
                     ],
-                    "required": true,
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.company_id",
+                    "rules": [
+                        "required_without:mentions.*.profile_id",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -55945,6 +56028,73 @@
         },
         {
             "method": "POST",
+            "uri": "internal/analytics/team-daily-state",
+            "controller": "App\\Http\\Controllers\\Internal\\InternalAnalyticsController",
+            "action": "teamDailyState",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "Gtm\\Lib\\Common\\Core\\Analytics\\DailyState\\Http\\InternalTeamDailyStateRequest",
+            "rules": [
+                {
+                    "field": "date",
+                    "rules": [
+                        "required",
+                        "date_format:Y-m-d"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "date_format",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:500"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18",
+                        "starts_with:ts_tm_"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/antidetect-browser-proxies/pick",
             "controller": "App\\Entities\\AntidetectBrowserProxy\\InternalAntidetectBrowserProxyController",
             "action": "pick",
@@ -61417,6 +61567,41 @@
                     "min": null,
                     "max": null,
                     "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-sign-in-checks/requeue",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "requeueAntidetectBrowserProxySignInCheck",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxySignInCheckRequeueRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_sc_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
