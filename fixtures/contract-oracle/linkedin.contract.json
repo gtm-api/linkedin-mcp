@@ -42911,11 +42911,28 @@
                 {
                     "field": "mentions.*.profile_id",
                     "rules": [
-                        "required",
+                        "required_without:mentions.*.company_id",
+                        "prohibits:mentions.*.company_id",
                         "string",
                         "min:1"
                     ],
-                    "required": true,
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "mentions.*.company_id",
+                    "rules": [
+                        "required_without:mentions.*.profile_id",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,

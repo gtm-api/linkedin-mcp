@@ -400,12 +400,14 @@ export const linkedinPostingTools: ToolDefinition[] = [
       parent_comment_urn: z.string().max(512).nullable().optional()
         .describe('Reply target: the comment URN to reply under. Omit or null for a top-level comment.'),
       mentions: z.array(z.object({
-        profile_id: z.string().min(1)
-          .describe('Who to mention: a bare ACoA… profile id (as get-post-comments and the profile readers return) or the full urn:li:fsd_profile:<id>.'),
+        profile_id: z.string().min(1).optional()
+          .describe('A member to mention: a bare ACoA… profile id (as get-post-comments and the profile readers return) or the full urn:li:fsd_profile:<id>. Exactly one of profile_id or company_id.'),
+        company_id: z.string().min(1).optional()
+          .describe('A company page to mention: the bare numeric company id (same form get_linkedin_company_posts takes) or the full urn:li:fsd_company:<id>. Exactly one of profile_id or company_id.'),
         name: z.string().min(1)
-          .describe('The exact substring of text that becomes the clickable link (usually the profile name).'),
+          .describe('The exact substring of text that becomes the clickable link (usually the member\'s or the page\'s name).'),
       })).optional()
-        .describe('Profile mentions (2026-08-21). Names are matched in text left to right in list order, each search starting after the previous mention. The node computes the character offsets itself.'),
+        .describe('Mentions of members (profile_id) and company pages (company_id, 2026-10-29). Names are matched in text left to right in list order, each search starting after the previous mention. The node computes the character offsets itself.'),
       client_reference: postingKey('comment', 'the post as LinkedIn files it, named by any of its urns, or for a reply the comment it answers', 'the same words at the same place'),
       confirmed_not_sent: CONFIRMED_NOT_SENT,
       confirmed_sent: CONFIRMED_SENT,
