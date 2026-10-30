@@ -7873,6 +7873,10 @@
                 {
                     "name": "Customer",
                     "value": "customer"
+                },
+                {
+                    "name": "Adopted",
+                    "value": "adopted"
                 }
             ]
         },
@@ -56341,14 +56345,15 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "in:\"platform\",\"customer\""
+                        "in:\"platform\",\"customer\",\"adopted\""
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": [
                         "platform",
-                        "customer"
+                        "customer",
+                        "adopted"
                     ],
                     "min": null,
                     "max": null,

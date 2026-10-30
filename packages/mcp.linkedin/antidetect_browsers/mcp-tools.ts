@@ -49,12 +49,16 @@ const CloudBrowserAccessEntry = z.object({
 });
 
 // Owner + vendor enums mirror the create FormRequest (only `gologin` is wired).
-// DERIVED server-side from vendor_profile_id, never an input: a bound profile is the
-// customer's, a minted one is ours. Read-only on the row and filterable; it is NOT on
-// create (removed 2026-08-28 with the `mirror_profiles` case, which stood for a closed
-// vendor integration that does not exist - MCP has no business knowing about vendor
+// DERIVED server-side from vendor_profile_id, never an input: a minted profile is
+// ours (platform); a bound one is the customer's (customer) unless GoLogin reports
+// it held in our own account, which makes it adopted (2026-10-30: another
+// application of ours minted thousands of profiles there, and people re-bind
+// them by id). Read-only on the row and filterable; it is NOT on create (removed
+// 2026-08-28 with the `mirror_profiles` case, which stood for a closed vendor
+// integration that does not exist - MCP has no business knowing about vendor
 // integrations at all).
-const BrowserOwner = z.enum(['platform', 'customer']);
+const BrowserOwner = z.enum(['platform', 'customer', 'adopted'])
+  .describe('Who holds the vendor profile. platform: minted by us. customer: bound by id from your own GoLogin account, its proxy managed there. adopted: bound by id but held in our own GoLogin account, so its proxy is ours to set; the profile is never deleted at the vendor and never shared from here.');
 const VendorProvider = z.enum(['gologin', 'multilogin', 'adspower', 'dolphin']);
 
 // AntidetectBrowserStatusEnum, in its PHP order. Named once and reused by the
@@ -81,11 +85,12 @@ const AntidetectBrowserStatus = z.enum([
 ]);
 
 // Customer bring-your-own proxy tuple. Allowed on any browser whose vendor
-// profile WE minted (browser_owner=platform included: our profile, their proxy);
-// forbidden on a profile bound by id, whose proxy lives in the customer's own
-// vendor account. Both write paths PROBE the tuple first and refuse an
-// unreachable one (422 custom_proxy_unreachable_*), and the probe's exit country
-// is what lands in proxy_country_code: the blob itself states no geo.
+// profile WE hold (browser_owner=platform or adopted: our profile, their proxy);
+// forbidden on a profile bound by id from the customer's own vendor account
+// (browser_owner=customer), whose proxy lives there. Both write paths PROBE the
+// tuple first and refuse an unreachable one (422 custom_proxy_unreachable_*), and
+// the probe's exit country is what lands in proxy_country_code: the blob itself
+// states no geo.
 const CustomProxyConfig = z.object({
   ip: z.string().describe('Proxy host.'),
   port: z.number().int().min(1).max(65535),
@@ -365,7 +370,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     inputSchema: z.object({
       vendor_provider: VendorProvider.optional().describe('Default gologin (the only wired vendor).'),
       vendor_profile_id: z.string().regex(/^[0-9a-f]{24}$/i).nullable().optional()
-        .describe('Bind an EXISTING vendor profile (BYO): the GoLogin profile id, 24 hex characters. NOT a profile URL, share link or LinkedIn slug. Omit to mint a fresh one. The profile must be shared with our GoLogin account, or the create is 422 vendor_profile_not_found; if the owning GoLogin account is over its plan the create is 402 vendor_profile_plan_limit and retrying will not help.'),
+        .describe('Bind an EXISTING vendor profile (BYO): the GoLogin profile id, 24 hex characters. NOT a profile URL, share link or LinkedIn slug. Omit to mint a fresh one. The profile must be shared with our GoLogin account, or the create is 422 vendor_profile_not_found; if the owning GoLogin account is over its plan the create is 402 vendor_profile_plan_limit and retrying will not help. A profile held in our own GoLogin account (no share needed) is adopted (browser_owner=adopted), and when its proxy is one of ours it is linked to that proxy at create.'),
       os: z.enum(['win', 'mac', 'lin', 'android']).optional().describe('OS for a freshly-minted profile (default win).'),
       antidetect_browser_proxy_sid: PROXY_SID.optional()
         .describe('Assign an already-chosen pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
@@ -485,7 +490,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'update_antidetect_browser_proxy',
     description:
-      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. EVERY arm needs browser_owner=platform: a profile bound by id keeps its proxy in the vendor (422 managed_proxy_forbidden_for_owner / 422 custom_proxy_forbidden_for_owner). custom_proxy_config is probed first (422 custom_proxy_unreachable_* changes nothing), takes the exit country measured there, and RELEASES any armed 5G slot. Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty, 5G on a BYO proxy 422 proxy_5g_requires_managed_proxy. proxy_5g alone is a valid body: it moves the add-on binding only. DANGEROUS twice over: a location flip mid-campaign can trip a LinkedIn risk check, and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
+      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. EVERY arm needs browser_owner=platform or adopted: a profile you own at GoLogin keeps its proxy there (422 managed_proxy_forbidden_for_owner / 422 custom_proxy_forbidden_for_owner). custom_proxy_config is probed first (422 custom_proxy_unreachable_* changes nothing), takes the exit country measured there, and RELEASES any armed 5G slot. Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty, 5G on a BYO proxy 422 proxy_5g_requires_managed_proxy. proxy_5g alone is a valid body: it moves the add-on binding only. DANGEROUS twice over: a location flip mid-campaign can trip a LinkedIn risk check, and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/update-proxy' },
     operation: 'action',
@@ -512,7 +517,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'replace_antidetect_browser_proxy',
     description:
-      'Rotate an antidetect browser onto another MANAGED proxy of the SAME country. Geo-binding is preserved, so this is the safe way to drop a flagged IP. Omit antidetect_browser_proxy_sid to take the least-loaded active proxy of that country, or pin one (a pin from another country is refused, 422 proxy_country_mismatch). Platform-owned browsers only, 422 managed_proxy_forbidden_for_owner; a platform row that never got a proxy is 422 proxy_not_managed; a country with no other active proxy is 422 proxy_replacement_unavailable. A running browser is stopped and started again so the new IP takes effect; result.restarted reports whether it came back.',
+      'Rotate an antidetect browser onto another MANAGED proxy of the SAME country. Geo-binding is preserved, so this is the safe way to drop a flagged IP. Omit antidetect_browser_proxy_sid to take the least-loaded active proxy of that country, or pin one (a pin from another country is refused, 422 proxy_country_mismatch). Only a browser whose profile we hold (browser_owner=platform or adopted): a profile you own at GoLogin keeps its proxy there, 422 managed_proxy_forbidden_for_owner; a row that never got a managed proxy is 422 proxy_not_managed; a country with no other active proxy is 422 proxy_replacement_unavailable. A running browser is stopped and started again so the new IP takes effect; result.restarted reports whether it came back.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/replace-proxy' },
     operation: 'action',
@@ -534,7 +539,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'delete_antidetect_browser',
     description:
-      'Decommission (soft-delete) a single antidetect browser by sid: outward, destructive, one-way through MCP. A browser in an active-run status is stopped FIRST and the node must confirm: the call can take up to ~20s waiting for that confirm, and if it does not arrive the delete is refused with 409 conflict (context.reason=browser_stop_unconfirmed) and NOTHING is deleted - retry in a minute rather than assuming success. Variant B cascade: the bound linkedin-account is soft-deleted and pending plugin tasks transition to failed; the cascade block reports the counts. A platform-minted GoLogin profile is reclaimed (deleted) at the vendor unless another live browser row still holds it; customer BYO vendor profiles are left intact.',
+      'Decommission (soft-delete) a single antidetect browser by sid: outward, destructive, one-way through MCP. A browser in an active-run status is stopped FIRST and the node must confirm: the call can take up to ~20s waiting for that confirm, and if it does not arrive the delete is refused with 409 conflict (context.reason=browser_stop_unconfirmed) and NOTHING is deleted - retry in a minute rather than assuming success. Variant B cascade: the bound linkedin-account is soft-deleted and pending plugin tasks transition to failed; the cascade block reports the counts. A platform-minted GoLogin profile is reclaimed (deleted) at the vendor unless another live browser row still holds it; customer BYO and adopted vendor profiles (bound by id) are left intact.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'DELETE', pathTemplate: '/api/antidetect-browsers/{sid}', sidParam: 'sid' },
     operation: 'delete',
