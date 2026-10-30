@@ -168,11 +168,12 @@ const ACTIVITY_LOG = z.object({}).passthrough()
   .describe('Full dispatch row (linkedin-account-activity-log) per §4.12a. Poll it there by sid for the terminal outcome.');
 
 const CreatePostResult = z.object({
-  activity_urn: z.string().nullable().describe('The published post as an activity urn.'),
-  post_urn: z.string().nullable().describe('The same post as urn:li:share:<id>.'),
-  url: z.string().nullable().describe('Public post URL, query string already stripped.'),
-  created_at: z.string().nullable().describe('Publication time, ISO 8601.'),
-  text: z.string().describe('The body LinkedIn actually published, read back off the wire. Empty for an image-only post.'),
+  activity_urn: z.string().nullable().describe('The published post as an activity urn. Null for a scheduled post, and for a video post while LinkedIn transcodes it (lifecycle_state MEDIA_PROCESSING): read it later with get_linkedin_post by post_urn.'),
+  post_urn: z.string().nullable().describe('The same post as urn:li:share:<id>, or urn:li:ugcPost:<id> for a video post.'),
+  url: z.string().nullable().describe('Public post URL, query string already stripped. Null when LinkedIn answered none (scheduled, media processing).'),
+  created_at: z.string().nullable().describe('Publication time, ISO 8601 (from the post id while a video post is still processing).'),
+  text: z.string().describe('The body LinkedIn actually published, read back off the wire. Empty for an image-only post and for a video post still processing.'),
+  lifecycle_state: z.string().nullable().describe('The share\'s lifecycle state as LinkedIn answered it: PUBLISHED; MEDIA_PROCESSING for a video post whose activity is not minted yet (the post exists, activity_urn / url come later); null when the answer named no state (a scheduled post).'),
   activity_log: ACTIVITY_LOG,
   idempotent_replay: z.boolean().optional()
     .describe('true when this answers a repeat (under the key, or without one the same words at the same place) with what the first send made: nothing was sent now.'),
