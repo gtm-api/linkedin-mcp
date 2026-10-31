@@ -8940,6 +8940,39 @@
                     "between": null
                 },
                 {
+                    "field": "forward_email_message_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_ms_",
+                        "size:18",
+                        "prohibits:reply_to_email_message_sid"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "include_original_attachments",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "to",
                     "rules": [
                         "nullable",
@@ -9128,12 +9161,13 @@
                 {
                     "field": "attachments.*.name",
                     "rules": [
-                        "required",
+                        "required_without:attachments.*.email_message_sid",
+                        "nullable",
                         "string",
                         "max:255"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -9144,15 +9178,50 @@
                 {
                     "field": "attachments.*.content_base64",
                     "rules": [
-                        "required",
+                        "required_without:attachments.*.email_message_sid",
+                        "nullable",
                         "string"
                     ],
-                    "required": true,
-                    "nullable": false,
+                    "required": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.email_message_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_ms_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "attachments.*.attachment_id",
+                    "rules": [
+                        "required_with:attachments.*.email_message_sid",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 },
@@ -13882,8 +13951,10 @@
     "error_catalog": {
         "account_bound_other_team": "This mailbox is already connected in another workspace.",
         "account_not_active": "This email account is not active (see context.status), so it cannot send; reconnect it first.",
+        "account_not_searchable": "The mailbox cannot be searched at its provider right now: it is not active, or it is a hosted mailbox whose mirror already holds every message; reconnect it, or search the mirror with email-messages.search.",
         "account_not_syncable": "This account has no sync runs (see context.detail).",
         "account_sending_paused": "Sending from this account is paused (see context.reason); resume it, or send from another account.",
+        "archive_folder_missing": "This IMAP mailbox mirrors no folder with the archive role, so there is nowhere to archive to; move the message to a folder of your choice with email-messages.update instead.",
         "attachment_fetch_failed": "The attachment could not be downloaded from the provider (see context.detail).",
         "attachment_too_large": "The attachments together exceed the size a send may carry (context.max_bytes).",
         "body_fetch_failed": "The message body could not be fetched from the provider (see context.detail); a sync refreshes its locator.",
@@ -13917,6 +13988,7 @@
         "provider_not_reconnectable": "A hosted mailbox has no external provider to reconnect.",
         "provider_probe_failed": "The provider's token endpoint could not be reached or refused our client; retry in a minute.",
         "provider_probe_not_available": "This provider cannot be probed on this deployment yet (see context.detail).",
+        "provider_unavailable": "The mailbox provider did not answer the search; retry after the wait in context.retry_after seconds.",
         "recipient_suppressed": "Every recipient is on the suppression list (bounced or unsubscribed); nothing was sent.",
         "redirect_host_not_allowed": "success_redirect_url must point at an allowed host.",
         "relation_not_found": "reply_to_email_message_sid names no message this account holds.",
@@ -13926,6 +13998,7 @@
         "send_outcome_unknown": "This message may already have gone out (the provider gave no verdict), so it is not sent again until the mailbox shows whether it left; ask again after context.retry_after, or ask check-sent (context.activity_log_sid names the attempt).",
         "sync_in_progress": "A sync of this account is already running (context.open_sync_run_sid); wait for it to finish.",
         "too_many_recipients": "A send reaches at most 50 recipients across to, cc and bcc together; split it into several sends.",
-        "tracking_domain_not_verified": "The account's tracking domain is not verified, so tracking cannot be injected; verify the domain or send without tracking."
+        "tracking_domain_not_verified": "The account's tracking domain is not verified, so tracking cannot be injected; verify the domain or send without tracking.",
+        "trash_folder_missing": "This IMAP mailbox mirrors no folder with the trash role, so the message cannot be moved to Trash; move it to a folder of your choice with email-messages.update instead."
     }
 }
