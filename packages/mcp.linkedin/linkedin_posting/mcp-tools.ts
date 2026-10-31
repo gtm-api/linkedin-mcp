@@ -354,7 +354,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
         file_name: z.string().min(1).max(255).nullable().optional(),
         file_type: z.string().min(1).max(255).nullable().optional(),
       }).optional()
-        .describe('ONE video, image-shaped minus alt_text. Mutually exclusive with images (LinkedIn does not mix them in a share - 422 here). Shares the 35 MB media budget. The upload is a single large PUT through the browser and is SLOW: the synchronous call can outlive your client timeout while the post still publishes, so repeat it only under the same client_reference.'),
+        .describe('ONE video, image-shaped minus alt_text. Mutually exclusive with images (LinkedIn does not mix them in a share - 422 here). Shares the 35 MB media budget. The upload runs through the browser (one PUT up to 10 MiB, 4 MiB parts above it) and is SLOW: the synchronous call can outlive your client timeout while the post still publishes, so repeat it only under the same client_reference.'),
       scheduled_at: z.string().optional()
         .describe('Schedule the post instead of publishing now: ISO 8601 with timezone, must be in the future (a strictly-past time is a 422; within a minute of now is passed through for LinkedIn to judge). A SCHEDULED share legitimately answers with null activity_urn/url - post_urn is the handle. Read and clean the queue with get_linkedin_scheduled_posts / delete_linkedin_scheduled_post. Scheduling is LinkedIn-side: the draft lives in ITS queue, nothing is stored here. The slot is no part of a key: a retry under the same client_reference that computes a new scheduled_at is the same post. Without a key the slot tells two posts apart.'),
       mentions: z.array(LinkedinPostingMention).optional()
