@@ -14156,6 +14156,8 @@
         "account_not_searchable": "The mailbox cannot be searched at its provider right now: it is not active, or it is a hosted mailbox whose mirror already holds every message; reconnect it, or search the mirror with email-messages.search.",
         "account_not_syncable": "This account has no sync runs (see context.detail).",
         "account_sending_paused": "Sending from this account is paused (see context.reason); resume it, or send from another account.",
+        "app_access_denied": "The tenant does not let this application reach the mailbox: an Exchange application access policy excludes it, or the admin consent for Mail.ReadWrite and Mail.Send is missing.",
+        "app_only_credential_rejected": "Entra does not accept this application's client secret, or the application is unknown to the tenant (expired or rotated secret, wrong tenant); fix it at the provider and update the secret with email-oauth-apps.update.",
         "archive_folder_missing": "This IMAP mailbox mirrors no folder with the archive role, so there is nowhere to archive to; move the message to a folder of your choice with email-messages.update instead.",
         "attachment_fetch_failed": "The attachment could not be downloaded from the provider (see context.detail).",
         "attachment_too_large": "The attachments together exceed the size a send may carry (context.max_bytes).",
