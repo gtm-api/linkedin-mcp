@@ -1713,6 +1713,18 @@
                         "has_default": false
                     },
                     {
+                        "name": "auth_kind",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppAuthKindEnum|string",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "service_account_email",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_by",
                         "type": "Gtm\\Lib\\Common\\Core\\Values\\AccessIdentityValue|array|null",
                         "nullable": true,
@@ -1856,6 +1868,7 @@
                 "fields": [
                     "sid",
                     "provider",
+                    "auth_kind",
                     "status",
                     "is_default",
                     "callback_host",
@@ -3063,6 +3076,23 @@
                 {
                     "name": "Bounced",
                     "value": "bounced"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Email\\EmailOauthApp\\Enums\\EmailOauthAppAuthKindEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "OauthClient",
+                    "value": "oauth_client"
+                },
+                {
+                    "name": "ServiceAccount",
+                    "value": "service_account"
+                },
+                {
+                    "name": "AppOnly",
+                    "value": "app_only"
                 }
             ]
         },
@@ -5060,12 +5090,12 @@
                 {
                     "field": "oauth_refresh_token",
                     "rules": [
-                        "required_if:provider,google,microsoft",
+                        "nullable",
                         "string",
                         "max:4096"
                     ],
                     "required": false,
-                    "nullable": false,
+                    "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
@@ -5093,12 +5123,12 @@
                 {
                     "field": "address",
                     "rules": [
-                        "required_if:provider,imap_smtp,gtm_hosted",
+                        "nullable",
                         "email",
                         "max:320"
                     ],
                     "required": false,
-                    "nullable": false,
+                    "nullable": true,
                     "type": "email",
                     "in": null,
                     "min": null,
@@ -5304,6 +5334,112 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-accounts/bulk-create",
+            "controller": "App\\Entities\\EmailAccount\\EmailAccountController",
+            "action": "bulkCreate",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountBulkCreateRequest",
+            "rules": [
+                {
+                    "field": "email_oauth_app_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_oa_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "addresses",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "addresses.*",
+                    "rules": [
+                        "required",
+                        "email",
+                        "max:320",
+                        "distinct:ignore_case"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "email",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "backfill_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 3650,
+                    "size": null,
                     "between": null
                 },
                 {
@@ -9743,13 +9879,33 @@
                     "between": null
                 },
                 {
+                    "field": "auth_kind",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"oauth_client\",\"service_account\",\"app_only\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "oauth_client",
+                        "service_account",
+                        "app_only"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "client_id",
                     "rules": [
-                        "required",
+                        "required_without:service_account_json",
                         "string",
                         "max:512"
                     ],
-                    "required": true,
+                    "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
@@ -9761,16 +9917,48 @@
                 {
                     "field": "client_secret",
                     "rules": [
-                        "required",
+                        "required_without:service_account_json",
                         "string",
-                        "max:1024"
+                        "max:8192"
                     ],
-                    "required": true,
+                    "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 1024,
+                    "max": 8192,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "service_account_email",
+                    "rules": [
+                        "nullable",
+                        "email",
+                        "max:320"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "email",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "service_account_json",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:16384"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 16384,
                     "size": null,
                     "between": null
                 },
@@ -9926,6 +10114,20 @@
                 },
                 {
                     "field": "filter.provider",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.auth_kind",
                     "rules": [
                         "nullable"
                     ],
@@ -13961,11 +14163,13 @@
         "callback_host_registry_unavailable": "The identity service did not answer the callback-host lookup; retry in a minute.",
         "client_reference_frozen": "This message was already sent (or tried) under its client_reference, which its repeat and check-sent find it by; the client_reference cannot be set, changed or cleared now.",
         "daily_limit_exceeded": "This account has used its daily sending budget; pass scheduled_at and the queue sends when budget allows.",
+        "delegation_not_authorized": "The Workspace admin has not authorized this service account's client id for the Gmail scope (Admin console > Security > API controls > Domain-wide delegation: the client id with https://www.googleapis.com/auth/gmail.modify), so no mailbox token can be minted.",
         "dispatch_in_flight": "A send of this message is on its way (context.send_outcome in_flight), or it went out and its row is not stored (sent); ask again after context.retry_after, or ask check-sent. A sent answer without context.retry_after is final: the mail went out and no row will come.",
         "dns_resolvers_unavailable": "The DNS resolvers did not answer, so the domain could not be verified; retry in a minute.",
         "domain_bound_other_team": "This domain is already registered in another workspace.",
         "email_box_dump_not_ready": "The mailbox dump is not finished (see context.status); retry once it is done.",
         "email_box_ops_disabled": "This deployment is not a workspace mailbox host; box operations are off here.",
+        "grant_connect_needs_oauth_provider": "A grant application connects google or microsoft mailboxes only.",
         "header_not_allowed": "A send may set X-* headers, List-Unsubscribe and Reply-To, each named in printable ASCII with no space or colon; drop or rename the header {field} names.",
         "header_reserved": "X-Gtm-Message-Sid is the mark the platform stamps on every send, by which check-sent and the Sent-folder sync find it, so a send cannot set it; drop it.",
         "header_set_by_platform": "This send carries the platform's own one-click List-Unsubscribe, which records an unsubscribe on the stop-list, so it cannot carry another; send without the header, or with track_opens and track_clicks off and no unsubscribe link in the body.",
@@ -13974,6 +14178,7 @@
         "idempotency_key_busy": "A send with this idempotency_key is in progress; ask again after context.retry_after.",
         "idempotency_key_reused": "This idempotency_key was used for a different send; use a new key for a new message.",
         "invalid_transition": "This status change is not allowed while the account is connecting.",
+        "mailbox_not_found": "The grant application cannot reach this mailbox: no such user in the Workspace or tenant the grant covers (check the address, or that the service account key is the one Google knows).",
         "message_not_outbound": "Only a message this mailbox sent can be checked for having gone out; this one was received.",
         "no_mailbox_license": "This Microsoft account has no mailbox (no Exchange license), so there is nothing to connect.",
         "not_this_message": "{field} names the activity_log_sid of an earlier attempt of this same message (the same client_reference and recipients, or without a key the same content and recipients) that is in doubt; this one is not.",
@@ -13990,12 +14195,14 @@
         "provider_probe_not_available": "This provider cannot be probed on this deployment yet (see context.detail).",
         "provider_unavailable": "The mailbox provider did not answer the search; retry after the wait in context.retry_after seconds.",
         "recipient_suppressed": "Every recipient is on the suppression list (bounced or unsubscribed); nothing was sent.",
+        "reconnect_identity_mismatch": "The grant now resolves this address to a different mailbox than the account was connected as; connect that mailbox as its own account.",
         "redirect_host_not_allowed": "success_redirect_url must point at an allowed host.",
         "relation_not_found": "reply_to_email_message_sid names no message this account holds.",
         "scheduled_at_in_past": "scheduled_at is in the past; omit it to send now, or pass a future time.",
         "send_as_denied": "from_email is not an address this account owns or is allowed to send as.",
         "send_outcome_settled": "confirmed_sent names an attempt that was already proven not sent (context.activity_log_sid, why in context.check_reason), so the word cannot be taken; nothing was sent.",
         "send_outcome_unknown": "This message may already have gone out (the provider gave no verdict), so it is not sent again until the mailbox shows whether it left; ask again after context.retry_after, or ask check-sent (context.activity_log_sid names the attempt).",
+        "service_account_key_rejected": "Google does not accept this service account key (deleted, rotated, or not this account's); upload the current key with email-oauth-apps.update.",
         "sync_in_progress": "A sync of this account is already running (context.open_sync_run_sid); wait for it to finish.",
         "too_many_recipients": "A send reaches at most 50 recipients across to, cc and bcc together; split it into several sends.",
         "tracking_domain_not_verified": "The account's tracking domain is not verified, so tracking cannot be injected; verify the domain or send without tracking.",

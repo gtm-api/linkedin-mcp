@@ -50,6 +50,7 @@
       "POST api/email-accounts/{sid}/pause-sending",
       "POST api/email-accounts/{sid}/reconnect",
       "POST api/email-accounts/{sid}/resume-sending",
+      "POST api/email-accounts/bulk-create",
       "POST api/email-accounts/{sid}/search-provider",
       "POST api/email-accounts/{sid}/sync-email-account",
       "POST api/email-bounce-log/metrics",
