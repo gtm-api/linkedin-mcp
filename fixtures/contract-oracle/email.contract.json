@@ -1574,6 +1574,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "is_flagged",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "is_answered",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
                         "name": "deleted_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -1600,6 +1612,8 @@
                     "folder_role",
                     "email_folder_sids",
                     "is_read",
+                    "is_flagged",
+                    "is_answered",
                     "has_attachments",
                     "first_opened_at",
                     "sent_at",
@@ -7925,6 +7939,153 @@
         },
         {
             "method": "POST",
+            "uri": "api/email-messages/bulk-update",
+            "controller": "App\\Entities\\EmailMessage\\EmailMessageController",
+            "action": "bulkUpdate",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_email_messages",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailMessage\\Requests\\EmailMessageBulkUpdateRequest",
+            "rules": [
+                {
+                    "field": "sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:em_ms_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "is_read",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "is_flagged",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_folder_sids",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_folder_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:em_fd_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "archive",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/email-messages/check-sent",
             "controller": "App\\Entities\\EmailMessage\\EmailMessageController",
             "action": "checkSentByClientReference",
@@ -9279,6 +9440,21 @@
                     "between": null
                 },
                 {
+                    "field": "is_flagged",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "email_folder_sids",
                     "rules": [
                         "sometimes",
@@ -9343,6 +9519,28 @@
                 }
             ],
             "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-messages/{sid}/archive",
+            "controller": "App\\Entities\\EmailMessage\\EmailMessageController",
+            "action": "archive",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_email_messages",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
         },
         {
             "method": "POST",
