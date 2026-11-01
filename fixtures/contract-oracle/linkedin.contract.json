@@ -55774,6 +55774,21 @@
                     "between": null
                 },
                 {
+                    "field": "take_over",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "rdp_settings",
                     "rules": [
                         "sometimes",
@@ -55907,7 +55922,26 @@
             "required_permission": null,
             "internal": false,
             "request_class": "App\\Entities\\CloudBrowser\\Requests\\ExternalCloudBrowserKeepAliveRequest",
-            "rules": [],
+            "rules": [
+                {
+                    "field": "session_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:cb_ss_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
             "rules_reason": null
         },
         {

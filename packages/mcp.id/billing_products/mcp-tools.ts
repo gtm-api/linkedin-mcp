@@ -15,7 +15,9 @@ import {
   McpSearchResponse,
 } from '@gtm/mcp-shared';
 
-const BillingProductTypeEnum = z.enum(['plan', 'addon']);
+// The lib's BillingProductTypeEnum: credits_pack is a product of data credits (getsales' catalog since
+// 2026-10-25; gtm's catalog carries none), so an agent must still read and filter it.
+const BillingProductTypeEnum = z.enum(['plan', 'addon', 'credits_pack']);
 
 // Loose item schema: full field set is tightened by the Stage-1
 // contract tests against live envelopes; passthrough keeps live responses valid.
@@ -76,7 +78,7 @@ export const billingProductsTools: ToolDefinition[] = [
     ...base,
     name: 'search_billing_products',
     description:
-      'List the Paddle-synced product catalog (the base plan + add-ons) with filtering, sorting and cursor pagination. Filter by type to split plan vs add-on, is_active for the live catalog, or q for an infix match over name/slug. Each row carries the per-unit limits grant. Read-only: the catalog is authored in Paddle, never here. page_size:0 returns counts only.',
+      'List the Paddle-synced product catalog (the base plan, add-ons and any credits packs) with filtering, sorting and cursor pagination. Filter by type to split plan, add-on and credits_pack, is_active for the live catalog, or q for an infix match over name/slug. Each row carries the per-unit limits grant. Read-only: the catalog is authored in Paddle, never here. page_size:0 returns counts only.',
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-products/search' },
     operation: 'search',

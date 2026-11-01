@@ -47,7 +47,7 @@ const BillingTransaction = z.object({
   items: z.array(z.object({
     price_sid: z.string().nullable(),
     product_sid: z.string().nullable(),
-    product_type: z.enum(['plan', 'addon']),
+    product_type: z.enum(['plan', 'addon', 'credits_pack']),
     quantity: z.number(),
     unit_amount: z.string(),
     paddle_price_id: z.string().nullable(),
