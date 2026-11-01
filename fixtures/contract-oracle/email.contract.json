@@ -162,6 +162,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "sending_paused_until",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "reconnect_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -2771,6 +2783,10 @@
                     "value": "reconnect"
                 },
                 {
+                    "name": "Probe",
+                    "value": "probe"
+                },
+                {
                     "name": "Push",
                     "value": "push"
                 }
@@ -2790,6 +2806,10 @@
                 {
                     "name": "Pacing",
                     "value": "pacing"
+                },
+                {
+                    "name": "AuthSuspect",
+                    "value": "auth_suspect"
                 }
             ]
         },
@@ -2853,6 +2873,10 @@
                 {
                     "name": "WarmupGuard",
                     "value": "warmup_guard"
+                },
+                {
+                    "name": "ProviderQuota",
+                    "value": "provider_quota"
                 }
             ]
         },
