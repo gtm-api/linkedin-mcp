@@ -1562,6 +1562,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "body_html_sanitized",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "body_text_unquoted",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -9825,6 +9837,28 @@
         },
         {
             "method": "POST",
+            "uri": "api/email-messages/{sid}/get-source",
+            "controller": "App\\Entities\\EmailMessage\\EmailMessageController",
+            "action": "getSource",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_email_messages",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
             "uri": "api/email-oauth-apps",
             "controller": "App\\Entities\\EmailOauthApp\\EmailOauthAppController",
             "action": "store",
@@ -14205,6 +14239,9 @@
         "send_outcome_settled": "confirmed_sent names an attempt that was already proven not sent (context.activity_log_sid, why in context.check_reason), so the word cannot be taken; nothing was sent.",
         "send_outcome_unknown": "This message may already have gone out (the provider gave no verdict), so it is not sent again until the mailbox shows whether it left; ask again after context.retry_after, or ask check-sent (context.activity_log_sid names the attempt).",
         "service_account_key_rejected": "Google does not accept this service account key (deleted, rotated, or not this account's); upload the current key with email-oauth-apps.update.",
+        "source_fetch_failed": "The provider did not hand over the raw source (see context.detail); retry shortly.",
+        "source_not_available": "This message has no raw source to download (see context.detail): a scheduled message has not been sent yet, and a hosted mailbox keeps the parsed message only.",
+        "source_too_large": "The raw source is larger than the download cap (context.size_bytes against context.max_bytes); read the message through get and get-attachment instead.",
         "sync_in_progress": "A sync of this account is already running (context.open_sync_run_sid); wait for it to finish.",
         "too_many_recipients": "A send reaches at most 50 recipients across to, cc and bcc together; split it into several sends.",
         "tracking_domain_not_verified": "The account's tracking domain is not verified, so tracking cannot be injected; verify the domain or send without tracking.",

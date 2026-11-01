@@ -66,6 +66,7 @@
       "POST api/email-messages/{sid}/archive",
       "POST api/email-messages/{sid}/check-sent",
       "POST api/email-messages/{sid}/get-attachment",
+      "POST api/email-messages/{sid}/get-source",
       "POST api/email-oauth-apps",
       "POST api/email-oauth-apps/search",
       "POST api/email-oauth-apps/{sid}/verify",
