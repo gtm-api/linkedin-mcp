@@ -99,7 +99,7 @@ const DataRequestRow = z.object({}).passthrough()
 
 // Generic loose item, used for full-profile's RAW-WIRE truncated sub-record
 // heads, which diverge from the dedicated methods' projected shapes (the head
-// skills carry the wire `id`, head posts carry epoch-ms created_at).
+// skills carry the wire `id`; the posts head left the profile on 2026-11-03).
 const LooseItem = z.object({}).passthrough();
 
 // Paged wrapper factory ({elements, paging}). The element shape is supplied per
@@ -270,7 +270,7 @@ const FullProfileResult = z.object({
   experience: z.array(LooseItem),   // TRUNCATED raw-wire head; full list: person-experience
   educations: z.array(LooseItem),   // raw-wire head; same data person-education projects
   skills: z.array(LooseItem),       // TRUNCATED raw-wire head (carries wire `id`, not skill_id)
-  posts: z.array(LooseItem),        // recent raw-wire head (epoch-ms created_at, not ISO)
+  // No `posts` since 2026-11-03: the feed is person-posts; the head left the node's live profile read.
   top_voices: z.array(LooseItem),   // followed Top Voices; open-ended wire shape
   featured: z.array(LooseItem),     // pinned Featured head; raw-wire
 }).passthrough();
@@ -527,7 +527,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_full_profile',
     description:
-      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, plus truncated heads of experience/education/skills/recent posts. cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
+      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, plus truncated heads of experience/education/skills (no posts since 2026-11-03: the feed is person-posts). cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-full-profile' },
     operation: 'action',
