@@ -1381,6 +1381,10 @@
                 {
                     "name": "RotateSecrets",
                     "value": "rotate_secrets"
+                },
+                {
+                    "name": "TenantPush",
+                    "value": "tenant_push"
                 }
             ]
         },
@@ -6857,7 +6861,7 @@
                     "rules": [
                         "required",
                         "string",
-                        "in:\"provision\",\"rescale\",\"migrate\",\"suspend\",\"resume\",\"destroy\",\"rotate_secrets\""
+                        "in:\"provision\",\"rescale\",\"migrate\",\"suspend\",\"resume\",\"destroy\",\"rotate_secrets\",\"tenant_push\""
                     ],
                     "required": true,
                     "nullable": false,
@@ -6869,7 +6873,8 @@
                         "suspend",
                         "resume",
                         "destroy",
-                        "rotate_secrets"
+                        "rotate_secrets",
+                        "tenant_push"
                     ],
                     "min": null,
                     "max": null,

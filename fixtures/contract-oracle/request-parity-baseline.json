@@ -166,6 +166,11 @@
         "reason": "legacy `limit` alias of `page_size`, kept on the search FormRequests for the table frontends that still send it. Tools speak the cursor contract (`page_size` + `cursor`) and must not learn a second spelling of the same knob: two page-size keys on one tool is a 422 waiting for whichever the agent picks second. Class-wide by design (`tool: \"*\"`): one decision, not forty lines. Delete when the alias leaves the FormRequests."
       },
       {
+        "tool": "*",
+        "path": "fresh",
+        "reason": "the cache bypass of 2026-11-03 (gtm.service.linkedin 17dba116): a live read whatever the caches hold, made for a partner's own feed column (GetSales' posts), every read billed and paced. Agents read through the caches; a tool learns the knob when an agent use case asks for it. Class-wide: one decision for every enrichment and scraping surface that accepts it."
+      },
+      {
         "tool": "get_antidetect_browser",
         "path": "cursor",
         "reason": "GET /api/antidetect-browsers/{sid} is bound to AntidetectBrowserSearchRequest, the SEARCH FormRequest, so its rule set describes a list call: this tool reads ONE row by sid and the controller passes none of these through. Delete when the show action gets a FormRequest of its own."

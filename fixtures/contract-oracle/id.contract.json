@@ -20526,6 +20526,23 @@
             "rules_reason": "the action reads the raw request, so no rule set declares its body"
         },
         {
+            "method": "POST",
+            "uri": "internal/email-boxes/tenant-push",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "tenantPush",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
             "method": "PATCH",
             "uri": "internal/email-boxes/{sid}",
             "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
@@ -20564,6 +20581,40 @@
             "uri": "internal/email-boxes/{teamSid}",
             "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
             "action": "forTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-provider-incidents/report",
+            "controller": "App\\Entities\\EmailProviderIncident\\InternalEmailProviderIncidentController",
+            "action": "report",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "GET",
+            "uri": "internal/email-provider-incidents/{provider}",
+            "controller": "App\\Entities\\EmailProviderIncident\\InternalEmailProviderIncidentController",
+            "action": "show",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
@@ -21074,6 +21125,205 @@
         },
         {
             "method": "POST",
+            "uri": "ops/activity/search",
+            "controller": "App\\Ops\\Controllers\\OpsActivityController",
+            "action": "search",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsActivitySearchRequest",
+            "rules": [
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required_without_all:user_sid,visitor_id",
+                        "nullable",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "user_sid",
+                    "rules": [
+                        "required_without_all:team_sid,visitor_id",
+                        "nullable",
+                        "string",
+                        "starts_with:us_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "visitor_id",
+                    "rules": [
+                        "required_without_all:team_sid,user_sid",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kinds",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kinds.*",
+                    "rules": [
+                        "string",
+                        "in:\"registered\",\"setup\",\"team\",\"login\",\"connect\",\"sender\",\"issue\",\"mcp\",\"api\",\"agent\",\"pulse\",\"billing\",\"limits\",\"support\",\"churn\",\"mail\",\"ops\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "registered",
+                        "setup",
+                        "team",
+                        "login",
+                        "connect",
+                        "sender",
+                        "issue",
+                        "mcp",
+                        "api",
+                        "agent",
+                        "pulse",
+                        "billing",
+                        "limits",
+                        "support",
+                        "churn",
+                        "mail",
+                        "ops"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "key_only",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "from",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "to",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "ops/alerts",
             "controller": "App\\Ops\\Controllers\\OpsAlertController",
             "action": "search",
@@ -21211,6 +21461,376 @@
                     ],
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-automation-logs/search",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "searchAutomationLogs",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsProxyAutomationLogSearchRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "kind",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:24"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 24,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "trigger",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:24"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 24,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "antidetect_browser_proxy_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "size:18",
+                        "starts_with:ab_px_"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "country_code",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "size:2",
+                        "regex:/^[A-Z]{2}$/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 2,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-automation-settings/get",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "automationSettings",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-automation-settings/update",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "updateAutomationSettings",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsProxyAutomationSettingsUpdateRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "auto_buy_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "auto_buy_avg_browsers_per_ip_threshold",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "auto_buy_min_per_country",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "auto_buy_daily_ip_limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_on_downtime_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_downtime_continuous_minutes",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_downtime_total_minutes_7d",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_on_captcha_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_on_fraud_flagged_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_daily_limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
                     "size": null,
                     "between": null
                 }
@@ -21617,6 +22237,245 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-ip-blacklist/create",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "createIpBlacklist",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsProxyIpBlacklistCreateRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ip",
+                    "rules": [
+                        "required",
+                        "string",
+                        "ip"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "reason",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:500"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-ip-blacklist/delete",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "deleteIpBlacklist",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsProxyIpBlacklistDeleteRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "size:18",
+                        "starts_with:ab_pb_"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "ip",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "ip"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-ip-blacklist/search",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "searchIpBlacklist",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsProxyIpBlacklistSearchRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ip",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:45"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 45,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:24"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 24,
                     "size": null,
                     "between": null
                 }
@@ -23625,6 +24484,7 @@
         "email_taken": "An account with this email already exists; sign in and connect the agent from the app instead.",
         "handover_in_flight": "A handover of this account is already in progress; wait for it to finish.",
         "holder_team_unavailable": "The receiving workspace does not exist or is not active.",
+        "incident_tally_busy": "The provider incident tally is busy for this provider; retry shortly.",
         "invalid_transition": "This status change is not allowed from the member's current status.",
         "invitation_already_redeemed": "This invitation was already used.",
         "invitation_expired": "This invitation has expired; ask for a new one.",
