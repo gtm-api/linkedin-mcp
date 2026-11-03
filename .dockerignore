@@ -1,3 +1,6 @@
-# The image copies only docker/entrypoint.sh; keep the build context tiny.
+# The image copies only the npm launcher (manifest, lockfile, bin); keep the
+# build context tiny.
 *
-!docker/
+!npm/package.json
+!npm/package-lock.json
+!npm/bin/

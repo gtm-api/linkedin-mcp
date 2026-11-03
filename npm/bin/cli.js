@@ -6,7 +6,8 @@
 // No server logic lives here. The bin bridges a stdio MCP client (Claude
 // Desktop, Cursor, anything that spawns a command) to the remote
 // streamable-http endpoint via the bundled mcp-remote; every tool executes on
-// https://mcp.gtm-api.com/mcp. Mirrors docker/entrypoint.sh in the repo root.
+// https://mcp.gtm-api.com/mcp. The Docker image (Dockerfile in the repo root)
+// runs this same file.
 //
 // Auth, two modes:
 //
@@ -80,7 +81,14 @@ try {
 
 const args = [proxy, url, '--transport', 'http-only'];
 if (apiKey) {
-  args.push('--header', 'Authorization: Bearer ' + apiKey);
+  // A reference, not the key (since 1.3.2): mcp-remote expands
+  // ${GTM_API_KEY} from the environment this child inherits. 1.1.0, 1.3.0
+  // and 1.3.1 put the key itself in this argument, where any local account
+  // could read it with ps, and mcp-remote 0.1.38 logs --header values to
+  // stderr before expanding them, so the key also landed in the client's MCP
+  // log. test/key-exposure.test.js checks both, and that the key still
+  // reaches the endpoint.
+  args.push('--header', 'Authorization: Bearer ${GTM_API_KEY}');
 }
 args.push(...process.argv.slice(2));
 

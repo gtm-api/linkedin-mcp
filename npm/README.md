@@ -53,6 +53,8 @@ Two ways in; pick one.
 
 Version notes: launchers up to 1.1.0 required `GTM_API_KEY` but the endpoint rejected keys back then, so they failed on the first call; 1.2.x ignored the variable and did OAuth only. Key auth works from 1.3.0 on, and requires nothing else in the config.
 
+1.3.2 hands the key to mcp-remote as a `${GTM_API_KEY}` reference instead of its value, so the key no longer shows up in the process list or in your MCP client's logs. 1.1.0, 1.3.0 and 1.3.1 exposed it in both, and so did the Docker image published before 1.3.2. If you ran one of them with a key and those logs ever left your machine (a bug report, a support chat), rotate the key in the app under Settings, API keys.
+
 ## Environment variables
 
 | Variable | Required | Meaning |

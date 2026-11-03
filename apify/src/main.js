@@ -1,7 +1,7 @@
 // Apify Actor wrapper for the hosted gtm-api LinkedIn MCP server.
 //
-// No server logic lives here, same contract as npm/bin/cli.js and
-// docker/entrypoint.sh in the repo root: every tool executes on the hosted
+// No server logic lives here, same contract as npm/bin/cli.js in the repo
+// root (which the Docker image runs too): every tool executes on the hosted
 // streamable-http endpoint (default https://mcp.gtm-api.com/mcp). In Standby
 // mode this Actor is a thin HTTP bridge that injects the caller's gtm-api key
 // as an Authorization bearer; in a normal run it performs a connectivity

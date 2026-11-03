@@ -4,6 +4,9 @@
 #   ci/setup.sh     pnpm pinned to package.json packageManager, frozen install
 #   pnpm typecheck  tsc over every workspace package
 #   offline tests   the gate suite MINUS the two corpus gates (below)
+#   npm/ launcher   npm ci + npm test: the real launcher and its mcp-remote
+#                   against a local stub, holding the API key out of ps and
+#                   the logs (it needs ps, which this image has)
 #
 # WHAT DOES NOT RUN HERE, AND WHY
 #   research-parity + openapi-public-drift  Both read the PRIVATE umbrella repo
@@ -43,3 +46,6 @@ jobs:
       - name: Offline gate suite (corpus gates excluded, see header)
         working-directory: tests
         run: pnpm exec vitest run --exclude '**/research-parity.test.ts' --exclude '**/openapi-public-drift.test.ts'
+      - name: Launcher keeps the API key out of ps and the logs (npm/)
+        working-directory: npm
+        run: npm ci --no-audit --no-fund && npm test
