@@ -67,18 +67,21 @@ Client can only spawn a command, not open a URL? The [`@gtm-api/linkedin-mcp`](h
 
 For Claude Code it is one line: `claude mcp add --transport http gtm-api https://mcp.gtm-api.com/mcp`.
 
-The same launcher also ships as a Docker image, [`gtmapi/linkedin-mcp`](https://hub.docker.com/r/gtmapi/linkedin-mcp) (config in [`examples/`](./examples/claude_desktop_config.docker.json)). Mount a volume on the token cache so the consent step runs once rather than on every container:
+The same launcher also ships as a Docker image, [`gtmapi/linkedin-mcp`](https://hub.docker.com/r/gtmapi/linkedin-mcp) (config in [`examples/`](./examples/claude_desktop_config.docker.json)). The image signs in with an API key only. Pass the variable by name and keep the key in the `env` block, so it sits on no command line, docker's included:
 
 ```json
 {
   "mcpServers": {
     "gtm-api": {
       "command": "docker",
-      "args": ["run", "-i", "--rm", "-v", "gtm-mcp-auth:/home/node/.mcp-auth", "gtmapi/linkedin-mcp"]
+      "args": ["run", "-i", "--rm", "-e", "GTM_API_KEY", "gtmapi/linkedin-mcp"],
+      "env": { "GTM_API_KEY": "gtm_live_..." }
     }
   }
 }
 ```
+
+OAuth cannot finish inside a container: the consent page sends your browser back to a callback on `localhost`, which is your machine, not the container. Without a key the container exits at once and says so. For OAuth, use the URL or the npm launcher above.
 
 **3. Restart the client and prompt in plain English:**
 

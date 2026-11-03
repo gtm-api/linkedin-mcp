@@ -6,10 +6,13 @@
         "run",
         "-i",
         "--rm",
-        "-v",
-        "gtm-mcp-auth:/home/node/.mcp-auth",
+        "-e",
+        "GTM_API_KEY",
         "gtmapi/linkedin-mcp"
-      ]
+      ],
+      "env": {
+        "GTM_API_KEY": "gtm_live_..."
+      }
     }
   }
 }
