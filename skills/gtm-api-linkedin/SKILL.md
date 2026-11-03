@@ -79,8 +79,11 @@ launcher `GTM_API_KEY` and skip the browser entirely:
 }
 ```
 
-The launcher also ships as `gtmapi/linkedin-mcp` on Docker Hub. Mount a volume on the token cache
-(`/home/node/.mcp-auth`) in OAuth mode, or the consent step repeats on every container start.
+The launcher also ships as `gtmapi/linkedin-mcp` on Docker Hub, in key mode only. Use `docker` as
+the command with `["run", "-i", "--rm", "-e", "GTM_API_KEY", "gtmapi/linkedin-mcp"]` as its args
+and the same `env` block, so the key sits on no command line. OAuth cannot finish inside a
+container (the consent redirect to `localhost` never reaches it), so without a key the container
+exits at once and says so.
 
 **The gotcha:** in OAuth mode, passing `--header Authorization` to the stdio bridge overwrites the
 OAuth token and the connection fails in a way that looks like a server problem. Pick one mode. In
