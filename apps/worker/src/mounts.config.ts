@@ -39,6 +39,9 @@ export const MOUNTS: MountConfig[] = [
       // this mount sits at 29 of its 29, and an agent inviting connections to an
       // event is doing network work, not account administration.
       { kind: 'exclude', name: 'invite_linkedin_members_to_event' },
+      // The page-follow invitation batch (2026-11-04) rides with it, for the
+      // same reasons: the same wire, the same permission, network work.
+      { kind: 'exclude', name: 'invite_linkedin_members_to_follow_company' },
     ],
     // 26 -> 29 on 2026-09-22: set_linkedin_account_my_position (the About
     // section and the two profile images ride edit_linkedin_account_my_profile,
@@ -167,7 +170,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/network',
     name: 'gtm-linkedin-network',
     instructions:
-      'GTM LinkedIn network graph: connections, connection requests, invitations, followers, and inviting connections to a LinkedIn event. Outward actions (send request, withdraw, accept, ignore, remove, invite to event) are protected (preview → confirm).',
+      'GTM LinkedIn network graph: connections, connection requests, invitations, followers, and inviting connections to a LinkedIn event or to follow a company page. Outward actions (send request, withdraw, accept, ignore, remove, invite to event, invite to follow a page) are protected (preview → confirm).',
     selectors: [
       p('linkedin_connections'),
       p('linkedin_connection_requests'),
@@ -177,6 +180,9 @@ export const MOUNTS: MountConfig[] = [
       // invite-to-event and that file is the research home), mounted here with
       // the other invitation verbs; 22 -> 23 of the default 25 on 2026-10-08.
       { kind: 'tool', name: 'invite_linkedin_members_to_event' },
+      // The page-follow invitation batch (2026-11-04), the same binding;
+      // 23 -> 24 of the default 25.
+      { kind: 'tool', name: 'invite_linkedin_members_to_follow_company' },
     ],
     maxTools: 25,
     facade: 'none',
