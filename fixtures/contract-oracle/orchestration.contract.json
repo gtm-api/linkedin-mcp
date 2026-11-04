@@ -725,6 +725,9 @@
                     "deleted_at",
                     "deleted",
                     "q"
+                ],
+                "json_path_fields": [
+                    "filters.account_sid"
                 ]
             }
         },
@@ -5933,6 +5936,21 @@
                     "required": false,
                     "nullable": false,
                     "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "sample_envelope",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
                     "in": null,
                     "min": null,
                     "max": null,

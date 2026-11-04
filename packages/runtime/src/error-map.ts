@@ -84,7 +84,8 @@ export function mapErrorEnvelope(
       const retry = e.context?.retry_after;
       if (typeof retry === 'number') lines.push(`Retryable: retry after ${retry}s.`);
       else if (typeof retry === 'string' && retry !== '') lines.push(`Retryable: retry after ${retry}.`);
-      else lines.push('Retryable after a short backoff.');
+      // A cap is no clock: waiting does not lift it, the message says what to change.
+      else if (code === 'rate_limited') lines.push('Retryable after a short backoff.');
       if (e.suggestion) lines.push(e.suggestion);
       break;
     }

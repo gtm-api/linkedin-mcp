@@ -269,10 +269,14 @@ const WebhookReplayResult = z.object({
 
 const WebhookTestResult = z.object({
   http_status: z.number().nullable(),
-  response_body: z.string().nullable(),
+  response_body: z.string().nullable()
+    .describe('Always null: an answer is never read back, so a test cannot be turned into a read of what an address serves.'),
   duration_ms: z.number(),
   error_kind: z.enum(['none', 'network', 'timeout', 'tls', 'http_error']),
-  error_message: z.string().nullable(),
+  error_message: z.string().nullable()
+    .describe('What went wrong, the delivery log\'s line: http_503, or the connection error; null on none.'),
+  filter_matched: z.boolean().nullable()
+    .describe('What filters.where says to sample_envelope, true with no gate; null without a sample.'),
 }).passthrough();
 
 const WebhookFilter = z.object({
@@ -280,6 +284,8 @@ const WebhookFilter = z.object({
   status: filterOp(WebhookStatus, ['eq', 'in']).optional(),
   events: filterOp(z.string(), ['eq', 'in']).optional()
     .describe('eq: webhooks subscribed to this event type; in: subscribed to ANY of these (JSON-contains on the events array).'),
+  'filters.account_sid': filterOp(z.string(), ['eq']).optional()
+    .describe('The webhooks narrowed to this account (ln_ac_… / em_ac_…).'),
   name: z.object({
     eq: z.string().optional(),
   }).partial().optional(),
@@ -334,7 +340,7 @@ export const webhooksTools: ToolDefinition[] = [
     ...base,
     name: 'test_webhook',
     description:
-      'Synchronously POST a synthetic payload to the webhook target_url and return the receiver response (HTTP status, duration, error kind). Verifies endpoint health / signature handling without waiting for a real event; does NOT write to webhook_logs and does NOT affect the consecutive-failure counter. Allowed while status=failed (revival flow); rejected while status=off. Rate-limited to 10 calls/min per webhook. Outward live HTTP probe.',
+      'Synchronously POST a synthetic payload to the webhook target_url and return the receiver response (HTTP status, duration, error kind, error message). sample_envelope dry-runs filters.where: filter_matched says if that event would be delivered. Verifies endpoint health / signature handling without waiting for a real event; does NOT write to webhook_logs and does NOT affect the consecutive-failure counter. Allowed while status=failed (revival flow); rejected while status=off. Rate-limited to 10 calls/min per webhook. Outward live HTTP probe.',
     toolClass: 'complex',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/webhooks/{sid}/test', sidParam: 'sid' },
     operation: 'action',
@@ -345,6 +351,8 @@ export const webhooksTools: ToolDefinition[] = [
       sid: SID,
       override_event_type: z.string().optional()
         .describe('Test with a specific event type payload shape (default: webhooks.test synthetic).'),
+      sample_envelope: z.record(z.unknown()).optional()
+        .describe('An envelope to judge against filters.where, e.g. {"type": "email-messages.sent", "payload": {"status": "sent"}}. Only filter_matched reads it; the POST stays the synthetic one.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(Webhook, WebhookTestResult),

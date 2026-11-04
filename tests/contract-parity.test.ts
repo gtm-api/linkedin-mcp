@@ -86,7 +86,8 @@ type OracleField = { name: string; type: string; nullable: boolean; has_default:
 type OracleEntity = {
   domain: { class: string; fields: OracleField[] };
   response: { class: string; fields: OracleField[] } | null;
-  filter: { class: string; fields: string[] } | null;
+  /** json_path_fields: the dotted keys of getJsonPathFields(), only on a filter that has any. */
+  filter: { class: string; fields: string[]; json_path_fields?: string[] } | null;
 };
 type OracleRoute = {
   method: string;
@@ -496,7 +497,10 @@ for (const svc of SERVICES) {
         }
 
         const { pick, tied } = attribute(
-          candidates.map((key) => fitOf(key, keys, svc.oracle.entities[key].filter!.fields, tool.name)),
+          candidates.map((key) => {
+            const filter = svc.oracle.entities[key].filter!;
+            return fitOf(key, keys, [...filter.fields, ...(filter.json_path_fields ?? [])], tool.name);
+          }),
         );
         if (!pick) {
           skipped.push(`${tool.name}: entity '${tool.entity}' is ambiguous, ${tied.join(' / ')} fit its filter keys equally well`);
@@ -542,7 +546,10 @@ for (const svc of SERVICES) {
         const candidates = candidatesFor(tool.entity).filter((key) => svc.oracle.entities[key].filter);
         if (!candidates.length) continue;
         const { pick } = attribute(
-          candidates.map((key) => fitOf(key, keys, svc.oracle.entities[key].filter!.fields, tool.name)),
+          candidates.map((key) => {
+            const filter = svc.oracle.entities[key].filter!;
+            return fitOf(key, keys, [...filter.fields, ...(filter.json_path_fields ?? [])], tool.name);
+          }),
         );
         if (!pick) continue;
 
