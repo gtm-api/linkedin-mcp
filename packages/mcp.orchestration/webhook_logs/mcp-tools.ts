@@ -131,6 +131,12 @@ const WebhookLogFilter = z.object({
 // orchestration and cannot join another service's account table.
 const WebhookLogInclude = z.enum(['webhook']);
 
+// WebhookLogIncludedBuilder: one read of the parents for the page.
+const WebhookLogIncluded = z.object({
+  webhook: z.record(z.unknown()).optional()
+    .describe('The parent subscription (WebhookDomain, secret masked), a soft-deleted one included.'),
+}).passthrough();
+
 const WebhookLogSortable = z.enum(['created_at', 'scheduled_at', 'executed_at', 'duration_ms']);
 
 const WebhookLogGroupable = z.enum([
@@ -159,7 +165,7 @@ export const webhookLogsTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: false,
     inputSchema: McpSearchRequestSchema(WebhookLogFilter, WebhookLogInclude, WebhookLogSortable),
-    outputSchema: McpSearchResponse(WebhookLog, undefined, WebhookLogCounts),
+    outputSchema: McpSearchResponse(WebhookLog, WebhookLogIncluded, WebhookLogCounts),
     annotations: { title: 'Search webhook logs', ...RO },
   },
   {

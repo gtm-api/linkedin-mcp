@@ -4734,7 +4734,7 @@
                     "field": "include.*",
                     "rules": [
                         "string",
-                        "in:webhook"
+                        "in:\"webhook\""
                     ],
                     "required": false,
                     "nullable": false,
