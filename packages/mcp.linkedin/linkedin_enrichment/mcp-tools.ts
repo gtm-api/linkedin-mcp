@@ -322,6 +322,8 @@ const CommentActivityItem = z.object({
   post_author: PostAuthorRef.nullable(),
   text: z.string(),
   created_at: z.string().nullable(),
+  num_impressions: z.number().int().nullable()
+    .describe('How many times LinkedIn showed the comment. Filled only when the executing account is the member whose comments are read: LinkedIn tells impressions for one\'s own comments alone, so a read of another member carries null throughout.'),
 }).passthrough();
 
 // person-reaction-activity item (row 60), mirroring the node's `ProfileReaction`
