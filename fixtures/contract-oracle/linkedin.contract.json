@@ -44787,6 +44787,89 @@
                     "between": null
                 },
                 {
+                    "field": "document",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "document.file_base64",
+                    "rules": [
+                        "exclude_without:document",
+                        "required_without:document.url",
+                        "prohibits:document.url",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "document.url",
+                    "rules": [
+                        "exclude_without:document",
+                        "required_without:document.file_base64",
+                        "string",
+                        "max:2048",
+                        "url:https"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "document.title",
+                    "rules": [
+                        "required_with:document",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "document.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "scheduled_at",
                     "rules": [
                         "sometimes",

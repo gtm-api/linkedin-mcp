@@ -191,7 +191,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/content',
     name: 'gtm-linkedin-content',
     instructions:
-      'GTM LinkedIn content authoring and engagement: publish a post, comment on a post, react to a post, endorse or unendorse a connection\'s skill by id, from one of the team accounts. Posts are addressed by activity URN and need no prior tracking. Every verb is protected (preview then confirm). Media for a post goes as an https url we download (request_media_upload on the platform mount gives one: a link the user opens to drop the file, or an upload from a shell) or inline as base64; never type out base64 of a pasted image. Reading a post and who engaged with it lives on the scraping and enrichment mounts.',
+      'GTM LinkedIn content authoring and engagement: publish a post, comment on a post, react to a post, endorse or unendorse a connection\'s skill by id, from one of the team accounts. Posts are addressed by activity URN and need no prior tracking. Every verb is protected (preview then confirm). Media for a post goes as an https url we download (request_media_upload on the platform mount gives one for a picture or a video: a link the user opens to drop the file, or an upload from a shell; no slot holds a PDF, so a document needs a public https url of its own) or inline as base64; never type out base64 of a pasted image. Reading a post and who engaged with it lives on the scraping and enrichment mounts.',
     selectors: [
       p('linkedin_posting'),
       // The explicit-skill endorse pair from the linkedin_accounts package (see
