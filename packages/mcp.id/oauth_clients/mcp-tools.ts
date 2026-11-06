@@ -1,8 +1,13 @@
 // Entity: OAuth Client (gtm.service.id)
 // Source of truth: product/research/gtm.service.id/entities/oauth_clients.md
 // Format: registry v2. Each tool carries route metadata so the generic
-// dispatcher can drive it. 5 tools (the oauth-clients route group), mounted on
-// id.access alongside api-keys / oauth-authorizations.
+// dispatcher can drive it. 5 tools (the oauth-clients route group), declared
+// on id.access alongside api-keys / oauth-authorizations and all five REST
+// only since 2026-11-06 (surface api, the shared contract with gs.mcp,
+// MCP_SURFACE_V2.md section 7 of the getsales umbrella: a client registers
+// itself through /oauth/register, and an agent asking what is connected reads
+// search_oauth_authorizations; a line in the REST reference each, no mount
+// serves them, until gtm's own call numbers say which may go).
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -111,6 +116,7 @@ export const oauthClientsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: McpSearchRequestSchema(OauthClientFilter, OauthClientInclude, OauthClientSortable),
     outputSchema: McpSearchResponse(OauthClient, undefined, OauthClientCounts),
     annotations: { title: 'Search OAuth clients', ...RO },
@@ -126,6 +132,7 @@ export const oauthClientsTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: McpGetRequestSchema('id_oc_', OauthClientInclude),
     outputSchema: McpGetResponse(OauthClient),
     annotations: { title: 'Get OAuth client', ...RO },
@@ -141,6 +148,7 @@ export const oauthClientsTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     allowSecretFields: ['client_secret'],
     inputSchema: z.object({
       name: z.string().min(1).max(255),
@@ -170,6 +178,7 @@ export const oauthClientsTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: z.object({
       sid: SID,
       name: z.string().min(1).max(255).optional(),
@@ -198,6 +207,7 @@ export const oauthClientsTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     inputSchema: McpSimpleDeleteRequestSchema('id_oc_'),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Delete OAuth client', ...DANGER },

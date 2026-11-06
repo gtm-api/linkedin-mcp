@@ -2,7 +2,11 @@
 // Source of truth: product/research/gtm.service.id/entities/billing_products.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 1 tool (the billing-products route group): a
-// read-only, Paddle-synced product catalog. The wider billing surface
+// read-only, Paddle-synced product catalog, REST only since 2026-11-06
+// (surface api, the shared contract with gs.mcp, MCP_SURFACE_V2.md section 7
+// of the getsales umbrella: the plan an agent reads carries its product, and
+// the catalog is the app's; a line in the REST reference, no mount serves it,
+// until gtm's own call numbers say whether it goes). The wider billing surface
 // (subscriptions / transactions / payment-methods) shares the id.billing mount
 // from their own entity files.
 
@@ -85,6 +89,7 @@ export const billingProductsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: McpSearchRequestSchema(BillingProductFilter, BillingProductInclude, BillingProductSortable),
     outputSchema: McpSearchResponse(BillingProduct, undefined, BillingProductCounts),
     annotations: { title: 'Search billing products', ...RO },

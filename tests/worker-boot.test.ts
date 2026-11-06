@@ -132,11 +132,21 @@ describe('worker boot', () => {
   // call: it just makes the DECLARED surface (the /health tool count for /mcp,
   // and the total quoted in PACKAGES.md) under-report what call_tool serves.
   // That is exactly how support sat outside the declared 248 while being
-  // callable, so assert the two are the same number.
-  it('the facade declares the whole registry (/health and PACKAGES.md match what call_tool serves)', () => {
+  // callable, so assert the two are the same number. The number is the SERVED
+  // registry: every definition but the REST-only ones (surface api, 2026-11-06,
+  // a line in the REST reference and no tool, which no selector picks and
+  // call_tool refuses).
+  it('the facade declares the whole served registry (/health and PACKAGES.md match what call_tool serves)', () => {
     const facade = boot().find((m) => isFacade(m.config));
     expect(facade, 'no facade mount in MOUNTS').toBeDefined();
-    expect(facade!.tools.length).toBe(buildRegistry(WORKER_PACKAGES).byName.size);
+    const served = [...buildRegistry(WORKER_PACKAGES).byName.values()].filter(({ tool }) => tool.surface !== 'api').length;
+    expect(facade!.tools.length).toBe(served);
+  });
+
+  it('no mount serves a REST-only tool (surface api): the definition stays for the generator and the gates, the mounts pass it by', () => {
+    const servedRestOnly = boot()
+      .flatMap((m) => m.tools.filter((t) => t.surface === 'api').map((t) => `${t.name} on ${m.config.path}`));
+    expect(servedRestOnly, 'resolveMounts picked a tool whose surface is api; a selector names it by hand, or the resolver regressed').toEqual([]);
   });
 
   it('the facade has a non-empty domain-mount catalog', () => {

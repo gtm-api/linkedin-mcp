@@ -2,7 +2,13 @@
 // Source of truth: product/research/gtm.service.orchestration/entities/webhook_logs.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 4 tools (the webhook-logs route group), mounted on
-// orchestration.webhooks alongside webhooks. Execution layer of the three-layer
+// orchestration.webhooks alongside webhooks; metrics, retry and cancel REST
+// only since 2026-11-06 (surface api, the shared contract with gs.mcp,
+// MCP_SURFACE_V2.md section 7 of the getsales umbrella: the window and the
+// statuses of replay_webhook cover a re-arm, update_webhook status off is the
+// agent's stop, and the delivery health is a dashboard's; a line in the REST
+// reference each, no mount serves them, until gtm's own call numbers say
+// which may go). Execution layer of the three-layer
 // webhook architecture (KNOWLEDGE §4.4): one row = one (webhook × event)
 // delivery; retries UPDATE the same row.
 //
@@ -157,7 +163,7 @@ export const webhookLogsTools: ToolDefinition[] = [
     ...base,
     name: 'search_webhook_logs',
     description:
-      "List webhook delivery rows for the caller's team with filter, sort, include and group-counts. Deliveries from every producer service (LinkedIn, email, …) land in this one log; filter per webhook, per account_sid, per source_service, per event type, per HTTP code or status; include=webhook. Returns a counts block (groups by status / event_type / response_code / webhook_sid / account_sid). Use for delivery auditing and integrator-outage debugging. For period-bound success rates use get_webhook_logs_metrics; single-row lookup is a filter on sid.",
+      "List webhook delivery rows for the caller's team with filter, sort, include and group-counts. Deliveries from every producer service (LinkedIn, email, …) land in this one log; filter per webhook, per account_sid, per source_service, per event type, per HTTP code or status; include=webhook. Returns a counts block (groups by status / event_type / response_code / webhook_sid / account_sid). Use for delivery auditing and integrator-outage debugging. Period-bound success rates are the metrics route of the REST API (no MCP tool since 2026-11-06); single-row lookup is a filter on sid.",
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/webhook-logs/search' },
     operation: 'search',
@@ -179,6 +185,7 @@ export const webhookLogsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: McpMetricsRequestSchema(WebhookLogFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -200,6 +207,7 @@ export const webhookLogsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     inputSchema: z.object({
       sid: SID,
       expected_status: WebhookLogStatus.optional()
@@ -220,6 +228,7 @@ export const webhookLogsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     inputSchema: z.object({
       sid: SID,
       expected_status: WebhookLogStatus.optional()

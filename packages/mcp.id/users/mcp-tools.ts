@@ -3,7 +3,9 @@
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 2 tools (the users route group), both self-scoped
 // to the JWT subject (NO {sid}: the authenticated user is the only addressable
-// user). All auth (register / login / refresh / verify / reset / Google OAuth)
+// user); update REST only since 2026-11-06 (surface api, the shared contract
+// with gs.mcp: the account's own fields are the app's; a line in the REST
+// reference, no mount serves it). All auth (register / login / refresh / verify / reset / Google OAuth)
 // is public REST, never MCP, so it produces no tools here.
 
 import { z } from 'zod';
@@ -102,6 +104,7 @@ export const usersTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: z.object({
       first_name: z.string().min(1).max(100).optional(),
       last_name: z.string().max(100).nullable().optional(),

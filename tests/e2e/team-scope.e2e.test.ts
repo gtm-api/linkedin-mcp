@@ -173,20 +173,22 @@ suite('e2e team scope (live worker + id AS, real OAuth installation)', () => {
   });
 
   it('a dangerous preview binds the team: committing into another team is refused', async () => {
-    const sid = 'id_se_e2eteamscope'; // well-formed, nonexistent - nothing can actually be revoked
-    const preview = await rpcCallTool({ name: 'revoke_session', arguments: { sid }, team_sid: TEAM_B });
+    // delete_api_key since 2026-11-06: revoke_session, the dangerous verb this
+    // test drove before, is REST only (surface api) and call_tool refuses it.
+    const sid = 'id_ak_e2eteamscope'; // well-formed, nonexistent - nothing can actually be revoked
+    const preview = await rpcCallTool({ name: 'delete_api_key', arguments: { sid }, team_sid: TEAM_B });
     const psc = preview.structuredContent as { preview: boolean; team_sid: string; commit_token: string };
     expect(psc.preview).toBe(true);
     expect(psc.team_sid).toBe(TEAM_B);
 
-    const wrongTeam = await rpcCallTool({ name: 'revoke_session', arguments: { sid, commit_token: psc.commit_token } });
+    const wrongTeam = await rpcCallTool({ name: 'delete_api_key', arguments: { sid, commit_token: psc.commit_token } });
     expect(wrongTeam.isError).toBe(true);
     expect(String(wrongTeam.content?.[0]?.text)).toContain('team changed');
 
     // Committed in the RIGHT team the gate passes and the call reaches the
     // backend, which answers not_found for the nonexistent sid - full path,
     // zero side effects.
-    const rightTeam = await rpcCallTool({ name: 'revoke_session', arguments: { sid, commit_token: psc.commit_token }, team_sid: TEAM_B });
+    const rightTeam = await rpcCallTool({ name: 'delete_api_key', arguments: { sid, commit_token: psc.commit_token }, team_sid: TEAM_B });
     expect(rightTeam.isError).toBe(true);
     expect((rightTeam.structuredContent as { error: { code: string } }).error.code).toBe('not_found');
   });

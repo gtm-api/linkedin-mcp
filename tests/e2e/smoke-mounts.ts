@@ -131,7 +131,9 @@ export const WAVE2_MOUNTS: SmokeMount[] = [
 export const ID_MOUNTS: SmokeMount[] = [
   { path: '/mcp/id/identity', name: 'gtm-id-identity', search: 'search_teams' },
   { path: '/mcp/id/access', name: 'gtm-id-access', search: 'search_api_keys' },
-  { path: '/mcp/id/billing', name: 'gtm-id-billing', search: 'search_billing_products' },
+  // search_billing_subscriptions since 2026-11-06: search_billing_products is
+  // REST only (surface api) and no mount serves it.
+  { path: '/mcp/id/billing', name: 'gtm-id-billing', search: 'search_billing_subscriptions' },
   { path: '/mcp/id/platform', name: 'gtm-id-platform', search: 'search_notifications' },
 ];
 

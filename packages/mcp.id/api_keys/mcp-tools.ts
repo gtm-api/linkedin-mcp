@@ -2,7 +2,12 @@
 // Source of truth: product/research/gtm.service.id/entities/api_keys.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 7 tools (the api-keys route group), mounted on
-// id.access alongside oauth-clients / oauth-authorizations.
+// id.access alongside oauth-clients / oauth-authorizations; four of them REST
+// only since 2026-11-06 (surface api, the shared contract with gs.mcp,
+// MCP_SURFACE_V2.md section 7 of the getsales umbrella: create, rotate and
+// update mint or re-scope a secret that must not land in a chat transcript,
+// and metrics is search with page_size 0; a line in the REST reference each,
+// no mount serves them, until gtm's own call numbers say which may go).
 
 import { z } from 'zod';
 
@@ -124,7 +129,7 @@ export const apiKeysTools: ToolDefinition[] = [
     ...base,
     name: 'get_api_key',
     description:
-      'Fetch a single API key by sid, with optional metrics include. Returns token_prefix + token_last4 for display; the secret is unrecoverable (use rotate_api_key to mint a new one).',
+      'Fetch a single API key by sid, with optional metrics include. Returns token_prefix + token_last4 for display; the secret is unrecoverable (a new one is minted by the rotate route of the REST API or in Settings, never through a tool).',
     toolClass: 'trivial',
     route: { service: 'id', method: 'GET', pathTemplate: '/api/api-keys/{sid}', sidParam: 'sid' },
     operation: 'get',
@@ -146,6 +151,7 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'create',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     allowSecretFields: ['plaintext_token'],
     inputSchema: z.object({
       name: z.string().min(1).max(255).describe('Human-readable key name; unique among the team\'s non-revoked keys.'),
@@ -171,6 +177,7 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: z.object({
       sid: SID,
       name: z.string().min(1).max(255).optional(),
@@ -209,6 +216,7 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: McpMetricsRequestSchema(ApiKeyFilter).extend({
       period: z.object({
         from: z.string().describe('ISO 8601 UTC window start (inclusive).'),
@@ -231,6 +239,7 @@ export const apiKeysTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     allowSecretFields: ['plaintext_token'],

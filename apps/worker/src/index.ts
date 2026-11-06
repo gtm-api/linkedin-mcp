@@ -166,7 +166,9 @@ export default {
           discovery: config.discovery.status,
           problems: config.problems,
           mounts: RESOLVED.map((m) => ({ path: m.config.path, tools: m.tools.length })),
-          tools: REGISTRY.byName.size,
+          // The served registry: every definition but the REST-only ones
+          // (surface api, a line in the REST reference and no tool).
+          tools: [...REGISTRY.byName.values()].filter(({ tool }) => tool.surface !== 'api').length,
         },
         config.status === 'fail' ? 503 : 200,
         NO_STORE,

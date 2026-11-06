@@ -2,7 +2,11 @@
 // Source of truth: product/research/gtm.service.id/entities/teams.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 6 tools (the teams route group), mounted on
-// id.identity alongside users / team-members / sessions.
+// id.identity alongside users / team-members / sessions; delete and
+// transfer-ownership REST only since 2026-11-06 (surface api, the shared
+// contract with gs.mcp: a cascade with no return and an owner's gesture, each
+// decided in its own modal in the app; a line in the REST reference each, no
+// mount serves them, until gtm's own call numbers say which may go).
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -169,6 +173,7 @@ export const teamsTools: ToolDefinition[] = [
     envelope: 'delete_cascade',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     inputSchema: McpCascadeDeleteRequestSchema('ts_tm_', z.enum(['revoke_keys', 'remove_members'])).extend({
       next_default_team_sid: z.string().length(18).startsWith('ts_tm_').optional()
         .describe('Which of the caller\'s other live memberships becomes their working team afterwards; default is the oldest one. 422 if it is not an active membership of theirs in another live team.'),
@@ -187,6 +192,7 @@ export const teamsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

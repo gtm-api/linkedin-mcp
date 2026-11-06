@@ -2,7 +2,10 @@
 // Source of truth: product/research/gtm.service.id/entities/billing_transactions.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 4 tools (the billing-transactions route group): an
-// append-only, read-only financial ledger (search / metrics / get) plus the
+// append-only, read-only financial ledger (search / metrics / get; metrics
+// REST only since 2026-11-06, surface api, the shared contract with gs.mcp: a
+// line in the REST reference and no tool, an agent sums the few invoices
+// search returns) plus the
 // get-invoice action (temporary Paddle invoice-PDF URL, mutates nothing).
 // Rows are written only by the Paddle webhook ingest; money moves via Paddle,
 // not platform credits.
@@ -115,6 +118,7 @@ export const billingTransactionsTools: ToolDefinition[] = [
     envelope: 'metrics',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     // BillingTransactionMetricsRequest makes period + period.from + period.to
     // `required`. Without a slot for them the z.object strips whatever the agent
     // sends and the call 422s every single time, for any input.

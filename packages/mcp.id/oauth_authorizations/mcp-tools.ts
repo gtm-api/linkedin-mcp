@@ -2,7 +2,11 @@
 // Source of truth: product/research/gtm.service.id/entities/oauth_authorizations.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 3 tools (the oauth-authorizations route group),
-// mounted on id.access alongside api-keys / oauth-clients. User self-service:
+// mounted on id.access alongside api-keys / oauth-clients; update REST only
+// since 2026-11-06 (surface api, the shared contract with gs.mcp: an agent
+// must not widen its own grant without the consent screen, the app's
+// Connected apps page keeps the route, a line in the REST reference, no
+// mount). User self-service:
 // every read/write is implicitly scoped to the caller's own grants.
 
 import { z } from 'zod';
@@ -116,6 +120,7 @@ export const oauthAuthorizationsTools: ToolDefinition[] = [
     envelope: 'update',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: z.object({
       sid: SID,
       team_scope_mode: OauthTeamScopeMode.optional(),

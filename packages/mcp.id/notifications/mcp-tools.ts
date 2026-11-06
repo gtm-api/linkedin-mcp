@@ -2,7 +2,9 @@
 // Source of truth: product/research/gtm.service.id/entities/notifications.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 4 tools (the notifications route group), mounted on
-// id.platform. One row per email notification; born from domain events via the
+// id.platform, delete REST only since 2026-11-06 (surface api, the shared
+// contract with gs.mcp: a line in the REST reference, no mount serves it). One
+// row per email notification; born from domain events via the
 // internal dispatch path (create/update are `not supported`, so no MCP tool).
 
 import { z } from 'zod';
@@ -164,6 +166,7 @@ export const notificationsTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     inputSchema: McpSimpleDeleteRequestSchema('id_nt_'),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Dismiss notification', ...DANGER },

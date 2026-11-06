@@ -114,6 +114,12 @@ export function registerFacadeTools(
       if (!entry) {
         return { content: [{ type: 'text', text: `Unknown tool "${name}". Use list_toolsets → get_toolset_tools to discover tools.` }], isError: true };
       }
+      // A REST-only definition (surface api, 2026-11-06) is in the registry for
+      // the generator and the gates, on no mount and in no toolset listing; the
+      // facade must not be the one door that still runs it.
+      if (entry.tool.surface === 'api') {
+        return { content: [{ type: 'text', text: `"${name}" is REST only: no MCP tool serves this route, call it on the REST API (docs.gtm-api.com/api-reference). Use list_toolsets → get_toolset_tools to discover the tools this server serves.` }], isError: true };
+      }
       // The team-scope override: the top-level `team_sid` param, or - the
       // natural agent gesture - `arguments.team_sid` on a tool that does not
       // own the field, lifted out BEFORE the parse (the tool schema would

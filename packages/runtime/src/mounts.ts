@@ -29,6 +29,9 @@ export interface ResolvedMount {
 // Resolve each mount's selectors into a concrete, deduped, budget-checked tool
 // list. Throws on unknown targets or an over-budget non-facade mount, so a bad
 // mounts.config fails at module load and in CI.
+// A tool whose surface is `api` is a line in the REST reference and no tool
+// (2026-11-06): a package or service selector passes it by, and a tool
+// selector naming it is a config error.
 export function resolveMounts(registry: Registry, configs: MountConfig[]): ResolvedMount[] {
   return configs.map((config) => {
     const picked = new Map<string, ToolDefinition>();
@@ -40,14 +43,15 @@ export function resolveMounts(registry: Registry, configs: MountConfig[]): Resol
       if (sel.kind === 'package') {
         const pkg = registry.packages.find((p) => p.id === sel.id);
         if (!pkg) throw new Error(`mount ${config.path}: unknown package '${sel.id}'`);
-        for (const t of pkg.tools) picked.set(t.name, t);
+        for (const t of pkg.tools) if (t.surface !== 'api') picked.set(t.name, t);
       } else if (sel.kind === 'service') {
         for (const p of registry.packages) {
-          if (p.service === sel.service) for (const t of p.tools) picked.set(t.name, t);
+          if (p.service === sel.service) for (const t of p.tools) if (t.surface !== 'api') picked.set(t.name, t);
         }
       } else if (sel.kind === 'tool') {
         const entry = registry.byName.get(sel.name);
         if (!entry) throw new Error(`mount ${config.path}: unknown tool '${sel.name}'`);
+        if (entry.tool.surface === 'api') throw new Error(`mount ${config.path}: '${sel.name}' is REST only (surface api), no mount serves it`);
         picked.set(sel.name, entry.tool);
       }
     }

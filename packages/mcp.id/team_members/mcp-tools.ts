@@ -4,7 +4,10 @@
 // dispatcher can drive it. 6 tools (the team-members route group), mounted on
 // id.identity alongside users / teams / sessions. `create` = invite by email;
 // `delete` = remove invite / kick member (owner-protected → 409);
-// accept-invitation is public REST (code-bearer) but still a registered tool.
+// accept-invitation is public REST (code-bearer), and REST only since
+// 2026-11-06 (surface api, the shared contract with gs.mcp: the code from the
+// invite email, redeemed in the invitee's browser; a line in the REST
+// reference, no mount serves it).
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -183,7 +186,7 @@ export const teamMembersTools: ToolDefinition[] = [
     ...base,
     name: 'update_team_member',
     description:
-      "Re-scope an existing member: replace permissions and/or account_sids. email / status / user_sid / team_sid are read-only (rejected silently). At least one field with an ACTUAL change required (a value-identical PATCH answers 422 nothing_to_update). The change applies immediately: the member's live tokens are invalidated and re-minted with the new grant on their next request (agents re-exchange). Bounded by the caller's own grant (403 grant_exceeds_ceiling); the structural owner's seat is not re-scopable (409 owner_cannot_be_rescoped - move ownership via transfer_team_ownership).",
+      "Re-scope an existing member: replace permissions and/or account_sids. email / status / user_sid / team_sid are read-only (rejected silently). At least one field with an ACTUAL change required (a value-identical PATCH answers 422 nothing_to_update). The change applies immediately: the member's live tokens are invalidated and re-minted with the new grant on their next request (agents re-exchange). Bounded by the caller's own grant (403 grant_exceeds_ceiling); the structural owner's seat is not re-scopable (409 owner_cannot_be_rescoped: ownership moves in the app's Workspace settings or by the transfer-ownership route of the REST API, no MCP tool since 2026-11-06).",
     toolClass: 'typical',
     route: { service: 'id', method: 'PATCH', pathTemplate: '/api/team-members/{sid}', sidParam: 'sid' },
     operation: 'update',
@@ -205,7 +208,7 @@ export const teamMembersTools: ToolDefinition[] = [
     ...base,
     name: 'delete_team_member',
     description:
-      'Remove a pending invite OR kick an active member: one tool, soft-delete. DESTRUCTIVE. The structural owner is protected (409 conflict, owner_cannot_be_removed); move ownership via transfer_team_ownership first. Kicking a member revokes their sessions in this team only.',
+      'Remove a pending invite OR kick an active member: one tool, soft-delete. DESTRUCTIVE. The structural owner is protected (409 conflict, owner_cannot_be_removed); move ownership first, in the app\'s Workspace settings or by the transfer-ownership route of the REST API (no MCP tool since 2026-11-06). Kicking a member revokes their sessions in this team only.',
     toolClass: 'typical',
     route: { service: 'id', method: 'DELETE', pathTemplate: '/api/team-members/{sid}', sidParam: 'sid' },
     operation: 'delete',
@@ -227,6 +230,7 @@ export const teamMembersTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

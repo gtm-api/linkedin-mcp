@@ -139,7 +139,9 @@ const operationDescription = (tool: ToolDefinition): string => {
   if (tool.availability === 'stub_501') lines.push(STUB_REASON, '');
   lines.push('Contract:');
   lines.push(
-    `- MCP tool \`${tool.name}\`, registry package \`mcp.${tool.service}/${tool.entity}\`, mount \`${tool.mount}\`.`,
+    tool.surface === 'api'
+      ? `- REST only: no MCP tool serves this route (registry package \`mcp.${tool.service}/${tool.entity}\`, surface api).`
+      : `- MCP tool \`${tool.name}\`, registry package \`mcp.${tool.service}/${tool.entity}\`, mount \`${tool.mount}\`.`,
   );
   lines.push(`- Operation \`${tool.operation}\`, response envelope \`${tool.envelope}\`.`);
   const flags = flagSentences(tool);
@@ -162,6 +164,7 @@ const extensions = (tool: ToolDefinition): JsonSchema => {
     'x-gtm-operation': tool.operation,
     'x-gtm-envelope': tool.envelope,
     'x-gtm-availability': tool.availability,
+    'x-gtm-surface': tool.surface ?? 'both',
     'x-gtm-dangerous': tool.dangerous,
     'x-gtm-mass-action': tool.massAction === true,
     'x-gtm-step-eligible': tool.stepEligible === true,

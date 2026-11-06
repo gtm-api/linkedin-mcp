@@ -307,7 +307,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/orchestration/webhooks',
     name: 'gtm-orchestration-webhooks',
     instructions:
-      'GTM webhooks - the platform-wide event subscriptions and their delivery log. Register / update / delete / test a webhook, then audit deliveries (search / metrics / retry / cancel). One registry covers every producer service, so filter delivery rows by source_service and account_sid, not by channel. Mutations and test-sends are protected (preview then confirm).',
+      'GTM webhooks - the platform-wide event subscriptions and their delivery log. Register / update / delete / test a webhook, replay its failed deliveries over a window, and audit deliveries with search_webhook_logs (counts by status, event type, response code). A single delivery\'s retry or cancel and the period metrics are REST only since 2026-11-06 (no tool here): an agent re-arms with replay_webhook and stops with update_webhook status off. One registry covers every producer service, so filter delivery rows by source_service and account_sid, not by channel. Mutations, replays and test-sends are protected (preview then confirm).',
     selectors: [por('webhooks'), por('webhook_logs')],
     maxTools: 25,
     facade: 'none',
@@ -328,7 +328,10 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/identity',
     name: 'gtm-id-identity',
     instructions:
-      'GTM identity: the current user, teams, team members & invitations, and active sessions. Deletes and ownership transfer are protected (preview → confirm).',
+      'GTM identity: the current user (read), teams (search, get, create, update) and team members & invitations (invite, re-scope, remove, resend). Removing a member is protected (preview → confirm). Deleting a workspace, transferring its ownership, editing the current user, accepting an invitation and the active sessions are the app\'s own doors: REST only since 2026-11-06, no tool here.',
+    // sessions is declared here and serves nothing since 2026-11-06: both of
+    // its tools are REST only (surface api), the selector stays so the package
+    // keeps its home.
     selectors: [pid('users'), pid('teams'), pid('team_members'), pid('sessions')],
     maxTools: 25,
     facade: 'none',
@@ -343,7 +346,10 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/access',
     name: 'gtm-id-access',
     instructions:
-      'GTM identity: API keys, OAuth clients & authorizations, and connected-account shares. Secret-minting (create / rotate) and deletes/revokes are protected (preview → confirm); created secrets are shown once. A share lends ONE connected account to another team, revocably: create_account_share issues it, search_account_shares lists what this team lent out, list_received_account_shares lists what it borrowed, and the share ends with recall_account_share (by the owner) or return_account_share (by the holder). Permanent account transfers are deliberately not exposed here.',
+      'GTM identity: API keys (search, get, revoke), the caller\'s OAuth authorizations (search, revoke), and connected-account shares. Minting, rotating or re-scoping a key, widening a grant and the OAuth client registry are REST only since 2026-11-06 (a secret never passes through a model; a client registers itself at /oauth/register), so no tool here does them. Revokes and recalls are protected (preview → confirm). A share lends ONE connected account to another team, revocably: create_account_share issues it, search_account_shares lists what this team lent out, list_received_account_shares lists what it borrowed, and the share ends with recall_account_share (by the owner) or return_account_share (by the holder). Permanent account transfers are deliberately not exposed here.',
+    // oauth_clients is declared here and serves nothing since 2026-11-06: all
+    // five of its tools are REST only (surface api), the selector stays so the
+    // package keeps its home.
     selectors: [pid('api_keys'), pid('oauth_clients'), pid('oauth_authorizations'), pid('account_shares')],
     maxTools: 25,
     facade: 'none',
@@ -352,8 +358,10 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/billing',
     name: 'gtm-id-billing',
     instructions:
-      'GTM billing: products, subscriptions (checkout / change / add-ons / pause / cancel), transactions & invoices, payment methods. Money-moving actions are protected (preview → confirm).',
+      'GTM billing: subscriptions (search, get, apply / unapply, preview and change the plan, add-ons), transactions & invoices, payment methods (list, add-card link). Money-moving actions are protected (preview → confirm). Checkout, pause, resume, cancel and undo-cancel, the product catalog, removing a card and the transactions metrics are the app\'s own doors: REST only since 2026-11-06, no tool here.',
     selectors: [
+      // billing_products serves nothing since 2026-11-06: its one tool is REST
+      // only (surface api), the selector stays so the package keeps its home.
       pid('billing_products'),
       pid('billing_subscriptions'),
       pid('billing_transactions'),
@@ -366,7 +374,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/platform',
     name: 'gtm-id-platform',
     instructions:
-      'GTM platform: notifications, SSL certificates (issue / renew / delete), support escalation (escalate_to_human hands the current issue to the human support team; the team replies to the user\'s account email), the team\'s own API request log (search_api_requests / get_api_request_metrics: every call made with an api key or an OAuth client, your own included; how many, how many failed, which tools, which clients), and upload slots (request_media_upload: a one-time link the user opens to drop a file, or an upload from a shell, and the public file_url to pass on, e.g. to create_linkedin_post, instead of base64). Certificate mutations are protected (preview → confirm).',
+      'GTM platform: notifications (search, get, metrics), SSL certificates (create, update, renew; search, get, issue and delete are REST only since 2026-11-06, no tool here), support escalation (escalate_to_human hands the current issue to the human support team; the team replies to the user\'s account email), the team\'s own API request log (search_api_requests / get_api_request_metrics: every call made with an api key or an OAuth client, your own included; how many, how many failed, which tools, which clients), and upload slots (request_media_upload: a one-time link the user opens to drop a file, or an upload from a shell, and the public file_url to pass on, e.g. to create_linkedin_post, instead of base64). Certificate mutations are protected (preview → confirm).',
     selectors: [pid('notifications'), pid('ssl_certificates'), pid('support_requests'), pid('api_requests'), pid('media_uploads')],
     maxTools: 25,
     facade: 'none',

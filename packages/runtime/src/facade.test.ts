@@ -268,3 +268,32 @@ describe('facade get_toolset_tools pacing', () => {
     expect(listing).not.toHaveProperty('pacing');
   });
 });
+
+// A REST-only definition (surface api, 2026-11-06) sits in the registry for the
+// generator and the gates and on no mount; call_tool resolves names against the
+// registry, so it has to refuse the name itself or /mcp would be the one door
+// that still runs the tool.
+describe('facade call_tool and the REST-only surface', () => {
+  it('refuses a tool whose surface is api without dispatching, and runs its served sibling', async () => {
+    const restOnly = mkTool({
+      name: 'create_thing',
+      operation: 'create',
+      envelope: 'create',
+      route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/things' },
+      surface: 'api',
+      inputSchema: z.object({ label: z.string(), _meta: z.any().optional() }),
+      annotations: { title: 'Create thing', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
+    });
+    const { call, dispatched } = facade([mkTool(), restOnly]);
+
+    const refused = await call({ name: 'create_thing', arguments: { label: 'x' } });
+
+    expect(refused.isError).toBe(true);
+    expect(refused.content[0].text).toContain('REST only');
+    expect(dispatched).toEqual([]);
+
+    const served = await call({ name: 'search_things', arguments: { page_size: 5 } });
+    expect(served.isError).toBeUndefined();
+    expect(dispatched.map((ctx) => ctx.tool.name)).toEqual(['search_things']);
+  });
+});

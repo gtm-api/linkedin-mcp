@@ -331,6 +331,71 @@ function loadCorpus(spec: ServiceSpec): Corpus {
 
 const CORPUS = new Map(SERVICES.map((spec) => [spec.name, loadCorpus(spec)]));
 
+// ---------------------------------------------------------------------------
+// The MCP Tools blocks: the surface marker (2026-11-06)
+// ---------------------------------------------------------------------------
+
+// A route whose tool is REST only (ToolDefinition.surface `api`: a line in the
+// public REST reference and no tool on any mount) says so in the research file
+// too, as `**surface:** api` on the first lines of its `#####` block under
+// `#### MCP Tools`, the way the block already states its `**tool-class:**`. The
+// Endpoints row keeps its `mcp` status (the route still has a registry tool,
+// which is what the tri-state registry records), so this is the one place the
+// design side records the cut. The parser is the one gs.mcp's
+// research-tools-doc gate uses: a block is a `#####` heading carrying
+// `METHOD /api/path` in backticks (a group heading carries none and is
+// skipped), with every `{param}` read as one slot and no query string.
+
+const ROUTE_IN_HEADING = /`(GET|POST|PUT|PATCH|DELETE)\s+(\/api\/[^`\s]+)`/g;
+
+const normalizeRoute = (method: string, path: string): string =>
+  `${method.toUpperCase()} ${path.replace(/\?.*$/, '').replace(/\{[^}]*\}/g, '{}').replace(/\/$/, '')}`;
+
+type ToolsBlock = { file: string; line: number; heading: string; routes: string[]; toolClass: string | null; surface: string | null };
+
+/** The `#### MCP Tools` section of a research file, split into its routed `#####` blocks. */
+function mcpToolsBlocks(file: string, markdown: string): ToolsBlock[] {
+  const lines = markdown.split('\n');
+  const start = lines.findIndex((l) => /^#{3,4}\s+.*MCP Tools/.test(l));
+  if (start === -1) return [];
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i += 1) {
+    if (/^#{1,4}\s/.test(lines[i])) { end = i; break; }
+  }
+  const blocks: ToolsBlock[] = [];
+  for (let i = start + 1; i < end; i += 1) {
+    const line = lines[i];
+    if (!line.startsWith('##### ')) continue;
+    const routes = [...line.matchAll(ROUTE_IN_HEADING)].map((m) => normalizeRoute(m[1], m[2]));
+    if (routes.length === 0) continue;
+    let toolClass: string | null = null;
+    let surface: string | null = null;
+    for (let j = i + 1; j < Math.min(i + 8, end); j += 1) {
+      const m = lines[j].match(/^\*\*tool-class:\*\*\s*([a-z-]+)/i);
+      if (m) toolClass = m[1].toLowerCase();
+      const sm = lines[j].match(/^\*\*surface:\*\*\s*([a-z]+)/i);
+      if (sm) surface = sm[1].toLowerCase();
+      if (lines[j].startsWith('#####')) break;
+    }
+    blocks.push({ file, line: i + 1, heading: line, routes, toolClass, surface });
+  }
+  return blocks;
+}
+
+/** Every routed MCP Tools block of a service's research directory, keyed by route. */
+function toolsBlocksByRoute(spec: ServiceSpec): Map<string, ToolsBlock> {
+  const out = new Map<string, ToolsBlock>();
+  if (!spec.researchDir) return out;
+  for (const fileName of entityFiles(spec.researchDir)) {
+    const label = `${spec.name}/${fileName}`;
+    const markdown = readFileSync(`${RESEARCH_ROOT}${spec.researchDir}/entities/${fileName}`, 'utf8');
+    for (const block of mcpToolsBlocks(label, markdown)) {
+      for (const route of block.routes) if (!out.has(route)) out.set(route, block);
+    }
+  }
+  return out;
+}
+
 // Every registered tool, keyed by route. Direction 1 resolves ACROSS services on
 // purpose: an entity that was re-homed (account_shares moved from linkedin to id)
 // still has a research file in the old service's directory, and the tool that answers
@@ -621,6 +686,44 @@ for (const spec of SERVICES) {
     });
   });
 }
+
+describe('research parity: the surface marker', () => {
+  for (const spec of SERVICES) {
+    if (!spec.researchDir) continue;
+    it(`${spec.name}: a REST-only route says so in both places, surface api on the tool and **surface:** api on its block`, () => {
+      const blocks = toolsBlocksByRoute(spec);
+      const adrift: string[] = [];
+      const unblocked: string[] = [];
+      for (const pkg of spec.packages) {
+        for (const tool of pkg.tools) {
+          const block = blocks.get(normalizeRoute(tool.route.method, tool.route.pathTemplate));
+          const toolApi = tool.surface === 'api';
+          if (!block) {
+            if (toolApi) unblocked.push(`${tool.name} (${tool.route.method} ${tool.route.pathTemplate})`);
+            continue;
+          }
+          const blockApi = block.surface === 'api';
+          if (toolApi === blockApi) continue;
+          adrift.push(toolApi
+            ? `${pkg.id}: ${tool.name} is surface api in the package and ${block.file}:${block.line} does not say **surface:** api`
+            : `${pkg.id}: ${block.file}:${block.line} says **surface:** api and the package serves ${tool.name} on a mount`);
+        }
+      }
+      // A routed block is the template's shape; a file that heads a block
+      // another way (oauth_authorizations' action-only headings) has no block
+      // to compare, which is printed, not failed: the Endpoints gate above
+      // holds that file the way it holds every other.
+      for (const name of unblocked) {
+        /* eslint-disable-next-line no-console */
+        console.log(`${spec.name}: SKIP ${name} is surface api and no routed MCP Tools block carries its route`);
+      }
+      expect(
+        adrift,
+        `${spec.name}: a REST-only route is marked in the package (surface: 'api') and in the research block (**surface:** api), never in one place:\n${adrift.join('\n')}`,
+      ).toEqual([]);
+    });
+  }
+});
 
 describe('research parity: gate hygiene', () => {
   it('parse coverage is reported, not assumed', () => {

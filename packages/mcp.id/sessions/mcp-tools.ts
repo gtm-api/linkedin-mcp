@@ -1,8 +1,13 @@
 // Entity: Session (gtm.service.id)
 // Source of truth: product/research/gtm.service.id/entities/sessions.md
 // Format: registry v2. Each tool carries route metadata so the generic
-// dispatcher can drive it. 2 tools (the sessions route group), mounted on
-// id.identity. sessions is a token WHITELIST: no CRUD create/get/update/delete
+// dispatcher can drive it. 2 tools (the sessions route group), declared on
+// id.identity and both REST only since 2026-11-06 (surface api, the shared
+// contract with gs.mcp: the Active sessions panel is the app's screen,
+// connected agents are read by search_oauth_authorizations, and is_current
+// for an agent is its own token; a line in the REST reference each, no mount
+// serves them, until gtm's own call numbers say which may go). sessions is a
+// token WHITELIST: no CRUD create/get/update/delete
 // (minted by public-REST auth / OAuth flows); only search + the custom revoke
 // verb, which is the canonical "end a session" for this entity.
 
@@ -87,6 +92,7 @@ export const sessionsTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: McpSearchRequestSchema(SessionFilter, undefined, SessionSortable)
       // The SearchRequest declares no include rule and the controller builds no
       // included block, so advertising the param would be a silent no-op.
@@ -105,6 +111,7 @@ export const sessionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),

@@ -1,7 +1,10 @@
 // Entity: Billing Payment Method (gtm.service.id), VIRTUAL (no local table)
 // Source of truth: product/research/gtm.service.id/entities/billing_payment_methods.md
 // Format: registry v2. Each tool carries route metadata so the generic
-// dispatcher can drive it. 3 tools (the billing-payment-methods route group):
+// dispatcher can drive it. 3 tools (the billing-payment-methods route group),
+// delete REST only since 2026-11-06 (surface api, the shared contract with
+// gs.mcp: an agent cannot add a card, so it has nothing to remove; the app's
+// Billing page keeps the route, a line in the REST reference, no mount):
 // a thin live proxy over the Paddle Billing API. `list` is a collection GET
 // (no /search, no {sid}) modeled as a read action; `get-add-link` mints a
 // Paddle portal deep link; `delete` proxies a Paddle DELETE. The {sid} on
@@ -94,6 +97,7 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     inputSchema: z.object({ sid: PAYMENT_METHOD_SID, ...usageMetaField }),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Delete payment method', ...PADDLE_DELETE },

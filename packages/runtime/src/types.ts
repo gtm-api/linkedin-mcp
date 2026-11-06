@@ -53,6 +53,19 @@ export interface ToolDefinition {
   availability: ToolAvailability;
   /** Server-side preview→commit gate applies (destructive / paid). */
   dangerous: boolean;
+  /**
+   * Where the route is public (2026-11-06; the shared contract with gs.mcp,
+   * MCP_SURFACE_V2.md section 7 of the getsales umbrella, rule 1). `both` (the
+   * default, omitted): a tool on its mount and a line in the public REST
+   * reference. `api`: a line in the reference and NO tool: the definition
+   * stays in the registry for the generator, the coverage gate and the
+   * research gate, and no mount serves it, the facade's call_tool refuses it.
+   * For what cannot pass through a model (a secret, a bulk payload, a person's
+   * own gesture in the app) and, here, for the 32 shared id and webhook-logs
+   * verbs gs.mcp cut on 2026-11-06, REST only on both registries until gtm's
+   * own call numbers say which may go.
+   */
+  surface?: 'both' | 'api';
   /** ACTION verbs only: this verb's OWN surface takes a filter/targets[] set, which
    *  the owning service drains. Mirrors #[ApiMethod(..., massAction:)] (§R4). */
   massAction?: boolean;

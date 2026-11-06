@@ -2,7 +2,12 @@
 // Source of truth: product/research/gtm.service.id/entities/billing_subscriptions.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 14 tools (the billing-subscriptions route group):
-// two read tools (search / get) + eleven custom actions. Money-moving mutations
+// two read tools (search / get) + eleven custom actions, five of them REST
+// only since 2026-11-06 (surface api, the shared contract with gs.mcp:
+// create-checkout, pause, resume, cancel and undo-cancel are an owner's
+// decisions behind the app's Billing page, and a checkout_url outside the app
+// is dead; a line in the REST reference each, no mount serves them, until
+// gtm's own call numbers say which may go). Money-moving mutations
 // are dangerous:true → the server-side preview→commit gate applies. Every
 // custom action returns the plain McpActionResponse envelope (KNOWLEDGE §1.8);
 // the "async" verbs (checkout / pause / resume / cancel) embed their pending
@@ -135,6 +140,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -287,6 +293,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -304,6 +311,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -321,6 +329,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -340,6 +349,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     // Keeps money flowing rather than stopping it, and re-running it is a no-op:
     // the one verb in this family that is neither destructive nor gated.
     dangerous: false,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),

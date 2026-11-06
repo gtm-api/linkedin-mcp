@@ -97,7 +97,7 @@ export function mapErrorEnvelope(
     case 'payment_required':
       lines.push(e.message);
       if (e.context) lines.push(`context: ${JSON.stringify(e.context)}`);
-      lines.push('This is a plan/quota decision, not a transient failure. Inspect the workspace plan with search_billing_subscriptions or get_billing_subscription, and the catalog with search_billing_products; buying more capacity is add_billing_subscription_addon / change_billing_subscription.');
+      lines.push('This is a plan/quota decision, not a transient failure. Inspect the workspace plan with search_billing_subscriptions or get_billing_subscription (the catalog is the billing-products route of the REST API, no tool); buying more capacity is add_billing_subscription_addon / change_billing_subscription.');
       break;
     case 'unauthorized':
       lines.push(e.message);

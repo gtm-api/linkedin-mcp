@@ -12,6 +12,14 @@ Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below 
 a plan. Every row below is ✅ shipped: three services are at full MCP coverage and the only remaining
 gap is `gtm.service.email`, which has no package and therefore no row.
 
+Since 2026-11-06 a tool definition carries a `surface`: `both` (the default, a tool on its mount and
+a line in the public REST reference) or `api` (the line in the reference and NO tool: the definition
+stays in the registry for the generator and the gates, no selector picks it, the facade's `call_tool`
+refuses it). The 32 shared id and webhook-logs verbs that gs.mcp cut that day are `api` here, the
+shared contract of MCP_SURFACE_V2.md section 7 of the getsales umbrella (a delete of a shared tool
+waits on gtm's own call numbers). So a row below reads **defined (served)** where the two differ, and
+a mount's count is what it serves.
+
 ## mcp.linkedin: 12 mounts / 190 tools
 
 > 2026-07-24 service split: `linkedin-tracked-posts` / `-comments` / `-engagements` / `-searches` /
@@ -29,7 +37,7 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 | recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 4 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects, get-my-recruiter-contracts, select-recruiter-contract) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 3 from linkedin_messages (get-my-latest-recruiter, send-recruiter, and check-sent, which is served on messaging too). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 9 | ✅ |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (7), linkedin_connection_invitations (6), linkedin_followers (3) + 1 from linkedin_accounts (invite-to-event, 2026-10-08: up to 25 connections invited to an event in one batch, gated with the invitation verbs) | 23 | ✅ |
 | content | `/mcp/linkedin/content` | linkedin_posting (10: create-post, repost, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post, check-sent) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 12 | ✅ |
-| scraping | `/mcp/linkedin/scraping` | linkedin_scraping (24; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not; the search-URL builder 2026-10-08, one tool for the four people and company searches) | 24 | ✅ (budget 25, 1 free) |
+| scraping | `/mcp/linkedin/scraping` | linkedin_scraping (25; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not; the search-URL builder 2026-10-08, one tool for the four people and company searches) | 25 | ✅ (budget 25, at cap) |
 | auto_scrapes | `/mcp/linkedin/auto-scrapes` | linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2), linkedin_auto_scrape_results (1) | 13 | ✅ |
 | enrichment | `/mcp/linkedin/enrichment` | linkedin_enrichment (22) | 22 | ✅ |
 | data | `/mcp/linkedin/data` | data_requests (2) | 2 | ✅ |
@@ -91,7 +99,7 @@ queue lives on LinkedIn and nothing is stored on this service), `antidetect_brow
 without a raise: `content` sits at 8 / 25 and `browsers` at 20 / 25, and messaging spent one of its
 three free slots.
 
-## mcp.orchestration: 2 mounts / 23 tools
+## mcp.orchestration: 2 mounts / 23 tools defined, 20 served
 
 `gtm.service.orchestration` owns the cross-service plumbing: one webhook registry and one delivery
 log for every producer service, plus mass actions. Base URL `ORCHESTRATION_BASE_URL` (local `:8025`,
@@ -99,12 +107,18 @@ log for every producer service, plus mass actions. Base URL `ORCHESTRATION_BASE_
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| webhooks | `/mcp/orchestration/webhooks` | webhooks (7), webhook_logs (4) | 11 | ✅ |
+| webhooks | `/mcp/orchestration/webhooks` | webhooks (7), webhook_logs (4 defined, 1 served: metrics, retry and cancel are REST only since 2026-11-06) | 8 | ✅ |
 | mass_actions | `/mcp/orchestration/mass-actions` | mass_actions (10), mass_action_items (2) | 12 | ✅ |
 
 2026-10-05 - the header went 22 to 23 and the webhooks row 10 to 11, which is this file catching up
 with the registry rather than the surface changing: `replay_webhook` (the paced re-arm of failed and
 platform-cancelled deliveries) joined the `webhooks` package on 2026-09-09 and was never counted here.
+
+2026-11-06 - the webhooks row 11 to 8: `get_webhook_logs_metrics`, `retry_webhook_log` and
+`cancel_webhook_log` are REST only (`surface: api`, the shared contract with gs.mcp): the window and
+the statuses of `replay_webhook` cover a re-arm, `update_webhook` status off is the agent's stop, and
+the delivery health is a dashboard's. The three definitions stay in the package and in the public
+OpenAPI; no mount serves them.
 
 ⚠️ `webhooks` + `webhook_logs` moved here from `mcp.linkedin/platform` at the 2026-07-26
 orchestration cutover: the registry is platform-wide, so the log carries `account_sid`
@@ -146,14 +160,35 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 4 mounts / 75 tools
+## mcp.id: 4 mounts / 75 tools defined, 46 served
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| identity | `/mcp/id/identity` | users (2), teams (6), team_members (6), sessions (2) | 16 | ✅ |
-| access | `/mcp/id/access` | api_keys (7), oauth_clients (5), oauth_authorizations (3), account_shares (5) | 20 | ✅ |
-| billing | `/mcp/id/billing` | billing_products (1), billing_subscriptions (14), billing_transactions (4), billing_payment_methods (3) | 22 | ✅ |
-| platform | `/mcp/id/platform` | notifications (4), ssl_certificates (7), support_requests (3), api_requests (2), media_uploads (1) | 17 | ✅ |
+| identity | `/mcp/id/identity` | users (2 defined, 1 served), teams (6 defined, 4 served), team_members (6 defined, 5 served), sessions (2 defined, 0 served) | 10 | ✅ |
+| access | `/mcp/id/access` | api_keys (7 defined, 3 served), oauth_clients (5 defined, 0 served), oauth_authorizations (3 defined, 2 served), account_shares (5) | 10 | ✅ |
+| billing | `/mcp/id/billing` | billing_products (1 defined, 0 served), billing_subscriptions (14 defined, 9 served), billing_transactions (4 defined, 3 served), billing_payment_methods (3 defined, 2 served) | 14 | ✅ |
+| platform | `/mcp/id/platform` | notifications (4 defined, 3 served), ssl_certificates (7 defined, 3 served), support_requests (3), api_requests (2), media_uploads (1) | 12 | ✅ |
+
+2026-11-06 - id 75 served to 46: 29 tools are REST only (`surface: api`), the shared contract with
+gs.mcp (MCP_SURFACE_V2.md section 7 of the getsales umbrella, where the same verbs left the registry
+the same day). identity 16 to 10: `update_current_user`, `delete_team`, `transfer_team_ownership`,
+`accept_team_member_invitation`, `search_sessions`, `revoke_session` (the app's own doors: a cascade
+with no return, an owner's gesture, the invite code in the invitee's browser, the Active sessions
+panel). access 20 to 10: `create_api_key`, `update_api_key`, `rotate_api_key`, `get_api_keys_metrics`
+(a secret never passes through a model), the five oauth_clients tools (a client registers itself at
+`/oauth/register`; what is connected is `search_oauth_authorizations`), `update_oauth_authorization`
+(an agent must not widen its own grant). billing 22 to 14: `search_billing_products`,
+`create_billing_subscription_checkout`, `pause_` / `resume_` / `cancel_` / `undo_cancel_billing_subscription`,
+`get_billing_transactions_metrics`, `delete_billing_payment_method` (an owner's decisions behind the
+Billing page; a checkout_url outside the app is dead). platform 17 to 12: `delete_notification`,
+`search_ssl_certificates`, `get_ssl_certificate`, `delete_ssl_certificate`, `issue_ssl_certificate`
+(the certificate's fold into a brand that gs.mcp owes is done in both registries or in neither; gtm
+has no brand entity, so `create`, `update` and `renew` stay). A package whose every tool is REST only
+(sessions, oauth_clients, billing_products) keeps its selector on its mount and serves nothing. The
+definitions stay in the packages and in the public OpenAPI, where their Contract line says no tool
+serves them; a delete waits on gtm's own call numbers (the one per-route sample in the umbrella,
+Amplitude `api.called` over 2026-09-01 to 09-10, counts one `create_api_key`, one `rotate_api_key`,
+four `search_billing_products` and nothing on the other 29).
 
 2026-08-16 - the `credits` mount and the `credit_transactions` package were removed with the
 platform-wide credits exit; data-bus reads are no longer metered.
@@ -232,8 +267,9 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **289 tools**
-(linkedin 189 + id 75 + orchestration 23 + support 2).
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **260 tools served**
+(linkedin 192 + id 46 + orchestration 20 + support 2) of 292 defined: the 32 REST-only definitions
+(surface api, 2026-11-06) are in no toolset, and `call_tool` refuses them by name.
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
 service". That was wrong twice over. `support` is a `ServiceId` like the other three, and the
@@ -248,11 +284,16 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **49 registry packages / 289 tools**, served over **18 mounts + 1 facade**. By service:
-linkedin 189 (27 packages), id 75 (17), orchestration 23 (4), support 2 (1). Every number in this
-file is read off the built registry (`buildRegistry` over the four barrels, then `resolveMounts` over
-`MOUNTS`); the per-mount ones are the headroom table `tests/worker-boot.test.ts` prints on a green
-run, so re-run it rather than editing a count by hand.
+Totals: **49 registry packages / 292 tools defined, 260 served**, over **18 mounts + 1 facade**. By
+service: linkedin 192 (27 packages), id 75 defined and 46 served (17), orchestration 23 defined and 20
+served (4), support 2 (1). Every number in this file is read off the built registry (`buildRegistry`
+over the four barrels, then `resolveMounts` over `MOUNTS`); the per-mount ones are the headroom table
+`tests/worker-boot.test.ts` prints on a green run, so re-run it rather than editing a count by hand.
+
+2026-11-06 - linkedin 189 to 192 and scraping 24 to 25 (at cap) is this file catching up with the
+registry on the day the surface flag landed, not the surface changing: the tools arrived with the
+October and November linkedin work and were never counted here. /health counts the served registry
+(`tools: 260`) since the same day.
 
 Remaining coverage debt is **51** routes and all of it is `gtm.service.email`. `gtm.service.linkedin`,
 `gtm.service.id` and `gtm.service.orchestration` are each at full coverage (ratchet 0, empty ledger):

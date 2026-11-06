@@ -2,7 +2,12 @@
 // Source of truth: product/research/gtm.service.id/entities/ssl_certificates.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 7 tools (the ssl-certificates route group), mounted on
-// id.platform. Let's Encrypt certs for customers' custom email domains (ACME
+// id.platform; search, get, issue and delete REST only since 2026-11-06
+// (surface api, the shared contract with gs.mcp, MCP_SURFACE_V2.md section 7
+// of the getsales umbrella: a line in the REST reference each, no mount serves
+// them; create, update and renew stay tools, since the fold of the certificate
+// into its brand that gs.mcp owes is done in both registries or in neither,
+// and gtm has no brand entity). Let's Encrypt certs for customers' custom email domains (ACME
 // HTTP-01, full issuer chain). The cert body and private key are returned by NO
 // tool. issue/renew are async (mcpAsyncAction → action_async); poll get.
 
@@ -114,6 +119,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: McpSearchRequestSchema(SslCertificateFilter, undefined, SslCertificateSortable)
       // The SearchRequest declares no include rule and the controller builds no
       // included block, so advertising the param would be a silent no-op.
@@ -132,6 +138,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'get',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     inputSchema: McpGetRequestSchema('id_sc_'),
     outputSchema: McpGetResponse(SslCertificate),
     annotations: { title: 'Get SSL certificate', ...RO },
@@ -140,7 +147,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     ...base,
     name: 'create_ssl_certificate',
     description:
-      "Register a custom domain as a certificate row in status='pending'. Does NOT start ACME; call issue_ssl_certificate next to begin the HTTP-01 flow. Idempotent on the domain natural key, and already_exists says whether the row was left as found. true: the team's row is returned as it stands (pending, active, or an attempt in flight whatever the status), nothing was written. false: a new row, or a failed/expired row with nothing in flight or a soft-deleted row recreated in place (same sid, reset to pending, challenge and last_error cleared; read last_error with get_ssl_certificate first if the reason matters). A domain whose certificate is active in another team returns 409 conflict (domain_active_in_another_team). A domain another team has only registered is not refused: the first certificate to go active holds it.",
+      "Register a custom domain as a certificate row in status='pending'. Does NOT start ACME; the issue route of the REST API begins the HTTP-01 flow (no MCP tool issues a certificate since 2026-11-06). Idempotent on the domain natural key, and already_exists says whether the row was left as found. true: the team's row is returned as it stands (pending, active, or an attempt in flight whatever the status), nothing was written. false: a new row, or a failed/expired row with nothing in flight or a soft-deleted row recreated in place (same sid, reset to pending, challenge and last_error cleared; the GET route of the REST API shows last_error first if the reason matters). A domain whose certificate is active in another team returns 409 conflict (domain_active_in_another_team). A domain another team has only registered is not refused: the first certificate to go active holds it.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/ssl-certificates' },
     operation: 'create',
@@ -181,6 +188,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'delete_simple',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     inputSchema: McpSimpleDeleteRequestSchema('id_sc_'),
     outputSchema: McpSimpleDeleteResponse,
     annotations: { title: 'Delete SSL certificate', ...DANGER_IDEM },
@@ -196,6 +204,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     envelope: 'action_async',
     availability: 'ga',
     dangerous: true,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -206,7 +215,7 @@ export const sslCertificatesTools: ToolDefinition[] = [
     ...base,
     name: 'renew_ssl_certificate',
     description:
-      'Force a re-issue of an existing certificate, ignoring the 30-day expiry window (operator-forced). ASYNC: same HTTP-01 path as issue and the auto-renew job, on the same row. On an active certificate the row STAYS active (it keeps serving and routing) while challenge carries the attempt: on success the persisted leaf / full chain / key are replaced and issued_at / expires_at re-stamped, on failure last_error is set and the current certificate keeps serving. On a pending/failed/expired row nothing is serving, so it flips status→challenge and ends active or failed like issue. Poll get_ssl_certificate until challenge is null, or await ssl-certificates.renewed / .failed. Use after a CA chain fix, to retry a failing renewal once its cause is fixed, or to recover a failed/expired certificate. 409 conflict while an attempt is in flight (issuance_already_in_progress, e.g. the renew job\'s) or while another team\'s certificate for the domain is active (domain_active_in_another_team, retrying cannot help).',
+      'Force a re-issue of an existing certificate, ignoring the 30-day expiry window (operator-forced). ASYNC: same HTTP-01 path as issue and the auto-renew job, on the same row. On an active certificate the row STAYS active (it keeps serving and routing) while challenge carries the attempt: on success the persisted leaf / full chain / key are replaced and issued_at / expires_at re-stamped, on failure last_error is set and the current certificate keeps serving. On a pending/failed/expired row nothing is serving, so it flips status→challenge and ends active or failed like issue. Poll the GET route of the REST API until challenge is null, or await ssl-certificates.renewed / .failed. Use after a CA chain fix, to retry a failing renewal once its cause is fixed, or to recover a failed/expired certificate. 409 conflict while an attempt is in flight (issuance_already_in_progress, e.g. the renew job\'s) or while another team\'s certificate for the domain is active (domain_active_in_another_team, retrying cannot help).',
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/ssl-certificates/{sid}/renew', sidParam: 'sid' },
     operation: 'action',
