@@ -12231,9 +12231,43 @@
             ],
             "required_permission": "can_manage_billing",
             "internal": false,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action takes no request object"
+            "request_class": "App\\Entities\\BillingPaymentMethod\\Requests\\BillingPaymentMethodGetAddLinkRequest",
+            "rules": [
+                {
+                    "field": "subscription_sid",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "starts_with:bl_sb_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "DELETE",
@@ -16969,7 +17003,8 @@
                 {
                     "field": "permissions",
                     "rules": [
-                        "present",
+                        "present_unless:preset,operator,view_only",
+                        "prohibited_if:preset,operator,view_only",
                         "array"
                     ],
                     "required": false,
@@ -17052,6 +17087,24 @@
                     ],
                     "min": null,
                     "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "preset",
+                    "rules": [
+                        "sometimes",
+                        "in:\"operator\",\"view_only\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": null,
+                    "in": [
+                        "operator",
+                        "view_only"
+                    ],
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -21942,6 +21995,41 @@
         },
         {
             "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-downtime-checks/clear",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "clearDowntimeChecks",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "ops/antidetect-browser-proxy-downtime-checks/search",
             "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
             "action": "searchDowntimeChecks",
@@ -24309,6 +24397,23 @@
             "uri": "partner/teams/{sid}",
             "controller": "App\\Http\\Controllers\\PartnerController",
             "action": "deleteTeam",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "PUT",
+            "uri": "partner/teams/{sid}/capacity",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "setCapacity",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,

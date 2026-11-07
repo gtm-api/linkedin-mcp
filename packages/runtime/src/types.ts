@@ -54,6 +54,16 @@ export interface ToolDefinition {
   /** Server-side preview→commit gate applies (destructive / paid). */
   dangerous: boolean;
   /**
+   * A dangerous tool whose preview call asks the backend what the confirm
+   * would do (ported from gs.mcp 2026-11-07: change_billing_subscription's money
+   * rides its first call, where preview_billing_subscription_change was a tool of
+   * its own). The preview gate calls this route with the tool's own args on the
+   * first call alone, under the caller's token and team, and carries the
+   * envelope's result as preview_result; a route that does not answer degrades
+   * to the plain preview (fail-open: the confirm call re-checks everything).
+   */
+  previewRoute?: RouteMeta;
+  /**
    * Where the route is public (2026-11-06; the shared contract with gs.mcp,
    * MCP_SURFACE_V2.md section 7 of the getsales umbrella, rule 1). `both` (the
    * default, omitted): a tool on its mount and a line in the public REST

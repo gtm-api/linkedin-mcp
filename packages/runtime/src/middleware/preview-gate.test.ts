@@ -282,3 +282,129 @@ describe('preview gate: backend validate twin', () => {
   });
 });
 
+// A tool with a previewRoute (ported from gs.mcp 2026-11-07: the money of
+// change_billing_subscription) asks the backend what the confirm would do on the
+// preview call, with the tool's own args, and shows the answer whole.
+describe('preview gate: previewRoute', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  const BASE = 'https://id.test';
+  const VALIDATED = { success: true, operation: 'validate', valid: true, validated_requests: [], meta: {} };
+  const QUOTE = { immediate_charge: '1200', next_billed_amount: '4900', currency: 'USD', proration_mode: 'prorated_immediately', crosses_bracket: false };
+
+  function depsWithId(): RuntimeDeps {
+    const deps = mkDeps(memStore().store, SECRET);
+    deps.config.baseUrls.id = BASE;
+    return deps;
+  }
+
+  const change: ToolDefinition = {
+    ...mkTool(true),
+    name: 'change_billing_subscription',
+    service: 'id',
+    route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/{sid}/change', sidParam: 'sid' },
+    previewRoute: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/{sid}/preview-change', sidParam: 'sid' },
+  };
+
+  /** The twin answers `twin`, the dry run `dryRun`; every call is recorded. */
+  function stubBackend(twin: [number, unknown], dryRun: [number, unknown] | Error): Array<{ url: string; body: unknown }> {
+    const calls: Array<{ url: string; body: unknown }> = [];
+    vi.stubGlobal('fetch', vi.fn(async (url: string, init: RequestInit) => {
+      calls.push({ url, body: init.body ? JSON.parse(init.body as string) : undefined });
+      const answer = url.includes('/api/_validate/') ? twin : dryRun;
+      if (answer instanceof Error) throw answer;
+      return new Response(JSON.stringify(answer[1]), { status: answer[0] });
+    }));
+    return calls;
+  }
+
+  const never = async (): Promise<ToolResult> => {
+    throw new Error('the action must not run at preview');
+  };
+
+  it('calls the route with the args on the preview call, and its result rides the preview', async () => {
+    const calls = stubBackend([200, VALIDATED], [200, { success: true, operation: 'action', action: 'preview-change', item: null, result: QUOTE }]);
+    const deps = depsWithId();
+
+    const res = await makePreviewGate(deps)(mkCtx({ sid: 'bl_sb_1', quantity: 9, _meta: { user_goal: 'g' } }, deps, change), never);
+
+    const dryRun = calls.find((call) => call.url.endsWith('/preview-change'));
+    expect(dryRun?.url).toBe(`${BASE}/api/billing-subscriptions/bl_sb_1/preview-change`);
+    expect(dryRun?.body).toEqual({ quantity: 9 });
+    const preview = res.structuredContent as { preview_result: { status: string; result?: typeof QUOTE }; commit_token: string; validated: boolean };
+    expect(preview.preview_result.status).toBe('answered');
+    expect(preview.preview_result.result?.immediate_charge).toBe('1200');
+    expect(preview.validated).toBe(true);
+    expect(typeof preview.commit_token).toBe('string');
+    expect(res.content[0].text).toMatch(/immediate_charge/);
+  });
+
+  it('a route that refuses leaves the preview standing, unanswered', async () => {
+    stubBackend([200, VALIDATED], [403, { success: false, error: { code: 'forbidden', message: 'no' } }]);
+    const deps = depsWithId();
+
+    const res = await makePreviewGate(deps)(mkCtx({ sid: 'bl_sb_1', quantity: 9 }, deps, change), never);
+
+    const preview = res.structuredContent as { preview_result: { status: string; detail?: string; result?: unknown }; commit_token: string };
+    expect(preview.preview_result.status).toBe('unanswered');
+    expect(preview.preview_result.detail).toContain('forbidden');
+    expect(preview.preview_result).not.toHaveProperty('result');
+    expect(res.content[0].text).toMatch(/did not answer/);
+    expect(typeof preview.commit_token).toBe('string');
+  });
+
+  it('a route that cannot be reached leaves the preview standing, unanswered', async () => {
+    stubBackend([200, VALIDATED], new Error('ECONNREFUSED'));
+    const deps = depsWithId();
+
+    const res = await makePreviewGate(deps)(mkCtx({ sid: 'bl_sb_1', quantity: 9 }, deps, change), never);
+
+    const preview = res.structuredContent as { preview_result: { status: string }; commit_token: string };
+    expect(preview.preview_result.status).toBe('unanswered');
+    expect(typeof preview.commit_token).toBe('string');
+  });
+
+  it('a refusal of the validate twin ends the preview there: no dry run, no token', async () => {
+    const calls = stubBackend(
+      [422, { success: false, error: { code: 'validation_failed', message: 'nothing_to_change', field_errors: { quantity: [{ rule: 'nothing_to_change', message: 'nothing_to_change' }] } }, meta: {} }],
+      [200, { success: true, result: QUOTE }],
+    );
+    const deps = depsWithId();
+
+    const res = await makePreviewGate(deps)(mkCtx({ sid: 'bl_sb_1' }, deps, change), never);
+
+    expect(res.isError).toBe(true);
+    expect(calls.map((call) => call.url)).toEqual([`${BASE}/api/_validate/billing-subscriptions/bl_sb_1/change`]);
+    expect(JSON.stringify(res)).not.toContain('commit_token');
+  });
+
+  it('the confirmed call goes straight to the action: no dry run again', async () => {
+    const calls = stubBackend([200, VALIDATED], [200, { success: true, result: QUOTE }]);
+    const deps = depsWithId();
+    const gate = makePreviewGate(deps);
+    const args = { sid: 'bl_sb_1', quantity: 9 };
+
+    const preview = (await gate(mkCtx(args, deps, change), never)).structuredContent as { commit_token: string };
+    const callsAtPreview = calls.length;
+    let ran = 0;
+    await gate(mkCtx({ ...args, commit_token: preview.commit_token }, deps, change), async () => {
+      ran++;
+      return { content: [{ type: 'text', text: 'done' }] };
+    });
+
+    expect(ran).toBe(1);
+    expect(calls).toHaveLength(callsAtPreview);
+  });
+
+  it('a tool without a previewRoute carries no preview_result', async () => {
+    stubBackend([200, VALIDATED], [200, { success: true, result: QUOTE }]);
+    const deps = depsWithId();
+    const tool: ToolDefinition = { ...change, previewRoute: undefined };
+
+    const res = await makePreviewGate(deps)(mkCtx({ sid: 'bl_sb_1', quantity: 9 }, deps, tool), never);
+
+    expect(res.structuredContent?.preview_result).toBeUndefined();
+    expect(typeof res.structuredContent?.commit_token).toBe('string');
+  });
+});
+

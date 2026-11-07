@@ -73,7 +73,7 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     ...base,
     name: 'get_billing_payment_method_add_link',
     description:
-      "Return a temporary Paddle Customer Portal deep link to add or replace a card for the workspace's applied subscription. This is the ONLY way to add a card: Paddle has no add-card API; the user enters card details on Paddle's hosted page. Never cached. Returns no_billing_account if the workspace has no applied subscription. Requires billing.manage.",
+      "Return a temporary Paddle Customer Portal deep link to add or replace a card, the ONLY way to add one: Paddle has no add-card API, the user enters the card on Paddle's hosted page. Without subscription_sid it is for the workspace's applied subscription (no_billing_account if none). With it, for that subscription: 403 not_subscription_owner unless it is the caller's or applied to this workspace, 422 if invoiced, 409 with no Paddle subscription. Never cached. Requires billing.manage.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-payment-methods/get-add-link' },
     operation: 'action',
@@ -82,7 +82,11 @@ export const billingPaymentMethodsTools: ToolDefinition[] = [
     dangerous: false,
     massAction: false,
     scheduleRequired: false,
-    inputSchema: z.object({ ...usageMetaField }),
+    inputSchema: z.object({
+      subscription_sid: z.string().length(18).startsWith('bl_sb_').optional()
+        .describe('The subscription the card is for (bl_sb_...); omitted = the one the workspace draws from.'),
+      ...usageMetaField,
+    }),
     outputSchema: McpActionResponse(z.null(), z.object({ add_link: z.string().nullable(), expires_at: z.string(), subscription_sid: z.string() })),
     annotations: { title: 'Get add-card link', ...PADDLE_MINT },
   },

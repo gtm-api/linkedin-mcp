@@ -2,12 +2,15 @@
 // Source of truth: product/research/gtm.service.id/entities/billing_subscriptions.md
 // Format: registry v2. Each tool carries route metadata so the generic
 // dispatcher can drive it. 14 tools (the billing-subscriptions route group):
-// two read tools (search / get) + eleven custom actions, five of them REST
-// only since 2026-11-06 (surface api, the shared contract with gs.mcp:
-// create-checkout, pause, resume, cancel and undo-cancel are an owner's
-// decisions behind the app's Billing page, and a checkout_url outside the app
-// is dead; a line in the REST reference each, no mount serves them, until
-// gtm's own call numbers say which may go). Money-moving mutations
+// two read tools (search / get) + eleven custom actions, seven of them REST
+// only (surface api, the shared contract with gs.mcp; a line in the REST
+// reference each, no mount serves them). Since 2026-11-06: create-checkout,
+// pause, resume, cancel and undo-cancel, an owner's decisions behind the app's
+// Billing page, and a checkout_url outside the app is dead; they wait on gtm's
+// own call numbers to go. Since 2026-11-07: preview-change, now the first call
+// of change_billing_subscription (previewRoute, one door for the money), and
+// get-update-payment-method-link, folded into get_billing_payment_method_add_link
+// with subscription_sid; the app calls both routes, so they stay. Money-moving mutations
 // are dangerous:true → the server-side preview→commit gate applies. Every
 // custom action returns the plain McpActionResponse envelope (KNOWLEDGE §1.8);
 // the "async" verbs (checkout / pause / resume / cancel) embed their pending
@@ -198,13 +201,14 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     ...base,
     name: 'preview_billing_subscription_change',
     description:
-      'Read-only proration preview for a quantity / bracket-price change BEFORE committing. Calls Paddle Pricing Preview and returns the immediate charge (upgrade) or next-period credit (downgrade), the resolved new bracket price, and whether it crosses a bracket boundary. No state change, no charge. This is the confirmation gate to show the user before change_billing_subscription. Provide at least one of quantity / price_sid. Requires billing.view.',
+      'Read-only proration preview for a quantity / bracket-price change BEFORE committing. Calls Paddle Pricing Preview and returns the immediate charge (upgrade) or next-period credit (downgrade), the resolved new bracket price, and whether it crosses a bracket boundary. No state change, no charge. This is the confirmation gate to show the user before change_billing_subscription. Provide at least one of quantity / price_sid. Requires billing.manage.',
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/{sid}/preview-change', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -220,9 +224,12 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     ...base,
     name: 'change_billing_subscription',
     description:
-      'Commit a quantity / bracket-price change. DANGEROUS: an UPGRADE charges the owner\'s card immediately (prorated); a downgrade applies next period (no immediate charge). Server-side preview→commit gate applies; call preview_billing_subscription_change first. manual (sales) subscriptions are not re-bracketed (422). The committed state arrives via webhook; the response returns the optimistic post-change row. Provide at least one of quantity / price_sid. Requires billing.manage.',
+      'Change the plan\'s quantity or bracket price, in two calls. The first, without commit_token, is the preview and changes nothing: preview_result carries the money from Paddle\'s own pricing preview (immediate_charge, next_billed_amount, currency, proration_mode, new_price_sid, new_quantity, crosses_bracket) beside the commit_token; show it to the user. status unanswered means no quote came back: say so before committing. The second call, same arguments plus commit_token, commits: an UPGRADE charges the owner\'s card immediately (prorated), a downgrade applies next period with no immediate charge. manual (sales) subscriptions are not re-bracketed (422). The committed state arrives via webhook; the response returns the optimistic post-change row. Provide at least one of quantity / price_sid. Requires billing.manage.',
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/{sid}/change', sidParam: 'sid' },
+    // The first call's own backend read (2026-11-07): Paddle's pricing preview,
+    // the route the app's confirm dialog reads the same quote from.
+    previewRoute: { service: 'id', method: 'POST', pathTemplate: '/api/billing-subscriptions/{sid}/preview-change', sidParam: 'sid' },
     operation: 'action',
     envelope: 'action',
     availability: 'ga',
@@ -367,6 +374,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
     envelope: 'action',
     availability: 'ga',
     dangerous: false,
+    surface: 'api',
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: SID, ...usageMetaField }),
@@ -376,7 +384,7 @@ export const billingSubscriptionsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'get_billing_subscription',
-    description: 'Fetch a single billing subscription by sid, with optional includes (price, product, team, latest_transactions).',
+    description: 'Fetch one billing subscription by sid, with optional includes (price, product, team, latest_transactions). 404 outside the search\'s scope: the caller\'s own and the workspace\'s applied one.',
     toolClass: 'trivial',
     route: { service: 'id', method: 'GET', pathTemplate: '/api/billing-subscriptions/{sid}', sidParam: 'sid' },
     operation: 'get',

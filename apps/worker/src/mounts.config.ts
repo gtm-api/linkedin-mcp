@@ -328,7 +328,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/identity',
     name: 'gtm-id-identity',
     instructions:
-      'GTM identity: the current user (read), teams (search, get, create, update) and team members & invitations (invite, re-scope, remove, resend). Removing a member is protected (preview → confirm). Deleting a workspace, transferring its ownership, editing the current user, accepting an invitation and the active sessions are the app\'s own doors: REST only since 2026-11-06, no tool here.',
+      'GTM identity: the current user (read), teams (search, get, create, update) and team members & invitations (invite with a preset, operator or view_only, or an explicit token list; re-scope, remove, resend). Removing a member is protected (preview → confirm). Deleting a workspace, transferring its ownership, editing the current user, accepting an invitation and the active sessions are the app\'s own doors: REST only since 2026-11-06, no tool here.',
     // sessions is declared here and serves nothing since 2026-11-06: both of
     // its tools are REST only (surface api), the selector stays so the package
     // keeps its home.
@@ -358,7 +358,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/billing',
     name: 'gtm-id-billing',
     instructions:
-      'GTM billing: subscriptions (search, get, apply / unapply, preview and change the plan, add-ons), transactions & invoices, payment methods (list, add-card link). Money-moving actions are protected (preview → confirm). Checkout, pause, resume, cancel and undo-cancel, the product catalog, removing a card and the transactions metrics are the app\'s own doors: REST only since 2026-11-06, no tool here.',
+      'GTM billing: subscriptions (search, get, apply / unapply, change the plan, add-ons), transactions & invoices, payment methods (list, add-card link for the workspace\'s subscription or a named one). Money-moving actions are protected (preview → confirm): the first call of change_billing_subscription is the preview, its preview_result carries the money. Checkout, pause, resume, cancel and undo-cancel, the product catalog, removing a card and the transactions metrics are the app\'s own doors: REST only since 2026-11-06, no tool here.',
     selectors: [
       // billing_products serves nothing since 2026-11-06: its one tool is REST
       // only (surface api), the selector stays so the package keeps its home.
@@ -374,7 +374,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/platform',
     name: 'gtm-id-platform',
     instructions:
-      'GTM platform: notifications (search, get, metrics), SSL certificates (create, update, renew; search, get, issue and delete are REST only since 2026-11-06, no tool here), support escalation (escalate_to_human hands the current issue to the human support team; the team replies to the user\'s account email), the team\'s own API request log (search_api_requests / get_api_request_metrics: every call made with an api key or an OAuth client, your own included; how many, how many failed, which tools, which clients), and upload slots (request_media_upload: a one-time link the user opens to drop a file, or an upload from a shell, and the public file_url to pass on, e.g. to create_linkedin_post, instead of base64). Certificate mutations are protected (preview → confirm).',
+      'GTM platform: notifications (search, get, metrics), SSL certificates (create, update, issue, poll with get, renew, delete), support escalation (escalate_to_human hands the current issue to the human support team; the team replies to the user\'s account email), the team\'s own API request log (search_api_requests / get_api_request_metrics: every call made with an api key or an OAuth client, your own included; how many, how many failed, which tools, which clients), and upload slots (request_media_upload: a one-time link the user opens to drop a file, or an upload from a shell, and the public file_url to pass on, e.g. to create_linkedin_post, instead of base64). Certificate mutations are protected (preview → confirm).',
     selectors: [pid('notifications'), pid('ssl_certificates'), pid('support_requests'), pid('api_requests'), pid('media_uploads')],
     maxTools: 25,
     facade: 'none',

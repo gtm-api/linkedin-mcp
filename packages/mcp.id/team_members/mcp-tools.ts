@@ -31,6 +31,10 @@ const ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
 
 const TeamMemberStatus = z.enum(['invited', 'active', 'revoked']);
 
+// The named grants of create (TeamMemberPresetEnum in gtm.service.id, gtm's own
+// token lists): the backend expands one to plain tokens before anything reads it.
+const TeamMemberPreset = z.enum(['operator', 'view_only']);
+
 // Includes on search (see research Includes).
 const TeamMemberInclude = z.enum(['user']);
 
@@ -165,7 +169,7 @@ export const teamMembersTools: ToolDefinition[] = [
     ...base,
     name: 'create_team_member',
     description:
-      "Invite a person by email. Born status=invited, user_sid=null, with a one-time code (+7d expiry); dispatches the invite email. permissions is the explicit token list validated against the catalog (403 grant_exceeds_ceiling when it exceeds the CALLER's own grant; '*' is grantable only by the owner or a wildcard holder; can_view_teams is always added - the membership floor). account_sids is the optional profile slice (null/omitted = all team profiles; an explicit empty list is refused, and a sliced caller cannot grant beyond their own slice). Natural key (team, email) over live rows; re-inviting a live member returns already_exists:true.",
+      "Invite a person by email with exactly one of preset or permissions (both or neither is 422). preset names a grant: operator (runs outreach end to end, no org or billing management) or view_only (reads the workspace, acts on nothing). permissions is the explicit token list validated against the catalog. Either way: 403 grant_exceeds_ceiling when it exceeds the CALLER's own grant; '*' is grantable only by the owner or a wildcard holder; can_view_teams is always added - the membership floor. Born status=invited, user_sid=null, with a one-time code (+7d expiry); dispatches the invite email. account_sids is the optional profile slice (null/omitted = all team profiles; an explicit empty list is refused, and a sliced caller cannot grant beyond their own slice). Natural key (team, email) over live rows; re-inviting a live member returns already_exists:true.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/team-members' },
     operation: 'create',
@@ -174,7 +178,10 @@ export const teamMembersTools: ToolDefinition[] = [
     dangerous: false,
     inputSchema: z.object({
       email: z.string().email().max(255),
-      permissions: z.array(PERMISSION_TOKEN).describe('Unified catalog tokens; the can_view_teams floor is always unioned in.'),
+      permissions: z.array(PERMISSION_TOKEN).optional()
+        .describe('Unified catalog tokens, [] = membership only; the can_view_teams floor is always unioned in. This or preset, never both.'),
+      preset: TeamMemberPreset.optional()
+        .describe('A named grant, expanded to its tokens: operator or view_only. This or permissions, never both.'),
       account_sids: z.array(ACCOUNT_SID).min(1).nullable().optional()
         .describe('Profile slice; null/omitted = all team profiles. An empty list is refused (422).'),
       ...usageMetaField,

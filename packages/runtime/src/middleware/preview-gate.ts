@@ -9,7 +9,8 @@ import { mapErrorEnvelope } from '../error-map';
 //   - Call 1 (no commit_token): nothing executes. The arguments are checked
 //     against the backend's validate twin first (see validateOnBackend), then a
 //     preview is returned with a short-lived HMAC commit_token bound to the tool
-//     name and a hash of the args.
+//     name and a hash of the args, plus the backend's own dry run when the tool
+//     declares a previewRoute (see fetchPreviewRoute).
 //   - Call 2 (commit_token present): verify signature + expiry + tool + args
 //     hash, mark the token's jti single-use in KV, then execute.
 // Fail-closed: no secret / no store / KV error → refuse to execute.
@@ -139,7 +140,7 @@ function errorResult(text: string): ToolResult {
 }
 
 // One line saying what the confirmed call will do, built from the arguments
-// alone: the preview makes no backend call, so ids stay ids (no names resolved).
+// alone: nothing here resolves an id, so ids stay ids (no names).
 // Long values are cut so a message body does not swallow the line.
 function effectSummary(tool: string, action: string, args: Record<string, unknown>): string {
   const brief = (value: unknown): string => {
@@ -187,12 +188,55 @@ async function validateOnBackend(ctx: DispatchContext): Promise<ToolResult | 'pa
   return 'unavailable';
 }
 
-function previewResult(ctx: DispatchContext, token: string, expiresIn: number, team: string, validated: boolean): ToolResult {
+// What the backend's own dry run of the confirm would do, for a tool that
+// declares a previewRoute (ported from gs.mcp 2026-11-07): the route called with
+// the tool's own args on the preview call, the envelope's result shown whole (the
+// money, the blockers), nothing written. Short-fused and fail-open: a route that
+// does not answer, a refusal, a transport error all read as 'unanswered', and the
+// confirm call answers them for real.
+const PREVIEW_ROUTE_TIMEOUT_MS = 5000;
+const PREVIEW_RESULT_TEXT_CAP = 2000;
+
+export interface PreviewRouteResult {
+  status: 'answered' | 'unanswered';
+  result?: unknown;
+  detail?: string;
+}
+
+async function fetchPreviewRoute(ctx: DispatchContext): Promise<PreviewRouteResult | null> {
+  const previewRoute = ctx.tool.previewRoute;
+  if (!previewRoute) return null;
+  const { commit_token: _c, _meta: _m, ...args } = ctx.args;
+  try {
+    const res = await backendFetch({ ...ctx, tool: { ...ctx.tool, route: previewRoute }, args }, { timeoutMs: PREVIEW_ROUTE_TIMEOUT_MS });
+    if (res.kind !== 'ok') return { status: 'unanswered', detail: `the dry run did not answer (${res.reason})` };
+    const env = res.envelope as { success?: boolean; result?: unknown; error?: { code?: string } } | null;
+    if (!env || env.success === false || res.status >= 400) {
+      return { status: 'unanswered', detail: `the dry run was refused (${env?.error?.code ?? `HTTP ${res.status}`})` };
+    }
+    return { status: 'answered', result: env.result ?? null };
+  } catch (err) {
+    return { status: 'unanswered', detail: `the dry run failed (${String((err as { message?: string })?.message ?? err).slice(0, 200)})` };
+  }
+}
+
+function previewRouteLines(previewRoute: PreviewRouteResult | null): string[] {
+  if (!previewRoute) return [];
+  if (previewRoute.status === 'answered') {
+    const rendered = JSON.stringify(previewRoute.result);
+    const shown = rendered.length > PREVIEW_RESULT_TEXT_CAP ? `${rendered.slice(0, PREVIEW_RESULT_TEXT_CAP)}…` : rendered;
+    return [`What the confirm would do, the backend's own dry run (nothing changed): ${shown}`];
+  }
+  return [`The backend's dry run did not answer (${previewRoute.detail ?? 'no answer'}); what the confirm would do is the confirm call's answer.`];
+}
+
+function previewResult(ctx: DispatchContext, token: string, expiresIn: number, team: string, validated: boolean, previewRoute: PreviewRouteResult | null): ToolResult {
   const action = ctx.tool.route.pathTemplate.split('/').pop() ?? ctx.tool.name;
   const { commit_token: _committed, ...args } = ctx.args;
   const summary = effectSummary(ctx.tool.name, action, args);
   const text = [
     `⚠️ ${ctx.tool.name} is a protected action and needs confirmation before it runs.`,
+    ...previewRouteLines(previewRoute),
     `Nothing has changed yet. Review the arguments below, then call ${ctx.tool.name} AGAIN with the exact same arguments plus "commit_token": "${token}" to execute.`,
     `The token is single-use and expires in ${expiresIn}s.`,
     ...(team !== '' ? [`It will execute in team ${team}.`] : []),
@@ -216,6 +260,15 @@ function previewResult(ctx: DispatchContext, token: string, expiresIn: number, t
       // true = the backend's validate twin accepted these arguments; false = the
       // backend has no twin (or did not answer), so only the MCP schema checked them.
       validated,
+      ...(previewRoute
+        ? {
+          preview_result: {
+            status: previewRoute.status,
+            ...(previewRoute.status === 'answered' ? { result: previewRoute.result } : {}),
+            ...(previewRoute.detail ? { detail: previewRoute.detail } : {}),
+          },
+        }
+        : {}),
       commit_token: token,
       expires_in_seconds: expiresIn,
       team_sid: team !== '' ? team : null,
@@ -257,7 +310,7 @@ export function makePreviewGate(deps: RuntimeDeps): ToolMiddleware {
 
       const jti = crypto.randomUUID();
       const { token, expiresIn } = await mintCommitToken(ctx.tool.name, argsHash, gate.secret, gate.ttlSeconds, nowMs, jti, team);
-      return previewResult(ctx, token, expiresIn, team, validation === 'passed');
+      return previewResult(ctx, token, expiresIn, team, validation === 'passed', await fetchPreviewRoute(ctx));
     }
 
     const verdict = await verifyCommitToken(provided, ctx.tool.name, argsHash, gate.secret, nowMs, team);

@@ -8,13 +8,14 @@ export type BackendResult =
 // Single backend call for one tool. Attaches auth + trace headers, times out
 // via AbortController, and returns any JSON body (incl. 4xx/5xx error
 // envelopes) as kind:'ok' - only non-JSON / network / timeout is a
-// transport_error. Never throws.
-export async function backendFetch(ctx: DispatchContext, opts: { validateOnly?: boolean } = {}): Promise<BackendResult> {
+// transport_error. Never throws. `timeoutMs` overrides the config fuse for
+// callers that must stay snappy (the preview gate's dry run).
+export async function backendFetch(ctx: DispatchContext, opts: { validateOnly?: boolean; timeoutMs?: number } = {}): Promise<BackendResult> {
   const { tool, scope, deps } = ctx;
   const { url, body } = buildRequest(ctx, opts);
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), deps.config.backendTimeoutMs);
+  const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? deps.config.backendTimeoutMs);
 
   const headers: Record<string, string> = {
     Authorization: `Bearer ${scope.token}`,

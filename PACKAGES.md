@@ -15,10 +15,12 @@ gap is `gtm.service.email`, which has no package and therefore no row.
 Since 2026-11-06 a tool definition carries a `surface`: `both` (the default, a tool on its mount and
 a line in the public REST reference) or `api` (the line in the reference and NO tool: the definition
 stays in the registry for the generator and the gates, no selector picks it, the facade's `call_tool`
-refuses it). The 32 shared id and webhook-logs verbs that gs.mcp cut that day are `api` here, the
-shared contract of MCP_SURFACE_V2.md section 7 of the getsales umbrella (a delete of a shared tool
-waits on gtm's own call numbers). So a row below reads **defined (served)** where the two differ, and
-a mount's count is what it serves.
+refuses it). 30 shared id and webhook-logs verbs are `api` here, the shared contract of
+MCP_SURFACE_V2.md section 7 of the getsales umbrella: 28 of the 32 gs.mcp cut on 2026-11-06 (a delete
+of a shared tool waits on gtm's own call numbers; the other four, the certificate verbs, came back
+on 2026-11-07, gtm has no brand to fold them into), and two more on 2026-11-07, whose routes the app
+still calls. So a row below reads **defined (served)** where the two differ, and a mount's count is
+what it serves.
 
 ## mcp.linkedin: 12 mounts / 190 tools
 
@@ -160,14 +162,22 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 4 mounts / 75 tools defined, 46 served
+## mcp.id: 4 mounts / 75 tools defined, 48 served
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
 | identity | `/mcp/id/identity` | users (2 defined, 1 served), teams (6 defined, 4 served), team_members (6 defined, 5 served), sessions (2 defined, 0 served) | 10 | ✅ |
 | access | `/mcp/id/access` | api_keys (7 defined, 3 served), oauth_clients (5 defined, 0 served), oauth_authorizations (3 defined, 2 served), account_shares (5) | 10 | ✅ |
-| billing | `/mcp/id/billing` | billing_products (1 defined, 0 served), billing_subscriptions (14 defined, 9 served), billing_transactions (4 defined, 3 served), billing_payment_methods (3 defined, 2 served) | 14 | ✅ |
-| platform | `/mcp/id/platform` | notifications (4 defined, 3 served), ssl_certificates (7 defined, 3 served), support_requests (3), api_requests (2), media_uploads (1) | 12 | ✅ |
+| billing | `/mcp/id/billing` | billing_products (1 defined, 0 served), billing_subscriptions (14 defined, 7 served), billing_transactions (4 defined, 3 served), billing_payment_methods (3 defined, 2 served) | 12 | ✅ |
+| platform | `/mcp/id/platform` | notifications (4 defined, 3 served), ssl_certificates (7), support_requests (3), api_requests (2), media_uploads (1) | 16 | ✅ |
+
+2026-11-07 - id 46 served to 48, two rulings on the shared verbs. platform 12 to 16: `search_`, `get_`,
+`delete_` and `issue_ssl_certificate` are served again. GetSales cut its certificate reads because they
+ride `get_whitelabel`; gtm has no brand entity, so that fold is GetSales's alone and create, update,
+issue, poll and renew work as one door here. billing 14 to 12: `preview_billing_subscription_change`
+(now the first call of `change_billing_subscription`, `previewRoute` on the tool, one door for the money)
+and `get_billing_subscription_update_payment_method_link` (`get_billing_payment_method_add_link` takes
+`subscription_sid`) are `surface: api`; the app calls both routes, so they stay.
 
 2026-11-06 - id 75 served to 46: 29 tools are REST only (`surface: api`), the shared contract with
 gs.mcp (MCP_SURFACE_V2.md section 7 of the getsales umbrella, where the same verbs left the registry
@@ -180,10 +190,8 @@ panel). access 20 to 10: `create_api_key`, `update_api_key`, `rotate_api_key`, `
 (an agent must not widen its own grant). billing 22 to 14: `search_billing_products`,
 `create_billing_subscription_checkout`, `pause_` / `resume_` / `cancel_` / `undo_cancel_billing_subscription`,
 `get_billing_transactions_metrics`, `delete_billing_payment_method` (an owner's decisions behind the
-Billing page; a checkout_url outside the app is dead). platform 17 to 12: `delete_notification`,
-`search_ssl_certificates`, `get_ssl_certificate`, `delete_ssl_certificate`, `issue_ssl_certificate`
-(the certificate's fold into a brand that gs.mcp owes is done in both registries or in neither; gtm
-has no brand entity, so `create`, `update` and `renew` stay). A package whose every tool is REST only
+Billing page; a checkout_url outside the app is dead). platform 17 to 12: `delete_notification` and
+the four certificate verbs that came back the next day (above). A package whose every tool is REST only
 (sessions, oauth_clients, billing_products) keeps its selector on its mount and serves nothing. The
 definitions stay in the packages and in the public OpenAPI, where their Contract line says no tool
 serves them; a delete waits on gtm's own call numbers (the one per-route sample in the umbrella,
@@ -267,9 +275,9 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **260 tools served**
-(linkedin 192 + id 46 + orchestration 20 + support 2) of 292 defined: the 32 REST-only definitions
-(surface api, 2026-11-06) are in no toolset, and `call_tool` refuses them by name.
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **262 tools served**
+(linkedin 192 + id 48 + orchestration 20 + support 2) of 292 defined: the 30 REST-only definitions
+(surface api) are in no toolset, and `call_tool` refuses them by name.
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
 service". That was wrong twice over. `support` is a `ServiceId` like the other three, and the
@@ -284,8 +292,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **49 registry packages / 292 tools defined, 260 served**, over **18 mounts + 1 facade**. By
-service: linkedin 192 (27 packages), id 75 defined and 46 served (17), orchestration 23 defined and 20
+Totals: **49 registry packages / 292 tools defined, 262 served**, over **18 mounts + 1 facade**. By
+service: linkedin 192 (27 packages), id 75 defined and 48 served (17), orchestration 23 defined and 20
 served (4), support 2 (1). Every number in this file is read off the built registry (`buildRegistry`
 over the four barrels, then `resolveMounts` over `MOUNTS`); the per-mount ones are the headroom table
 `tests/worker-boot.test.ts` prints on a green run, so re-run it rather than editing a count by hand.
@@ -293,7 +301,7 @@ over the four barrels, then `resolveMounts` over `MOUNTS`); the per-mount ones a
 2026-11-06 - linkedin 189 to 192 and scraping 24 to 25 (at cap) is this file catching up with the
 registry on the day the surface flag landed, not the surface changing: the tools arrived with the
 October and November linkedin work and were never counted here. /health counts the served registry
-(`tools: 260`) since the same day.
+(`tools: 262` today) since the same day.
 
 Remaining coverage debt is **51** routes and all of it is `gtm.service.email`. `gtm.service.linkedin`,
 `gtm.service.id` and `gtm.service.orchestration` are each at full coverage (ratchet 0, empty ledger):

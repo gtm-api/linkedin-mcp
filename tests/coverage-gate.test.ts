@@ -90,6 +90,19 @@ for (const svc of SERVICES) {
       ).toEqual([]);
     });
 
+    it('every previewRoute points at a route the backend serves', () => {
+      // The dry run is fail-open (runtime/src/middleware/preview-gate.ts): a route the
+      // backend dropped reads as "unanswered" on every preview, so what the confirm
+      // would do, the money included, would go quiet with nothing failing.
+      const missing = tools
+        .filter((t) => t.previewRoute && !oracleKeys.has(`${t.previewRoute.method} ${t.previewRoute.pathTemplate.replace(/^\//, '')}`))
+        .map((t) => `${t.name} -> ${t.previewRoute?.method} ${t.previewRoute?.pathTemplate}`);
+      expect(
+        missing,
+        `${svc.name}: these tools run their dry run on a route the backend does not serve. Repoint or drop the previewRoute (run \`pnpm oracle:refresh\` first if the fixture may be behind).`,
+      ).toEqual([]);
+    });
+
     it('uncovered routes stay within the ratchet baseline (must only decrease)', () => {
       const covered = new Set(tools.map(toolKey));
       // A null operation means the controller method carries no #[ApiMethod]:
