@@ -289,7 +289,10 @@ export default {
     //                     short-circuit result (a preview echoing its args, an
     //                     error envelope with a long field_errors map) has to
     //                     be measured too. Outermost is the only position that
-    //                     sees every result that leaves the server.
+    //                     sees every result that leaves the server. It is also
+    //                     the one link that may run the rest of the chain twice:
+    //                     a search page that does not fit is asked again at the
+    //                     size that fits, and that read spends from the limiter.
     //   makeRateLimitGate first of the gates, ahead of the free ones. A limiter
     //                     a caller can dodge by picking a tool name is not a
     //                     limiter, and worker CPU is billed whether or not the

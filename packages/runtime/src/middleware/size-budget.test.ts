@@ -428,4 +428,261 @@ describe('size-budget middleware', () => {
     expect(resultChars(out)).toBeLessThanOrEqual(48_000);
     expect(truncationOf(out)).toMatchObject({ truncated: true, tool: 'search_linkedin_accounts' });
   });
+
+  // The defect this block guards: a trimmed page kept the backend's pagination,
+  // so a loop on has_more and next_cursor lost rows without a word.
+  describe('a search page that does not fit is asked again', () => {
+    const searchTool: ToolDefinition = {
+      ...tool,
+      inputSchema: z.object({
+        page_size: z.number().optional(),
+        cursor: z.string().nullable().optional(),
+        _meta: z.any().optional(),
+      }),
+    };
+    const searchCtx: DispatchContext = { ...ctx, tool: searchTool };
+    const gate = makeSizeBudget(deps);
+
+    const paddedRow = (i: number, width: number): Record<string, unknown> => ({
+      item: { sid: `cr_pp_${String(i).padStart(12, '0')}`, notes: 'n'.repeat(width) },
+      included: {},
+    });
+    const idRow = (i: number): Record<string, unknown> => ({
+      item: { sid: `cr_pp_${String(i).padStart(12, '0')}` },
+      included: [],
+    });
+    const rowsOf = (out: ToolResult): Array<{ item: { sid: string } }> =>
+      (out.structuredContent as { items: Array<{ item: { sid: string } }> }).items;
+    const paginationOf = (out: ToolResult): { next_cursor: string | null; has_more: boolean; total_count: number } =>
+      (out.structuredContent as { pagination: { next_cursor: string | null; has_more: boolean; total_count: number } }).pagination;
+
+    /** A backend over one table: the cursor is an offset, has_more is the truth. */
+    function tableOf(rows: Array<Record<string, unknown>>) {
+      const calls: Array<Record<string, unknown>> = [];
+      const next = async (c: DispatchContext): Promise<ToolResult> => {
+        calls.push(c.args);
+        const size = typeof c.args.page_size === 'number' ? c.args.page_size : 50;
+        const offset = typeof c.args.cursor === 'string' ? Number(c.args.cursor) : 0;
+        const hasMore = offset + size < rows.length;
+        return rendered({
+          ...searchEnvelope(0),
+          items: rows.slice(offset, offset + size),
+          pagination: { next_cursor: hasMore ? String(offset + size) : null, has_more: hasMore, total_count: rows.length },
+        });
+      };
+      return { calls, next };
+    }
+
+    /** What a script does: has_more and next_cursor, and nothing else. */
+    async function walk(rows: Array<Record<string, unknown>>, pageSize: number) {
+      const table = tableOf(rows);
+      const sids: string[] = [];
+      const answers: ToolResult[] = [];
+      let cursor: string | null = null;
+      for (let guard = 0; guard < 3000; guard++) {
+        const out = await gate({ ...searchCtx, args: { page_size: pageSize, ...(cursor ? { cursor } : {}) } }, table.next);
+        answers.push(out);
+        for (const row of rowsOf(out)) sids.push(row.item.sid);
+        if (!paginationOf(out).has_more) return { sids, answers, calls: table.calls };
+        cursor = paginationOf(out).next_cursor;
+      }
+      throw new Error('the walk did not end');
+    }
+    const sidsOf = (rows: Array<Record<string, unknown>>): string[] =>
+      rows.map((row) => (row.item as { sid: string }).sid);
+
+    it('a has_more loop alone collects every row of a wide table, in order, once each', async () => {
+      const rows = Array.from({ length: 114 }, (_, i) => accountRow(i));
+      const { sids, answers } = await walk(rows, 100);
+
+      expect(sids).toEqual(sidsOf(rows));
+      for (const out of answers) expect(resultChars(out)).toBeLessThanOrEqual(48_000);
+    });
+
+    it('an ids-only walk loses nothing either: 500 thin rows are over the budget too', async () => {
+      const rows = Array.from({ length: 1200 }, (_, i) => idRow(i));
+      const { sids, answers } = await walk(rows, 500);
+
+      expect(sids).toEqual(sidsOf(rows));
+      expect(truncationOf(answers[0])).toMatchObject({ page_shortened: true });
+      expect(rowsOf(answers[0]).length).toBeGreaterThan(400);
+    });
+
+    it('rows too wide to pair still walk through, one at a time', async () => {
+      const rows = Array.from({ length: 6 }, (_, i) => paddedRow(i, 17_000));
+      const { sids, answers } = await walk(rows, 50);
+
+      expect(sids).toEqual(sidsOf(rows));
+      expect(rowsOf(answers[0])).toHaveLength(1);
+      expect(resultChars(answers[0])).toBeLessThanOrEqual(48_000);
+    });
+
+    it('a row wider than the whole budget goes out whole and flagged, and the walk goes on', async () => {
+      const rows = Array.from({ length: 3 }, (_, i) => paddedRow(i, 60_000));
+      const { sids, answers } = await walk(rows, 50);
+
+      expect(sids).toEqual(sidsOf(rows));
+      expect(rowsOf(answers[0])[0]).toEqual(rows[0]);
+      expect(truncationOf(answers[0])).toMatchObject({ truncated: false, page_shortened: true, over_budget: true, omitted: 0 });
+      expect(answers[0].content[0].text).toContain('over the budget all the same');
+    });
+
+    it('never answers has_more=false with rows missing: the report that started this', async () => {
+      const rows = Array.from({ length: 22 }, (_, i) => paddedRow(i, 2000));
+      const table = tableOf(rows);
+      const out = await gate({ ...searchCtx, args: { page_size: 100 } }, table.next);
+      const returned = rowsOf(out).length;
+
+      expect(returned).toBeLessThan(22);
+      expect(paginationOf(out)).toEqual({ next_cursor: String(returned), has_more: true, total_count: 22 });
+      expect(truncationOf(out)).toMatchObject({
+        truncated: false,
+        page_shortened: true,
+        over_budget: false,
+        source: 'mcp_runtime',
+        reason: 'response_char_budget',
+        tool: 'search_linkedin_accounts',
+        list: 'items',
+        returned,
+        omitted: 0,
+        full_page_rows: 22,
+        char_budget: 48_000,
+      });
+    });
+
+    it('says so ahead of the payload, and points at the cursor, not away from it', async () => {
+      const table = tableOf(Array.from({ length: 50 }, (_, i) => accountRow(i)));
+      const out = await gate({ ...searchCtx, args: { page_size: 50 } }, table.next);
+      const text = out.content[0].text;
+
+      expect(out.content).toHaveLength(1);
+      expect(text.startsWith('PAGE SHORTENED BY THE MCP SERVER.')).toBe(true);
+      expect(text).toContain('follow next_cursor as usual');
+      expect(text).not.toContain('Do NOT follow');
+      expect(JSON.parse(text.slice(text.indexOf('\n\n') + 2))).toEqual(out.structuredContent);
+    });
+
+    it('asks again with the same filter, sort and cursor, at the size that fit', async () => {
+      const table = tableOf(Array.from({ length: 200 }, (_, i) => accountRow(i)));
+      const args = {
+        filter: { status: { eq: 'active' } },
+        sort: { field: 'created_at', direction: 'asc' },
+        include: ['smart_limits'],
+        cursor: '10',
+        page_size: 100,
+        _meta: { user_goal: 'back up the workspace' },
+      };
+      const out = await gate({ ...searchCtx, args }, table.next);
+      const returned = rowsOf(out).length;
+
+      expect(table.calls).toHaveLength(2);
+      expect(table.calls[0]).toEqual(args);
+      expect(table.calls[1]).toEqual({ ...args, page_size: returned });
+      expect(paginationOf(out).next_cursor).toBe(String(10 + returned));
+    });
+
+    it('runs once when the page fits', async () => {
+      const table = tableOf(Array.from({ length: 3 }, (_, i) => accountRow(i)));
+      const out = await gate({ ...searchCtx, args: { page_size: 3 } }, table.next);
+
+      expect(table.calls).toHaveLength(1);
+      expect(out.structuredContent).not.toHaveProperty('truncation');
+    });
+
+    it('runs once with the budget off', async () => {
+      const off = makeSizeBudget({ ...deps, config: { ...deps.config, responseCharBudget: 0 } });
+      const table = tableOf(Array.from({ length: 50 }, (_, i) => accountRow(i)));
+      await off({ ...searchCtx, args: { page_size: 50 } }, table.next);
+
+      expect(table.calls).toHaveLength(1);
+    });
+
+    const notAskedTwice: Array<[string, Partial<ToolDefinition>]> = [
+      ['a tool that is not read-only, on the search envelope', { annotations: { ...tool.annotations, readOnlyHint: false } }],
+      ['a read-only action with a cursor', { envelope: 'action', operation: 'action' }],
+      ['a search with no page_size to ask for', { inputSchema: z.object({ _meta: z.any().optional() }) }],
+    ];
+    it.each(notAskedTwice)('never runs %s twice: it keeps the trimmed answer and the recipe', async (_name, change) => {
+      const table = tableOf(Array.from({ length: 100 }, (_, i) => accountRow(i)));
+      const out = await gate({ ...searchCtx, tool: { ...searchTool, ...change }, args: { page_size: 100 } }, table.next);
+
+      expect(table.calls).toHaveLength(1);
+      expect(truncationOf(out)).toMatchObject({ truncated: true });
+      expect(out.content[0].text).toContain('Do NOT follow pagination.next_cursor');
+    });
+
+    it('never scrapes twice: a paid page under result.rows keeps the trimmed answer and the recipe', async () => {
+      let call = 0;
+      const scrape: ToolDefinition = { ...searchTool, name: 'scrape_linkedin_search_people', envelope: 'action', operation: 'action' };
+      const out = await gate({ ...searchCtx, tool: scrape, args: { page_size: 100 } }, async () => {
+        call += 1;
+        return rendered(scrapeEnvelope(1000));
+      });
+
+      expect(call).toBe(1);
+      expect(truncationOf(out)).toMatchObject({ truncated: true, list: 'result.rows' });
+      expect(out.content[0].text).toContain('Do NOT page on from result.paging');
+    });
+
+    it('a refused second read goes out as the refusal, never as half a page', async () => {
+      const table = tableOf(Array.from({ length: 100 }, (_, i) => accountRow(i)));
+      const refusal: ToolResult = { content: [{ type: 'text', text: 'rate_limited: retry in 12 s' }], isError: true };
+      let call = 0;
+      const out = await gate({ ...searchCtx, args: { page_size: 100 } }, async (c) => (++call === 1 ? table.next(c) : refusal));
+
+      expect(call).toBe(2);
+      expect(out).toEqual(refusal);
+    });
+
+    it('a backend that ignores page_size leaves the first answer and its recipe standing', async () => {
+      const answer = rendered(searchEnvelope(50));
+      let call = 0;
+      const out = await gate({ ...searchCtx, args: { page_size: 50 } }, async () => {
+        call += 1;
+        return answer;
+      });
+
+      expect(call).toBe(2);
+      expect(truncationOf(out)).toMatchObject({ truncated: true, rows_on_this_page: 50 });
+      expect(rowsOf(out).length).toBeLessThan(50);
+    });
+
+    it('rows that grew between the two reads go out whole and flagged, with their cursor', async () => {
+      const table = tableOf(Array.from({ length: 100 }, (_, i) => paddedRow(i, 2000)));
+      let call = 0;
+      const out = await gate({ ...searchCtx, args: { page_size: 100 } }, async (c) => {
+        call += 1;
+        if (call === 1) return table.next(c);
+        const size = c.args.page_size as number;
+        return rendered({
+          ...searchEnvelope(0),
+          items: Array.from({ length: size }, (_, i) => paddedRow(i, 6000)),
+          pagination: { next_cursor: String(size), has_more: true, total_count: 100 },
+        });
+      });
+
+      expect(call).toBe(2);
+      expect(resultChars(out)).toBeGreaterThan(48_000);
+      expect(paginationOf(out).next_cursor).toBe(String(rowsOf(out).length));
+      expect(truncationOf(out)).toMatchObject({ truncated: false, page_shortened: true, over_budget: true });
+    });
+
+    it('logs the second read, with no row and no token in the line', async () => {
+      const events: Array<Record<string, unknown>> = [];
+      const logged = makeSizeBudget({ ...deps, logger: { info: (e) => events.push(e), error() {} } });
+      const table = tableOf(Array.from({ length: 50 }, (_, i) => accountRow(i)));
+      const out = await logged({ ...searchCtx, args: { page_size: 50 } }, table.next);
+
+      expect(events).toEqual([
+        {
+          trace_id: 'trace',
+          event: 'page_shortened',
+          tool: 'search_linkedin_accounts',
+          full_page_rows: 50,
+          rows: rowsOf(out).length,
+          full_response_chars: expect.any(Number),
+        },
+      ]);
+    });
+  });
 });

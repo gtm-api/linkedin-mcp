@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import worker from './index';
 import { MOUNTS } from './mounts.config';
 import type { Env } from './env';
@@ -273,5 +273,76 @@ describe('the healthy path still serves', () => {
   it('still answers the CORS preflight', async () => {
     const res = await worker.fetch(new Request(`${ORIGIN}${MOUNT}`, { method: 'OPTIONS' }), asShipped());
     expect(res.status).toBe(204);
+  });
+});
+
+// The whole chain, through the real worker: what a client that loops on has_more
+// and next_cursor gets, and what the backend is asked. The cases of the re-ask
+// itself are in packages/runtime/src/middleware/size-budget.test.ts.
+describe('a search page over the answer budget', () => {
+  const token = jwt({ iss: ISSUER, exp: inAnHour(), access_identity: { actor_type: 'user', actor_sid: 'us_mb_1', team_sid: 'ts_tm_1' } });
+  const ROWS = Array.from({ length: 30 }, (_, i) => ({ item: { sid: `row_${String(i).padStart(4, '0')}`, notes: 'n'.repeat(3000) }, included: {} }));
+
+  const callTool = (env: Env, bearer: string, mount: string, name: string, args: Record<string, unknown>) =>
+    worker.fetch(
+      new Request(`${ORIGIN}${mount}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${bearer}` },
+        body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name, arguments: args } }),
+      }),
+      env,
+    );
+
+  /** A backend over one list: the cursor is an offset, has_more is the truth. */
+  const backend = () =>
+    vi.fn(async (_url: string, init: RequestInit) => {
+      const asked = JSON.parse(String(init.body)) as { page_size: number; cursor?: string };
+      const offset = Number(asked.cursor ?? 0);
+      const hasMore = offset + asked.page_size < ROWS.length;
+      return new Response(
+        JSON.stringify({
+          success: true,
+          operation: 'search',
+          items: ROWS.slice(offset, offset + asked.page_size),
+          pagination: { next_cursor: hasMore ? String(offset + asked.page_size) : null, has_more: hasMore, total_count: ROWS.length },
+          applied_filters: {},
+          includes: [],
+          meta: {},
+        }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      );
+    });
+
+  const entries: Array<[string, string, string, (args: Record<string, unknown>) => Record<string, unknown>]> = [
+    ['on its mount', '/mcp/linkedin/accounts', 'search_linkedin_accounts', (args) => args],
+    ['through the facade', '/mcp', 'call_tool', (args) => ({ name: 'search_linkedin_accounts', arguments: args })],
+  ];
+
+  it.each(entries)('a has_more loop collects every row %s', async (_how, mount, name, wrap) => {
+    const fetchSpy = backend();
+    vi.stubGlobal('fetch', fetchSpy);
+    try {
+      const sids: string[] = [];
+      let cursor: string | null = null;
+      for (let guard = 0; guard < 60; guard++) {
+        const res = await callTool(healthy(), token, mount, name, wrap({ page_size: 30, ...(cursor ? { cursor } : {}) }));
+        const result = (await body(res)).result as unknown as {
+          isError?: boolean;
+          structuredContent: { items: Array<{ item: { sid: string } }>; pagination: { has_more: boolean; next_cursor: string | null } };
+        };
+        expect(result.isError).not.toBe(true);
+        sids.push(...result.structuredContent.items.map((row) => row.item.sid));
+        if (!result.structuredContent.pagination.has_more) break;
+        cursor = result.structuredContent.pagination.next_cursor;
+      }
+      expect(sids).toEqual(ROWS.map((row) => row.item.sid));
+
+      // The page that did not fit, then the same call at the size that fit.
+      const [first, second] = fetchSpy.mock.calls.map(([, init]) => JSON.parse(String(init.body)) as Record<string, unknown>);
+      expect(first.page_size).toBe(30);
+      expect(second.page_size).toBeLessThan(30);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

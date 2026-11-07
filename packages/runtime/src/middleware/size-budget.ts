@@ -1,4 +1,4 @@
-import type { RuntimeDeps, ToolResult } from '../types';
+import type { RuntimeDeps, ToolDefinition, ToolResult } from '../types';
 import type { ToolMiddleware } from '../chain';
 
 // Response size budget.
@@ -20,6 +20,8 @@ import type { ToolMiddleware } from '../chain';
 //      bytes. Losing indentation loses nothing, so it is free and it is silent.
 //   2. Trim the data page. Rows come off the END of the list, never sampled and
 //      never reordered, and the result SAYS how many went and how to get them.
+//      A search page is then asked again at the size that fits, so it goes out
+//      whole, with its own cursor (the re-ask, at the bottom of this file).
 //   3. Nothing left to drop losslessly. Return the payload whole, flagged
 //      `over_budget`, and say which knob shrinks it. Blowing the budget while
 //      admitting it beats quietly deleting fields out of a single record.
@@ -134,9 +136,36 @@ interface TruncationBlock extends Record<string, unknown> {
   over_budget: boolean;
   source: 'mcp_runtime';
   reason: 'response_char_budget';
+  list: string | null;
+  returned: number | null;
   char_budget: number;
   full_response_chars: number;
   how_to_get_the_rest: string;
+}
+
+/**
+ * What renders an envelope back into this result, with an optional notice ahead
+ * of it. The text block is ours exactly when it is renderSuccess's pretty print
+ * of the same envelope. When it is prose plus a structured payload (the preview
+ * gate), the prose is kept verbatim and the notice is prepended as its own block
+ * instead.
+ */
+function rendererOf(
+  result: ToolResult,
+  structured: Record<string, unknown>,
+): (envelope: Record<string, unknown>, notice: string | null) => ToolResult {
+  const ownsText =
+    result.content.length === 1 && result.content[0].text === JSON.stringify(structured, null, 2);
+
+  return (envelope, notice) => {
+    const json = JSON.stringify(envelope);
+    const content = ownsText
+      ? [{ type: 'text' as const, text: notice ? `${notice}\n\n${json}` : json }]
+      : notice
+        ? [{ type: 'text' as const, text: notice }, ...result.content]
+        : result.content;
+    return { ...result, content, structuredContent: envelope };
+  };
 }
 
 /**
@@ -154,22 +183,7 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
   // sentence would corrupt the instruction the agent is meant to follow.
   if (!structured) return result;
 
-  // Whether this middleware owns the text block: true exactly when the block is
-  // renderSuccess's pretty print of the same envelope. When it is prose plus a
-  // structured payload (the preview gate), the prose is kept verbatim and the
-  // notice is prepended as its own block instead.
-  const ownsText =
-    result.content.length === 1 && result.content[0].text === JSON.stringify(structured, null, 2);
-
-  const build = (envelope: Record<string, unknown>, notice: string | null): ToolResult => {
-    const json = JSON.stringify(envelope);
-    const content = ownsText
-      ? [{ type: 'text' as const, text: notice ? `${notice}\n\n${json}` : json }]
-      : notice
-        ? [{ type: 'text' as const, text: notice }, ...result.content]
-        : result.content;
-    return { ...result, content, structuredContent: envelope };
-  };
+  const build = rendererOf(result, structured);
 
   // ── Lever 1: compact render, nothing lost, nothing announced ──────────────
   const compacted = build(structured, null);
@@ -266,6 +280,84 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
   return build(trimmedAt(kept, overBudget), noticeAt(kept, overBudget));
 }
 
+// ── The re-ask ───────────────────────────────────────────────────────────────
+// A trimmed page's pagination is still the backend's, and it describes the rows
+// the backend sent, not the rows that survived: has_more says false with rows
+// missing and next_cursor resumes past them. The notice warns about that, and a
+// model reads the notice. A script reads has_more, loses rows and never knows: a
+// client walking by cursor over wide rows keeps about one row in ten, and an
+// ids-only walk at page_size 500 loses 67 ids of every 500.
+//
+// Only the backend can mint the cursor of a shorter page, so a search page is
+// asked again at the size that fits and THAT page goes out whole: has_more and
+// next_cursor are the truth about its rows, and a plain cursor loop collects
+// everything. Its price is one more read on a page that did not fit, which also
+// spends from the rate limit, since the limiter sits inside this middleware.
+//
+// Only a read-only tool on the search envelope with a page_size qualifies: a
+// second read of our own tables changes nothing and spends no bucket. The
+// get_my_latest_* tools sit on the same envelope but ask LinkedIn, and a scrape
+// or an enrich page is a fresh paid call each time, so those keep the trimmed
+// answer and the recipe.
+
+/** The trimmed answer's block when this page may be asked again, else null. */
+function reaskable(
+  tool: ToolDefinition,
+  trimmed: ToolResult,
+): (TruncationBlock & { returned: number }) | null {
+  if (tool.envelope !== 'search' || !tool.annotations.readOnlyHint) return null;
+  if (!('page_size' in tool.inputSchema.shape)) return null;
+  const structured = trimmed.structuredContent;
+  if (!structured || !hasCursor(structured)) return null;
+  const truncation = structured.truncation as TruncationBlock | undefined;
+  if (!truncation?.truncated || truncation.list !== 'items' || truncation.returned === null) return null;
+  return truncation as TruncationBlock & { returned: number };
+}
+
+/**
+ * The page asked again, whole. It is not trimmed a second time: its rows fit a
+ * moment ago with a longer notice, so a page over budget here means they grew
+ * between the two reads, and blowing the budget while admitting it beats a wrong
+ * cursor. The same path carries one row wider than the whole budget.
+ */
+function shortenedPage(page: ToolResult, first: TruncationBlock, budget: number): ToolResult {
+  const structured = page.structuredContent as Record<string, unknown>;
+  const returned = (structured.items as unknown[]).length;
+  const how =
+    `pagination describes these ${returned} rows, so nothing is skipped: follow next_cursor as usual, and ` +
+    `has_more says whether rows remain. Asking page_size: ${returned} on the next call spares this server the ` +
+    "second read, and dropping entries from 'include' shrinks every row and lets more of them fit.";
+
+  const block = (overBudget: boolean): TruncationBlock => ({
+    truncated: false,
+    page_shortened: true,
+    over_budget: overBudget,
+    source: 'mcp_runtime',
+    reason: 'response_char_budget',
+    tool: first.tool,
+    list: 'items',
+    returned,
+    omitted: 0,
+    full_page_rows: first.rows_on_this_page,
+    char_budget: budget,
+    full_response_chars: first.full_response_chars,
+    how_to_get_the_rest: how,
+  });
+  const notice =
+    `PAGE SHORTENED BY THE MCP SERVER. The full page was ${String(first.rows_on_this_page)} rows and ` +
+    `${first.full_response_chars} chars against this server's ${budget}-char tool-result budget, so this answer ` +
+    `is a page of ${returned} rows.\n${how}`;
+
+  const build = rendererOf(page, structured);
+  const fitting = build({ ...structured, truncation: block(false) }, notice);
+  if (resultChars(fitting) <= budget) return fitting;
+  return build(
+    { ...structured, truncation: block(true) },
+    `${notice}\nThis page is over the budget all the same, and nothing was dropped from it. ` +
+      "Drop entries from 'include': the rows themselves are what is oversized.",
+  );
+}
+
 /**
  * Size-budget middleware. Outermost link in the chain, so EVERY result that
  * leaves this server is measured: dispatch payloads, the preview gate's
@@ -274,7 +366,30 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
  */
 export function makeSizeBudget(deps: RuntimeDeps): ToolMiddleware {
   return async (ctx, next) => {
-    const result = await next(ctx);
-    return applySizeBudget(result, deps.config.responseCharBudget, ctx.tool.name);
+    const budget = deps.config.responseCharBudget;
+    const trimmed = applySizeBudget(await next(ctx), budget, ctx.tool.name);
+    const first = reaskable(ctx.tool, trimmed);
+    if (!first) return trimmed;
+
+    const page = await next({ ...ctx, args: { ...ctx.args, page_size: first.returned } });
+
+    // A refusal (the rate limit, a backend error) goes out as what it is: the
+    // caller retries, where half a page with a wrong cursor would lose rows.
+    if (page.isError) return applySizeBudget(page, budget, ctx.tool.name);
+
+    // A backend that ignored page_size answered the page that did not fit, so
+    // the first answer and its recipe are still the honest ones.
+    const rows = page.structuredContent?.items;
+    if (!Array.isArray(rows) || rows.length > first.returned) return trimmed;
+
+    deps.logger.info({
+      trace_id: ctx.scope.traceId,
+      event: 'page_shortened',
+      tool: ctx.tool.name,
+      full_page_rows: first.rows_on_this_page,
+      rows: rows.length,
+      full_response_chars: first.full_response_chars,
+    });
+    return shortenedPage(page, first, budget);
   };
 }
