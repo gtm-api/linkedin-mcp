@@ -25,6 +25,11 @@
 // gated with (can_act_linkedin_connections); the accounts mount sits at 29 of
 // its 29. The exclusion on the accounts mount, the tool selector on the network
 // mount and the tool's own `mount` field are the whole binding.
+//
+// 2026-11-04: invite_linkedin_members_to_follow_company follows it exactly (its
+// route is /api/linkedin-accounts/{sid}/invite-to-follow-company, the same
+// batch with a company page as the inviter, the same permission), declared
+// here and riding on /mcp/linkedin/network, 23 -> 24 of its 25.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -820,6 +825,21 @@ const EventInviteTarget = z.object({
     .describe('Public profile slug, the vanity name in the profile URL. A nickname-ONLY target costs one profile read (self_account_sync) before the batch; next to ln_id it is ignored, the id is the address.'),
 }).describe('One person to invite; ln_id or nickname (a Sales Navigator id is not an address for an event invitation).');
 
+// The page-follow invitation (2026-11-04) takes the same targets; only the
+// refusal wording differs.
+const CompanyFollowInviteTarget = EventInviteTarget
+  .describe('One person to invite; ln_id or nickname (a Sales Navigator id is not an address for a page-follow invitation).');
+
+const CompanyFollowInviteResult = z.object({
+  activity_log: z.object({}).passthrough()
+    .describe('The one dispatch row of the batch (linkedin-account-activity-log) per §4.12a; action_type invite_to_follow_company.'),
+  success: z.boolean()
+    .describe("The wire's own flag, mirrored: true when LinkedIn took the batch and every element it answered was 200 or 201. Always true in a 200; a false is the 409 company_follow_invite_rejected."),
+  company_ln_id: z.string().describe('The page the batch invited to, echoed.'),
+  profile_ids: z.array(z.string())
+    .describe('The member ids LinkedIn was given, resolved and deduped, in the order of the targets: a caller who addressed people by nickname learns the ids here.'),
+}).passthrough();
+
 const EventInviteResult = z.object({
   activity_log: z.object({}).passthrough()
     .describe('The one dispatch row of the batch (linkedin-account-activity-log) per §4.12a; action_type invite_to_event.'),
@@ -1537,6 +1557,32 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     }),
     outputSchema: McpActionResponse(LinkedinAccount, EventInviteResult),
     annotations: { title: 'Invite members to event', ...DANGER_IDEM },
+  },
+  {
+    ...base,
+    mount: 'linkedin.network',
+    name: 'invite_linkedin_members_to_follow_company',
+    description:
+      "Invite up to 25 members to follow a LinkedIn company page this account administers, in ONE call: the page's own \"Invite connections\", one invitation batch from the account's open LinkedIn tab, one browser round and one networking_general unit (40 a day, 180 s apart; 429 on saturation). company_ln_id is the page's numeric id, the digits of urn:li:fsd_company:<id> (the number in /company/<id>/). A target is a member id (ln_id, preferred) or a nickname; a nickname alone costs one profile read first, and a Sales Navigator id is not an address here. LinkedIn decides who may invite and be invited: the account must administer the page, it offers 1st-degree connections, and each page has a monthly budget of invitation credits (one comes back when the invitation is accepted). The answer is one flag for the batch; a false is 409 company_follow_invite_rejected with the ids sent, without saying which member was refused. A member already invited counts as success. Writes nothing locally.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/invite-to-follow-company', sidParam: 'sid' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    pacedBucket: 'networking_general',
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      sid: SID,
+      company_ln_id: z.string().regex(/^[0-9]{1,32}$/)
+        .describe("The page's numeric id: the digits of urn:li:fsd_company:<id>, the number in https://www.linkedin.com/company/<id>/ and the company_ln_id a company read answers."),
+      targets: z.array(CompanyFollowInviteTarget).min(1).max(25)
+        .describe('1 to 25 people, one batch. A member named twice is sent once.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(LinkedinAccount, CompanyFollowInviteResult),
+    annotations: { title: 'Invite members to follow company page', ...DANGER_IDEM },
   },
   {
     ...base,

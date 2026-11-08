@@ -39,6 +39,9 @@ export const MOUNTS: MountConfig[] = [
       // this mount sits at 29 of its 29, and an agent inviting connections to an
       // event is doing network work, not account administration.
       { kind: 'exclude', name: 'invite_linkedin_members_to_event' },
+      // The page-follow invitation batch (2026-11-04) rides with it, for the
+      // same reasons: the same wire, the same permission, network work.
+      { kind: 'exclude', name: 'invite_linkedin_members_to_follow_company' },
     ],
     // 26 -> 29 on 2026-09-22: set_linkedin_account_my_position (the About
     // section and the two profile images ride edit_linkedin_account_my_profile,
@@ -167,7 +170,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/network',
     name: 'gtm-linkedin-network',
     instructions:
-      'GTM LinkedIn network graph: connections, connection requests, invitations, followers, and inviting connections to a LinkedIn event. Outward actions (send request, withdraw, accept, ignore, remove, invite to event) are protected (preview → confirm).',
+      'GTM LinkedIn network graph: connections, connection requests, invitations, followers, and inviting connections to a LinkedIn event or to follow a company page. Outward actions (send request, withdraw, accept, ignore, remove, invite to event, invite to follow a page) are protected (preview → confirm).',
     selectors: [
       p('linkedin_connections'),
       p('linkedin_connection_requests'),
@@ -177,6 +180,9 @@ export const MOUNTS: MountConfig[] = [
       // invite-to-event and that file is the research home), mounted here with
       // the other invitation verbs; 22 -> 23 of the default 25 on 2026-10-08.
       { kind: 'tool', name: 'invite_linkedin_members_to_event' },
+      // The page-follow invitation batch (2026-11-04), the same binding;
+      // 23 -> 24 of the default 25.
+      { kind: 'tool', name: 'invite_linkedin_members_to_follow_company' },
     ],
     maxTools: 25,
     facade: 'none',
@@ -185,7 +191,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/content',
     name: 'gtm-linkedin-content',
     instructions:
-      'GTM LinkedIn content authoring and engagement: publish a post, comment on a post, react to a post, endorse or unendorse a connection\'s skill by id, from one of the team accounts. Posts are addressed by activity URN and need no prior tracking. Every verb is protected (preview then confirm). Media for a post goes as an https url we download (request_media_upload on the platform mount gives one: a link the user opens to drop the file, or an upload from a shell) or inline as base64; never type out base64 of a pasted image. Reading a post and who engaged with it lives on the scraping and enrichment mounts.',
+      'GTM LinkedIn content authoring and engagement: publish a post, comment on a post, react to a post, endorse or unendorse a connection\'s skill by id, from one of the team accounts. Posts are addressed by activity URN and need no prior tracking. Every verb is protected (preview then confirm). Media for a post goes as an https url we download (request_media_upload on the platform mount gives one for a picture or a video: a link the user opens to drop the file, or an upload from a shell; no slot holds a PDF, so a document needs a public https url of its own) or inline as base64; never type out base64 of a pasted image. Reading a post and who engaged with it lives on the scraping and enrichment mounts.',
     selectors: [
       p('linkedin_posting'),
       // The explicit-skill endorse pair from the linkedin_accounts package (see

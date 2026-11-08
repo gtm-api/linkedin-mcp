@@ -57,7 +57,7 @@ const ENTITY_URN = z.string().min(1).max(512)
 // reply's the comment it answers, a repost's the post it reposts; a post's is
 // where it lands (its author's feed, a company page, a group), and its slot
 // never splits a key. Without a key the same words at the same place are a
-// repeat for an hour after they went out (a post's pictures or video too). A
+// repeat for an hour after they went out (a post's pictures, video or document too). A
 // lost answer is a 409 send_outcome_unknown naming send_decisive_at (a 503
 // "retry shortly" before round 5), and LinkedIn is read for the send: the post's
 // comments, the account's own comments or feed, a page's feed (it shows a page
@@ -145,6 +145,24 @@ const LinkedinPostingImageValue = z.object({
   alt_text: z.string().nullable().optional().describe('Accessibility alt text; may be empty.'),
 });
 
+// One PDF: LinkedIn's document post (2026-11-06; the capture and what was measured
+// live are in linkedinApiSdk/src/posts/createPostDocumentExample.ts). There is no
+// file_type and no file_byte_size: it is PDF only, and the size always comes from
+// the decoded bytes. The title is LinkedIn's rule: a share without one creates
+// nothing. No upload slot holds a PDF (a PDF slot is refused while that bucket is
+// public), so the url arm means any public https address. A document into a group
+// is not verified on the wire.
+const LinkedinPostingDocumentValue = z.object({
+  title: z.string().min(1)
+    .describe('The title LinkedIn shows on the document. Required and never blank: LinkedIn creates nothing without one, so a blank title is a 422 here.'),
+  file_base64: z.string().min(1).optional()
+    .describe('The PDF bytes: a data:application/pdf;base64,<...> URL or bare base64. Exactly one of file_base64 or url. Typed by content before anything is dispatched: anything but a PDF is a 422 on this member (document_format_unrecognized). Base64 typed out by hand is the usual source of damage: prefer url, or have a tool encode the file.'),
+  url: z.string().url().max(2048).optional()
+    .describe('An https URL of the PDF file, downloaded by us (public hosts only, the same 35 MB post budget, typed by content). Exactly one of file_base64 or url. A request_media_upload file_url does not hold a PDF, so a local PDF needs a public https url of your own or base64 from a tool. A link to a web page that shows the PDF is refused (document_format_unrecognized); fetch problems are media_url_invalid / media_url_host_forbidden / media_url_fetch_failed / media_too_large.'),
+  file_name: z.string().min(1).max(255).optional()
+    .describe('The name the file is uploaded under. Its extension and alphabet do not matter to LinkedIn; omit it and one is supplied.'),
+});
+
 // One mention of a post: a member OR a company page, exactly one of the two ids
 // per entry (the backend refuses both and neither, as the node's builder does).
 // A company page (2026-10-29) rides as LinkedIn's companyName text attribute;
@@ -168,17 +186,17 @@ const ACTIVITY_LOG = z.object({}).passthrough()
   .describe('Full dispatch row (linkedin-account-activity-log) per §4.12a. Poll it there by sid for the terminal outcome.');
 
 const CreatePostResult = z.object({
-  activity_urn: z.string().nullable().describe('The published post as an activity urn. Null for a scheduled post, and for a video post LinkedIn had not finished transcoding within the node\'s ~15 s read-back (lifecycle_state MEDIA_PROCESSING): read it later with enrich_linkedin_post_details by post_urn.'),
-  post_urn: z.string().nullable().describe('The same post as urn:li:share:<id>, or urn:li:ugcPost:<id> for a video post.'),
+  activity_urn: z.string().nullable().describe('The published post as an activity urn. Null for a scheduled post, and for a video or document post LinkedIn had not finished processing within the node\'s ~15 s read-back (lifecycle_state MEDIA_PROCESSING): read it later with enrich_linkedin_post_details by post_urn.'),
+  post_urn: z.string().nullable().describe('The same post as urn:li:share:<id>, or urn:li:ugcPost:<id> for a video or document post.'),
   url: z.string().nullable().describe('Public post URL, query string already stripped. Null when LinkedIn answered none (scheduled, media still processing).'),
-  created_at: z.string().nullable().describe('Publication time, ISO 8601 (from the post id while a video post is still processing).'),
-  text: z.string().describe('The body LinkedIn actually published, read back off the wire. Empty for an image-only post and for a video post still processing.'),
-  lifecycle_state: z.string().nullable().describe('The share\'s lifecycle state: PUBLISHED (LinkedIn said so, or the node\'s read-back found the post live within ~15 s); MEDIA_PROCESSING for a video post still transcoding past that (the post exists, activity_urn / url come later); null when the answer named no state (a scheduled post).'),
+  created_at: z.string().nullable().describe('Publication time, ISO 8601 (from the post id while a video or document post is still processing).'),
+  text: z.string().describe('The body LinkedIn actually published, read back off the wire. Empty for a post of media alone and for a video or document post still processing.'),
+  lifecycle_state: z.string().nullable().describe('The share\'s lifecycle state: PUBLISHED (LinkedIn said so, or the node\'s read-back found the post live within ~15 s); MEDIA_PROCESSING for a video or document post LinkedIn is still processing past that (the post exists, activity_urn / url come later); null when the answer named no state (a scheduled post).'),
   activity_log: ACTIVITY_LOG,
   idempotent_replay: z.boolean().optional()
     .describe('true when this answers a repeat (under the key, or without one the same words at the same place) with what the first send made: nothing was sent now.'),
   content_differs: z.boolean().optional()
-    .describe('With idempotent_replay: true when this request\'s words (or a post\'s pictures or video) differ from those of the send that made it.'),
+    .describe('With idempotent_replay: true when this request\'s words (or a post\'s pictures, video or document) differ from those of the send that made it.'),
 }).passthrough();
 
 const CommentResult = z.object({
@@ -187,7 +205,7 @@ const CommentResult = z.object({
   idempotent_replay: z.boolean().optional()
     .describe('true when this answers a repeat (under the key, or without one the same words at the same place) with what the first send made: nothing was sent now.'),
   content_differs: z.boolean().optional()
-    .describe('With idempotent_replay: true when this request\'s words (or a post\'s pictures or video) differ from those of the send that made it.'),
+    .describe('With idempotent_replay: true when this request\'s words (or a post\'s pictures, video or document) differ from those of the send that made it.'),
 }).passthrough();
 
 const DeletePostResult = z.object({
@@ -315,7 +333,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
       idempotent_replay: z.boolean().optional()
         .describe('true when this answers a repeat (under the key, or without one the same words at the same place) with what the first send made: nothing was sent now.'),
       content_differs: z.boolean().optional()
-        .describe('With idempotent_replay: true when this request\'s words (or a post\'s pictures or video) differ from those of the send that made it.'),
+        .describe('With idempotent_replay: true when this request\'s words (or a post\'s pictures, video or document) differ from those of the send that made it.'),
     }).passthrough()),
     annotations: { title: 'Repost LinkedIn post', ...DANGER },
   },
@@ -323,7 +341,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_post',
     description:
-      'Publish ONE feed post - as the member, AS a company page it administers (author_organization_id), or INTO a group (group_id) - now or scheduled (scheduled_at) - wire create-post. Public; retract with delete_linkedin_post, or delete a scheduled draft with delete_linkedin_scheduled_post. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when media is attached; no text, images or video at all is a 422. Media: up to 20 images XOR one video, each base64 or an https url, 35 MB total. Answers the published post (urn, url, time, body) and the activity-log row. '
+      'Publish ONE feed post - as the member, AS a company page it administers (author_organization_id), or INTO a group (group_id) - now or scheduled (scheduled_at) - wire create-post. Public; retract with delete_linkedin_post, or delete a scheduled draft with delete_linkedin_scheduled_post. Identity-bound: linkedin_account_sid REQUIRED, spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4), saturation returns 429. text is REQUIRED as a key but may be an EMPTY string when media is attached; no text or media at all is a 422. Media: up to 20 images XOR one video XOR one PDF document, each base64 or https url, 35 MB total. Answers the published post (urn, url, time, body) and the activity-log row. '
       + sendOnce('place (your feed, the page or the group; a new scheduled_at is the same post)')
       + ' 409 post_not_created is send_outcome unknown: repeat after retry_after.',
     toolClass: 'typical',
@@ -338,9 +356,9 @@ export const linkedinPostingTools: ToolDefinition[] = [
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       text: z.string().max(3000)
-        .describe('Post body, always present. Empty is legal ONLY alongside an image. 3000 is LinkedIn\'s own cap, refused here rather than burning a posting slot. Published byte for byte, blank lines included, and so is each image\'s alt_text.'),
+        .describe('Post body, always present. Empty is legal ONLY alongside media (an image, a video or a document). 3000 is LinkedIn\'s own cap, refused here rather than burning a posting slot. Published byte for byte, blank lines included, and so is each image\'s alt_text.'),
       images: z.array(LinkedinPostingImageValue).max(20).optional()
-        .describe('Up to 20 images (the node\'s own cap; array order = carousel order). Mutually exclusive with video. The decoded bytes across ALL media must stay under 35 MB in total; over that is a 422, because a bigger body is refused by the node\'s JSON parser as a bare 413 with no response envelope. For 2+ images the backend supplies the account\'s own member id to the wire itself - no profile_id field exists here. Uploads are sequential node-side, so many large images make a SLOW synchronous call: the post can publish after your client times out, so repeat it only as the same request under the same client_reference, which is answered with the post (or held while LinkedIn is read), never published twice.'),
+        .describe('Up to 20 images (the node\'s own cap; array order = carousel order). Mutually exclusive with video and document. The decoded bytes across ALL media must stay under 35 MB in total; over that is a 422, because a bigger body is refused by the node\'s JSON parser as a bare 413 with no response envelope. For 2+ images the backend supplies the account\'s own member id to the wire itself - no profile_id field exists here. Uploads are sequential node-side, so many large images make a SLOW synchronous call: the post can publish after your client times out, so repeat it only as the same request under the same client_reference, which is answered with the post (or held while LinkedIn is read), never published twice.'),
       visibility: LinkedinPostingVisibility.optional()
         .describe('ANYONE (the node default) or CONNECTIONS_ONLY. Omit to let the node apply its own default. Mutually exclusive with group_id.'),
       allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional()
@@ -354,7 +372,9 @@ export const linkedinPostingTools: ToolDefinition[] = [
         file_name: z.string().min(1).max(255).nullable().optional(),
         file_type: z.string().min(1).max(255).nullable().optional(),
       }).optional()
-        .describe('ONE video, image-shaped minus alt_text. Mutually exclusive with images (LinkedIn does not mix them in a share - 422 here). Shares the 35 MB media budget. Plays 3 seconds to 15 minutes, as its MP4 / MOV / WEBM container states (LinkedIn\'s own rule, checked here before the upload: 422 video_duration on the member otherwise; a container that states no length passes). The upload runs through the browser (one PUT up to 10 MiB, 4 MiB parts above it) and is SLOW: the synchronous call can outlive your client timeout while the post still publishes, so repeat it only under the same client_reference.'),
+        .describe('ONE video, image-shaped minus alt_text. Mutually exclusive with images and document (LinkedIn does not mix them in a share - 422 here). Shares the 35 MB media budget. Plays 3 seconds to 15 minutes, as its MP4 / MOV / WEBM container states (LinkedIn\'s own rule, checked here before the upload: 422 video_duration on the member otherwise; a container that states no length passes). The upload runs through the browser (one PUT up to 10 MiB, 4 MiB parts above it) and is SLOW: the synchronous call can outlive your client timeout while the post still publishes, so repeat it only under the same client_reference.'),
+      document: LinkedinPostingDocumentValue.optional()
+        .describe('ONE PDF, posted as a LinkedIn document the feed pages through. PDF only, up to 300 pages, typed by its content, never by a file name or a Content-Type. Exactly one of file_base64 or url. Shares the 35 MB media budget. Mutually exclusive with images and video (LinkedIn does not mix them in a share - 422 here). A request_media_upload file_url does not hold a PDF. A file LinkedIn cannot process (one that asks for a password, damaged, over 300 pages) is a 409 linkedin_refused with plugin_error_code linkedin_422 and send_outcome not_sent: nothing is published, and a repeat of the same file is refused the same way. A document into a group (group_id) is not verified on the wire. The upload runs through the browser and a big file is SLOW: the synchronous call can outlive your client timeout while the post still publishes, so repeat it only under the same client_reference.'),
       scheduled_at: z.string().optional()
         .describe('Schedule the post instead of publishing now: ISO 8601 with timezone, must be in the future (a strictly-past time is a 422; within a minute of now is passed through for LinkedIn to judge). A SCHEDULED share legitimately answers with null activity_urn/url - post_urn is the handle. Read and clean the queue with get_linkedin_scheduled_posts / delete_linkedin_scheduled_post. Scheduling is LinkedIn-side: the draft lives in ITS queue, nothing is stored here. The slot is no part of a key: a retry under the same client_reference that computes a new scheduled_at is the same post. Without a key the slot tells two posts apart.'),
       mentions: z.array(LinkedinPostingMention).optional()
@@ -368,7 +388,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
       client_reference: postingKey(
         'post',
         'where it lands: your own feed, the company page of author_organization_id or the group of group_id',
-        'the same words and pictures or video at the same place and slot',
+        'the same words and pictures, video or document at the same place and slot',
       ),
       confirmed_not_sent: CONFIRMED_NOT_SENT,
       confirmed_sent: CONFIRMED_SENT,

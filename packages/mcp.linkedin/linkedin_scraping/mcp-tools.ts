@@ -947,6 +947,8 @@ const LinkedinCommenterPreview = z.object({
   reactions_count: z.number().int().describe('SUM of every reaction bucket on the comment, not a like count.'),
   comment_permalink: z.string().nullable().describe('Public deep link to this comment.'),
   replies_count: z.number().int().describe('How many replies the comment has. A COUNT ONLY: this verb queries the post\'s comment list and fetches no replies, so there is no way to read them and no replies array to ask for.'),
+  impressions_count: z.number().int().nullable()
+    .describe('How many times LinkedIn showed the comment. LinkedIn tells it for the executing account\'s OWN comments only, so the field is null on everyone else\'s comment: null means "not ours", not zero.'),
   is_pinned: z.boolean(),
   is_edited: z.boolean(),
   is_own: z.boolean().describe('Commenter matches one of the team’s managed accounts (same rule as sync).'),
