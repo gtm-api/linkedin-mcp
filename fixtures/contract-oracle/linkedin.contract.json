@@ -132,6 +132,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "proxy_actual_country_code",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "custom_proxy",
                         "type": "Gtm\\Lib\\Common\\Microservices\\Linkedin\\AntidetectBrowser\\Values\\AntidetectBrowserCustomProxyValue|array|null",
                         "nullable": true,
@@ -312,6 +318,12 @@
                     },
                     {
                         "name": "proxy_country_code",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "proxy_actual_country_code",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -7817,10 +7829,6 @@
                 {
                     "name": "NoConnect",
                     "value": "no_connect"
-                },
-                {
-                    "name": "CountryMismatch",
-                    "value": "country_mismatch"
                 },
                 {
                     "name": "FraudFlagged",
@@ -63643,6 +63651,40 @@
             "request_class": "App\\Ops\\Requests\\OpsProxyDowntimeCheckSearchRequest",
             "rules": [
                 {
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-country-coverage/get",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "antidetectBrowserProxyCountryCoverage",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxyCountryCoverageRequest",
+            "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-downtime-checks/clear",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "clearAntidetectBrowserProxyDowntimeChecks",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxyDowntimeCheckClearRequest",
+            "rules": [],
+            "rules_reason": null
+        },
                     "field": "page",
                     "rules": [
                         "sometimes",
