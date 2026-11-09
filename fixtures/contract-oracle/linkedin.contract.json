@@ -63637,22 +63637,6 @@
         },
         {
             "method": "POST",
-            "uri": "internal/ops/antidetect-browser-proxy-downtime-checks/search",
-            "controller": "App\\Ops\\InternalOpsController",
-            "action": "searchAntidetectBrowserProxyDowntimeChecks",
-            "operation": null,
-            "mass_action": false,
-            "step_eligible": false,
-            "step_tool": null,
-            "schedule_required": false,
-            "declared_arguments": [],
-            "required_permission": null,
-            "internal": true,
-            "request_class": "App\\Ops\\Requests\\OpsProxyDowntimeCheckSearchRequest",
-            "rules": [
-                {
-        {
-            "method": "POST",
             "uri": "internal/ops/antidetect-browser-proxy-country-coverage/get",
             "controller": "App\\Ops\\InternalOpsController",
             "action": "antidetectBrowserProxyCountryCoverage",
@@ -63685,6 +63669,22 @@
             "rules": [],
             "rules_reason": null
         },
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-downtime-checks/search",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "searchAntidetectBrowserProxyDowntimeChecks",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxyDowntimeCheckSearchRequest",
+            "rules": [
+                {
                     "field": "page",
                     "rules": [
                         "sometimes",
