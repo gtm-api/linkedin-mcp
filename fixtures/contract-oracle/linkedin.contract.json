@@ -44420,6 +44420,22 @@
                     "between": null
                 },
                 {
+                    "field": "author_organization_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:~^\\d+$~"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "client_reference",
                     "rules": [
                         "sometimes",
