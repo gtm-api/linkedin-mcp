@@ -965,7 +965,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'get_linkedin_account_my_lite_profile',
-    description: "Fetch the lite self-profile of the connected account in one request: its identifiers, the name in its parts (first_name, last_name, full_name) and its own contact card, in result.data. The headline and the photo are NOT part of this read (LinkedIn does not resolve them for the account's own profile here, so they come back null): get_linkedin_account_my_full_profile carries them.",
+    description: "Fetch the lite self-profile of the connected account in two LinkedIn requests: its identifiers, the name in its parts (first_name, last_name, and full_name computed from them), the headline, the photo (picture_url, a signed link that expires) and its own contact card, in result.data. get_linkedin_account_my_full_profile carries the rest (position, company, location, counts, premium flags).",
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/{sid}/get-my-lite-profile', sidParam: 'sid' },
     operation: 'action',

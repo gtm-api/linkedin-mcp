@@ -237,48 +237,6 @@ const FeaturedItem = z.object({
 const NETWORK_DISTANCE = z.string().nullable()
   .describe("Relationship degree relative to the pinned executor account ('1st' / '2nd' / '3rd'…). Null when no linkedin_account_sid was pinned, when the payload came from a cache another account filled, or when the wire did not report one. Never a degree relative to an account you did not name.");
 
-// person-full-profile result (row 49): scalar contract tightened (incl. the
-// picture_url→avatar_url rework); network_distance rides along when attributable
-// to the pinned executor (A8, 2026-08-14). Sub-record heads stay loose: they are
-// RAW WIRE truncated heads, distinct from the dedicated methods' projected items.
-const FullProfileResult = z.object({
-  ln_member_id: z.string().nullable(),
-  ln_id: z.string().nullable(),
-  sn_id: z.string().nullable(),
-  nickname: z.string().nullable(),
-  // The name in its parts beside the one line (2026-11-10, plugin 1.8.0): absent
-  // on a body stored before that, hence optional.
-  first_name: z.string().nullable().optional(),
-  last_name: z.string().nullable().optional(),
-  full_name: z.string(),
-  network_distance: NETWORK_DISTANCE,
-  headline: z.string().nullable(),
-  position: z.string().nullable(),
-  company_name: z.string().nullable(),
-  company_public_identifier: z.string().nullable(),
-  country: z.string().nullable(),
-  location: z.string().nullable(),
-  about: z.string().nullable(),
-  avatar_url: z.string().nullable(),
-  email: z.string().nullable(),
-  phone: z.string().nullable(),
-  twitter: z.string().nullable(),
-  facebook: z.string().nullable(),
-  connections_number: z.number().nullable(),
-  followers_number: z.number().nullable(),
-  primary_language: z.string().nullable(),
-  supported_languages: z.array(z.string()),
-  has_open_profile: z.boolean().nullable(),
-  has_verified_profile: z.boolean().nullable(),
-  has_premium: z.boolean().nullable(),
-  experience: z.array(LooseItem),   // TRUNCATED raw-wire head; full list: person-experience
-  educations: z.array(LooseItem),   // raw-wire head; same data person-education projects
-  skills: z.array(LooseItem),       // TRUNCATED raw-wire head (carries wire `id`, not skill_id)
-  // No `posts` since 2026-11-03: the feed is person-posts; the head left the node's live profile read.
-  top_voices: z.array(LooseItem),   // followed Top Voices; open-ended wire shape
-  featured: z.array(LooseItem),     // pinned Featured head; raw-wire
-}).passthrough();
-
 // person-contact-info result (row 55): LinkedIn's contact card, as the wire carries it.
 const ContactInfoResult = z.object({
   // Wire shape from LinkedinContactInfoMapper::fromWireProfile: singular email,
@@ -300,20 +258,70 @@ const ContactInfoResult = z.object({
     .describe('The WeChat name and its QR links. Null when the member set none.'),
 }).passthrough();
 
+// person-full-profile result (row 49): scalar contract tightened (incl. the
+// picture_url→avatar_url rework); network_distance rides along when attributable
+// to the pinned executor (A8, 2026-08-14). Sub-record heads stay loose: they are
+// RAW WIRE truncated heads, distinct from the dedicated methods' projected items.
+const FullProfileResult = z.object({
+  ln_member_id: z.string().nullable(),
+  ln_id: z.string().nullable(),
+  sn_id: z.string().nullable(),
+  nickname: z.string().nullable(),
+  // The name in its parts (2026-11-10, plugin 1.8.0): absent on a body stored
+  // before that, hence optional. The node glues nothing since then: full_name
+  // is computed by the service, the stated line else the parts joined.
+  first_name: z.string().nullable().optional(),
+  last_name: z.string().nullable().optional(),
+  full_name: z.string().describe("The name as one line: the line the stored body states, else first_name and last_name joined; '' when unknown."),
+  network_distance: NETWORK_DISTANCE,
+  headline: z.string().nullable(),
+  position: z.string().nullable(),
+  company_name: z.string().nullable(),
+  company_public_identifier: z.string().nullable(),
+  country: z.string().nullable(),
+  location: z.string().nullable(),
+  about: z.string().nullable(),
+  avatar_url: z.string().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  twitter: z.string().nullable(),
+  facebook: z.string().nullable(),
+  contact_info: ContactInfoResult,
+  connections_number: z.number().nullable(),
+  followers_number: z.number().nullable(),
+  primary_language: z.string().nullable(),
+  supported_languages: z.array(z.string()),
+  has_open_profile: z.boolean().nullable(),
+  has_verified_profile: z.boolean().nullable(),
+  has_premium: z.boolean().nullable(),
+  experience: z.array(LooseItem),   // TRUNCATED raw-wire head; full list: person-experience
+  educations: z.array(LooseItem),   // raw-wire head; same data person-education projects
+  skills: z.array(LooseItem),       // TRUNCATED raw-wire head (carries wire `id`, not skill_id)
+  // No `posts` since 2026-11-03: the feed is person-posts; the head left the node's live profile read.
+  top_voices: z.array(LooseItem),   // followed Top Voices; open-ended wire shape
+  featured: z.array(LooseItem),     // pinned Featured head; raw-wire
+}).passthrough();
+
 // person-lite-profile result (row 48): the identifier quad, then everything else
-// the ONE wire call says about the member (2026-11-10, plugin 1.8.0). LinkedIn
-// carries the headline and the picture on the member's own record inside the
-// relationship block of that answer, so the picture comes for a 1st-degree
-// connection only and the email-required mark only while the two are not
-// connected and no invitation is pending.
+// LinkedIn's contact card answer says about the member (2026-11-10, plugin
+// 1.8.0), and the photo. LinkedIn carries the headline and a connection's photo
+// on the member's own record inside the relationship block of that answer;
+// anyone else's photo is read off the basic profile answer, one request more,
+// which also fills the headline where the first answer resolves no copy of the
+// member. The email-required mark comes only while the two are not connected and
+// no invitation is pending. The contact card is the one LinkedIn shows the
+// reading account (2026-11-10, Eugene: it is in the same answer).
 const LiteProfileResult = PersonRef.extend({
   first_name: z.string().nullable().describe('The first name as LinkedIn returns it. Null when the answer came from a body that has no name parts (a cached full profile, a body stored before 2026-11-10); never a split of full_name.'),
   last_name: z.string().nullable().describe('The last name as LinkedIn returns it. Null on the same bodies as first_name.'),
-  full_name: z.string().describe("'<first_name> <last_name>' as one line; '' when unknown."),
-  headline: z.string().nullable().describe("The profile's headline. Null on the reading account's own profile and when the member has invited that account (LinkedIn resolves no copy of the member there)."),
-  avatar_url: z.string().nullable().describe('The photo, re-hosted on our storage (a durable link). LinkedIn resolves a photo in this read for a 1st-degree connection of the reading account only; null for anyone else. For a stranger\'s photo use enrich_linkedin_person_basic_profile.'),
+  full_name: z.string().describe("The name as one line: the line the stored body states, else first_name and last_name joined; '' when unknown."),
+  headline: z.string().nullable().describe("The profile's headline. Null when LinkedIn states none for the member."),
+  avatar_url: z.string().nullable().describe('The photo, re-hosted on our storage (a durable link), for any member who shows one: a 1st-degree connection of the reading account in the same answer, anyone else one LinkedIn request more. Null when the member shows none.'),
   is_memorialized: z.boolean().nullable().describe("LinkedIn's mark on the account of a member who died (the profile reads 'In memoriam'): do not contact. Null when unknown."),
   is_email_required_to_connect: z.boolean().nullable().describe("LinkedIn asks for the member's email address before a connection request can be sent to them, as it told the reading account. Stated only while the two are not connected and no invitation is pending; null otherwise."),
+  email: z.string().nullable().describe("contact_info.email, flat, as person-full-profile carries it. Null unless LinkedIn opens it to the reading account (a 1st-degree connection)."),
+  phone: z.string().nullable().describe("The card's first MOBILE number, flat, as person-full-profile carries it; every number of any type is in contact_info.phones."),
+  contact_info: ContactInfoResult.describe("The contact card LinkedIn shows the READING account: a 1st-degree connection's email, phones and the rest, for anyone else mostly the websites. Off the shared pool, which is nobody's connection, expect the websites alone; for a connection's whole card use enrich_linkedin_person_contact_info."),
   network_distance: NETWORK_DISTANCE,
 });
 
@@ -448,7 +456,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_lite_profile',
     description:
-      "Cheapest person read, one request: existence check + full identifier resolution, plus who the person is at a glance. THE tool for turning a vanity slug (/in/…) or a bare URN into the canonical identifier quad (ln_member_id + both URNs + nickname) that every deeper enrich and stored-domain join keys on. Also returns first_name and last_name as LinkedIn holds them, the headline, is_memorialized (a deceased member's account, do not contact) and is_email_required_to_connect. avatar_url is filled only for a 1st-degree connection of the reading account; for a stranger's photo or location use enrich_linkedin_person_basic_profile. cached 24h. Pin linkedin_account_sid and network_distance carries the degree relative to that account; unpinned it is null. The connection date and the contact card are not here: check_linkedin_connection_degree and enrich_linkedin_person_contact_info answer them. Address by profile_id XOR public_identifier.",
+      "Cheapest person read: existence check + full identifier resolution, plus who the person is at a glance. THE tool for turning a vanity slug (/in/…) or a bare URN into the canonical identifier quad (ln_member_id + both URNs + nickname) that every deeper enrich and stored-domain join keys on. Also returns first_name and last_name (full_name is computed), the headline, the photo, is_memorialized (a deceased member's account, do not contact), is_email_required_to_connect and the contact card LinkedIn shows the reading account (contact_info, flat email and phone; off the shared pool mostly the websites). One LinkedIn request, two when the photo is not a 1st-degree connection's. cached 24h. Pin linkedin_account_sid and network_distance carries the degree relative to that account; unpinned it is null. The connection date: check_linkedin_connection_degree; a connection's whole card: enrich_linkedin_person_contact_info; location: enrich_linkedin_person_basic_profile. Address by profile_id XOR public_identifier.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-lite-profile' },
     operation: 'action',
@@ -465,7 +473,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_basic_profile',
     description:
-      "The middle person read, between the lite identity stub and the full dossier: name PARTS (first / last, which no other read splits out), headline, country and display location, profile and background imagery, and the premium / influencer / creator / verified flags. One request, cached 24h. Reach for this when you want to know WHO someone is without pulling the experience and education cards you will not read. Addressed by public_identifier ONLY: the underlying query keys on the vanity slug, so a urn-only call is refused before any browser work (resolve the slug with enrich_linkedin_person_lite_profile first). NOTE primary_language and supported_languages are the profile's LOCALE settings, i.e. which language the profile is written in. They are NOT the Languages section and carry no proficiency; do not read them as 'this person speaks these languages'.",
+      "The middle person read, between the lite identity stub and the full dossier: the name in its parts (first / last) and the line computed from them, headline, country and display location, profile and background imagery, and the premium / influencer / creator / verified flags. One request, cached 24h. Reach for this when you want to know WHO someone is without pulling the experience and education cards you will not read. Addressed by public_identifier ONLY: the underlying query keys on the vanity slug, so a urn-only call is refused before any browser work (resolve the slug with enrich_linkedin_person_lite_profile first). NOTE primary_language and supported_languages are the profile's LOCALE settings, i.e. which language the profile is written in. They are NOT the Languages section and carry no proficiency; do not read them as 'this person speaks these languages'.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-basic-profile' },
     operation: 'action',
@@ -560,7 +568,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_full_profile',
     description:
-      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, plus truncated heads of experience/education/skills (no posts since 2026-11-03: the feed is person-posts). cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
+      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, the contact card as LinkedIn shows it to the reading account (contact_info, in the lite read\'s shape), plus truncated heads of experience/education/skills (no posts since 2026-11-03: the feed is person-posts). cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-full-profile' },
     operation: 'action',
@@ -662,7 +670,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_contact_info',
     description:
-      "Contact details for ONE person, LinkedIn's whole contact card: email, phones (typed, so HOME/WORK is kept, unlike the lossy flat `phone` on person-full-profile), websites, twitter handles, the birthday (day and month, LinkedIn sends no year), the address, messenger handles and WeChat. Cached 24h. IMPORTANT: LinkedIn reveals contacts to 1st-degree connections ONLY, so this runs from whichever of YOUR accounts is connected to the target (picked automatically, respecting limits; linkedin_account_sid is only a preference). If none of your accounts is connected it refuses 422 no_connected_account, so connect first (linkedin_connection_requests send), then retry after the invite is accepted. An empty block means the connected account still cannot see them.",
+      "Contact details for ONE person, LinkedIn's whole contact card: email, phones (typed, so HOME/WORK is kept, unlike the lossy flat `phone` on person-full-profile), websites, twitter handles, the birthday (day and month, LinkedIn sends no year), the address, messenger handles and WeChat. One LinkedIn request, cached 24h. IMPORTANT: LinkedIn reveals contacts to 1st-degree connections ONLY, so this runs from whichever of YOUR accounts is connected to the target (picked automatically, respecting limits; linkedin_account_sid is only a preference). If none of your accounts is connected it refuses 422 no_connected_account, so connect first (linkedin_connection_requests send), then retry after the invite is accepted. An empty block means the connected account still cannot see them.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-contact-info' },
     operation: 'action',
