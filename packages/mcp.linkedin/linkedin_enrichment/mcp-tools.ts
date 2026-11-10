@@ -246,6 +246,10 @@ const FullProfileResult = z.object({
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
+  // The name in its parts beside the one line (2026-11-10, plugin 1.8.0): absent
+  // on a body stored before that, hence optional.
+  first_name: z.string().nullable().optional(),
+  last_name: z.string().nullable().optional(),
   full_name: z.string(),
   network_distance: NETWORK_DISTANCE,
   headline: z.string().nullable(),
@@ -275,16 +279,43 @@ const FullProfileResult = z.object({
   featured: z.array(LooseItem),     // pinned Featured head; raw-wire
 }).passthrough();
 
-// person-contact-info result (row 55 stub; reserved shape, finalizes with the plugin verb).
+// person-contact-info result (row 55): LinkedIn's contact card, as the wire carries it.
 const ContactInfoResult = z.object({
   // Wire shape from LinkedinContactInfoMapper::fromWireProfile: singular email,
-  // typed phones/websites objects (richer than the flat string[] sketch); the wire
-  // does not parse address/birthday/connected_at, so they are not projected.
+  // typed phones/websites objects (richer than the flat string[] sketch). The
+  // birthday, the address, the messengers and WeChat are the rest of the same
+  // card; the node parses them since plugin 1.8.0 (2026-11-10), and a body
+  // stored before that reads them as null / []. `connected_at` of the first
+  // sketch is not a contact: check_linkedin_connection_degree answers it.
   email: z.string().nullable(),
   phones: z.array(z.object({ type: z.string().nullable(), number: z.string() }).passthrough()),
   websites: z.array(z.object({ url: z.string(), category: z.string().nullable(), label: z.string().nullable() }).passthrough()),
   twitter_handles: z.array(z.string()),
+  birthday: z.object({ day: z.number(), month: z.number() }).nullable()
+    .describe('The day and month the member shares with connections. LinkedIn sends no year. Null when hidden.'),
+  address: z.string().nullable().describe("The contact card's free-text address. Null when empty."),
+  instant_messengers: z.array(z.object({ provider: z.string().nullable(), id: z.string() }).passthrough())
+    .describe('Messenger handles: provider as LinkedIn names it (SKYPE, ...) and the handle.'),
+  wechat: z.object({ name: z.string().nullable(), qr_url: z.string().nullable(), qr_image_url: z.string().nullable() }).nullable()
+    .describe('The WeChat name and its QR links. Null when the member set none.'),
 }).passthrough();
+
+// person-lite-profile result (row 48): the identifier quad, then everything else
+// the ONE wire call says about the member (2026-11-10, plugin 1.8.0). LinkedIn
+// carries the headline and the picture on the member's own record inside the
+// relationship block of that answer, so the picture comes for a 1st-degree
+// connection only and the email-required mark only while the two are not
+// connected and no invitation is pending.
+const LiteProfileResult = PersonRef.extend({
+  first_name: z.string().nullable().describe('The first name as LinkedIn returns it. Null when the answer came from a body that has no name parts (a cached full profile, a body stored before 2026-11-10); never a split of full_name.'),
+  last_name: z.string().nullable().describe('The last name as LinkedIn returns it. Null on the same bodies as first_name.'),
+  full_name: z.string().describe("'<first_name> <last_name>' as one line; '' when unknown."),
+  headline: z.string().nullable().describe("The profile's headline. Null on the reading account's own profile and when the member has invited that account (LinkedIn resolves no copy of the member there)."),
+  avatar_url: z.string().nullable().describe('The photo, re-hosted on our storage (a durable link). LinkedIn resolves a photo in this read for a 1st-degree connection of the reading account only; null for anyone else. For a stranger\'s photo use enrich_linkedin_person_basic_profile.'),
+  is_memorialized: z.boolean().nullable().describe("LinkedIn's mark on the account of a member who died (the profile reads 'In memoriam'): do not contact. Null when unknown."),
+  is_email_required_to_connect: z.boolean().nullable().describe("LinkedIn asks for the member's email address before a connection request can be sent to them, as it told the reading account. Stated only while the two are not connected and no invitation is pending; null otherwise."),
+  network_distance: NETWORK_DISTANCE,
+});
 
 // person-languages item (row 56, LIVE 2026-08-27; shape finalized against the wire).
 const LanguageItem = z.object({
@@ -417,7 +448,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_lite_profile',
     description:
-      'Cheapest person read: existence check + full identifier resolution. THE tool for turning a vanity slug (/in/…) or a bare URN into the canonical identifier quad (ln_member_id + both URNs + nickname) that every deeper enrich and stored-domain join keys on. cached 24h. Pin linkedin_account_sid and the relationship degree comes back with it in network_distance, which saves the second dispatch to linkedin-connections.check-degree; without a pinned account that field is null, because a degree relative to an account you did not name is not an answer. Address by profile_id XOR public_identifier.',
+      "Cheapest person read, one request: existence check + full identifier resolution, plus who the person is at a glance. THE tool for turning a vanity slug (/in/…) or a bare URN into the canonical identifier quad (ln_member_id + both URNs + nickname) that every deeper enrich and stored-domain join keys on. Also returns first_name and last_name as LinkedIn holds them, the headline, is_memorialized (a deceased member's account, do not contact) and is_email_required_to_connect. avatar_url is filled only for a 1st-degree connection of the reading account; for a stranger's photo or location use enrich_linkedin_person_basic_profile. cached 24h. Pin linkedin_account_sid and network_distance carries the degree relative to that account; unpinned it is null. The connection date and the contact card are not here: check_linkedin_connection_degree and enrich_linkedin_person_contact_info answer them. Address by profile_id XOR public_identifier.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-lite-profile' },
     operation: 'action',
@@ -427,7 +458,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
-    outputSchema: McpActionResponse(NullItem, z.object({ profile: PersonRef.extend({ full_name: z.string(), network_distance: NETWORK_DISTANCE }), data_request: DataRequestRow }).passthrough()),
+    outputSchema: McpActionResponse(NullItem, z.object({ profile: LiteProfileResult, data_request: DataRequestRow }).passthrough()),
     annotations: { title: 'Enrich person lite profile', ...LIVE },
   },
   {
@@ -631,7 +662,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_contact_info',
     description:
-      'Contact details for ONE person: email, phones (typed, so HOME/WORK is kept, unlike the lossy flat `phone` on person-full-profile), websites and twitter handles. Cached 24h. IMPORTANT: LinkedIn reveals contacts to 1st-degree connections ONLY, so this runs from whichever of YOUR accounts is connected to the target (picked automatically, respecting limits; linkedin_account_sid is only a preference). If none of your accounts is connected it refuses 422 no_connected_account, so connect first (linkedin_connection_requests send), then retry after the invite is accepted. An empty block means the connected account still cannot see them.',
+      "Contact details for ONE person, LinkedIn's whole contact card: email, phones (typed, so HOME/WORK is kept, unlike the lossy flat `phone` on person-full-profile), websites, twitter handles, the birthday (day and month, LinkedIn sends no year), the address, messenger handles and WeChat. Cached 24h. IMPORTANT: LinkedIn reveals contacts to 1st-degree connections ONLY, so this runs from whichever of YOUR accounts is connected to the target (picked automatically, respecting limits; linkedin_account_sid is only a preference). If none of your accounts is connected it refuses 422 no_connected_account, so connect first (linkedin_connection_requests send), then retry after the invite is accepted. An empty block means the connected account still cannot see them.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-contact-info' },
     operation: 'action',

@@ -227,7 +227,7 @@ export const linkedinConnectionsTools: ToolDefinition[] = [
     ...base,
     name: 'check_linkedin_connection_degree',
     description:
-      "Probe one contact's current connection degree (1st / 2nd / 3rd / 4_plus) from a managed account, and actualize a stale stored row: a live connection whose degree is no longer 1st is soft-deleted (removal_kind=removed) in the same call. Reuses the get-lite-profile getter (owner-only: it runs on the account you name). Supply exactly one target identifier.",
+      "Probe one contact's current connection degree (1st / 2nd / 3rd / 4_plus) from a managed account, and actualize a stale stored row: a live connection whose degree is no longer 1st is soft-deleted (removal_kind=removed) in the same call. When the degree is 1st, result.connected_at is the moment the two connected as LinkedIn states it (ISO 8601; null for any other degree). This is THE read for relationship facts: the degree and the connection date are facts about one account and one member, so they are answered here, by the account you name and never by a shared pool. Reuses the get-lite-profile getter. Supply exactly one target identifier.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-connections/check-degree' },
     operation: 'action',
