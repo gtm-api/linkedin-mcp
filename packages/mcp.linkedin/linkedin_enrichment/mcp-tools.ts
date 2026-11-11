@@ -267,6 +267,10 @@ const FullProfileResult = z.object({
   has_open_profile: z.boolean().nullable(),
   has_verified_profile: z.boolean().nullable(),
   has_premium: z.boolean().nullable(),
+  is_open_to_work: z.boolean().nullable().optional()
+    .describe('True when the member shows the public #OpenToWork photo frame. False when the profile photo has no such frame: a member who shares Open to Work with recruiters only reads false too. Absent or null when unknown (no photo in the answer, or a payload cached before this field existed).'),
+  is_hiring: z.boolean().nullable().optional()
+    .describe('True when the member shows the public #Hiring photo frame. False when the profile photo has no such frame: the frame is optional, so false does not mean the member is not hiring. Never true together with is_open_to_work (a photo carries one frame). Absent or null when unknown (no photo in the answer, or a payload cached before this field existed).'),
   experience: z.array(LooseItem),   // TRUNCATED raw-wire head; full list: person-experience
   educations: z.array(LooseItem),   // raw-wire head; same data person-education projects
   skills: z.array(LooseItem),       // TRUNCATED raw-wire head (carries wire `id`, not skill_id)
@@ -529,7 +533,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_full_profile',
     description:
-      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, plus truncated heads of experience/education/skills (no posts since 2026-11-03: the feed is person-posts). cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
+      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification/open-to-work/hiring flags, plus truncated heads of experience/education/skills (no posts since 2026-11-03: the feed is person-posts). cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-full-profile' },
     operation: 'action',
