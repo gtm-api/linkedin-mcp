@@ -430,6 +430,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'send_messages',
+    sentCheck: { tool: 'check_linkedin_message_sent' },
     massAction: false,
     stepEligible: true,
     scheduleRequired: false,
@@ -467,6 +468,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'send_messages',
+    sentCheck: { tool: 'check_linkedin_message_sent' },
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -500,6 +502,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'send_inmails',
+    sentCheck: { tool: 'check_linkedin_message_sent' },
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -533,6 +536,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'send_inmails',
+    sentCheck: { tool: 'check_linkedin_message_sent' },
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -565,6 +569,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'send_inmails',
+    sentCheck: { tool: 'check_linkedin_message_sent' },
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -694,6 +699,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'send_messages',
+    sentCheck: { tool: 'check_linkedin_message_sent' },
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({

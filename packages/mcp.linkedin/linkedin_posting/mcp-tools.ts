@@ -305,6 +305,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'posting',
+    sentCheck: { tool: 'check_linkedin_posting_sent', args: { verb: 'repost' } },
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -351,6 +352,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'posting',
+    sentCheck: { tool: 'check_linkedin_posting_sent', args: { verb: 'create-post' } },
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
@@ -411,6 +413,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'comment_posts',
+    sentCheck: { tool: 'check_linkedin_posting_sent', args: { verb: 'comment' } },
     massAction: true,
     stepEligible: true,
     scheduleRequired: false,

@@ -5,6 +5,7 @@ import {
   mintCommitToken,
   verifyCommitToken,
   makePreviewGate,
+  VALIDATE_TWIN_TIMEOUT_MS,
 } from './preview-gate';
 import type { CommitTokenStore, DispatchContext, RuntimeDeps, ToolDefinition, ToolResult } from '../types';
 
@@ -262,6 +263,40 @@ describe('preview gate: backend validate twin', () => {
     const result = await makePreviewGate(deps)(mkCtx({ sid: 'ln_ac_1' }, deps), never);
 
     expect((result.structuredContent as { validated: boolean }).validated).toBe(false);
+  });
+
+  // The twin keeps a short fuse of its own: the backend fuse is 55 s since
+  // 2026-11-11, and a twin that hung would have held the preview that long for
+  // a check the preview then goes without.
+  it('cuts a twin that hangs at its own fuse, not the backend fuse, and previews as before', async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = vi.fn(
+        (_url: string, init: RequestInit) =>
+          new Promise<Response>((_resolve, reject) => {
+            init.signal?.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
+          }),
+      );
+      vi.stubGlobal('fetch', fetchMock);
+      const deps = depsWithBackend();
+      deps.config.backendTimeoutMs = 55_000;
+      let result: ToolResult | undefined;
+
+      void makePreviewGate(deps)(mkCtx({ sid: 'ln_ac_1' }, deps), never).then((r) => (result = r));
+      // The arguments are hashed by WebCrypto, off the timers, before the twin is
+      // asked: the clock moves from the moment the twin's fetch is out.
+      await vi.waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+      await vi.advanceTimersByTimeAsync(VALIDATE_TWIN_TIMEOUT_MS);
+      await vi.waitFor(() => expect(result).toBeDefined());
+
+      expect(VALIDATE_TWIN_TIMEOUT_MS).toBeLessThan(55_000);
+      const preview = result?.structuredContent as { preview: boolean; validated: boolean; commit_token: string };
+      expect(preview.preview).toBe(true);
+      expect(preview.validated).toBe(false);
+      expect(preview.commit_token).toBeTruthy();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('does not ask the twin again at commit: the confirmed call goes straight to the action', async () => {

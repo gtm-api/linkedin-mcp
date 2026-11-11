@@ -254,7 +254,7 @@ export default {
     const runtime = buildRuntimeConfig(env);
 
     // Batch cap, before anything is built. The loop below gives every element
-    // its own backend call with its own 25s timeout, so the length of this
+    // its own backend call under its own backend fuse, so the length of this
     // array is a fan-out multiplier on a public URL. Rejected whole: a partial
     // batch would leave the caller guessing which half ran. Rationale for the
     // number in packages/runtime/src/middleware/batch-cap.ts.

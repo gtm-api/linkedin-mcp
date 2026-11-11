@@ -176,7 +176,23 @@ describe('numeric knobs', () => {
     const report = check(healthy({ BACKEND_TIMEOUT_MS: 'twenty seconds' }));
     expect(report.status).toBe('fail');
     expect(keys(report.problems, 'fatal')).toEqual(['BACKEND_TIMEOUT_MS']);
-    expect(buildRuntimeConfig(healthy()).backendTimeoutMs).toBe(25000);
+    expect(buildRuntimeConfig(healthy()).backendTimeoutMs).toBe(55000);
+  });
+
+  // The fuse sits between two clocks (config.ts says why): above the 50 s a
+  // backend gives a request that drives a LinkedIn browser, so the backend's own
+  // answer arrives inside it, and under the gateway's 60 s, so the caller reads
+  // this worker's timeout answer and never the gateway's bare 504. At 25 s a
+  // video post the backend published at 34.7 s read as a timeout (2026-11-10).
+  it('waits past the backends\' 50 s request budget and gives up before the gateway\'s 60 s', () => {
+    const fuse = buildRuntimeConfig(healthy()).backendTimeoutMs;
+
+    expect(fuse).toBeGreaterThan(50_000);
+    expect(fuse).toBeLessThan(60_000);
+  });
+
+  it('takes BACKEND_TIMEOUT_MS over the default when it is a number', () => {
+    expect(buildRuntimeConfig(healthy({ BACKEND_TIMEOUT_MS: '30000' })).backendTimeoutMs).toBe(30000);
   });
 
   it('a bad response budget is only a warning, and unset is not a problem at all', () => {

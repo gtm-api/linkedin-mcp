@@ -5,8 +5,9 @@ import { mapErrorEnvelope } from '../error-map';
 // Abuse + cost control on the tool chain.
 //
 // Every tool call on this server is one HTTP call into one of our own backends
-// (25s timeout, real DB work behind it), so an unbounded caller is a direct
-// bill and a direct availability risk. Nothing else in the chain caps that:
+// (up to the backend fuse of 55 s, real DB work behind it), so an unbounded
+// caller is a direct bill and a direct availability risk. Nothing else in the
+// chain caps that:
 // stub-gate short-circuits 15 tools, preview-gate slows down the dangerous
 // ones, and the JWT check happens once per HTTP request, not per call.
 //

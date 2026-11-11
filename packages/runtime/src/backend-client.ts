@@ -8,8 +8,10 @@ export type BackendResult =
 // Single backend call for one tool. Attaches auth + trace headers, times out
 // via AbortController, and returns any JSON body (incl. 4xx/5xx error
 // envelopes) as kind:'ok' - only non-JSON / network / timeout is a
-// transport_error. Never throws. `timeoutMs` overrides the config fuse for
-// callers that must stay snappy (the preview gate's dry run).
+// transport_error. Never throws. The fuse is the config's backendTimeoutMs (55 s
+// by default, apps/worker/src/config.ts says why); `timeoutMs` overrides it for
+// the calls that must stay short (the preview gate's validate twin and preview
+// route).
 export async function backendFetch(ctx: DispatchContext, opts: { validateOnly?: boolean; timeoutMs?: number } = {}): Promise<BackendResult> {
   const { tool, scope, deps } = ctx;
   const { url, body } = buildRequest(ctx, opts);

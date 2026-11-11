@@ -8,7 +8,7 @@
 // body and building the chain.
 //
 // What it stops: the worker loops an array of JSON-RPC messages and gives each
-// one a backend call with a 25s timeout, from a public URL that answers
+// one a backend call under the backend fuse, from a public URL that answers
 // Access-Control-Allow-Origin '*'. Without a cap, one POST carrying a
 // thousand-element array is a thousand-deep fan-out into our own services,
 // authored by whoever holds any valid bearer.
@@ -23,8 +23,13 @@
 //   holds on EITHER plan rather than quietly depending on which one we are on.
 //
 //   Wall clock. The loop is sequential and each element gets backendTimeoutMs
-//   (25s). Sixteen slow elements is already 400s of hanging request; anything
-//   larger is not a batch, it is a denial of service against ourselves.
+//   (55 s since 2026-11-11, 25 s before). Sixteen slow elements is 880 s of
+//   hanging request; anything larger is not a batch, it is a denial of service
+//   against ourselves. The longer fuse did not move the cap: what the cap
+//   bounds is the number of backend calls, which the subrequest ceiling above
+//   already holds at 16, and the clients we serve stop waiting for one POST
+//   at 60 s (Claude Code, n8n, the TypeScript MCP SDK) or 240 s (claude.ai),
+//   long before a full batch of slow calls ends.
 //
 // The generosity check runs the other way: MCP revision 2025-06-18 REMOVED
 // JSON-RPC batching from the protocol, so a current client sends exactly one
@@ -75,8 +80,8 @@ export function checkBatchSize(size: number, limit: number): BatchRejection | nu
         code: -32600,
         message:
           `Invalid Request: this batch carries ${size} JSON-RPC messages and the server accepts at most ` +
-          `${limit}. Nothing in it ran. Each message costs one backend call with a 25s timeout, so a large ` +
-          'batch is a fan-out, not a speed-up. Split it into requests of at most ' +
+          `${limit}. Nothing in it ran. Each message costs one backend call, and they run one after another, so a ` +
+          'large batch is a fan-out, not a speed-up. Split it into requests of at most ' +
           `${limit} messages, or send one message per request (the current MCP revision has no batching ` +
           'at all, so one per request is what clients do).',
         data: { reason: 'batch_too_large', received: size, max_batch_size: limit },

@@ -37,6 +37,14 @@ const siblingCache = new Map<string, CachedSibling>();
 const CACHE_MAX_ENTRIES = 500;
 const CACHE_SAFETY_MS = 120_000;
 
+// The exchange's own fuse (2026-11-11), not the backend fuse: that one is 55 s
+// now, sized for a LinkedIn browser, and the exchange runs BEFORE the tool, so
+// every second it may hold is a second the tool call loses under the caller's
+// own clock (Claude Code cuts a request to an HTTP MCP server at 60 s). id's
+// /oauth/token answered 58,809 times in the 30 days to 2026-11-11, the slowest
+// in 114 ms. An exchange cut here ran nothing: the caller is told to retry.
+export const TOKEN_EXCHANGE_TIMEOUT_MS = 5000;
+
 /** Test seam: drop all cached sibling tokens. */
 export function clearSiblingTokenCache(): void {
   siblingCache.clear();
@@ -80,7 +88,7 @@ async function exchangeForTeam(
   if (!base) return { kind: 'transport', detail: "no base URL configured for service 'id'" };
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), deps.config.backendTimeoutMs);
+  const timer = setTimeout(() => controller.abort(), TOKEN_EXCHANGE_TIMEOUT_MS);
   try {
     const res = await fetch(`${base.replace(/\/$/, '')}/oauth/token`, {
       method: 'POST',

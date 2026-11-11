@@ -169,14 +169,21 @@ function effectSummary(tool: string, action: string, args: Record<string, unknow
  * way the commit would), a transport failure, a 5xx, a body that is not the
  * platform envelope. The gate then previews as it always did: the twin makes a
  * preview stronger where it exists and never makes it unavailable.
+ *
+ * Short-fused, as the preview route below: until 2026-11-11 the twin shared the
+ * backend fuse, which is 55 s since that day, and a twin that hung would have
+ * held a preview that long for a check it then skips. The backends' twins
+ * answered 7,239 times in the 30 days to 2026-11-11, the slowest in 154 ms.
  */
+export const VALIDATE_TWIN_TIMEOUT_MS = 5000;
+
 async function validateOnBackend(ctx: DispatchContext): Promise<ToolResult | 'passed' | 'unavailable'> {
   if (ctx.tool.localHandler || !ctx.tool.route.pathTemplate.startsWith('/api/')) return 'unavailable';
 
   const { commit_token: _drop, ...args } = ctx.args;
   let res;
   try {
-    res = await backendFetch({ ...ctx, args }, { validateOnly: true });
+    res = await backendFetch({ ...ctx, args }, { validateOnly: true, timeoutMs: VALIDATE_TWIN_TIMEOUT_MS });
   } catch {
     return 'unavailable';
   }

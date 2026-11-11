@@ -149,10 +149,55 @@ describe('transportErrorResult on a timeout', () => {
     expect(r.content[0].text).toContain('Pass an idempotency_key on every attempt');
   });
 
-  it('tells a send to read the thread before sending again', () => {
-    const send = writeTool({ name: 'send_linkedin_message' });
-    const r = transportErrorResult(({ tool: send, args: {} } as unknown as DispatchContext), timeout);
-    expect(r.content[0].text).toContain('must not be sent twice');
+  // A keyed send in doubt is a question its own tool answers (2026-11-11): the
+  // timeout hands the caller that call, filled with the send's account and key.
+  // On 2026-11-10 a video post published at 34.7 s read as a timeout here, and
+  // only check_linkedin_posting_sent said it was out.
+  it('hands a keyed post its check call, with the account, the key and the verb', () => {
+    const post = writeTool({
+      name: 'create_linkedin_post',
+      sentCheck: { tool: 'check_linkedin_posting_sent', args: { verb: 'create-post' } },
+    });
+    const r = transportErrorResult(
+      ({ tool: post, args: { linkedin_account_sid: 'ln_ac_aaaaaaaaaaaa', text: 'Hello', client_reference: 'launch-post-1' } } as unknown as DispatchContext),
+      timeout,
+    );
+    const text = r.content[0].text;
+    expect(text).toContain('may have completed the call');
+    expect(text).toContain(
+      'Ask check_linkedin_posting_sent with {"linkedin_account_sid":"ln_ac_aaaaaaaaaaaa","client_reference":"launch-post-1","verb":"create-post"}:',
+    );
+    expect(text).toContain('Send again only on not_sent');
+    expect(text).not.toContain('Check first what landed');
+  });
+
+  it('hands a keyed message its check call, in the team the send ran in', () => {
+    const send = writeTool({ name: 'send_linkedin_message', sentCheck: { tool: 'check_linkedin_message_sent' } });
+    const r = transportErrorResult(
+      ({
+        tool: send,
+        args: { linkedin_account_sid: 'ln_ac_aaaaaaaaaaaa', text: 'Hi', client_reference: 'msg-42' },
+        teamSidOverride: 'ts_tm_bbbbbbbbbbbb',
+      } as unknown as DispatchContext),
+      timeout,
+    );
+    expect(r.content[0].text).toContain(
+      'Ask check_linkedin_message_sent with {"linkedin_account_sid":"ln_ac_aaaaaaaaaaaa","client_reference":"msg-42"} in team ts_tm_bbbbbbbbbbbb',
+    );
+  });
+
+  it('tells a send without a key there is nothing to ask by, to read the activity log, and to key every send', () => {
+    const invite = writeTool({ name: 'send_linkedin_connection_request', sentCheck: { tool: 'check_linkedin_connection_request_sent' } });
+    const r = transportErrorResult(
+      ({ tool: invite, args: { linkedin_account_sid: 'ln_ac_aaaaaaaaaaaa', profile_id: 'ACoAAA' } } as unknown as DispatchContext),
+      timeout,
+    );
+    const text = r.content[0].text;
+    expect(text).toContain('carried no client_reference');
+    expect(text).toContain('search_linkedin_account_activity_log');
+    expect(text).toContain('Give every send a client_reference from now on: check_linkedin_connection_request_sent answers by it');
+    // An invitation has no thread to read.
+    expect(text).not.toContain('thread');
   });
 
   it('tells any other write to check what landed', () => {

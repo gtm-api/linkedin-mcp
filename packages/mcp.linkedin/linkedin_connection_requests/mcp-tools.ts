@@ -196,6 +196,7 @@ export const linkedinConnectionRequestsTools: ToolDefinition[] = [
     availability: 'ga',
     dangerous: true,
     pacedBucket: 'send_connection_requests',
+    sentCheck: { tool: 'check_linkedin_connection_request_sent' },
     massAction: false,
     stepEligible: true,
     scheduleRequired: false,

@@ -89,7 +89,39 @@ export interface ConfigReport {
 /** ENV_NAME values where AUTH_MODE=dev (bearer bypass, no issuer check) is allowed. */
 const DEV_ENV_NAMES = new Set(['local', 'dev', 'development', 'test']);
 
-export const BACKEND_TIMEOUT_DEFAULT_MS = 25000;
+// The backend fuse: how long one tool call waits for its backend before this
+// worker answers "timed out at this server" (backend-client.ts). 55 s since
+// 2026-11-11. It was 25 s, under the backend's own clock, so a call the backend
+// finished between 25 and 50 s reached the caller as a timeout: 71 connector
+// calls of gtm.service.linkedin in the 7 days to 2026-11-10, 35 of them answered
+// 200 (a video post published after 34.7 s while its caller read "could not
+// reach the backend").
+//
+// The number sits between two clocks:
+//   above 50 s, the budget a backend gives a request that drives a LinkedIn
+//     browser (gtm.service.linkedin SyncRequestBudget, config
+//     automation_protocol.sync_request_budget_seconds). At the budget the
+//     backend answers by itself, the result or a 503 with retry_after, and
+//     those answers land at 50 to 53 s: 100 connector calls of the 30 days to
+//     2026-11-11 answered between 50 and 55 s.
+//   under 60 s, the gateway's proxy_read_timeout (gateway template
+//     gtm-gateway.conf.j2 in gtm.deployment.ansible). Its 504 carries no
+//     envelope and reads "retry shortly", the wrong word for a send that may
+//     have gone out; under it the caller gets this worker's timeout answer
+//     (error-map.ts timeoutAdvice). Claude Code cuts one request to an HTTP MCP
+//     server at 60 s by default too, as do n8n's MCP client and the TypeScript
+//     MCP SDK, so 55 s still answers them; claude.ai waits 240 s. The MCP
+//     client apps of Make and Zapier state no number; if their general step
+//     limits hold (40 s and 30 s), a slower call ends there first, in their
+//     own timeout.
+// 4 connector calls of those 30 days answered between 55 and 60 s, all 503s
+// that said to retry; they read as this worker's timeout, which says the same
+// for a read and the safe thing for a write.
+//
+// The calls around a tool call keep fuses of their own, since each answers in
+// well under a second and none may hold the call this long: the token exchange
+// (team-scope.ts), the validate twin and the preview route (preview-gate.ts).
+export const BACKEND_TIMEOUT_DEFAULT_MS = 55000;
 export const RESPONSE_CHAR_BUDGET_DEFAULT = 48000;
 // Rate-limit defaults. The reasoning for each number is in env.ts, next to the
 // read; the reasoning for the AXIS and the mechanism is in the middleware.

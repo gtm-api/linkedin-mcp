@@ -40,6 +40,14 @@ export interface ToolAnnotations {
   openWorldHint: boolean;
 }
 
+/** See ToolDefinition.sentCheck. */
+export interface SentCheck {
+  /** A served tool that takes linkedin_account_sid and client_reference. */
+  tool: string;
+  /** Arguments fixed per send verb, e.g. check_linkedin_posting_sent's verb. */
+  args?: Record<string, string>;
+}
+
 export interface ToolDefinition {
   name: string;
   description: string;
@@ -63,6 +71,16 @@ export interface ToolDefinition {
    * to the plain preview (fail-open: the confirm call re-checks everything).
    */
   previewRoute?: RouteMeta;
+  /**
+   * A send keyed by the caller's client_reference: the tool that answers what
+   * the send came to without sending (sent, in_flight, unknown, not_sent), and
+   * the arguments it takes fixed for this verb. A send this worker's fuse cut
+   * is in doubt, not failed, so the timeout answer hands the caller that call,
+   * filled with the send's own linkedin_account_sid and client_reference
+   * (error-map.ts timeoutAdvice, 2026-11-11). tests/sent-check-parity.test.ts
+   * holds every keyed send to naming a served check tool.
+   */
+  sentCheck?: SentCheck;
   /**
    * Where the route is public (2026-11-06; the shared contract with gs.mcp,
    * MCP_SURFACE_V2.md section 7 of the getsales umbrella, rule 1). `both` (the

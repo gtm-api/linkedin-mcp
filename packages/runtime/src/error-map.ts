@@ -1,4 +1,4 @@
-import type { DispatchContext, ToolResult } from './types';
+import type { DispatchContext, SentCheck, ToolResult } from './types';
 
 // The backend error envelope (McpException::render). `meta` is present only on
 // delete_blocked; most errors omit it.
@@ -236,7 +236,9 @@ function timeoutAdvice(ctx: DispatchContext): string[] {
     'The request timed out at this server, not at the backend: the backend may have completed the call ' +
       'and spent its budget, so do not repeat it blindly.',
   ];
-  if ('idempotency_key' in (tool.inputSchema.shape ?? {})) {
+  if (tool.sentCheck) {
+    lines.push(...sentCheckAdvice(tool.sentCheck, args, ctx.teamSidOverride));
+  } else if ('idempotency_key' in (tool.inputSchema.shape ?? {})) {
     const key = args.idempotency_key;
     lines.push(
       typeof key === 'string' && key !== ''
@@ -245,11 +247,6 @@ function timeoutAdvice(ctx: DispatchContext): string[] {
             'its result if it completed. Pass an idempotency_key on every attempt from now on: a replay with the same key ' +
             'returns the stored row instead of running again.',
     );
-  } else if (tool.name.startsWith('send_')) {
-    lines.push(
-      'Read the thread first (search_linkedin_messages on the conversation, or the get_my_latest read of it): ' +
-        'a message that landed must not be sent twice.',
-    );
   } else {
     lines.push(
       "Check first what landed (the account's activity log, or the row this call would have created) and repeat " +
@@ -257,4 +254,29 @@ function timeoutAdvice(ctx: DispatchContext): string[] {
     );
   }
   return lines;
+}
+
+// A keyed send in doubt is a question its own tool answers, so the answer names
+// that call with the send's own key (2026-11-11). Until then the timeout said
+// "do not repeat it blindly" and pointed a send_ tool at the thread, which a
+// connection request does not have and a post is not in; a 13 MB video post
+// published after 34.7 s while its caller read a timeout, and only
+// check_linkedin_posting_sent said it was out (2026-11-10).
+function sentCheckAdvice(check: SentCheck, args: Record<string, unknown>, team?: string | null): string[] {
+  const inTeam = typeof team === 'string' && team !== '' ? ` in team ${team}, as this send ran` : '';
+  const key = args.client_reference;
+  if (typeof key === 'string' && key !== '') {
+    const call = { linkedin_account_sid: args.linkedin_account_sid, client_reference: key, ...check.args };
+    return [
+      `Ask ${check.tool} with ${JSON.stringify(call)}${inTeam}: it answers what this send came to without sending ` +
+        '(sent, in_flight, unknown with retry_after, not_sent). Send again only on not_sent, as the same request ' +
+        'under the same client_reference: a repeat under the key is answered with the first send, never sent twice.',
+    ];
+  }
+  return [
+    `This send carried no client_reference, so ${check.tool} has nothing to ask it by. Before repeating it, read ` +
+      `what the account did: search_linkedin_account_activity_log for its linkedin_account_sid${inTeam}, newest ` +
+      'first, lists the attempt and its status. Give every send a client_reference from now on: ' +
+      `${check.tool} answers by it, and a repeat under the key is never sent twice.`,
+  ];
 }

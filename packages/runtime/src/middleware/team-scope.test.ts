@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
-import { clearSiblingTokenCache, makeTeamScope } from './team-scope';
+import { clearSiblingTokenCache, makeTeamScope, TOKEN_EXCHANGE_TIMEOUT_MS } from './team-scope';
 import type { AuthScope, DispatchContext, RuntimeDeps, ToolDefinition, ToolResult } from '../types';
 
 // The team-scope middleware is what turns a multi-team OAuth grant into a
@@ -178,6 +178,39 @@ describe('makeTeamScope', () => {
     const err = (result.structuredContent as { error: { code: string; message: string } }).error;
     expect(err.code).toBe('forbidden');
     expect(err.message).toContain('not in scope');
+  });
+
+  // The exchange runs before the tool, so it keeps a fuse of its own: the backend
+  // fuse is 55 s since 2026-11-11, and an exchange that held a call that long
+  // would leave the tool nothing under the caller's clock.
+  it('cuts an exchange that hangs at its own fuse, not the backend fuse, and never dispatches', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(
+          (_url: string, init: RequestInit) =>
+            new Promise<Response>((_resolve, reject) => {
+              init.signal?.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
+            }),
+        ),
+      );
+      const slowDeps = { config: { baseUrls: { id: 'http://id.test' }, backendTimeoutMs: 55_000 } } as unknown as RuntimeDeps;
+      const { next, seen } = nextRecorder();
+      let result: ToolResult | undefined;
+
+      void makeTeamScope(slowDeps)(mkCtx({}, { override: TEAM_B }), next).then((r) => (result = r));
+      await vi.advanceTimersByTimeAsync(TOKEN_EXCHANGE_TIMEOUT_MS);
+      await vi.waitFor(() => expect(result).toBeDefined());
+
+      expect(TOKEN_EXCHANGE_TIMEOUT_MS).toBeLessThan(55_000);
+      expect(result?.isError).toBe(true);
+      expect((result?.structuredContent as { error: { code: string; message: string } }).error.code).toBe('internal_error');
+      expect(result?.content[0].text).toContain('Could not reach the token exchange');
+      expect(seen).toHaveLength(0);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('refuses a team override on an api-key scope without dialing', async () => {
