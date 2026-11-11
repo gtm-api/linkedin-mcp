@@ -2537,19 +2537,6 @@
                 }
             ]
         },
-        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteKeyPage\\Enums\\WebsiteKeyPageSortableFieldEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "CreatedAt",
-                    "value": "created_at"
-                },
-                {
-                    "name": "Key",
-                    "value": "key"
-                }
-            ]
-        },
         "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSessionOwner\\Enums\\WebsiteSessionOwnerGroupableFieldsEnum": {
             "backing": "string",
             "cases": [
@@ -2962,19 +2949,6 @@
                 {
                     "name": "Disabled",
                     "value": "disabled"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteTrackedEvent\\Enums\\WebsiteTrackedEventSortableFieldEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "CreatedAt",
-                    "value": "created_at"
-                },
-                {
-                    "name": "Event",
-                    "value": "event"
                 }
             ]
         },

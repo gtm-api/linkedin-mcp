@@ -7248,6 +7248,18 @@
                         "has_default": true
                     },
                     {
+                        "name": "max_runs_per_day",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "min_interval_minutes",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "runs_count",
                         "type": "int",
                         "nullable": false,
@@ -7315,6 +7327,18 @@
                     {
                         "name": "disabled_at",
                         "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "max_runs_per_day",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "min_interval_minutes",
+                        "type": "?int",
                         "nullable": true,
                         "has_default": true
                     },
@@ -10978,19 +11002,6 @@
                 }
             ]
         },
-        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteKeyPage\\Enums\\WebsiteKeyPageSortableFieldEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "CreatedAt",
-                    "value": "created_at"
-                },
-                {
-                    "name": "Key",
-                    "value": "key"
-                }
-            ]
-        },
         "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSessionOwner\\Enums\\WebsiteSessionOwnerGroupableFieldsEnum": {
             "backing": "string",
             "cases": [
@@ -11403,19 +11414,6 @@
                 {
                     "name": "Disabled",
                     "value": "disabled"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteTrackedEvent\\Enums\\WebsiteTrackedEventSortableFieldEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "CreatedAt",
-                    "value": "created_at"
-                },
-                {
-                    "name": "Event",
-                    "value": "event"
                 }
             ]
         },
@@ -64153,6 +64151,143 @@
         },
         {
             "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-sign-in-check-settings/get",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "getAntidetectBrowserProxySignInCheckSettings",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxySignInCheckSettingsGetRequest",
+            "rules": [],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/antidetect-browser-proxy-sign-in-check-settings/update",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "updateAntidetectBrowserProxySignInCheckSettings",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsProxySignInCheckSettingsUpdateRequest",
+            "rules": [
+                {
+                    "field": "account_max_runs_per_day",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "account_min_interval_minutes",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "max_attempts",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "retry_after_minutes",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "stale_minutes",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "operator_email",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/ops/antidetect-browser-proxy-sign-in-checks/requeue",
             "controller": "App\\Ops\\InternalOpsController",
             "action": "requeueAntidetectBrowserProxySignInCheck",
@@ -65295,6 +65430,42 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "max_runs_per_day",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "min_interval_minutes",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -65634,6 +65805,7 @@
         "comment_not_deleted": "LinkedIn did not delete this comment: it is not this account's, or it is already gone.",
         "comment_urn_not_activity_thread": "comment_urn must name a comment on an activity thread, urn:li:comment:(activity:<postId>,<commentId>) or the fsd form urn:li:fsd_comment:(<commentId>,urn:li:activity:<postId>); the replies under a comment on a ugcPost, share or groupPost thread cannot be read.",
         "company_anchor_not_numeric": "source_input.anchor_company_ln_id must be the numeric LinkedIn company id, not a slug or a URL.",
+        "company_follow_invite_rejected": "LinkedIn refused at least one invitation of this batch and the wire does not say which; check that this account administers the company page (LinkedIn offers it the Invite connections button on the page's admin dashboard), that every member is a 1st-degree connection it may still invite, and that the page has invitation credits left, then send the refused members again.",
         "concurrent_send_in_flight": "An earlier attempt of this send, or another send to the same place, is in the browser, in doubt or already went out (context.send_outcome says which, context.activity_log_sid or blocking_activity_log_sid names it), so nothing was sent now. Repeat the same request after retry_after, or ask check-sent about the attempt the context names.",
         "confirmed_sent_contradicts": "The attempt confirmed_sent names was proved not sent, so the word is not taken and nothing was sent now. Look on LinkedIn again: if it is there, do not send it again; if it is not, repeat the request without confirmed_sent.",
         "conversation_deleted": "This thread was deleted and cannot be acted on; sync the inbox again if it should still exist.",

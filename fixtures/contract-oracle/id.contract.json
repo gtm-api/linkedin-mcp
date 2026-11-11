@@ -7895,19 +7895,6 @@
                 }
             ]
         },
-        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteKeyPage\\Enums\\WebsiteKeyPageSortableFieldEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "CreatedAt",
-                    "value": "created_at"
-                },
-                {
-                    "name": "Key",
-                    "value": "key"
-                }
-            ]
-        },
         "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteSessionOwner\\Enums\\WebsiteSessionOwnerGroupableFieldsEnum": {
             "backing": "string",
             "cases": [
@@ -8320,19 +8307,6 @@
                 {
                     "name": "Disabled",
                     "value": "disabled"
-                }
-            ]
-        },
-        "Gtm\\Lib\\Common\\Microservices\\Signals\\WebsiteTrackedEvent\\Enums\\WebsiteTrackedEventSortableFieldEnum": {
-            "backing": "string",
-            "cases": [
-                {
-                    "name": "CreatedAt",
-                    "value": "created_at"
-                },
-                {
-                    "name": "Event",
-                    "value": "event"
                 }
             ]
         },
@@ -21995,6 +21969,41 @@
         },
         {
             "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-country-coverage/get",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "countryCoverage",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "ops/antidetect-browser-proxy-downtime-checks/clear",
             "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
             "action": "clearDowntimeChecks",
@@ -22564,6 +22573,161 @@
                     "in": null,
                     "min": null,
                     "max": 24,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-sign-in-check-settings/get",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "signInCheckSettings",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/antidetect-browser-proxy-sign-in-check-settings/update",
+            "controller": "App\\Ops\\Controllers\\OpsProxySignInCheckController",
+            "action": "updateSignInCheckSettings",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsProxySignInCheckSettingsUpdateRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "account_max_runs_per_day",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "account_min_interval_minutes",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "max_attempts",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "retry_after_minutes",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "stale_minutes",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
                     "size": null,
                     "between": null
                 }
@@ -23696,6 +23860,42 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "max_runs_per_day",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "min_interval_minutes",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 100000,
                     "size": null,
                     "between": null
                 }
