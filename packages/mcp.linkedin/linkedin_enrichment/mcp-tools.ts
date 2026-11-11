@@ -150,11 +150,14 @@ const SkillItem = z.object({
   endorsement_count: z.number().nullable(),
 }).passthrough();
 
-// person-education item (row 52): native-slug, raw-wire education row.
+// person-education item (row 52): a row of the whole "Show all educations"
+// list (2026-11-11; before it the profile page's card, its first two schools).
 const EducationItem = z.object({
   school_name: z.string().nullable(),
   company_id: z.string().nullable(),
-  degree: z.string().nullable(),
+  school_public_identifier: z.string().nullable().describe("The vanity of the school's LinkedIn page; null for a school with no page."),
+  school_logo_url: z.string().nullable().describe("The school's logo, a signed LinkedIn CDN link that expires."),
+  degree: z.string().nullable().describe("As the member wrote it ('Bachelor’s Degree')."),
   field_of_study: z.string().nullable(),
   start_date: z.string().nullable(),
   end_date: z.string().nullable(),
@@ -262,6 +265,51 @@ const ContactInfoResult = z.object({
 // picture_url→avatar_url rework); network_distance rides along when attributable
 // to the pinned executor (A8, 2026-08-14). Sub-record heads stay loose: they are
 // RAW WIRE truncated heads, distinct from the dedicated methods' projected items.
+const LiteProfileLocalized = z.object({
+  locale: z.string(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  maiden_name: z.string().nullable(),
+  headline: z.string().nullable(),
+}).passthrough();
+
+// The member's profile header, the same facts under the same names in the lite,
+// basic and full answers. Locales are the profile's own language settings, not
+// spoken languages.
+const ProfileHeaderFacts = {
+  maiden_name: z.string().nullable(),
+  localized: z.array(LiteProfileLocalized).describe('The name and the headline in every language the member wrote them in.'),
+  background_picture_url: z.string().nullable().describe('The cover image, a signed LinkedIn CDN link that expires.'),
+  location: z.string().nullable().describe("The location as LinkedIn shows it ('Redmond, Washington, United States')."),
+  location_without_country: z.string().nullable().describe("The location without its country ('Redmond, Washington')."),
+  location_geo_id: z.string().nullable().describe("The location's geo id, the value LinkedIn's location search filter takes."),
+  country: z.string().nullable(),
+  country_geo_id: z.string().nullable(),
+  postal_code: z.string().nullable(),
+  primary_locale: z.string().nullable().describe("The profile's primary locale ('en_US'), not a spoken language."),
+  primary_language: z.string().nullable().describe('Profile LOCALE language, not a spoken language.'),
+  supported_locales: z.array(z.string()),
+  supported_languages: z.array(z.string()).describe('Profile locales, not spoken languages, and no proficiency.'),
+  is_premium: z.boolean().nullable(),
+  has_premium_subscriber_badge: z.boolean().nullable(),
+  has_verified_profile: z.boolean().nullable().describe('The verification badge.'),
+  is_influencer: z.boolean().nullable(),
+  is_creator: z.boolean().nullable(),
+  is_open_to_work: z.boolean().nullable().describe("The public #OpenToWork frame on the photo; false = no public frame (not 'not looking'); null with no photo."),
+  is_hiring: z.boolean().nullable().describe("The public #Hiring frame on the photo; false = no #Hiring frame (not 'not hiring'); null with no photo."),
+  top_voice_badge: z.string().nullable().describe("LinkedIn's Top Voice badge text; null without one."),
+  creator_hashtags: z.array(z.string()),
+  creator_website: z.string().nullable(),
+  pronoun: z.string().nullable(),
+  status: z.object({ text: z.string().nullable(), emoji: z.string().nullable(), expires_at: z.string().nullable() }).nullable(),
+  birthday: z.object({ day: z.number().nullable(), month: z.number().nullable(), year: z.number().nullable() }).nullable().describe('Shared with the reading account only.'),
+};
+
+const PendingInvitation = z.object({
+  direction: z.enum(['sent', 'received']).nullable(),
+  invitation_id: z.string().nullable(),
+}).nullable().describe('The invitation pending between the pinned account and the member, with its exact id (what a withdrawal or a reply names). Null when none, or when the read was not the pinned account\'s.');
+
 const FullProfileResult = z.object({
   ln_member_id: z.string().nullable(),
   ln_id: z.string().nullable(),
@@ -274,12 +322,17 @@ const FullProfileResult = z.object({
   last_name: z.string().nullable().optional(),
   full_name: z.string().describe("The name as one line: the line the stored body states, else first_name and last_name joined; '' when unknown."),
   network_distance: NETWORK_DISTANCE,
+  connected_at: z.string().nullable().optional(),
+  pending_invitation: PendingInvitation.optional(),
   headline: z.string().nullable(),
+  // Every fact of the lite read (2026-11-11): the full read starts from it.
+  // Optional, absent on a body stored before that day.
+  ...Object.fromEntries(Object.entries(ProfileHeaderFacts).map(([key, schema]) => [key, schema.optional()])) as {
+    [K in keyof typeof ProfileHeaderFacts]: z.ZodOptional<(typeof ProfileHeaderFacts)[K]>
+  },
   position: z.string().nullable(),
   company_name: z.string().nullable(),
   company_public_identifier: z.string().nullable(),
-  country: z.string().nullable(),
-  location: z.string().nullable(),
   about: z.string().nullable(),
   avatar_url: z.string().nullable(),
   email: z.string().nullable(),
@@ -289,26 +342,24 @@ const FullProfileResult = z.object({
   contact_info: ContactInfoResult,
   connections_number: z.number().nullable(),
   followers_number: z.number().nullable(),
-  primary_language: z.string().nullable(),
-  supported_languages: z.array(z.string()),
   has_open_profile: z.boolean().nullable(),
-  has_verified_profile: z.boolean().nullable(),
   has_premium: z.boolean().nullable(),
-  experience: z.array(LooseItem),   // TRUNCATED raw-wire head; full list: person-experience
-  educations: z.array(LooseItem),   // raw-wire head; same data person-education projects
-  skills: z.array(LooseItem),       // TRUNCATED raw-wire head (carries wire `id`, not skill_id)
+  experience: z.array(LooseItem),   // the whole list, 100 rows read (2026-11-11); paged: person-experience
+  educations: z.array(LooseItem),   // the whole list, the same rows person-education reads
+  skills: z.array(LooseItem),       // the whole list, 100 rows read (carries wire `id`, not skill_id)
   // No `posts` since 2026-11-03: the feed is person-posts; the head left the node's live profile read.
   top_voices: z.array(LooseItem),   // followed Top Voices; open-ended wire shape
   featured: z.array(LooseItem),     // pinned Featured head; raw-wire
 }).passthrough();
 
-// person-lite-profile result (row 48): the identifier quad, then what ONE
-// request of LinkedIn's basic profile query says about the member (plugin
-// 1.8.0): the name in its parts, the headline, the photo of any member and the
-// marks. That query takes a slug, a profile id or a Sales Navigator id alike,
-// which is how this read turns one identifier into the others. The
-// email-required mark comes only while the two are not connected and no
-// invitation is pending. No contact card (2026-11-11, Eugene: LinkedIn's
+// person-lite-profile result (row 48): the identifier quad, then everything ONE
+// request of LinkedIn's basic profile query states about the member (2026-11-11,
+// Eugene: whatever we can give, we give): the name in its parts and in every
+// locale, the headline, the photo and the cover, the location with its geo ids,
+// the locales, the premium, verification, creator and Top Voice marks, the
+// status, and the reading account's relationship to the member. That query
+// takes a slug, a profile id or a Sales Navigator id alike, which is how this
+// read turns one identifier into the others. No contact card (LinkedIn's
 // contact card query is asked for the card alone): person-contact-info.
 const LiteProfileResult = PersonRef.extend({
   first_name: z.string().nullable().describe('The first name as LinkedIn returns it. Null when the answer came from a body that has no name parts (a cached full profile, a body stored before 2026-11-10); never a split of full_name.'),
@@ -316,9 +367,12 @@ const LiteProfileResult = PersonRef.extend({
   full_name: z.string().describe("The name as one line: the line the stored body states, else first_name and last_name joined; '' when unknown."),
   headline: z.string().nullable().describe("The profile's headline. Null when LinkedIn states none for the member."),
   avatar_url: z.string().nullable().describe('The photo, re-hosted on our storage (a durable link), for any member who shows one, whatever the degree. Null when the member shows none.'),
+  ...ProfileHeaderFacts,
   is_memorialized: z.boolean().nullable().describe("LinkedIn's mark on the account of a member who died (the profile reads 'In memoriam'): do not contact. Null when unknown."),
   is_email_required_to_connect: z.boolean().nullable().describe("LinkedIn asks for the member's email address before a connection request can be sent to them, as it told the reading account. Stated only while the two are not connected and no invitation is pending; null otherwise."),
   network_distance: NETWORK_DISTANCE,
+  connected_at: z.string().nullable().describe('ISO 8601 of the moment the pinned account and the member connected; null unless 1st degree, or when the read was not the pinned account\'s.'),
+  pending_invitation: PendingInvitation,
 });
 
 // person-languages item (row 56, LIVE 2026-08-27; shape finalized against the wire).
@@ -452,7 +506,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_lite_profile',
     description:
-      "Cheapest person read, ONE LinkedIn request: existence check + full identifier resolution, plus who the person is at a glance. THE tool for turning a vanity slug (/in/…) into the URNs, or a bare URN (a profile id or a Sales Navigator id) into the slug: it returns the canonical identifier quad (ln_member_id + both URNs + nickname) that every deeper enrich and stored-domain join keys on. Also returns first_name and last_name (full_name is computed), the headline, the photo of any member, is_memorialized (a deceased member's account, do not contact) and is_email_required_to_connect. No contact card: a connection's contacts are enrich_linkedin_person_contact_info. cached 24h. Pin linkedin_account_sid and network_distance carries the degree relative to that account; unpinned it is null. The connection date: check_linkedin_connection_degree; location: enrich_linkedin_person_basic_profile. Address by profile_id XOR public_identifier.",
+      "Cheapest person read, ONE LinkedIn request, and everything it states: existence check + full identifier resolution. THE tool for turning a vanity slug (/in/…) into the URNs, or a bare URN (a profile id or a Sales Navigator id) into the slug: it returns the canonical identifier quad (ln_member_id + both URNs + nickname). Also the name (full_name computed), the headline, the photo and cover, the location with its geo ids (location_geo_id feeds the location search filter), the locales, the premium, verified, creator, open-to-work, hiring and Top Voice marks, the status, is_memorialized (do not contact) and is_email_required_to_connect. Pin linkedin_account_sid and network_distance, connected_at and pending_invitation are that account's; unpinned they are null. No contact card: enrich_linkedin_person_contact_info. cached 24h. Address by profile_id XOR public_identifier.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-lite-profile' },
     operation: 'action',
@@ -469,7 +523,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_basic_profile',
     description:
-      "The middle person read, between the lite identity stub and the full dossier: the name in its parts (first / last) and the line computed from them, headline, country and display location, profile and background imagery, and the premium / influencer / creator / verified flags. One request, cached 24h. Reach for this when you want to know WHO someone is without pulling the experience and education cards you will not read. Addressed by public_identifier ONLY: a urn-only call is refused before any browser work (resolve the slug with enrich_linkedin_person_lite_profile first). NOTE primary_language and supported_languages are the profile's LOCALE settings, i.e. which language the profile is written in. They are NOT the Languages section and carry no proficiency; do not read them as 'this person speaks these languages'.",
+      "The same ONE LinkedIn request and the same facts as enrich_linkedin_person_lite_profile, under the wire's own names (id, urn, public_identifier, picture_url): the name, headline, location with its geo ids, locales, cover, the premium / influencer / creator / verified / Top Voice marks, the status, and the pinned account's degree, connection date and pending invitation (null when the read was not that account's). cached 24h. Address by profile_id XOR public_identifier. NOTE primary_language and supported_languages are the profile's LOCALE settings, i.e. which language the profile is written in. They are NOT the Languages section and carry no proficiency; do not read them as 'this person speaks these languages'.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-basic-profile' },
     operation: 'action',
@@ -484,23 +538,19 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
         id: z.string(),
         urn: z.string(),
         member_id: z.string().nullable(),
+        member_urn: z.string().nullable(),
         public_identifier: z.string(),
         first_name: z.string(),
         last_name: z.string(),
         full_name: z.string(),
         headline: z.string().nullable(),
-        primary_language: z.string().optional().describe('Profile LOCALE, not a spoken language.'),
-        supported_languages: z.array(z.string()).optional().describe('Profile locales, not spoken languages, and no proficiency.'),
-        country: z.string().nullable(),
-        location: z.string().nullable(),
         picture_url: z.string().nullable(),
-        background_picture_url: z.string().nullable(),
-        is_premium: z.boolean(),
-        is_influencer: z.boolean(),
-        is_creator: z.boolean(),
-        is_memorialized: z.boolean(),
-        has_verified_profile: z.boolean(),
-        has_premium_subscriber_badge: z.boolean(),
+        ...ProfileHeaderFacts,
+        is_memorialized: z.boolean().nullable(),
+        is_email_required_to_connect: z.boolean().nullable(),
+        network_distance: NETWORK_DISTANCE,
+        connected_at: z.string().nullable(),
+        pending_invitation: PendingInvitation,
       }).passthrough(),
       data_request: DataRequestRow,
     }).passthrough()),
@@ -564,7 +614,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_full_profile',
     description:
-      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, the contact card as LinkedIn shows it to the reading account (contact_info, in person-contact-info\'s shape), plus truncated heads of experience/education/skills (no posts since 2026-11-03: the feed is person-posts). cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
+      'The complete person dossier: every fact enrich_linkedin_person_lite_profile states (identity, headline, location with geo ids, locales, cover, premium / verified / creator / open-to-work / hiring / Top Voice marks), plus position/company, about, follower/connection counts, the contact card as LinkedIn shows it to the reading account (contact_info, in person-contact-info\'s shape), and the WHOLE experience, education and skills lists (up to 100 rows each; no posts since 2026-11-03: the feed is person-posts). Eight or nine LinkedIn requests (the education list one of them), cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. picture_url is normalized to avatar_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-full-profile' },
     operation: 'action',
@@ -615,7 +665,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_education',
     description:
-      'Education history only, a subset projection of the full-profile wire call (NOT a stub: shares get-full-profile, no dedicated verb). cached 7d under its own method key (a cached full profile does NOT satisfy it). Not paginated. public_identifier passes straight through (native slug support).',
+      'Education history only, every school (the whole Show all educations list): ONE LinkedIn request by profile_id, two by public_identifier (the list takes the id alone, so the slug is resolved first). Each school: name, its page vanity and id, logo, degree and field of study apart, the years, the texts under it. cached 7d under its own method key (a cached full profile does NOT satisfy it). Not paginated.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-education' },
     operation: 'action',
