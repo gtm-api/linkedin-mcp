@@ -302,26 +302,22 @@ const FullProfileResult = z.object({
   featured: z.array(LooseItem),     // pinned Featured head; raw-wire
 }).passthrough();
 
-// person-lite-profile result (row 48): the identifier quad, then everything else
-// LinkedIn's contact card answer says about the member (2026-11-10, plugin
-// 1.8.0), and the photo. LinkedIn carries the headline and a connection's photo
-// on the member's own record inside the relationship block of that answer;
-// anyone else's photo is read off the basic profile answer, one request more,
-// which also fills the headline where the first answer resolves no copy of the
-// member. The email-required mark comes only while the two are not connected and
-// no invitation is pending. The contact card is the one LinkedIn shows the
-// reading account (2026-11-10, Eugene: it is in the same answer).
+// person-lite-profile result (row 48): the identifier quad, then what ONE
+// request of LinkedIn's basic profile query says about the member (plugin
+// 1.8.0): the name in its parts, the headline, the photo of any member and the
+// marks. That query takes a slug, a profile id or a Sales Navigator id alike,
+// which is how this read turns one identifier into the others. The
+// email-required mark comes only while the two are not connected and no
+// invitation is pending. No contact card (2026-11-11, Eugene: LinkedIn's
+// contact card query is asked for the card alone): person-contact-info.
 const LiteProfileResult = PersonRef.extend({
   first_name: z.string().nullable().describe('The first name as LinkedIn returns it. Null when the answer came from a body that has no name parts (a cached full profile, a body stored before 2026-11-10); never a split of full_name.'),
   last_name: z.string().nullable().describe('The last name as LinkedIn returns it. Null on the same bodies as first_name.'),
   full_name: z.string().describe("The name as one line: the line the stored body states, else first_name and last_name joined; '' when unknown."),
   headline: z.string().nullable().describe("The profile's headline. Null when LinkedIn states none for the member."),
-  avatar_url: z.string().nullable().describe('The photo, re-hosted on our storage (a durable link), for any member who shows one: a 1st-degree connection of the reading account in the same answer, anyone else one LinkedIn request more. Null when the member shows none.'),
+  avatar_url: z.string().nullable().describe('The photo, re-hosted on our storage (a durable link), for any member who shows one, whatever the degree. Null when the member shows none.'),
   is_memorialized: z.boolean().nullable().describe("LinkedIn's mark on the account of a member who died (the profile reads 'In memoriam'): do not contact. Null when unknown."),
   is_email_required_to_connect: z.boolean().nullable().describe("LinkedIn asks for the member's email address before a connection request can be sent to them, as it told the reading account. Stated only while the two are not connected and no invitation is pending; null otherwise."),
-  email: z.string().nullable().describe("contact_info.email, flat, as person-full-profile carries it. Null unless LinkedIn opens it to the reading account (a 1st-degree connection)."),
-  phone: z.string().nullable().describe("The card's first MOBILE number, flat, as person-full-profile carries it; every number of any type is in contact_info.phones."),
-  contact_info: ContactInfoResult.describe("The contact card LinkedIn shows the READING account: a 1st-degree connection's email, phones and the rest, for anyone else mostly the websites. Off the shared pool, which is nobody's connection, expect the websites alone; for a connection's whole card use enrich_linkedin_person_contact_info."),
   network_distance: NETWORK_DISTANCE,
 });
 
@@ -456,7 +452,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_lite_profile',
     description:
-      "Cheapest person read: existence check + full identifier resolution, plus who the person is at a glance. THE tool for turning a vanity slug (/in/…) or a bare URN into the canonical identifier quad (ln_member_id + both URNs + nickname) that every deeper enrich and stored-domain join keys on. Also returns first_name and last_name (full_name is computed), the headline, the photo, is_memorialized (a deceased member's account, do not contact), is_email_required_to_connect and the contact card LinkedIn shows the reading account (contact_info, flat email and phone; off the shared pool mostly the websites). One LinkedIn request, two when the photo is not a 1st-degree connection's. cached 24h. Pin linkedin_account_sid and network_distance carries the degree relative to that account; unpinned it is null. The connection date: check_linkedin_connection_degree; a connection's whole card: enrich_linkedin_person_contact_info; location: enrich_linkedin_person_basic_profile. Address by profile_id XOR public_identifier.",
+      "Cheapest person read, ONE LinkedIn request: existence check + full identifier resolution, plus who the person is at a glance. THE tool for turning a vanity slug (/in/…) into the URNs, or a bare URN (a profile id or a Sales Navigator id) into the slug: it returns the canonical identifier quad (ln_member_id + both URNs + nickname) that every deeper enrich and stored-domain join keys on. Also returns first_name and last_name (full_name is computed), the headline, the photo of any member, is_memorialized (a deceased member's account, do not contact) and is_email_required_to_connect. No contact card: a connection's contacts are enrich_linkedin_person_contact_info. cached 24h. Pin linkedin_account_sid and network_distance carries the degree relative to that account; unpinned it is null. The connection date: check_linkedin_connection_degree; location: enrich_linkedin_person_basic_profile. Address by profile_id XOR public_identifier.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-lite-profile' },
     operation: 'action',
@@ -473,7 +469,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_basic_profile',
     description:
-      "The middle person read, between the lite identity stub and the full dossier: the name in its parts (first / last) and the line computed from them, headline, country and display location, profile and background imagery, and the premium / influencer / creator / verified flags. One request, cached 24h. Reach for this when you want to know WHO someone is without pulling the experience and education cards you will not read. Addressed by public_identifier ONLY: the underlying query keys on the vanity slug, so a urn-only call is refused before any browser work (resolve the slug with enrich_linkedin_person_lite_profile first). NOTE primary_language and supported_languages are the profile's LOCALE settings, i.e. which language the profile is written in. They are NOT the Languages section and carry no proficiency; do not read them as 'this person speaks these languages'.",
+      "The middle person read, between the lite identity stub and the full dossier: the name in its parts (first / last) and the line computed from them, headline, country and display location, profile and background imagery, and the premium / influencer / creator / verified flags. One request, cached 24h. Reach for this when you want to know WHO someone is without pulling the experience and education cards you will not read. Addressed by public_identifier ONLY: a urn-only call is refused before any browser work (resolve the slug with enrich_linkedin_person_lite_profile first). NOTE primary_language and supported_languages are the profile's LOCALE settings, i.e. which language the profile is written in. They are NOT the Languages section and carry no proficiency; do not read them as 'this person speaks these languages'.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-basic-profile' },
     operation: 'action',
@@ -568,7 +564,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_full_profile',
     description:
-      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, the contact card as LinkedIn shows it to the reading account (contact_info, in the lite read\'s shape), plus truncated heads of experience/education/skills (no posts since 2026-11-03: the feed is person-posts). cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
+      'The complete person dossier: identity, headline/position/company, location, about, follower/connection counts, premium/verification flags, the contact card as LinkedIn shows it to the reading account (contact_info, in person-contact-info\'s shape), plus truncated heads of experience/education/skills (no posts since 2026-11-03: the feed is person-posts). cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. Full sub-record lists still need the dedicated paginated methods. picture_url is normalized to avatar_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-full-profile' },
     operation: 'action',
