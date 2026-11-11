@@ -245,7 +245,7 @@ const ContactInfoResult = z.object({
   // Wire shape from LinkedinContactInfoMapper::fromWireProfile: singular email,
   // typed phones/websites objects (richer than the flat string[] sketch). The
   // birthday, the address, the messengers and WeChat are the rest of the same
-  // card; the node parses them since plugin 1.8.0 (2026-11-10), and a body
+  // card; the node parses them since plugin 1.9.0 (2026-11-10), and a body
   // stored before that reads them as null / []. `connected_at` of the first
   // sketch is not a contact: check_linkedin_connection_degree answers it.
   email: z.string().nullable(),
@@ -315,7 +315,7 @@ const FullProfileResult = z.object({
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
-  // The name in its parts (2026-11-10, plugin 1.8.0): absent on a body stored
+  // The name in its parts (2026-11-10, plugin 1.9.0): absent on a body stored
   // before that, hence optional. The node glues nothing since then: full_name
   // is computed by the service, the stated line else the parts joined.
   first_name: z.string().nullable().optional(),
