@@ -486,6 +486,63 @@ const CompanyProfileResult = z.object({
   logo_url: z.string().nullable(),
 }).passthrough();
 
+// company-lite-profile result: the node's light company as it answers it, every
+// fact the page's own record states (one request by either key, 2026-11-11).
+// The full company keeps its own projection (CompanyProfileResult above).
+const CompanyLocation = z.object({
+  description: z.string().nullable(),
+  address: z.object({
+    country: z.string().nullable(),
+    geographic_area: z.string().nullable(),
+    city: z.string().nullable(),
+    postal_code: z.string().nullable(),
+    line1: z.string().nullable(),
+    line2: z.string().nullable(),
+  }).nullable(),
+  is_headquarter: z.boolean().nullable(),
+});
+const LiteCompanyResult = z.object({
+  id: z.string(),
+  urn: z.string(),
+  public_identifier: z.string(),
+  name: z.string(),
+  localized: z.array(z.object({ locale: z.string(), name: z.string().nullable(), tagline: z.string().nullable(), description: z.string().nullable() })),
+  tagline: z.string().nullable(),
+  description: z.string().nullable(),
+  logo_url: z.string().nullable().optional(),
+  cover_image_url: z.string().nullable(),
+  company_url: z.string(),
+  website_url: z.string().nullable(),
+  phone: z.string().nullable(),
+  founded_on: z.object({ year: z.number().nullable(), month: z.number().nullable(), day: z.number().nullable() }).nullable(),
+  employee_count: z.number().nullable(),
+  employee_count_range: z.object({ start: z.number().nullable(), end: z.number().nullable() }).nullable(),
+  industry_ids: z.array(z.string()).describe('LinkedIn industry ids (urn:li:fsd_industryV2:<id>); the name is enrich_linkedin_company_profile\'s.'),
+  specialities: z.array(z.string()),
+  hashtags: z.array(z.string()),
+  organization_type: z.object({ code: z.string().nullable(), name: z.string().nullable() }).nullable(),
+  page_type: z.string().nullable(),
+  page_verified: z.boolean().nullable(),
+  page_verified_at: z.string().nullable(),
+  active: z.boolean().nullable(),
+  archived: z.boolean().nullable(),
+  auto_generated: z.boolean().nullable().describe('The page was made by LinkedIn, not by the company.'),
+  claimable: z.boolean().nullable().describe('The page has no admin and can be claimed.'),
+  category_page: z.boolean().nullable(),
+  created_at: z.string().nullable(),
+  default_locale: z.string().nullable(),
+  announcement: z.string().nullable(),
+  call_to_action: z.object({ text: z.string().nullable(), url: z.string().nullable(), type: z.string().nullable(), visible: z.boolean().nullable() }).nullable(),
+  job_search_url: z.string().nullable(),
+  headquarter: CompanyLocation.nullable(),
+  locations: z.array(z.object({ name: z.string().nullable(), latitude: z.number().nullable(), longitude: z.number().nullable(), locations: z.array(CompanyLocation) })),
+  parent_company: z.object({ id: z.string(), urn: z.string() }).nullable(),
+  competitors: z.array(z.object({ id: z.string(), urn: z.string(), suggested: z.boolean().nullable().describe('LinkedIn proposed it rather than the page.') })),
+  newsletter_urn: z.string().nullable(),
+  group_urns: z.array(z.string()),
+  credibility_highlights: z.array(z.object({ text: z.string(), featured: z.boolean().nullable(), logo_url: z.string().nullable() })),
+}).passthrough();
+
 // item is ALWAYS null on this stateless surface (controller passes item: null).
 const NullItem = z.null();
 
@@ -510,7 +567,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_lite_profile',
     description:
-      "Cheapest person read, ONE LinkedIn request, and everything it states: existence check + full identifier resolution. THE tool for turning a vanity slug (/in/…) into the URNs, or a bare URN (a profile id or a Sales Navigator id) into the slug: it returns the canonical identifier quad (ln_member_id + both URNs + nickname). Also the name (full_name computed), the headline, the photo and cover, the location with its geo ids (location_geo_id feeds the location search filter), the locales, the premium, verified, creator, open-to-work, hiring and Top Voice marks, the status, is_memorialized (do not contact) and is_email_required_to_connect. Pin linkedin_account_sid and network_distance, connected_at and pending_invitation are that account's; unpinned they are null. No contact card: enrich_linkedin_person_contact_info. cached 24h. Address by profile_id XOR public_identifier.",
+      "Cheapest person read, ONE LinkedIn request, and everything it states: existence check + full identifier resolution. THE tool for turning a vanity slug (/in/…) into the URNs, or a bare URN (a profile id or a Sales Navigator id) into the slug: it returns the canonical identifier quad (ln_member_id + both URNs + nickname). Also the name (full_name computed), the headline, the photo and cover, the location with its geo ids (location_geo_id feeds the location search filter), the locales, the premium, verified, creator, open-to-work, hiring and Top Voice marks, the status, is_memorialized (do not contact) and is_email_required_to_connect. Pin linkedin_account_sid and network_distance, connected_at and pending_invitation are that account's; unpinned they are null. No contact card: enrich_linkedin_person_contact_info. primary_language and supported_languages are the profile's LOCALES, not what the person speaks (that is enrich_linkedin_person_languages). cached 24h. Address by profile_id XOR public_identifier.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-lite-profile' },
     operation: 'action',
@@ -525,46 +582,9 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
   },
   {
     ...base,
-    name: 'enrich_linkedin_person_basic_profile',
-    description:
-      "The same ONE LinkedIn request and the same facts as enrich_linkedin_person_lite_profile, under the wire's own names (id, urn, public_identifier, picture_url): the name, headline, location with its geo ids, locales, cover, the premium / influencer / creator / verified / Top Voice marks, the status, and the pinned account's degree, connection date and pending invitation (null when the read was not that account's). cached 24h. Address by profile_id XOR public_identifier. NOTE primary_language and supported_languages are the profile's LOCALE settings, i.e. which language the profile is written in. They are NOT the Languages section and carry no proficiency; do not read them as 'this person speaks these languages'.",
-    toolClass: 'typical',
-    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-basic-profile' },
-    operation: 'action',
-    envelope: 'action',
-    availability: 'ga',
-    dangerous: false,
-    massAction: false,
-    scheduleRequired: false,
-    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
-    outputSchema: McpActionResponse(NullItem, z.object({
-      profile: z.object({
-        id: z.string(),
-        urn: z.string(),
-        member_id: z.string().nullable(),
-        member_urn: z.string().nullable(),
-        public_identifier: z.string(),
-        first_name: z.string(),
-        last_name: z.string(),
-        full_name: z.string(),
-        headline: z.string().nullable(),
-        picture_url: z.string().nullable(),
-        ...ProfileHeaderFacts,
-        is_memorialized: z.boolean().nullable(),
-        is_email_required_to_connect: z.boolean().nullable(),
-        network_distance: NETWORK_DISTANCE,
-        connected_at: z.string().nullable(),
-        pending_invitation: PendingInvitation,
-      }).passthrough(),
-      data_request: DataRequestRow,
-    }).passthrough()),
-    annotations: { title: 'Enrich person basic profile', ...LIVE },
-  },
-  {
-    ...base,
     name: 'enrich_linkedin_company_lite_profile',
     description:
-      "The cheap company read: id, vanity, name and logo, nothing else. Deliberately sparse, the company twin of the lite person profile. Use it to confirm a company exists and to pin its identifiers before joining data; use enrich_linkedin_company_profile when you actually need industry, size, HQ or the about text. cached 7d. COST NOTE: a /company/<slug>/ URL is ONE small request on LinkedIn's side, while a Sales Navigator /sales/company/<id> URL costs TWO, because the vanity has to be resolved first (measured: 433 ms vs 2479 ms). Prefer the vanity URL, or resolve the id once with enrich_linkedin_company_public_identifier and reuse it.",
+      "The cheap company read: ONE LinkedIn request by the vanity URL or a numeric-id URL alike (the page's own record), and every fact it states: id, vanity, name in every locale, tagline, about, website, phone, founding date, exact headcount and size range, industry ids, specialities, hashtags, organization and page type, the verified mark, headquarters and every location with coordinates, parent company, listed competitors, call to action and credibility highlights. The industry NAME and the follower count are enrich_linkedin_company_profile's (two or three requests). cached 7d.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/company-lite-profile' },
     operation: 'action',
@@ -578,23 +598,14 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
       ...executorFields,
       ...usageMetaField,
     }),
-    outputSchema: McpActionResponse(NullItem, z.object({
-      company: z.object({
-        id: z.string(),
-        urn: z.string(),
-        public_identifier: z.string(),
-        name: z.string(),
-        logo_url: z.string().nullable(),
-      }).passthrough(),
-      data_request: DataRequestRow,
-    }).passthrough()),
+    outputSchema: McpActionResponse(NullItem, z.object({ company: LiteCompanyResult, data_request: DataRequestRow }).passthrough()),
     annotations: { title: 'Enrich company lite profile', ...LIVE },
   },
   {
     ...base,
     name: 'enrich_linkedin_company_public_identifier',
     description:
-      "Resolve a numeric LinkedIn company id to its vanity slug. Its own method because this resolution is the single most expensive company request LinkedIn serves: a ~164KB organizational-page download, the only id-native request that reveals the vanity. Cached 30d, since the mapping does not change. The pattern that keeps company work cheap: resolve the id ONCE here, then call every other company read by vanity.",
+      "Resolve a numeric LinkedIn company id to its vanity slug: ONE light LinkedIn request (the page's own record), cached 30d since the mapping does not change. enrich_linkedin_company_lite_profile by the same id makes the same request and answers every fact of the record, so take it when you want more than the slug.",
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/company-public-identifier' },
     operation: 'action',
@@ -737,7 +748,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_languages',
     description:
-      'The Languages section: spoken languages with self-declared proficiency. Cheap localization signal: write the opener in the prospect\'s native language. cached 7d. Most profiles declare NONE, so an empty list is a real answer about the person rather than a failed read. proficiency is the RAW string LinkedIn renders, suffix included ("Native or bilingual proficiency", "Full professional proficiency", ...), localized on non-English sessions and null when the member declared the language without a level. Address by profile_id XOR public_identifier; like certifications, the screen behind this one needs the vanity slug AND the member urn at once, so the backend resolves whichever half you did not send.',
+      'The Languages section: spoken languages with self-declared proficiency. Cheap localization signal: write the opener in the prospect\'s native language. cached 7d. Most profiles declare NONE, so an empty list is a real answer about the person rather than a failed read. proficiency is the RAW string LinkedIn renders, suffix included ("Native or bilingual proficiency", "Full professional proficiency", ...), localized on non-English sessions and null when the member declared the language without a level. Address by profile_id XOR public_identifier; like certifications, the screen behind this one is addressed by the vanity slug, so public_identifier is the one request and a profile_id costs a resolve of the slug first (free when this team enriched the person before).',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-languages' },
     operation: 'action',
@@ -754,7 +765,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_certifications',
     description:
-      'Licenses and certifications from the target profile: issuing authority, license number, validity window. A qualification and compliance signal for recruiting and technical ICP fit. cached 7d. Most profiles have NONE, so an empty list is a real answer about the person rather than a failed read. license_number and url are frequently null even on real entries (LinkedIn own certifications carry neither). Address by profile_id XOR public_identifier, the same exactly-one-of rule as every other person read: passing both is a 422, they prohibit each other. The screen behind this one is the exception that needs the vanity slug AND the member urn at once, so the backend resolves whichever half you did not send. Addressing by public_identifier skips even that resolve once this team has enriched the person before, because the urn is then already on an earlier ledger row.',
+      'Licenses and certifications from the target profile: issuing authority, license number, validity window. A qualification and compliance signal for recruiting and technical ICP fit. cached 7d. Most profiles have NONE, so an empty list is a real answer about the person rather than a failed read. license_number and url are frequently null even on real entries (LinkedIn own certifications carry neither). Address by profile_id XOR public_identifier, the same exactly-one-of rule as every other person read: passing both is a 422, they prohibit each other. The screen behind this one is addressed by the vanity slug, so public_identifier is the ONE request; a profile_id costs one resolve of the slug first, skipped when this team enriched the person before (the slug is then on an earlier ledger row).',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-certifications' },
     operation: 'action',
@@ -771,7 +782,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_recommendations',
     description:
-      "Recommendations on the target profile: who vouches for them and in what words. `direction` picks received (the default, what LinkedIn opens on) or given; these are two SEPARATE reads of the same screen, so asking for both runs the method twice. cached 7d. The counterpart carries a nickname, name, headline and network distance but NO ln_id: LinkedIn does not put the member urn in this payload, so enrich the nickname separately if you need the urn. created_at is parsed out of the free-text context line and is null when that line has no date. Address by profile_id XOR public_identifier, the same exactly-one-of rule as every other person read: passing both is a 422, they prohibit each other. The screen behind this one is the exception that needs the vanity slug AND the member urn at once, so the backend resolves whichever half you did not send.",
+      "Recommendations on the target profile: who vouches for them and in what words. `direction` picks received (the default, what LinkedIn opens on) or given; these are two SEPARATE reads of the same screen, so asking for both runs the method twice. cached 7d. The counterpart carries a nickname, name, headline and network distance but NO ln_id: LinkedIn does not put the member urn in this payload, so enrich the nickname separately if you need the urn. created_at is parsed out of the free-text context line and is null when that line has no date. Address by profile_id XOR public_identifier, the same exactly-one-of rule as every other person read: passing both is a 422, they prohibit each other. The screen behind this one is addressed by the vanity slug, so public_identifier is the one request and a profile_id costs a resolve of the slug first.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-recommendations' },
     operation: 'action',
