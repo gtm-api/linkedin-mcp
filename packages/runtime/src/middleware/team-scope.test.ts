@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { z } from 'zod';
 import { clearSiblingTokenCache, makeTeamScope, TOKEN_EXCHANGE_TIMEOUT_MS } from './team-scope';
+import { withBackendCalls } from '../backend-calls';
 import type { AuthScope, DispatchContext, RuntimeDeps, ToolDefinition, ToolResult } from '../types';
 
 // The team-scope middleware is what turns a multi-team OAuth grant into a
@@ -208,6 +209,50 @@ describe('makeTeamScope', () => {
       expect((result?.structuredContent as { error: { code: string; message: string } }).error.code).toBe('internal_error');
       expect(result?.content[0].text).toContain('Could not reach the token exchange');
       expect(seen).toHaveLength(0);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  // The exchange is a backend call like the tool's own: it carries the trace id
+  // the gateway and id log, and the wide event notes it as the `token` call.
+  it('sends the trace id with the exchange and notes it as the token call', async () => {
+    const fetchSpy = vi.fn(
+      async () =>
+        new Response(JSON.stringify({ access_token: 'jwt-sibling', expires_in: 3600 }), {
+          status: 200,
+          headers: { 'cf-ray': '8f00000000000002-FRA' },
+        }),
+    );
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const { calls } = await withBackendCalls(() => makeTeamScope(deps)(mkCtx({}, { override: TEAM_B }), nextRecorder().next));
+
+    const [, init] = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
+    expect((init.headers as Record<string, string>)['X-Trace-Id']).toBe('trace-1');
+    expect(calls).toEqual([
+      { svc: 'id', kind: 'token', status: 200, hdr_ms: expect.any(Number), ms: expect.any(Number), ray: '8f00000000000002-FRA' },
+    ]);
+  });
+
+  it('notes an exchange its fuse cut as a timeout with no status', async () => {
+    vi.useFakeTimers();
+    try {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(
+          (_url: string, init: RequestInit) =>
+            new Promise<Response>((_resolve, reject) => {
+              init.signal?.addEventListener('abort', () => reject(Object.assign(new Error('aborted'), { name: 'AbortError' })));
+            }),
+        ),
+      );
+
+      const pending = withBackendCalls(() => makeTeamScope(deps)(mkCtx({}, { override: TEAM_B }), nextRecorder().next));
+      await vi.advanceTimersByTimeAsync(TOKEN_EXCHANGE_TIMEOUT_MS);
+      const { calls } = await pending;
+
+      expect(calls).toEqual([{ svc: 'id', kind: 'token', ms: TOKEN_EXCHANGE_TIMEOUT_MS, err: 'timeout' }]);
     } finally {
       vi.useRealTimers();
     }

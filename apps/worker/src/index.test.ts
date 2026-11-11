@@ -279,6 +279,82 @@ describe('the healthy path still serves', () => {
 // The whole chain, through the real worker: what a client that loops on has_more
 // and next_cursor gets, and what the backend is asked. The cases of the re-ask
 // itself are in packages/runtime/src/middleware/size-budget.test.ts.
+// The wide event is what a lost call is traced from: where Cloudflare ran the
+// request (colo, ray) and what each backend call of the message came to. The
+// cases of the notes themselves are in packages/runtime/src/backend-calls.test.ts.
+describe('the wide event of a message', () => {
+  const token = jwt({ iss: ISSUER, exp: inAnHour(), access_identity: { actor_type: 'user', actor_sid: 'us_mb_1', team_sid: 'ts_tm_1' } });
+
+  /** A request as Cloudflare hands it to the worker: its ray header and its cf.colo. */
+  const onCloudflare = (body: unknown, path: string) => {
+    const req = new Request(`${ORIGIN}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}`, 'cf-ray': '8f0000000000000a-AMS' },
+      body: JSON.stringify(body),
+    });
+    Object.defineProperty(req, 'cf', { value: { colo: 'AMS' } });
+    return req;
+  };
+
+  const wideEvents = (spy: { mock: { calls: unknown[][] } }) =>
+    spy.mock.calls
+      .map(([line]) => (typeof line === 'string' && line.startsWith('{') ? (JSON.parse(line) as Record<string, unknown>) : null))
+      .filter((e): e is Record<string, unknown> => e !== null && 'trace_id' in e);
+
+  it('names the colo, the ray and every backend call of a tool call', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(
+        async () =>
+          new Response(
+            JSON.stringify({
+              success: true,
+              operation: 'search',
+              items: [],
+              pagination: { next_cursor: null, has_more: false, total_count: 0 },
+              applied_filters: {},
+              includes: [],
+              meta: {},
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json', 'cf-ray': '8f0000000000000b-AMS' } },
+          ),
+      ),
+    );
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await worker.fetch(
+        onCloudflare(
+          { jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_linkedin_accounts', arguments: { page_size: 5 } } },
+          '/mcp/linkedin/accounts',
+        ),
+        healthy(),
+      );
+
+      const [event] = wideEvents(log);
+      expect(event).toMatchObject({ method: 'tools/call', tool: 'search_linkedin_accounts', ok: true, colo: 'AMS', ray: '8f0000000000000a-AMS' });
+      expect(event.backend).toEqual([
+        { svc: 'linkedin', kind: 'tool', status: 200, hdr_ms: expect.any(Number), ms: expect.any(Number), ray: '8f0000000000000b-AMS' },
+      ]);
+    } finally {
+      log.mockRestore();
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it('carries no backend field on a message that made no backend call', async () => {
+    const log = vi.spyOn(console, 'log').mockImplementation(() => {});
+    try {
+      await worker.fetch(onCloudflare({ jsonrpc: '2.0', id: 1, method: 'tools/list', params: {} }, MOUNT), healthy());
+
+      const [event] = wideEvents(log);
+      expect(event).toMatchObject({ method: 'tools/list', colo: 'AMS', ray: '8f0000000000000a-AMS' });
+      expect(event).not.toHaveProperty('backend');
+    } finally {
+      log.mockRestore();
+    }
+  });
+});
+
 describe('a search page over the answer budget', () => {
   const token = jwt({ iss: ISSUER, exp: inAnHour(), access_identity: { actor_type: 'user', actor_sid: 'us_mb_1', team_sid: 'ts_tm_1' } });
   const ROWS = Array.from({ length: 30 }, (_, i) => ({ item: { sid: `row_${String(i).padStart(4, '0')}`, notes: 'n'.repeat(3000) }, included: {} }));

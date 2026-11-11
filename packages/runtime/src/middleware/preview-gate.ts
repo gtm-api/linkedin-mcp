@@ -215,7 +215,7 @@ async function fetchPreviewRoute(ctx: DispatchContext): Promise<PreviewRouteResu
   if (!previewRoute) return null;
   const { commit_token: _c, _meta: _m, ...args } = ctx.args;
   try {
-    const res = await backendFetch({ ...ctx, tool: { ...ctx.tool, route: previewRoute }, args }, { timeoutMs: PREVIEW_ROUTE_TIMEOUT_MS });
+    const res = await backendFetch({ ...ctx, tool: { ...ctx.tool, route: previewRoute }, args }, { timeoutMs: PREVIEW_ROUTE_TIMEOUT_MS, kind: 'preview' });
     if (res.kind !== 'ok') return { status: 'unanswered', detail: `the dry run did not answer (${res.reason})` };
     const env = res.envelope as { success?: boolean; result?: unknown; error?: { code?: string } } | null;
     if (!env || env.success === false || res.status >= 400) {

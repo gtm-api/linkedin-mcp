@@ -1,5 +1,6 @@
 import type { DispatchContext } from './types';
 import { buildRequest } from './url';
+import { startBackendCall } from './backend-calls';
 
 export type BackendResult =
   | { kind: 'ok'; status: number; envelope: unknown }
@@ -11,8 +12,12 @@ export type BackendResult =
 // transport_error. Never throws. The fuse is the config's backendTimeoutMs (55 s
 // by default, apps/worker/src/config.ts says why); `timeoutMs` overrides it for
 // the calls that must stay short (the preview gate's validate twin and preview
-// route).
-export async function backendFetch(ctx: DispatchContext, opts: { validateOnly?: boolean; timeoutMs?: number } = {}): Promise<BackendResult> {
+// route). Every call is noted for the message's wide event (backend-calls.ts):
+// `validateOnly` marks the validate twin, `kind: 'preview'` the preview route.
+export async function backendFetch(
+  ctx: DispatchContext,
+  opts: { validateOnly?: boolean; timeoutMs?: number; kind?: 'tool' | 'preview' } = {},
+): Promise<BackendResult> {
   const { tool, scope, deps } = ctx;
   const { url, body } = buildRequest(ctx, opts);
 
@@ -27,6 +32,7 @@ export async function backendFetch(ctx: DispatchContext, opts: { validateOnly?: 
   if (scope.teamSid) headers['Team-SID'] = scope.teamSid;
   if (body !== undefined) headers['Content-Type'] = 'application/json';
 
+  const call = startBackendCall(tool.route.service, opts.validateOnly ? 'validate' : (opts.kind ?? 'tool'));
   try {
     const res = await fetch(url, {
       method: tool.route.method,
@@ -34,15 +40,18 @@ export async function backendFetch(ctx: DispatchContext, opts: { validateOnly?: 
       body: body !== undefined ? JSON.stringify(body) : undefined,
       signal: controller.signal,
     });
+    call.headers(res);
     const text = await res.text();
     if (!text) return { kind: 'ok', status: res.status, envelope: {} };
     try {
       return { kind: 'ok', status: res.status, envelope: JSON.parse(text) };
     } catch {
+      call.fail('non_json');
       return { kind: 'transport_error', reason: 'non_json', status: res.status, detail: text.slice(0, 500) };
     }
   } catch (err) {
     const isAbort = (err as { name?: string })?.name === 'AbortError';
+    call.fail(isAbort ? 'timeout' : 'network');
     return {
       kind: 'transport_error',
       reason: isAbort ? 'timeout' : 'network',
@@ -50,5 +59,6 @@ export async function backendFetch(ctx: DispatchContext, opts: { validateOnly?: 
     };
   } finally {
     clearTimeout(timer);
+    call.end();
   }
 }

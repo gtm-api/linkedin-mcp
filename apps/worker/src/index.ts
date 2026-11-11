@@ -9,6 +9,7 @@ import {
   resolveMounts,
   stubGate,
   runWithAuthScope,
+  withBackendCalls,
   type AuthScope,
   type Logger,
   type ResolvedMount,
@@ -317,16 +318,27 @@ export default {
       makePreviewGate(deps),
     ]);
     const scope: AuthScope = { ...auth.scope, mountPath: mount.config.path };
+    // Where Cloudflare ran this request: the data center (colo) and Cloudflare's
+    // own id of it (the cf-ray the client got back), the two a ticket to
+    // Cloudflare names. Absent off Cloudflare (tests, a local dev server).
+    const colo = (request.cf as { colo?: unknown } | undefined)?.colo;
+    const ray = request.headers.get('cf-ray');
 
     const responses = await runWithAuthScope(scope, async () => {
       const out: unknown[] = [];
       for (const msg of batch) {
         const server = factory(mount, DOMAIN_MOUNTS);
         const t0 = Date.now();
-        const resp = await handleMcpMessage(server, msg as never);
+        const { result: resp, calls } = await withBackendCalls(() => handleMcpMessage(server, msg as never));
         const { method, tool, ok, kbQuery } = summarizeCall(msg, resp);
         // One wide-event line per JSON-RPC message - the always-on "what did the
         // MCP receive" record (tool resolved through the facade's call_tool).
+        // `backend` is every call the message made to a platform backend, in
+        // order: its service and kind, the status and the time to the response
+        // headers once they came, the time to the end, the response's cf-ray, and
+        // the error when no usable answer came (packages/runtime/src/backend-calls.ts).
+        // With the trace id, which the gateway and the backends log too, it tells
+        // a call lost on Cloudflare's leg from a slow backend.
         logger.info({
           trace_id: scope.traceId,
           mount: mount.config.path,
@@ -337,6 +349,9 @@ export default {
           dur_ms: Date.now() - t0,
           team: scope.teamSid ? 'set' : 'token',
           actor: scope.actor.type,
+          ...(typeof colo === 'string' ? { colo } : {}),
+          ...(ray ? { ray } : {}),
+          ...(calls.length > 0 ? { backend: calls } : {}),
         });
         if (resp != null) out.push(resp);
       }

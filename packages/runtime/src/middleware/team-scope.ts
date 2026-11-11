@@ -1,5 +1,6 @@
 import type { ToolMiddleware } from '../chain';
 import type { DispatchContext, RuntimeDeps, ToolResult } from '../types';
+import { startBackendCall } from '../backend-calls';
 
 // Team-scope middleware: makes the multi-team OAuth grant actually usable.
 //
@@ -73,10 +74,14 @@ function errorResult(
   };
 }
 
+// The exchange carries the call's trace id like every backend call, so its
+// lines at the gateway and on id join the wide event, and it is noted there as
+// the `token` call (backend-calls.ts).
 async function exchangeForTeam(
   deps: RuntimeDeps,
   bearer: string,
   targetTeamSid: string,
+  traceId: string,
 ): Promise<{ kind: 'ok'; token: string } | { kind: 'denied'; description: string } | { kind: 'transport'; detail: string }> {
   const cacheKey = `${bearer}|${targetTeamSid}`;
   const cached = siblingCache.get(cacheKey);
@@ -89,10 +94,11 @@ async function exchangeForTeam(
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TOKEN_EXCHANGE_TIMEOUT_MS);
+  const call = startBackendCall('id', 'token');
   try {
     const res = await fetch(`${base.replace(/\/$/, '')}/oauth/token`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-Trace-Id': traceId },
       body: JSON.stringify({
         grant_type: TOKEN_EXCHANGE_GRANT,
         subject_token: bearer,
@@ -101,6 +107,7 @@ async function exchangeForTeam(
       }),
       signal: controller.signal,
     });
+    call.headers(res);
     const json = (await res.json().catch(() => null)) as
       | { access_token?: string; expires_in?: number; error?: string; error_description?: string }
       | null;
@@ -119,9 +126,11 @@ async function exchangeForTeam(
       description: json?.error_description ?? json?.error ?? `token endpoint answered ${res.status}`,
     };
   } catch (err) {
+    call.fail((err as { name?: string })?.name === 'AbortError' ? 'timeout' : 'network');
     return { kind: 'transport', detail: String((err as { message?: string })?.message ?? err) };
   } finally {
     clearTimeout(timer);
+    call.end();
   }
 }
 
@@ -153,7 +162,7 @@ export function makeTeamScope(deps: RuntimeDeps): ToolMiddleware {
       );
     }
 
-    const exchanged = await exchangeForTeam(deps, ctx.scope.token, target);
+    const exchanged = await exchangeForTeam(deps, ctx.scope.token, target, ctx.scope.traceId);
     if (exchanged.kind === 'transport') {
       return errorResult(
         'internal_error',

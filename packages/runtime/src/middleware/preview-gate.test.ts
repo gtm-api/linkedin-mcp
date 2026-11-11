@@ -7,6 +7,7 @@ import {
   makePreviewGate,
   VALIDATE_TWIN_TIMEOUT_MS,
 } from './preview-gate';
+import { withBackendCalls } from '../backend-calls';
 import type { CommitTokenStore, DispatchContext, RuntimeDeps, ToolDefinition, ToolResult } from '../types';
 
 const SECRET = 'unit-secret';
@@ -372,6 +373,18 @@ describe('preview gate: previewRoute', () => {
     expect(preview.validated).toBe(true);
     expect(typeof preview.commit_token).toBe('string');
     expect(res.content[0].text).toMatch(/immediate_charge/);
+  });
+
+  it('notes the twin and the dry run on the wide event as the validate and the preview call', async () => {
+    stubBackend([200, VALIDATED], [200, { success: true, operation: 'action', action: 'preview-change', item: null, result: QUOTE }]);
+    const deps = depsWithId();
+
+    const { calls } = await withBackendCalls(() => makePreviewGate(deps)(mkCtx({ sid: 'bl_sb_1', quantity: 9 }, deps, change), never));
+
+    expect(calls.map(({ svc, kind, status }) => ({ svc, kind, status }))).toEqual([
+      { svc: 'id', kind: 'validate', status: 200 },
+      { svc: 'id', kind: 'preview', status: 200 },
+    ]);
   });
 
   it('a route that refuses leaves the preview standing, unanswered', async () => {

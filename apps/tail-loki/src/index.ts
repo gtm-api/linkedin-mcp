@@ -1,9 +1,10 @@
 // gtm-mcp-tail: pushes gtm-mcp's console output to Grafana Cloud Loki.
 //
 // What it makes visible: the worker's one-line-per-JSON-RPC wide events
-// ({trace_id, mount, tool, ok, dur_ms, team, actor}) next to the copilot's and
-// the backends' logs. External MCP sessions - agents that never pass through
-// the in-product copilot - have no other footprint in the platform's Grafana.
+// ({trace_id, mount, tool, ok, dur_ms, team, actor, colo, ray, backend}) next to
+// the copilot's and the backends' logs. External MCP sessions - agents that never
+// pass through the in-product copilot - have no other footprint in the
+// platform's Grafana.
 
 export interface Env {
   LOKI_PUSH_URL: string;

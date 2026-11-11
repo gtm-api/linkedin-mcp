@@ -5,6 +5,7 @@ export * from './url';
 export * from './error-map';
 export * from './envelope';
 export * from './backend-client';
+export * from './backend-calls';
 export * from './dispatcher';
 export * from './registry';
 export * from './input-schema';
