@@ -65,6 +65,11 @@ const ENTITY_URN = z.string().min(1).max(512)
 // read, so a group post in doubt waits for a person. react stays outside the
 // rule: LinkedIn keeps one reaction per account and post, so a repeat changes
 // nothing. check_linkedin_posting_sent asks without sending.
+//
+// 2026-11-09: a comment made as a company page (author_organization_id) is
+// another comment than the member's at the same place, under one key or the
+// same words. No read shows a comment as the page's, so a page comment in doubt
+// waits for a person, as a group post does.
 const postingKey = (what: string, place: string, keyless: string) => z.string().max(255).nullable().optional()
   .describe(`Your key for this ONE ${what} (max 255, byte for byte): one key per ${what}, the same key on every repeat of it. The key and its place (${place}) are one ${what} whatever it says, and a repeat never goes out twice: it answers 200 with what the first send made (result.idempotent_replay, result.content_differs when this request says something else) or 409 naming error.context.send_outcome (in_flight, unknown with retry_after and send_decisive_at, or sent; not_sent with blocking_activity_log_sid when another ${what} in doubt holds the place). The same key at another place is another ${what}. Without a key ${keyless} count as a repeat for an hour after they went out. check_linkedin_posting_sent asks by it.`);
 
@@ -102,7 +107,7 @@ const CheckSentResult = z.object({
   outcome: z.string()
     .describe('sent | not_sent | in_flight | unknown. Send the same request again only on not_sent; on in_flight or unknown ask again after retry_after.'),
   reason: z.string().nullable()
-    .describe('Why. sent: null (item is what it made), result_pending (it went out, what it made is read later), caller_confirmed (a person said so; no item). not_sent: no_send_under_key, refused, not_on_linkedin, caller_confirmed. unknown: answer_lost, may_still_land, unreadable, unexplained, unprovable (a group post, or a page post its page has not shown: no read can prove either absent).'),
+    .describe('Why. sent: null (item is what it made), result_pending (it went out, what it made is read later), caller_confirmed (a person said so; no item). not_sent: no_send_under_key, refused, not_on_linkedin, caller_confirmed. unknown: answer_lost, may_still_land, unreadable, unexplained, unprovable (a group post, a page post its page has not shown, or a comment made as a company page: no read can prove any of them absent).'),
   retry_after: z.string().optional()
     .describe('ISO 8601: for a send in doubt, when LinkedIn is read for it next.'),
   activity_log_sid: z.string().optional()
@@ -403,7 +408,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'create_linkedin_comment',
     description:
-      'Leave ONE outbound comment on any LinkedIn post (wire create-comment): entity_urn takes a post urn in any family or a post URL carrying one, and the comment is written on the post\'s social thread (see entity_urn). Outward and fire-on-success: the post does NOT need to be tracked or owned by us. Identity-bound: linkedin_account_sid REQUIRED, spends the comment_posts bucket (30/day at a 360 s floor), saturation returns 429. Reply to an existing comment via parent_comment_urn. mentions turns exact substrings of text into clickable profile links ({profile_id, name} pairs; a name missing or out of order is a 422 with no dispatch spent). Returns the created comment ref plus the activity-log row. '
+      'Leave ONE outbound comment on any LinkedIn post (wire create-comment), as the member or AS a company page it administers (author_organization_id): entity_urn takes a post urn in any family or a post URL carrying one, and the comment is written on the post\'s social thread. The post does NOT need to be tracked or owned by us. Identity-bound: linkedin_account_sid REQUIRED, spends the comment_posts bucket (30/day at a 360 s floor), saturation returns 429. Reply to an existing comment via parent_comment_urn. mentions turns exact substrings of text into clickable links ({profile_id, name} pairs; a name missing or out of order is a 422 with no dispatch spent). Returns the created comment ref plus the activity-log row. '
       + sendOnce('place (the post as LinkedIn files it, or the comment a reply answers)')
       + ' To react use react_linkedin_post; to resolve a post URL use get_activity_urn_by_url.',
     toolClass: 'typical',
@@ -432,7 +437,9 @@ export const linkedinPostingTools: ToolDefinition[] = [
           .describe('The exact substring of text that becomes the clickable link (usually the member\'s or the page\'s name).'),
       })).optional()
         .describe('Mentions of members (profile_id) and company pages (company_id, 2026-10-29). Names are matched in text left to right in list order, each search starting after the previous mention. The node computes the character offsets itself.'),
-      client_reference: postingKey('comment', 'the post as LinkedIn files it, named by any of its urns, or for a reply the comment it answers', 'the same words at the same place'),
+      author_organization_id: z.string().regex(/^\d+$/).optional()
+        .describe('Comment AS a company page the account administers: the bare numeric company id (the company_ln_id enrich_linkedin_company_posts takes), for a top-level comment and a reply alike. Omit to comment as the member. The member and a page are two authors, so their comments at one place are two comments: give each a client_reference of its own, because check_linkedin_posting_sent takes no author and, asked by a key both share, answers for whichever went out. No read lists a comment as made by a page, so a page comment whose answer was lost stays in doubt until a person gives their word (confirmed_sent or confirmed_not_sent). A mass-action comment step does not take this field: a step comments as the member.'),
+      client_reference: postingKey('comment', 'the post as LinkedIn files it, named by any of its urns, or for a reply the comment it answers', 'the same words at the same place by the same author'),
       confirmed_not_sent: CONFIRMED_NOT_SENT,
       confirmed_sent: CONFIRMED_SENT,
       ...usageMetaField,

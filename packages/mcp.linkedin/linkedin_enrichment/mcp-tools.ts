@@ -344,6 +344,10 @@ const FullProfileResult = z.object({
   followers_number: z.number().nullable(),
   has_open_profile: z.boolean().nullable(),
   has_premium: z.boolean().nullable(),
+  is_open_to_work: z.boolean().nullable().optional()
+    .describe('True when the member shows the public #OpenToWork photo frame. False when the profile photo has no such frame: a member who shares Open to Work with recruiters only reads false too. Absent or null when unknown (no photo in the answer, or a payload cached before this field existed).'),
+  is_hiring: z.boolean().nullable().optional()
+    .describe('True when the member shows the public #Hiring photo frame. False when the profile photo has no such frame: the frame is optional, so false does not mean the member is not hiring. Never true together with is_open_to_work (a photo carries one frame). Absent or null when unknown (no photo in the answer, or a payload cached before this field existed).'),
   experience: z.array(LooseItem),   // the whole list, 100 rows read (2026-11-11); paged: person-experience
   educations: z.array(LooseItem),   // the whole list, the same rows person-education reads
   skills: z.array(LooseItem),       // the whole list, 100 rows read (carries wire `id`, not skill_id)

@@ -149,6 +149,8 @@ const AntidetectBrowser = z.object({
   // Proxy assignment (XOR: exactly one populated on managed browsers)
   antidetect_browser_proxy_sid: z.string().nullable(),
   proxy_country_code: z.string().nullable(),
+  proxy_actual_country_code: z.string().nullable()
+    .describe('Read only. The country the linked managed proxy exits in now, as LinkedIn last saw it; null without a managed proxy. When it differs from proxy_country_code, replace_antidetect_browser_proxy moves the browser to a proxy in the chosen country.'),
   // The password-free half of a BYO upstream, derived from the persistence-only
   // column. Non-null is how a reader tells "routed through the proxy the customer
   // supplied" from "on our managed pool" (antidetect_browser_proxy_sid set) and
