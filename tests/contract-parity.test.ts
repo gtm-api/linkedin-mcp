@@ -323,9 +323,12 @@ const numberOr = (value: number | string | null): number | null => (typeof value
 // a genuine ambiguity: it is counted as a skip and printed, never guessed at.
 
 const flatten = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+// `-xes` drops two letters: email_boxes is EmailBox, and the plain `-s` rule made
+// it `emailboxe`, which resolves to no Domain, so every email-boxes tool was a
+// printed skip instead of a check (2026-11-12).
 const singularize = (value: string) =>
   value.endsWith('ies') ? `${value.slice(0, -3)}y`
-    : value.endsWith('sses') ? value.slice(0, -2)
+    : value.endsWith('sses') || value.endsWith('xes') ? value.slice(0, -2)
       : value.endsWith('s') && !value.endsWith('ss') ? value.slice(0, -1)
         : value;
 

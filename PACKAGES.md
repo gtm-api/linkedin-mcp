@@ -19,8 +19,9 @@ refuses it). 30 shared id and webhook-logs verbs are `api` here, the shared cont
 MCP_SURFACE_V2.md section 7 of the getsales umbrella: 28 of the 32 gs.mcp cut on 2026-11-06 (a delete
 of a shared tool waits on gtm's own call numbers; the other four, the certificate verbs, came back
 on 2026-11-07, gtm has no brand to fold them into), and two more on 2026-11-07, whose routes the app
-still calls. So a row below reads **defined (served)** where the two differ, and a mount's count is
-what it serves.
+still calls. Two of gtm's own joined them on 2026-11-12, the email-boxes `preview-resize` and
+`confirm-checkout` routes, 32 in all. So a row below reads **defined (served)** where the two differ,
+and a mount's count is what it serves.
 
 ## mcp.linkedin: 12 mounts / 190 tools
 
@@ -162,14 +163,22 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 4 mounts / 75 tools defined, 48 served
+## mcp.id: 4 mounts / 84 tools defined, 55 served
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
 | identity | `/mcp/id/identity` | users (2 defined, 1 served), teams (6 defined, 4 served), team_members (6 defined, 5 served), sessions (2 defined, 0 served) | 10 | ✅ |
 | access | `/mcp/id/access` | api_keys (7 defined, 3 served), oauth_clients (5 defined, 0 served), oauth_authorizations (3 defined, 2 served), account_shares (5) | 10 | ✅ |
-| billing | `/mcp/id/billing` | billing_products (1 defined, 0 served), billing_subscriptions (14 defined, 7 served), billing_transactions (4 defined, 3 served), billing_payment_methods (3 defined, 2 served) | 12 | ✅ |
+| billing | `/mcp/id/billing` | billing_products (1 defined, 0 served), billing_subscriptions (14 defined, 7 served), billing_transactions (4 defined, 3 served), billing_payment_methods (3 defined, 2 served), email_boxes (9 defined, 7 served) | 19 | ✅ |
 | platform | `/mcp/id/platform` | notifications (4 defined, 3 served), ssl_certificates (7), support_requests (3), api_requests (2), media_uploads (1) | 16 | ✅ |
+
+2026-11-12 - id 48 served to 55, billing 12 to 19: `mcp.id/email_boxes`, the workspace's email servers
+(ADR 001 D12, several per workspace), authored once the backend and the Email Accounts screen had
+settled the contract. A server is one unit of the subscription, so it sits with the other money verbs.
+`create_email_box`, `resize_email_box` and `delete_email_box` are behind the preview gate, and the first
+call of `resize_email_box` carries the quote of `preview-resize` (`previewRoute`), which is
+`surface: api` like `confirm-checkout`, the app's own step after the Paddle checkout it opens. The id
+ratchet went 9 to 0.
 
 2026-11-07 - id 46 served to 48, two rulings on the shared verbs. platform 12 to 16: `search_`, `get_`,
 `delete_` and `issue_ssl_certificate` are served again. GetSales cut its certificate reads because they
@@ -275,8 +284,8 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **262 tools served**
-(linkedin 192 + id 48 + orchestration 20 + support 2) of 292 defined: the 30 REST-only definitions
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **269 tools served**
+(linkedin 192 + id 55 + orchestration 20 + support 2) of 301 defined: the 32 REST-only definitions
 (surface api) are in no toolset, and `call_tool` refuses them by name.
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
@@ -292,8 +301,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **49 registry packages / 292 tools defined, 262 served**, over **18 mounts + 1 facade**. By
-service: linkedin 192 (27 packages), id 75 defined and 48 served (17), orchestration 23 defined and 20
+Totals: **50 registry packages / 301 tools defined, 269 served**, over **18 mounts + 1 facade**. By
+service: linkedin 192 (27 packages), id 84 defined and 55 served (18), orchestration 23 defined and 20
 served (4), support 2 (1). Every number in this file is read off the built registry (`buildRegistry`
 over the four barrels, then `resolveMounts` over `MOUNTS`); the per-mount ones are the headroom table
 `tests/worker-boot.test.ts` prints on a green run, so re-run it rather than editing a count by hand.

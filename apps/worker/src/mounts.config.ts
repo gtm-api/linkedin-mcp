@@ -364,7 +364,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/id/billing',
     name: 'gtm-id-billing',
     instructions:
-      'GTM billing: subscriptions (search, get, apply / unapply, change the plan, add-ons), transactions & invoices, payment methods (list, add-card link for the workspace\'s subscription or a named one). Money-moving actions are protected (preview → confirm): the first call of change_billing_subscription is the preview, its preview_result carries the money. Checkout, pause, resume, cancel and undo-cancel, the product catalog, removing a card and the transactions metrics are the app\'s own doors: REST only since 2026-11-06, no tool here.',
+      'GTM billing: subscriptions (search, get, apply / unapply, change the plan, add-ons), transactions & invoices, payment methods (list, add-card link for the workspace\'s subscription or a named one), and the workspace\'s email servers, each a paid unit of its subscription (search, buy, rename, change the plan, delete, move mailboxes in, retry a failed run). Money-moving actions are protected (preview → confirm): the first call of change_billing_subscription and of resize_email_box is the preview, its preview_result carries the money. Checkout, pause, resume, cancel and undo-cancel, the product catalog, removing a card, the transactions metrics and the email server checkout confirm are the app\'s own doors: REST only, no tool here.',
     selectors: [
       // billing_products serves nothing since 2026-11-06: its one tool is REST
       // only (surface api), the selector stays so the package keeps its home.
@@ -372,6 +372,11 @@ export const MOUNTS: MountConfig[] = [
       pid('billing_subscriptions'),
       pid('billing_transactions'),
       pid('billing_payment_methods'),
+      // email_boxes (2026-11-12): a server is one unit of the workspace's
+      // subscription, bought, resized and given back through it, so it sits with
+      // the other money verbs. 7 served of 9: confirm-checkout and preview-resize
+      // are REST only (surface api).
+      pid('email_boxes'),
     ],
     maxTools: 25,
     facade: 'none',

@@ -16,6 +16,7 @@ import { sslCertificatesTools } from './ssl_certificates/mcp-tools';
 import { accountSharesTools } from './account_shares/mcp-tools';
 import { apiRequestsTools } from './api_requests/mcp-tools';
 import { mediaUploadsTools } from './media_uploads/mcp-tools';
+import { emailBoxesTools } from './email_boxes/mcp-tools';
 
 const pkg = (entity: string, tools: ToolPackage['tools']): ToolPackage => ({
   id: `mcp.id/${entity}`,
@@ -42,4 +43,5 @@ export const idPackages: ToolPackage[] = [
   pkg('account_shares', accountSharesTools),
   pkg('api_requests', apiRequestsTools),
   pkg('media_uploads', mediaUploadsTools),
+  pkg('email_boxes', emailBoxesTools),
 ];

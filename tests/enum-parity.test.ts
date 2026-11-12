@@ -338,9 +338,12 @@ const optionsOf = (node: any): unknown[] => {
 // ─── name helpers ───────────────────────────────────────────────────────
 
 const flatten = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, '');
+// `-xes` drops two letters (email_boxes is EmailBox), the same rule as in
+// contract-parity.test.ts: without it the entity resolves to nothing and every
+// enum of the email-boxes tools counts as unmapped (2026-11-12).
 const singularize = (value: string) =>
   value.endsWith('ies') ? `${value.slice(0, -3)}y`
-    : value.endsWith('sses') ? value.slice(0, -2)
+    : value.endsWith('sses') || value.endsWith('xes') ? value.slice(0, -2)
       : value.endsWith('s') && !value.endsWith('ss') ? value.slice(0, -1)
         : value;
 
