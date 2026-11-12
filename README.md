@@ -3,9 +3,8 @@
 [![Site](https://img.shields.io/badge/site-gtm--api.com-bef264)](https://gtm-api.com/linkedin-mcp-server/)
 [![Protocol](https://img.shields.io/badge/protocol-MCP-blue)](https://modelcontextprotocol.io/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](./LICENSE)
-[![Smithery](https://smithery.ai/badge/gtm-api/linkedin-mcp)](https://smithery.ai/servers/gtm-api/linkedin-mcp)
 
-gtm-api is a managed LinkedIn MCP server. It gives an AI agent one endpoint, three MCP tools and 190+ typed LinkedIn actions over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
+A managed LinkedIn MCP server from gtm-api.com: it gives an AI agent one endpoint, three MCP tools and 190+ typed LinkedIn actions over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
 
 This repository holds the public interface: what the server exposes, how to connect a client, and how the safety layer works.
 
@@ -13,7 +12,7 @@ This repository holds the public interface: what the server exposes, how to conn
 
 A LinkedIn MCP server exposes LinkedIn actions as Model Context Protocol tools, so an AI agent calls them directly, the way a person would click through the UI. LinkedIn publishes no [official API](https://learn.microsoft.com/en-us/linkedin/shared/authentication/getting-access) for invitations, member messages or open profile search, so a LinkedIn MCP server works through an account you own rather than through [LinkedIn's developer platform](https://developer.linkedin.com/).
 
-Two shapes exist today. **Cookie-driven open-source servers** run a browser session with your own cookie and no pacing. **Managed servers** run each account in isolated infrastructure with limits enforced before every action. gtm-api is the second kind.
+Two shapes exist today. **Cookie-driven open-source servers** run a browser session with your own cookie and no pacing. **Managed servers** run each account in isolated infrastructure with limits enforced before every action. Of the two, gtm-api.com is the second kind.
 
 ## Which clients it works with
 
@@ -50,7 +49,7 @@ Headless clients can skip the browser. The same API key (`gtm_live_...`) that au
 claude mcp add --transport http gtm-api https://mcp.gtm-api.com/mcp --header "Authorization: Bearer gtm_live_..."
 ```
 
-For command-spawning clients, the launcher below reads the key from `GTM_API_KEY` instead (1.3.0 or newer: older pins ignore it and do OAuth only). Pick one mode per connection: with a key attached, the OAuth flow never starts. Interactive clients such as claude.ai connectors have no header field and always use OAuth. Full matrix: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
+For command-spawning clients, the launcher below reads the key from `GTM_API_KEY` instead. Use 1.3.2 or newer with a key: npm deprecates 1.1.0, 1.3.0 and 1.3.1, which put the key in the process list and the MCP client's log (rotate a key used with one of them), and 1.2.x ignores the variable and does OAuth only. Pick one mode per connection: with a key attached, the OAuth flow never starts. Interactive clients such as claude.ai connectors have no header field and always use OAuth. Full matrix: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
 
 Client can only spawn a command, not open a URL? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint and runs the same OAuth flow (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
 
@@ -96,7 +95,7 @@ This repository is also a Cursor plugin ([`.cursor-plugin/plugin.json`](./.curso
 - The hosted MCP server, `https://mcp.gtm-api.com/mcp`, declared in [`.mcp.json`](./.mcp.json).
 - The [`gtm-api-linkedin`](./skills/gtm-api-linkedin/SKILL.md) skill. It tells the agent to discover tools before calling them, to show you the preview of every send before it commits, and to stop on a limit refusal instead of retrying it.
 
-Install it from the Cursor Marketplace: open **Customize**, search for `gtm-api`, select **Install**. To run it from this repository instead, copy the plugin into Cursor's local plugin folder:
+The Cursor Marketplace listing is in review. Until it is live, the one-click Cursor link on [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect) adds the MCP server alone, and the whole plugin, skill included, installs from this repository into Cursor's local plugin folder:
 
 ```bash
 git clone https://github.com/gtm-api/linkedin-mcp.git /tmp/linkedin-mcp
@@ -106,7 +105,7 @@ cp -R /tmp/linkedin-mcp/.cursor-plugin /tmp/linkedin-mcp/.mcp.json /tmp/linkedin
 
 Then run **Developer: Reload Window** and check that **Customize** lists the skill and the MCP server.
 
-The plugin carries no key and needs no configuration. The first tool call opens a consent page in your browser: you sign in to [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and pick the workspace the agent acts in. Cursor registers itself as an OAuth client on that first call, so there is no client ID to create. To add the server without the skill, use the one-click Cursor link on [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
+The plugin carries no key and needs no configuration. The first tool call opens a consent page in your browser: you sign in to [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and pick the workspace the agent acts in. Cursor registers itself as an OAuth client on that first call, so there is no client ID to create.
 
 ## MCP tools
 
