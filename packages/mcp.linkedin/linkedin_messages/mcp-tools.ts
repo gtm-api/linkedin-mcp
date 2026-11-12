@@ -310,6 +310,16 @@ const base = {
   mount: 'linkedin.messaging',
 } as const;
 
+// The person of a new thread, by any identifier (2026-11-12): whatever is given
+// resolves on the backend to the URN the send dispatches on.
+const newThreadPerson = {
+  ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…) for a new thread.'),
+  sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN (ACwAA…); interchangeable with ln_id.'),
+  recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  public_identifier: z.string().max(2048).nullable().optional().describe("A vanity slug, any profile link or any id, read by its shape. Whatever names the person resolves server-side to the URN the send dispatches on: your team's own rows, then the stored corpus, then ONE lite profile read on the sender (it spends self_account_sync, never the send's bucket). result.target_resolved_via says which: \"ledger\", \"corpus\", \"browser\", or null when a URN was given. A slug LinkedIn does not know is 422 public_identifier_unresolved."),
+};
+
 export const linkedinMessagesTools: ToolDefinition[] = [
   {
     ...base,
@@ -437,9 +447,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing basic-messenger thread; provide this OR a profile URN. Our sid only: a raw LinkedIn 2-…== thread id is NOT accepted here, resolve it first with search_linkedin_conversations filter.conversation_hash.eq."),
-      ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…) for a new thread.'),
-      sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (ACwAA…); interchangeable with ln_id.'),
-      public_identifier: z.string().max(2048).nullable().optional().describe("For a new thread when all you have is the person's vanity slug or linkedin.com/in/<slug> URL: resolved server-side to the URN (own rows, then the corpus, then a lite-profile read on the sender that spends enrichment). One addressing form per call: linkedin_conversation_sid, ln_id / sn_id, or public_identifier."),
+      ...newThreadPerson,
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
       reply_to_linkedin_message_sid: MESSAGE_SID.nullable().optional()
@@ -474,8 +482,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing basic-messenger thread; provide this OR a profile URN."),
-      ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN for a new thread.'),
-      sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
+      ...newThreadPerson,
       audio: z.object({
         url: z.string().optional().describe('An https URL of the audio file, downloaded by the backend (public hosts on port 443 only, no credentials in the URL, up to 32 MB before normalization). Refused 422 before anything is dispatched: audio_url_invalid (not https, a port other than 443, credentials), audio_url_host_forbidden (a private or reserved address), audio_fetch_failed, audio_too_large.'),
         base64: z.string().optional().describe('Inline payload (~15 MB cap pre-normalization).'),
@@ -507,8 +514,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…); one URN required.'),
-      sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
+      ...newThreadPerson,
       subject: z.string().min(1).max(200).describe('REQUIRED InMail subject; 1..200 chars.'),
       text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
@@ -542,8 +548,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
       linkedin_conversation_sid: CONVERSATION_SID.nullable().optional().describe("Existing SN thread (messenger_type='sales_navigator'); provide this OR a profile URN."),
-      ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN for a new SN thread.'),
-      sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (preferred on the SN surface); interchangeable with ln_id.'),
+      ...newThreadPerson,
       text: z.string().min(1).max(8000).describe('Message body; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send.'),
       client_reference: sendKey('the thread, else the person'),
@@ -706,8 +711,11 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       linkedin_account_sid: ACCOUNT_SID,
       attendees: z.array(z.object({
         ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN.'),
-        sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
-      })).min(2).max(20).describe('2..20 other participants; each needs a URN.'),
+        sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
+        recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…).'),
+        ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+        public_identifier: z.string().max(2048).nullable().optional().describe('Vanity slug, or any profile link or id.'),
+      })).min(2).max(20).describe('2..20 other participants, each by any identifier (at least one key). Whatever is given resolves to the URN the wire takes; result.targets_resolved_via lists how, in this order.'),
       text: z.string().min(1).max(8000).describe('Opening message; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       conversation_title: z.string().max(100).nullable().optional()
         .describe('Optional group name, max 100 chars; omitted leaves the thread unnamed.'),

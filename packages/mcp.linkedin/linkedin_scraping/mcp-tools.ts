@@ -585,16 +585,22 @@ const SchoolSearchFilters = z.object({
   keywords: z.string().max(256).describe('REQUIRED, and the WHOLE vocabulary: the schools search has no wire form without a query and no second axis to combine with it. Passed to LinkedIn verbatim.'),
 }).strict().describe(`${XOR} LinkedIn school-search filters. keywords is the ONLY member the node reads, so any other key is REFUSED rather than ignored. In particular there is NO school-id member: the ids param_id_lookup returns for type=school fit no filter on this engine and reach LinkedIn only inside a pasted people-search URL. Every facet the schools screen offers beyond the keyword box is reachable only by building the search in the LinkedIn UI and pasting that URL into the url field.`);
 
+// One person by any identifier (2026-11-12): the five identity keys, at least
+// one, several when they name one member. The backend finds the key the wire takes.
 const ProfileTarget = z.object({
-  ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…).'),
-  sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator URN (ACwAA…).'),
-  nickname: z.string().max(100).nullable().optional().describe('Vanity slug.'),
-}).describe('Target profile: exactly one of ln_id / sn_id / nickname (ln_member_id is not dispatchable, KNOWLEDGE §3d).');
+  ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…). A URN of another surface in this key is filed by what it is.'),
+  sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN (ACwAA…).'),
+  recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  nickname: z.string().max(2048).nullable().optional().describe('Vanity slug, or any profile link or id: read by its shape.'),
+}).describe('Target profile, by any identifier: at least one of ln_id / sn_id / recruiter_id / ln_member_id / nickname. The key the wire takes is found for you (data_request.target_resolved_via says how: "ledger", "corpus", or "browser" for ONE extra LinkedIn request).');
 
+// One company in any form, in either key (2026-11-12): the wires of these tools
+// take the numeric id, and the backend finds it for a link or a slug.
 const CompanyTarget = z.object({
-  company_url: z.string().max(512).nullable().optional().describe('https://www.linkedin.com/company/{slug}/'),
-  company_ln_id: z.string().max(64).nullable().optional().describe('Numeric LinkedIn company id.'),
-}).describe('Target company: exactly one of company_url / company_ln_id.');
+  company_url: z.string().max(2048).nullable().optional().describe('The company page link or its slug (any spelling of the numeric id is read too).'),
+  company_ln_id: z.string().max(2048).nullable().optional().describe('The numeric LinkedIn company id: the digits, a company urn or a /company/<id>/ link.'),
+}).describe('Target company: exactly one of company_url / company_ln_id. For a link or a slug the numeric id is found for you, free when your team or the corpus knows the page, else by ONE extra LinkedIn request (data_request.target_resolved_via: "browser").');
 
 // The nine dropdowns of the flagship (non Sales Navigator) search, node
 // `typehead-linkedin` `type` values passed through verbatim. The pre-landing
@@ -1336,7 +1342,7 @@ export const linkedinScrapingTools: ToolDefinition[] = [
     ...base,
     name: 'scrape_linkedin_similar_profiles',
     description:
-      'LinkedIn’s "people also viewed" browsemap for ONE seed profile: lookalike expansion from a known-good persona. IMPORTANT: address by profile.nickname (the vanity slug) ONLY, because the wire navigates by vanityName, so a ln_id/sn_id URN is refused not_dispatchable (resolve it via enrich_linkedin_person_lite_profile first, then pass the nickname). Returns ~20 cards; rows carry ln_member_id + nickname + full_name + headline (no ACoAA id, no avatar, no degree). One-shot list (no pagination); limit caps the cards.',
+      'LinkedIn’s "people also viewed" browsemap for ONE seed profile: lookalike expansion from a known-good persona. Address the seed by any identifier in `profile`: the wire navigates by the vanity slug, and for a URN or a member number the slug is found for you. Returns ~20 cards; rows carry ln_member_id + nickname + full_name + headline (no ACoAA id, no avatar, no degree). One-shot list (no pagination); limit caps the cards.',
     toolClass: 'typical',
     route: rt('similar-profiles'),
     operation: 'action',

@@ -136,6 +136,8 @@ const LinkedinConversationMetricsFilter = LinkedinConversationFilter
 const GroupVerbResult = z.object({
   status: z.literal('success').describe('The only value this verb answers with: a refusal is a typed error, never a status.'),
   activity_log_sid: z.string().nullable().describe('The linkedin-account-activity-log row of the call (ln_al_).'),
+  targets_resolved_via: z.array(z.enum(['ledger', 'corpus', 'browser']).nullable()).optional()
+    .describe('How each target was resolved to the id the wire takes, in the order given: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for that target.'),
 }).passthrough();
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
@@ -422,7 +424,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      participant_ln_ids: z.array(z.string().min(1).max(64)).min(1).max(20).describe('Bare LinkedIn profile ids (ACoA...) to add, 1..20; not urn: strings.'),
+      participant_ln_ids: z.array(z.string().min(1).max(2048)).min(1).max(20).describe('The members to add, 1..20, each by any identifier: a profile id (ACoA...), urn:li:fsd_profile:<id>, a Sales Navigator id, a slug or a profile link. Each resolves to the bare profile id the wire takes; result.targets_resolved_via lists how, in this order.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinConversation, GroupVerbResult),
@@ -444,7 +446,7 @@ export const linkedinConversationsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      participant_ln_ids: z.array(z.string().min(1).max(64)).min(1).max(20).describe('Bare LinkedIn profile ids (ACoA...) to remove, 1..20; not urn: strings.'),
+      participant_ln_ids: z.array(z.string().min(1).max(2048)).min(1).max(20).describe('The members to remove, 1..20, each by any identifier: a profile id (ACoA...), urn:li:fsd_profile:<id>, a Sales Navigator id, a slug or a profile link. Each resolves to the bare profile id the wire takes; result.targets_resolved_via lists how, in this order.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinConversation, GroupVerbResult),

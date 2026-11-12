@@ -65,10 +65,12 @@ const LinkedinAccountRecruiterStatus = z.enum(['active', 'signed_out']);
 
 // Target person for outward/probe actions: at least one identifier (backend-validated).
 const Target = z.object({
-  ln_id: z.string().optional().describe('LinkedIn member id.'),
-  sn_id: z.string().optional().describe('Sales Navigator member id.'),
-  nickname: z.string().optional().describe('Public profile slug.'),
-}).describe('Target person; provide at least one of ln_id / sn_id / nickname.');
+  ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…). A URN of another surface in this key is filed by what it is.'),
+  sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN (ACwAA…).'),
+  recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  nickname: z.string().max(2048).nullable().optional().describe('Vanity slug, or any profile link or id: read by its shape.'),
+}).describe("Target person, by any identifier: at least one of ln_id / sn_id / recruiter_id / ln_member_id / nickname. The key the verb's wire takes is found for you: your team's own rows, then the stored corpus, then ONE lite profile read on the acting account; the answer says which (result.target_resolved_via: \"ledger\", \"corpus\", \"browser\", or null when the input already held the key).");
 
 // Item projection: mirrors LinkedinAccountDomain (research §Domain) field-by-field.
 // Trailing .passthrough() is forward-compat only (backend may add fields).
@@ -686,6 +688,8 @@ const SkillVerbResult = z.object({
     .describe('The authoritative post-action state of THIS viewer\'s endorsement: true after endorse, false after unendorse; null when absent. A stronger verification signal than the urn echo, needs no cache-busting read.'),
   endorsement_count: z.number().int().nullable()
     .describe('The global endorser counter for the skill. Moves with everyone\'s endorsements, so assert direction not an absolute; null when absent.'),
+  target_resolved_via: z.enum(['ledger', 'corpus', 'browser']).nullable().optional()
+    .describe('How the target this call named was resolved to the key the wire takes: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for it.'),
 }).passthrough();
 
 // Each sync track's floor and default in minutes (gtm.lib.common
@@ -778,10 +782,12 @@ const FOLLOWING_ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
 const FollowTarget = z.object({
   ln_id: z.string().max(128).nullable().optional()
     .describe('LinkedIn member id (ACoAA…). Dispatched straight through as the wire\'s profile_id, so a target carrying one needs no member lookup.'),
-  sn_id: z.string().max(64).nullable().optional().describe('Sales Navigator member id.'),
-  nickname: z.string().max(100).nullable().optional()
-    .describe('Public profile slug, the vanity name in the profile URL. Pass it whenever you know it, INCLUDING alongside ln_id: it rides the wire as public_identifier and saves LinkedIn a member-resolution round trip, cutting the action from three requests to two. A nickname-ONLY target costs an extra profile read before the action instead.'),
-}).describe('Target person; provide at least one of ln_id / sn_id / nickname. Best case is a member id plus the nickname.');
+  sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator member id.'),
+  recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  nickname: z.string().max(2048).nullable().optional()
+    .describe('Public profile slug, the vanity name in the profile URL (a whole profile link is read too). Pass it whenever you know it, INCLUDING alongside ln_id: it rides the wire as public_identifier and saves LinkedIn a member-resolution round trip, cutting the action from three requests to two. A nickname-ONLY target costs an extra profile read before the action instead.'),
+}).describe('Target person, by any identifier: at least one of ln_id / sn_id / recruiter_id / ln_member_id / nickname. Best case is a member id plus the nickname. result.target_resolved_via says how a missing member id was come by.');
 
 // The §4.12a dispatch row. Kept open rather than re-declaring
 // LinkedinAccountActivityLogDomain, which its own package owns.
@@ -801,6 +807,8 @@ const FollowResult = z.object({
     .describe('The follow button state AFTER the action, read off the wire. Always Following in a 200.'),
   message: z.string().nullable().describe('LinkedIn\'s own toast, when it sent one.'),
   is_retryable: z.boolean().describe('LinkedIn\'s own retry hint, passed through untouched.'),
+  target_resolved_via: z.enum(['ledger', 'corpus', 'browser']).nullable().optional()
+    .describe('How the target this call named was resolved to the key the wire takes: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for it.'),
 }).passthrough();
 
 const UnfollowResult = z.object({
@@ -811,24 +819,27 @@ const UnfollowResult = z.object({
     .describe('The follow button state AFTER the action, read off the wire. Always Follow in a 200, meaning the button reverted to its pre-follow label.'),
   message: z.string().nullable().describe('LinkedIn\'s own toast, when it sent one.'),
   is_retryable: z.boolean().describe('LinkedIn\'s own retry hint, passed through untouched.'),
+  target_resolved_via: z.enum(['ledger', 'corpus', 'browser']).nullable().optional()
+    .describe('How the target this call named was resolved to the key the wire takes: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for it.'),
 }).passthrough();
 
 // invite_linkedin_members_to_event (2026-10-08). The wire takes voyager member
-// ids only (the SDK puts each into urn:li:fsd_profile:<id>), so a target is a
-// member id or a nickname and never a Sales Navigator id; the backend restates
-// the same rule (LinkedinAccountInviteToEventRequest) and resolves a
-// nickname-only target with one profile read before the batch.
+// ids only (the SDK puts each into urn:li:fsd_profile:<id>). A target is named
+// by any identifier (2026-11-12) and the backend finds that id: a Sales
+// Navigator id, a member number or a slug resolves to it from the team's rows
+// or the corpus, else by one profile read before the batch.
 const EventInviteTarget = z.object({
   ln_id: z.string().max(128).nullable().optional()
     .describe('LinkedIn member id (ACoAA...), sent as is in the batch. The address to prefer: it costs no lookup.'),
-  nickname: z.string().max(100).nullable().optional()
-    .describe('Public profile slug, the vanity name in the profile URL. A nickname-ONLY target costs one profile read (self_account_sync) before the batch; next to ln_id it is ignored, the id is the address.'),
-}).describe('One person to invite; ln_id or nickname (a Sales Navigator id is not an address for an event invitation).');
+  sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator id (ACwAA…): resolved to the member id the batch takes.'),
+  recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…).'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  nickname: z.string().max(2048).nullable().optional()
+    .describe('Public profile slug, the vanity name in the profile URL, or the whole profile link. A target with no ln_id resolves to it from your team\'s rows or the stored corpus, else by one profile read (self_account_sync) before the batch; next to ln_id it is ignored, the id is the address.'),
+}).describe('One person to invite, by any identifier: at least one key. result.targets_resolved_via lists how each member id was come by, in this order.');
 
-// The page-follow invitation (2026-11-04) takes the same targets; only the
-// refusal wording differs.
-const CompanyFollowInviteTarget = EventInviteTarget
-  .describe('One person to invite; ln_id or nickname (a Sales Navigator id is not an address for a page-follow invitation).');
+// The page-follow invitation (2026-11-04) takes the same targets.
+const CompanyFollowInviteTarget = EventInviteTarget;
 
 const CompanyFollowInviteResult = z.object({
   activity_log: z.object({}).passthrough()
@@ -838,6 +849,8 @@ const CompanyFollowInviteResult = z.object({
   company_ln_id: z.string().describe('The page the batch invited to, echoed.'),
   profile_ids: z.array(z.string())
     .describe('The member ids LinkedIn was given, resolved and deduped, in the order of the targets: a caller who addressed people by nickname learns the ids here.'),
+  targets_resolved_via: z.array(z.enum(['ledger', 'corpus', 'browser']).nullable()).optional()
+    .describe('How each target was resolved to the id the wire takes, in the order given: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for that target.'),
 }).passthrough();
 
 const EventInviteResult = z.object({
@@ -848,6 +861,8 @@ const EventInviteResult = z.object({
   event_ln_id: z.string().describe('The event the batch went to, echoed.'),
   profile_ids: z.array(z.string())
     .describe('The member ids LinkedIn was given, resolved and deduped, in the order of the targets: a caller who addressed people by nickname learns the ids here.'),
+  targets_resolved_via: z.array(z.enum(['ledger', 'corpus', 'browser']).nullable()).optional()
+    .describe('How each target was resolved to the id the wire takes, in the order given: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for that target.'),
 }).passthrough();
 
 export const linkedinAccountsTools: ToolDefinition[] = [
@@ -1575,8 +1590,8 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       sid: SID,
-      company_ln_id: z.string().regex(/^[0-9]{1,32}$/)
-        .describe("The page's numeric id: the digits of urn:li:fsd_company:<id>, the number in https://www.linkedin.com/company/<id>/ and the company_ln_id a company read answers."),
+      company_ln_id: z.string().max(2048)
+        .describe("The page, by its numeric id in any spelling (the digits, urn:li:fsd_company:<id>, https://www.linkedin.com/company/<id>/, the company_ln_id a company read answers), or by its page link or slug when a company read of your workspace or our shared corpus already knows the page's id. No page is read for an invitation: one nobody knows is 422 company_not_readable, pass the id."),
       targets: z.array(CompanyFollowInviteTarget).min(1).max(25)
         .describe('1 to 25 people, one batch. A member named twice is sent once.'),
       ...usageMetaField,

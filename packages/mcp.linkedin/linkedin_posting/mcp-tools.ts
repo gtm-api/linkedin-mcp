@@ -211,12 +211,16 @@ const CommentResult = z.object({
     .describe('true when this answers a repeat (under the key, or without one the same words at the same place) with what the first send made: nothing was sent now.'),
   content_differs: z.boolean().optional()
     .describe('With idempotent_replay: true when this request\'s words (or a post\'s pictures, video or document) differ from those of the send that made it.'),
+  target_resolved_via: z.enum(['ledger', 'corpus', 'browser']).nullable().optional()
+    .describe('How the target this call named was resolved to the key the wire takes: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for it.'),
 }).passthrough();
 
 const DeletePostResult = z.object({
   deleted: z.literal(true).describe('Always true on a 200: a refused delete is a 409, never a success body.'),
   message: z.string().nullable().describe("LinkedIn's own confirmation toast, when it sends one."),
   activity_log: ACTIVITY_LOG,
+  target_resolved_via: z.enum(['ledger', 'corpus', 'browser']).nullable().optional()
+    .describe('How the target this call named was resolved to the key the wire takes: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for it.'),
 }).passthrough();
 
 const DeleteCommentResult = z.object({
@@ -227,6 +231,8 @@ const DeleteCommentResult = z.object({
 const UnreactResult = z.object({
   removed: z.literal(true),
   activity_log: ACTIVITY_LOG,
+  target_resolved_via: z.enum(['ledger', 'corpus', 'browser']).nullable().optional()
+    .describe('How the target this call named was resolved to the key the wire takes: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for it.'),
 }).passthrough();
 
 const ReactResult = z.object({
@@ -234,6 +240,8 @@ const ReactResult = z.object({
   // shape drifted - the activity-log row stays the durable record.
   reaction_urn: z.string().nullable(),
   activity_log: ACTIVITY_LOG,
+  target_resolved_via: z.enum(['ledger', 'corpus', 'browser']).nullable().optional()
+    .describe('How the target this call named was resolved to the key the wire takes: null = nothing to resolve, ledger / corpus = known for free, browser = ONE extra LinkedIn request was made for it.'),
 }).passthrough();
 
 // One SCHEDULED (unpublished) share from the queue. The identity field is the
@@ -315,7 +323,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     scheduleRequired: false,
     inputSchema: z.object({
       linkedin_account_sid: ACCOUNT_SID,
-      post_urn: z.string().regex(/^urn:li:(activity|share|ugcPost):\d+$/).describe('The post to repost: urn:li:activity:<id>, urn:li:share:<id> or urn:li:ugcPost:<id>.'),
+      post_urn: z.string().min(1).max(2048).describe('The post to repost: urn:li:activity:<id>, urn:li:share:<id> or urn:li:ugcPost:<id>, or any link to the post (a lnkd.in shortlink too), which is read into its urn for you.'),
       text: z.string().max(3000).optional().describe('Your own words above the reposted post. Omit (or blank) for a plain repost.'),
       visibility: LinkedinPostingVisibility.optional().describe('With text only. ANYONE (the default) or CONNECTIONS_ONLY.'),
       allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional().describe('With text only. ALL (the default), CONNECTIONS_ONLY, or NONE to disable comments.'),
@@ -388,8 +396,8 @@ export const linkedinPostingTools: ToolDefinition[] = [
         .describe('Mentions of members (profile_id) and company pages (company_id, 2026-10-29) as READY POSITIONS over text (2026-08-21) - unlike create_linkedin_comment\'s {profile_id, name} search pairs. Each entry names exactly one of the two ids. Require non-blank text.'),
       brand_partnership: z.boolean().optional()
         .describe('true adds LinkedIn\'s "Brand partnership" label (paid endorsement). false and absent both send nothing - the wire\'s own shape.'),
-      author_organization_id: z.string().regex(/^\d+$/).optional()
-        .describe('Post AS a company page the account administers: the bare numeric company id (same form get_linkedin_company_posts takes). Omit to post as the member.'),
+      author_organization_id: z.string().max(2048).optional()
+        .describe('Post AS a company page the account administers: its numeric id in any spelling (the digits, a company urn, a /company/<id>/ link), or its page link or slug when a company read of your workspace already knows the id (else 422 company_not_readable). Omit to post as the member.'),
       group_id: z.string().regex(/^\d+$/).optional()
         .describe('Post INTO a group: the bare numeric group id. Mutually exclusive with visibility - a group post sets container visibility, not member-feed visibility. No read serves a group\'s feed, so a group post whose answer was lost stays in doubt until a person gives their word.'),
       client_reference: postingKey(
@@ -437,8 +445,8 @@ export const linkedinPostingTools: ToolDefinition[] = [
           .describe('The exact substring of text that becomes the clickable link (usually the member\'s or the page\'s name).'),
       })).optional()
         .describe('Mentions of members (profile_id) and company pages (company_id, 2026-10-29). Names are matched in text left to right in list order, each search starting after the previous mention. The node computes the character offsets itself.'),
-      author_organization_id: z.string().regex(/^\d+$/).optional()
-        .describe('Comment AS a company page the account administers: the bare numeric company id (the company_ln_id enrich_linkedin_company_posts takes), for a top-level comment and a reply alike. Omit to comment as the member. The member and a page are two authors, so their comments at one place are two comments: give each a client_reference of its own, because check_linkedin_posting_sent takes no author and, asked by a key both share, answers for whichever went out. No read lists a comment as made by a page, so a page comment whose answer was lost stays in doubt until a person gives their word (confirmed_sent or confirmed_not_sent). A mass-action comment step does not take this field: a step comments as the member.'),
+      author_organization_id: z.string().max(2048).optional()
+        .describe('Comment AS a company page the account administers: its numeric id in any spelling (the digits, a company urn, a /company/<id>/ link; the company_ln_id enrich_linkedin_company_posts takes), or its link or slug when your workspace already knows the id, for a top-level comment and a reply alike. Omit to comment as the member. The member and a page are two authors, so their comments at one place are two comments: give each a client_reference of its own, because check_linkedin_posting_sent takes no author and, asked by a key both share, answers for whichever went out. No read lists a comment as made by a page, so a page comment whose answer was lost stays in doubt until a person gives their word (confirmed_sent or confirmed_not_sent). A mass-action comment step does not take this field: a step comments as the member.'),
       client_reference: postingKey('comment', 'the post as LinkedIn files it, named by any of its urns, or for a reply the comment it answers', 'the same words at the same place by the same author'),
       confirmed_not_sent: CONFIRMED_NOT_SENT,
       confirmed_sent: CONFIRMED_SENT,
@@ -564,8 +572,8 @@ export const linkedinPostingTools: ToolDefinition[] = [
         .describe("Rows per page, the node's own [1, 100] gate. Defaults to 20."),
       cursor: z.string().min(1).max(200).optional()
         .describe('The previous page\'s paging.next_cursor, verbatim. Omit for the first page.'),
-      author_organization_id: z.string().regex(/^\d+$/).max(30).optional()
-        .describe("Read a company page's queue instead of the member's own: the bare numeric organization id (as in linkedin.com/company/<id>). The account must administer that page or the queue comes back empty."),
+      author_organization_id: z.string().max(2048).optional()
+        .describe("Read a company page's queue instead of the member's own: its numeric id in any spelling (the digits, a company urn, a linkedin.com/company/<id>/ link), or its link or slug when your workspace already knows the id. The account must administer that page or the queue comes back empty."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), GetScheduledPostsResult),

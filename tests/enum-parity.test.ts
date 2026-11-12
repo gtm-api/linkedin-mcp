@@ -185,6 +185,12 @@ const MANUAL_BRIDGE: BridgeEntry[] = [
   // run's 4-case vocabulary, not the scrape's 2-case active/paused. Pinned by
   // the FULL path so the scrape's own item.status keeps its own enum.
   { service: 'linkedin', entity: 'linkedin_auto_scrapes', at: 'result.status', enumClass: 'LinkedinAutoScrapeRunStatusEnum' },
+  // How a call's target was resolved (2026-11-12): the enum is the data request
+  // journal's (the row's own field), and every action verb that names a person, a
+  // page or a post echoes it in its result under the same word, on entities that
+  // have no enum of that name of their own.
+  { service: 'linkedin', entity: '*', at: 'target_resolved_via', enumClass: 'DataRequestTargetResolvedViaEnum' },
+  { service: 'linkedin', entity: '*', at: 'targets_resolved_via', enumClass: 'DataRequestTargetResolvedViaEnum' },
 
   // ── id ──
   // A share row's channel is the platform-wide account channel (Core), not a

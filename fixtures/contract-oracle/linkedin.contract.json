@@ -1798,6 +1798,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "target_resolved_via",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "result_ref",
                         "type": "array|string|null",
                         "nullable": true,
@@ -1930,6 +1936,12 @@
                     },
                     {
                         "name": "nickname",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "target_resolved_via",
                         "type": "?string",
                         "nullable": true,
                         "has_default": true
@@ -9182,6 +9194,23 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\DataRequestTargetResolvedViaEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Ledger",
+                    "value": "ledger"
+                },
+                {
+                    "name": "Corpus",
+                    "value": "corpus"
+                },
+                {
+                    "name": "Browser",
+                    "value": "browser"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\DataRequest\\Enums\\LinkedinRecommendationDirectionEnum": {
             "backing": "string",
             "cases": [
@@ -14081,7 +14110,7 @@
                         "nullable",
                         "string",
                         "max:2048",
-                        "starts_with:https://www.linkedin.com/"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -14220,15 +14249,15 @@
                         "prohibits:company.company_ln_id",
                         "nullable",
                         "string",
-                        "max:512",
-                        "starts_with:https://www.linkedin.com/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -14239,14 +14268,15 @@
                         "prohibits:company.company_url",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -14379,7 +14409,7 @@
                         "nullable",
                         "string",
                         "max:2048",
-                        "starts_with:https://www.linkedin.com/"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -14501,15 +14531,15 @@
                     "rules": [
                         "required",
                         "string",
-                        "regex:/^\\d+$/",
-                        "max:32"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 32,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -14710,8 +14740,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -14723,25 +14808,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -14836,8 +14902,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -14849,25 +14970,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -14995,8 +15097,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -15008,25 +15165,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -15121,8 +15259,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -15134,25 +15327,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -15280,8 +15454,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -15293,25 +15522,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -15406,8 +15616,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -15419,25 +15684,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -15532,8 +15778,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -15545,25 +15846,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -15713,8 +15995,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -15726,25 +16063,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -15839,8 +16157,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -15852,25 +16225,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -15965,8 +16319,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -15978,25 +16387,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -16124,8 +16514,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -16137,25 +16582,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -16283,8 +16709,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -16296,25 +16777,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -16428,8 +16890,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -16441,25 +16958,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -16554,8 +17052,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -16567,25 +17120,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -19995,15 +20529,15 @@
                         "prohibits:company.company_ln_id",
                         "nullable",
                         "string",
-                        "max:512",
-                        "starts_with:https://www.linkedin.com/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -20014,14 +20548,15 @@
                         "prohibits:company.company_url",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -20135,15 +20670,15 @@
                         "prohibits:company.company_ln_id",
                         "nullable",
                         "string",
-                        "max:512",
-                        "starts_with:https://www.linkedin.com/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -20154,14 +20689,15 @@
                         "prohibits:company.company_url",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -28307,15 +28843,15 @@
                         "prohibits:company.company_ln_id",
                         "nullable",
                         "string",
-                        "max:512",
-                        "starts_with:https://www.linkedin.com/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -28326,14 +28862,15 @@
                         "prohibits:company.company_url",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -28443,8 +28980,6 @@
                 {
                     "field": "profile.ln_id",
                     "rules": [
-                        "required_without_all:profile.sn_id,profile.nickname",
-                        "prohibits:profile.sn_id,profile.nickname",
                         "nullable",
                         "string",
                         "max:128",
@@ -28462,10 +28997,9 @@
                 {
                     "field": "profile.sn_id",
                     "rules": [
-                        "prohibits:profile.nickname",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -28473,7 +29007,39 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "profile.recruiter_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "profile.ln_member_id",
+                    "rules": [
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -28482,14 +29048,15 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -30992,9 +31559,10 @@
                 {
                     "field": "target.ln_id",
                     "rules": [
+                        "sometimes",
                         "nullable",
                         "string",
-                        "required_without_all:target.sn_id,target.nickname",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -31002,21 +31570,56 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 128,
                     "size": null,
                     "between": null
                 },
                 {
                     "field": "target.sn_id",
                     "rules": [
+                        "sometimes",
                         "nullable",
                         "string",
-                        "required_without_all:target.ln_id,target.nickname",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
                     "in": null,
                     "min": null,
                     "max": null,
@@ -31026,16 +31629,18 @@
                 {
                     "field": "target.nickname",
                     "rules": [
+                        "sometimes",
                         "nullable",
                         "string",
-                        "required_without_all:target.ln_id,target.sn_id"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -31116,7 +31721,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -31124,7 +31729,41 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -31134,14 +31773,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -31225,7 +31865,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -31233,7 +31873,41 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -31243,14 +31917,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -31893,19 +32568,72 @@
                     "between": null
                 },
                 {
-                    "field": "targets.*.nickname",
+                    "field": "targets.*.sn_id",
                     "rules": [
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -31937,14 +32665,15 @@
                     "rules": [
                         "required",
                         "string",
-                        "regex:/^[0-9]{1,32}$/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -31999,19 +32728,72 @@
                     "between": null
                 },
                 {
-                    "field": "targets.*.nickname",
+                    "field": "targets.*.sn_id",
                     "rules": [
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "targets.*.nickname",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -33404,7 +34186,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -33412,7 +34194,41 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -33422,14 +34238,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -33670,7 +34487,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -33678,7 +34495,41 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -33688,14 +34539,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -35792,8 +36644,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -35805,25 +36712,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -36051,7 +36939,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -36059,7 +36947,41 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -36069,14 +36991,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -37361,15 +38284,15 @@
                     "rules": [
                         "string",
                         "min:1",
-                        "max:64",
-                        "regex:/^(?!urn:)[A-Za-z0-9_-]+$/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": 1,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -37522,15 +38445,15 @@
                     "rules": [
                         "string",
                         "min:1",
-                        "max:64",
-                        "regex:/^(?!urn:)[A-Za-z0-9_-]+$/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": 1,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -37822,7 +38745,7 @@
                         "nullable",
                         "string",
                         "max:2048",
-                        "starts_with:https://www.linkedin.com/"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -37961,15 +38884,15 @@
                         "prohibits:company.company_ln_id",
                         "nullable",
                         "string",
-                        "max:512",
-                        "starts_with:https://www.linkedin.com/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -37980,14 +38903,15 @@
                         "prohibits:company.company_url",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -38120,7 +39044,7 @@
                         "nullable",
                         "string",
                         "max:2048",
-                        "starts_with:https://www.linkedin.com/"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -38242,15 +39166,15 @@
                     "rules": [
                         "required",
                         "string",
-                        "regex:/^\\d+$/",
-                        "max:32"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 32,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -38451,8 +39375,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -38464,25 +39443,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -38577,8 +39537,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -38590,25 +39605,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -38736,8 +39732,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -38749,25 +39800,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -38862,8 +39894,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -38875,25 +39962,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -38988,8 +40056,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -39001,25 +40124,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -39147,8 +40251,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -39160,25 +40319,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -39273,8 +40413,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -39286,25 +40481,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -39399,8 +40575,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -39412,25 +40643,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -39580,8 +40792,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -39593,25 +40860,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -39706,8 +40954,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -39719,25 +41022,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -39832,8 +41116,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -39845,25 +41184,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -39991,8 +41311,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -40004,25 +41379,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -40150,8 +41506,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -40163,25 +41574,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -40295,8 +41687,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -40308,25 +41755,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -40421,8 +41849,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -40434,25 +41917,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Closure"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -41178,7 +42642,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -41186,7 +42650,41 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -41196,14 +42694,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -41286,7 +42785,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -41294,7 +42793,41 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -41304,14 +42837,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -42127,7 +43661,6 @@
                 {
                     "field": "ln_id",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
                         "max:128",
@@ -42145,10 +43678,9 @@
                 {
                     "field": "sn_id",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -42156,20 +43688,49 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
                 {
                     "field": "public_identifier",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
                         "max:2048",
-                        "prohibits:ln_id",
-                        "prohibits:sn_id",
-                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -42275,9 +43836,7 @@
                         "string",
                         "starts_with:ln_ms_",
                         "size:18",
-                        "prohibits:ln_id",
-                        "prohibits:sn_id",
-                        "prohibits:public_identifier"
+                        "prohibits:ln_id,sn_id,recruiter_id,ln_member_id,public_identifier"
                     ],
                     "required": false,
                     "nullable": true,
@@ -42444,7 +44003,6 @@
                 {
                     "field": "ln_id",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
                         "max:128",
@@ -42462,10 +44020,9 @@
                 {
                     "field": "sn_id",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -42473,7 +44030,56 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -43033,7 +44639,6 @@
                 {
                     "field": "ln_id",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
                         "max:128",
@@ -43051,10 +44656,9 @@
                 {
                     "field": "sn_id",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -43062,7 +44666,56 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -43311,7 +44964,6 @@
                 {
                     "field": "ln_id",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
                         "max:128",
@@ -43329,10 +44981,9 @@
                 {
                     "field": "sn_id",
                     "rules": [
-                        "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -43340,7 +44991,56 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -43542,7 +45242,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -43550,7 +45250,59 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attendees.*.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attendees.*.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "attendees.*.public_identifier",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -44162,14 +45914,15 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "regex:~^\\d+$~"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -44761,14 +46514,15 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "regex:~^\\d+$~"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": null,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -45092,15 +46846,15 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "regex:/^\\d+$/",
-                        "max:30"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 30,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -45231,16 +46985,15 @@
                     "rules": [
                         "required",
                         "string",
-                        "regex:~^urn:li:(activity",
-                        "share",
-                        "ugcPost):\\d+$~"
+                        "min:1",
+                        "max:2048"
                     ],
                     "required": true,
                     "nullable": false,
                     "type": "string",
                     "in": null,
-                    "min": null,
-                    "max": null,
+                    "min": 1,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -48750,15 +50503,15 @@
                         "prohibits:company.company_ln_id",
                         "nullable",
                         "string",
-                        "max:512",
-                        "starts_with:https://www.linkedin.com/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -48769,14 +50522,15 @@
                         "prohibits:company.company_url",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -48890,15 +50644,15 @@
                         "prohibits:company.company_ln_id",
                         "nullable",
                         "string",
-                        "max:512",
-                        "starts_with:https://www.linkedin.com/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -48909,14 +50663,15 @@
                         "prohibits:company.company_url",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -57062,15 +58817,15 @@
                         "prohibits:company.company_ln_id",
                         "nullable",
                         "string",
-                        "max:512",
-                        "starts_with:https://www.linkedin.com/"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 512,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -57081,14 +58836,15 @@
                         "prohibits:company.company_url",
                         "nullable",
                         "string",
-                        "max:64"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -57198,8 +58954,6 @@
                 {
                     "field": "profile.ln_id",
                     "rules": [
-                        "required_without_all:profile.sn_id,profile.nickname",
-                        "prohibits:profile.sn_id,profile.nickname",
                         "nullable",
                         "string",
                         "max:128",
@@ -57217,10 +58971,9 @@
                 {
                     "field": "profile.sn_id",
                     "rules": [
-                        "prohibits:profile.nickname",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -57228,7 +58981,39 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "profile.recruiter_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "profile.ln_member_id",
+                    "rules": [
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -57237,14 +59022,15 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -61802,8 +63588,63 @@
                 {
                     "field": "profile_id",
                     "rules": [
-                        "required_without:public_identifier",
-                        "prohibits:public_identifier",
+                        "required_without_all:public_identifier,ln_member_id,recruiter_id",
+                        "prohibits:public_identifier,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "public_identifier",
+                    "rules": [
+                        "required_without_all:profile_id,ln_member_id,recruiter_id",
+                        "prohibits:profile_id,ln_member_id,recruiter_id",
+                        "nullable",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,recruiter_id",
+                        "prohibits:profile_id,public_identifier,recruiter_id",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "required_without_all:profile_id,public_identifier,ln_member_id",
+                        "prohibits:profile_id,public_identifier,ln_member_id",
                         "nullable",
                         "string",
                         "max:128",
@@ -61815,25 +63656,6 @@
                     "in": null,
                     "min": null,
                     "max": 128,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "public_identifier",
-                    "rules": [
-                        "required_without:profile_id",
-                        "prohibits:profile_id",
-                        "nullable",
-                        "string",
-                        "max:2048",
-                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
-                    ],
-                    "required": false,
-                    "nullable": true,
-                    "type": "string",
-                    "in": null,
-                    "min": null,
-                    "max": 2048,
                     "size": null,
                     "between": null
                 },
@@ -62009,7 +63831,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:64",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -62017,7 +63839,41 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 64,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.recruiter_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "target.ln_member_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -62027,14 +63883,15 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "max:100"
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 100,
+                    "max": 2048,
                     "size": null,
                     "between": null
                 }
@@ -62254,7 +64111,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:255",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -62262,7 +64119,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 255,
+                    "max": 128,
                     "size": null,
                     "between": null
                 },
@@ -62271,7 +64128,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:255",
+                        "max:128",
                         "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
                     ],
                     "required": false,
@@ -62279,7 +64136,39 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 255,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "recruiter_id",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinProfileUrnRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "ln_member_id",
+                    "rules": [
+                        "nullable",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinMemberIdRule"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -62289,9 +64178,7 @@
                         "nullable",
                         "string",
                         "max:2048",
-                        "prohibits:ln_id",
-                        "prohibits:sn_id",
-                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPublicIdentifierRule"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinPersonAddressRule"
                     ],
                     "required": false,
                     "nullable": true,
@@ -62376,9 +64263,7 @@
                         "string",
                         "starts_with:ln_ms_",
                         "size:18",
-                        "prohibits:ln_id",
-                        "prohibits:sn_id",
-                        "prohibits:public_identifier"
+                        "prohibits:ln_id,sn_id,recruiter_id,ln_member_id,public_identifier"
                     ],
                     "required": false,
                     "nullable": true,

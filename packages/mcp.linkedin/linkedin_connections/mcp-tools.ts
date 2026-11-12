@@ -24,12 +24,15 @@ const SID = z.string().length(18).startsWith('ln_cn_')
 const ACCOUNT_SID = z.string().length(18).startsWith('ln_ac_')
   .describe('LinkedIn account sid (ln_ac_…) whose network is acted on.');
 
-// Target person for check-degree: exactly one identifier (backend-validated).
+// Target person for check-degree, by any identifier (2026-11-12): at least one
+// of the five identity keys (backend-validated).
 const Target = z.object({
-  ln_id: z.string().max(128).optional().describe('Regular-profile URN (ACoAA…).'),
-  sn_id: z.string().max(64).optional().describe('Sales Navigator URN (ACwAA…).'),
-  nickname: z.string().max(100).optional().describe('Public profile slug.'),
-}).describe('Target person; supply exactly one of ln_id / sn_id / nickname.');
+  ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…). A URN of another surface in this key is filed by what it is.'),
+  sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN (ACwAA…).'),
+  recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  nickname: z.string().max(2048).nullable().optional().describe('Vanity slug, or any profile link or id: read by its shape.'),
+}).describe('Target person, by any identifier: at least one of ln_id / sn_id / recruiter_id / ln_member_id / nickname.');
 
 const LinkedinConnectionRemovalKind = z.enum(['removed', 'blocked']);
 

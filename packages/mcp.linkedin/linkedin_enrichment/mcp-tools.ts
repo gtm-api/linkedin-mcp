@@ -46,12 +46,19 @@ const executorFields = {
     .describe('Accept a stored payload this many days old instead of fetching (probe tier 2, §9.5): a hit answers with served_from_cache / cache_source "data_cluster", spending no browser run and no bucket slot. Omitted, the stored payload is never consulted and the call always dispatches.'),
 };
 
-// Person target: EXACTLY ONE of the two (both/neither → 422, backend-validated).
+// Person target: EXACTLY ONE of the four keys (several or none → 422,
+// backend-validated). Any identifier a caller holds fits one of them
+// (2026-11-12): the two address fields are read by their shape, not by their
+// name, and the backend finds whatever key the method's wire takes.
 const personTargetFields = {
-  profile_id: z.string().max(128).optional()
-    .describe('ln_id (ACoAA…) or sn_id (ACwAA…), interchangeable for dispatch. Provide profile_id XOR public_identifier.'),
+  profile_id: z.string().max(2048).optional()
+    .describe('The person by any identifier, read by its shape: a profile URN (ACoAA…), a Sales Navigator id (ACwAA…), a Recruiter id (AEMAA…), urn:li:fsd_profile:…, urn:li:member:<n>, a vanity slug or any profile link. Provide exactly one of profile_id / public_identifier / ln_member_id / recruiter_id.'),
   public_identifier: z.string().max(2048).optional()
-    .describe('Vanity slug from /in/…, or the whole profile URL it comes from (any linkedin.com host, locale or mwlite prefix, query and trailing slash included): the URL is reduced to the slug before dispatch, and both forms share one ledger entry. A linkedin.com URL that is NOT a profile URL is refused 422 public_identifier_not_resolvable instead of being sent as a slug. Provide public_identifier XOR profile_id. On sub-record methods a slug-only call needs a stored URN (run person-lite-profile first) or is refused not_dispatchable.'),
+    .describe('The same field under the slug\'s name: a vanity slug from /in/…, the whole profile link (any linkedin.com host, a Sales Navigator lead link too) or a URN; read by its shape, so a URN here and a slug in profile_id both work, and a link and its slug share one ledger entry. A value that names no member (a company page, a feed link) is 422 public_identifier_not_resolvable. Whatever key the method\'s wire takes is found for you: from your team\'s own history or the stored corpus for free, else by ONE extra LinkedIn request, and the receipt says which (data_request.target_resolved_via: "ledger" | "corpus" | "browser", null when nothing had to be resolved). A slug LinkedIn does not know is 422 public_identifier_unresolved.'),
+  ln_member_id: z.string().max(64).optional()
+    .describe('The bare member number (digits). It resolves from your team\'s history or the stored corpus; a number nobody knows is 422 ln_member_id_unresolved, since LinkedIn opens no profile by the number.'),
+  recruiter_id: z.string().max(128).optional()
+    .describe('A Recruiter (talent) id (AEMAA…): it names the member it decodes to.'),
 };
 
 // Pagination for sub-record list methods (wire offset cursor, opaque to callers).
@@ -67,21 +74,22 @@ const pageFields = {
 // neither given and both given are each a 422.
 const companyTargetFields = {
   company_url: z.string().max(2048).nullable().optional()
-    .describe('https://www.linkedin.com/company/{slug}/ (or a Sales Nav company URL). Provide company_url XOR domain.'),
+    .describe('The company in any form: its page link (any linkedin.com host), the bare slug, the numeric id, a /company/<id>/ or Sales Navigator company link, or a company urn (urn:li:fsd_company:<id>). A run of digits is the id wherever it stands. Provide company_url XOR domain.'),
   domain: z.string().max(191).nullable().optional()
     .describe('The company website instead of its LinkedIn URL (`acme.com`, `www.acme.com` and `https://acme.com/pricing` all fold to the same host): resolved to a LinkedIn identity through the stored corpus, so a miss is refused company_not_resolvable rather than searched for live. This is the way to turn a domain you already have into the company profile. Provide domain XOR company_url.'),
 };
 
-// Company target, company-posts only: NESTED and id-first. The wire getter has
-// no vanity addressing, so a bare company_url is accepted by validation and then
-// refused not_dispatchable; company_ln_id is the path that works. Exactly one of
-// the two (the FormRequest `prohibits` the other).
+// Company target, company-posts only: NESTED. The wire getter takes the numeric
+// id alone; each of the two keys reads the company in any form by its shape, and
+// the backend finds the id of a slug (2026-11-12: the team's journal, the corpus,
+// else one light company read). Exactly one of the two (the FormRequest
+// `prohibits` the other).
 const companyPostsTargetField = {
   company: z.object({
-    company_ln_id: z.string().max(64).nullable().optional()
-      .describe('Numeric LinkedIn company id: the `company_id` returned by enrich_linkedin_company_profile. THIS is the dispatchable form.'),
-    company_url: z.string().max(512).startsWith('https://www.linkedin.com/').nullable().optional()
-      .describe('Vanity company URL. Ledgered, then refused not_dispatchable: only pass it if you deliberately want that. Provide company_ln_id instead.'),
+    company_ln_id: z.string().max(2048).nullable().optional()
+      .describe('The company, by the numeric id (the `company_id` of enrich_linkedin_company_profile) or any other form: a company urn, a /company/<id>/ link, the page link, the slug.'),
+    company_url: z.string().max(2048).nullable().optional()
+      .describe('The same field under the link\'s name: the page link, the slug, or any spelling of the id. The id of a slug is found for you, free when your team or the corpus knows the page, else by ONE extra LinkedIn request (data_request.target_resolved_via: "browser").'),
   }).describe('Company target; exactly one of company_ln_id / company_url (both or neither is a 422).'),
 };
 
@@ -95,7 +103,7 @@ const companyPostsTargetField = {
 // The kind="enrich" DataRequestDomain ledger row: its full field set is owned
 // by data_requests.md, so it stays loose here (not this surface's projection).
 const DataRequestRow = z.object({}).passthrough()
-  .describe('The kind="enrich" DataRequest journal row (status / served_from_cache / cached_from_sid). The public audit anchor for this call. A receipt: its result_ref is null here, the payload is the item next to it; get_data_request by sid reads the stored payload back.');
+  .describe('The kind="enrich" DataRequest journal row (status / served_from_cache / cached_from_sid / target_resolved_via). The public audit anchor for this call. A receipt: its result_ref is null here, the payload is the item next to it; get_data_request by sid reads the stored payload back. target_resolved_via says how the key the wire takes was come by when you addressed the target by another one: null (nothing to resolve, or a cache answered), "ledger" (your team\'s own history knew it), "corpus" (the stored corpus did), "browser" (ONE extra LinkedIn request was spent on it).');
 
 // Generic loose item, used for full-profile's RAW-WIRE truncated sub-record
 // heads, which diverge from the dedicated methods' projected shapes (the head
@@ -156,7 +164,7 @@ const EducationItem = z.object({
   school_name: z.string().nullable(),
   company_id: z.string().nullable(),
   school_public_identifier: z.string().nullable().describe("The vanity of the school's LinkedIn page; null for a school with no page."),
-  school_logo_url: z.string().nullable().describe("The school's logo, a signed LinkedIn CDN link that expires."),
+  school_logo_url: z.string().nullable().describe("The school's logo, saved to our storage: a link that does not expire."),
   degree: z.string().nullable().describe("As the member wrote it ('Bachelor’s Degree')."),
   field_of_study: z.string().nullable(),
   start_date: z.string().nullable(),
@@ -226,7 +234,6 @@ const FeaturedItem = z.object({
   title: z.string().nullable(),
   subtitle: z.string().nullable(),
   text: z.string().nullable(),
-  image_url: z.string().nullable(),
   num_likes: z.number().nullable(),
   num_comments: z.number().nullable(),
 }).passthrough();
@@ -279,7 +286,6 @@ const LiteProfileLocalized = z.object({
 const ProfileHeaderFacts = {
   maiden_name: z.string().nullable(),
   localized: z.array(LiteProfileLocalized).describe('The name and the headline in every language the member wrote them in.'),
-  background_picture_url: z.string().nullable().describe('The cover image, a signed LinkedIn CDN link that expires.'),
   location: z.string().nullable().describe("The location as LinkedIn shows it ('Redmond, Washington, United States')."),
   location_without_country: z.string().nullable().describe("The location without its country ('Redmond, Washington')."),
   location_geo_id: z.string().nullable().describe("The location's geo id, the value LinkedIn's location search filter takes."),
@@ -359,7 +365,7 @@ const FullProfileResult = z.object({
 // person-lite-profile result (row 48): the identifier quad, then everything ONE
 // request of LinkedIn's basic profile query states about the member (2026-11-11,
 // Eugene: whatever we can give, we give): the name in its parts and in every
-// locale, the headline, the photo and the cover, the location with its geo ids,
+// locale, the headline, the photo, the location with its geo ids,
 // the locales, the premium, verification, creator and Top Voice marks, the
 // status, and the reading account's relationship to the member. That query
 // takes a slug, a profile id or a Sales Navigator id alike, which is how this
@@ -510,7 +516,6 @@ const LiteCompanyResult = z.object({
   tagline: z.string().nullable(),
   description: z.string().nullable(),
   logo_url: z.string().nullable().optional(),
-  cover_image_url: z.string().nullable(),
   company_url: z.string(),
   website_url: z.string().nullable(),
   phone: z.string().nullable(),
@@ -567,7 +572,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_lite_profile',
     description:
-      "Cheapest person read, ONE LinkedIn request, and everything it states: existence check + full identifier resolution. THE tool for turning a vanity slug (/in/…) into the URNs, or a bare URN (a profile id or a Sales Navigator id) into the slug: it returns the canonical identifier quad (ln_member_id + both URNs + nickname). Also the name (full_name computed), the headline, the photo and cover, the location with its geo ids (location_geo_id feeds the location search filter), the locales, the premium, verified, creator, open-to-work, hiring and Top Voice marks, the status, is_memorialized (do not contact) and is_email_required_to_connect. Pin linkedin_account_sid and network_distance, connected_at and pending_invitation are that account's; unpinned they are null. No contact card: enrich_linkedin_person_contact_info. primary_language and supported_languages are the profile's LOCALES, not what the person speaks (that is enrich_linkedin_person_languages). cached 24h. Address by profile_id XOR public_identifier.",
+      "Cheapest person read, ONE LinkedIn request, and everything it states: existence check + full identifier resolution. THE tool for turning a vanity slug (/in/…) into the URNs, or a bare URN (a profile id or a Sales Navigator id) into the slug: it returns the canonical identifier quad (ln_member_id + both URNs + nickname). Also the name (full_name computed), the headline, the photo, the location with its geo ids (location_geo_id feeds the location search filter), the locales, the premium, verified, creator, open-to-work, hiring and Top Voice marks, the status, is_memorialized (do not contact) and is_email_required_to_connect. Pin linkedin_account_sid and network_distance, connected_at and pending_invitation are that account's; unpinned they are null. No contact card: enrich_linkedin_person_contact_info. primary_language and supported_languages are the profile's LOCALES, not what the person speaks (that is enrich_linkedin_person_languages). cached 24h. Address by ONE identifier of any kind.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-lite-profile' },
     operation: 'action',
@@ -615,7 +620,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({
-      company_id: z.string().regex(/^\d+$/).max(32).describe('Numeric LinkedIn company id, e.g. from a Sales Navigator URL or an organization urn.'),
+      company_id: z.string().max(2048).describe('The numeric LinkedIn company id in any spelling: the digits, a company urn (urn:li:fsd_company:<id>, urn:li:organization:<id>), a /company/<id>/ link or a Sales Navigator company link.'),
       ...executorFields,
       ...usageMetaField,
     }),
@@ -629,7 +634,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_full_profile',
     description:
-      'The complete person dossier: every fact enrich_linkedin_person_lite_profile states (identity, headline, location with geo ids, locales, cover, premium / verified / creator / open-to-work / hiring / Top Voice marks), plus position/company, about, follower/connection counts, the contact card as LinkedIn shows it to the reading account (contact_info, in person-contact-info\'s shape), and the WHOLE experience, education and skills lists (up to 100 rows each; no posts since 2026-11-03: the feed is person-posts). Eight or nine LinkedIn requests (the education list one of them), cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. picture_url is normalized to avatar_url.',
+      'The complete person dossier: every fact enrich_linkedin_person_lite_profile states (identity, headline, location with geo ids, locales, premium / verified / creator / open-to-work / hiring / Top Voice marks), plus position/company, about, follower/connection counts, the contact card as LinkedIn shows it to the reading account (contact_info, in person-contact-info\'s shape), and the WHOLE experience, education and skills lists (up to 100 rows each; no posts since 2026-11-03: the feed is person-posts). Eight or nine LinkedIn requests (the education list one of them), cached 24h. One full profile beats separate subset calls when you need profile + 2 or more sections. picture_url is normalized to avatar_url.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-full-profile' },
     operation: 'action',
@@ -646,7 +651,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_experience',
     description:
-      'Complete, paginated work history ("Show all experiences"), unlike the truncated head on full-profile. One call = one page; loop cursor until paging.next_page_cursor is absent. cached 7d. A public_identifier-only call needs a stored URN (run person-lite-profile first) or is refused not_dispatchable. On the connected account\'s OWN profile each entry also carries position_id, the key of the position editing verbs.',
+      'Complete, paginated work history ("Show all experiences"), unlike the truncated head on full-profile. One call = one page; loop cursor until paging.next_page_cursor is absent. cached 7d. Address by any identifier: the wire takes a URN, and a slug\'s URN is found for you (data_request.target_resolved_via says how). On the connected account\'s OWN profile each entry also carries position_id, the key of the position editing verbs.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-experience' },
     operation: 'action',
@@ -663,7 +668,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_skills',
     description:
-      'Complete, paginated skills list ("Show all skills") with endorsement counts (skill_id is the endorse handle). cached 7d. Use to see/reason over skills; to simply ENDORSE, use linkedin-accounts.endorse-skill (auto-discovers skills, no enrich call needed). A public_identifier-only call needs a stored URN.',
+      'Complete, paginated skills list ("Show all skills") with endorsement counts (skill_id is the endorse handle). cached 7d. Use to see/reason over skills; to simply ENDORSE, use linkedin-accounts.endorse-skill (auto-discovers skills, no enrich call needed). Address by any identifier: a slug\'s URN is found for you.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-skills' },
     operation: 'action',
@@ -697,7 +702,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_posts',
     description:
-      "Posts authored or reshared by the target, newest-first: the personalization goldmine before outreach. Reshares carry the original in reshared_post; created_at is ISO 8601. cached 7d. This is the target's OWN feed; to harvest who ENGAGED with a post use the scraping surface. A public_identifier-only call needs a stored URN.",
+      "Posts authored or reshared by the target, newest-first: the personalization goldmine before outreach. Reshares carry the original in reshared_post; created_at is ISO 8601. cached 7d. This is the target's OWN feed; to harvest who ENGAGED with a post use the scraping surface. Address by any identifier: a slug's URN is found for you.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-posts' },
     operation: 'action',
@@ -714,7 +719,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_featured',
     description:
-      "The Featured section: what the target chose to pin (posts, links, media). Small, cheap, high-signal for personalization: pinned content is what the person WANTS noticed. cached 7d. Not paginated. A public_identifier-only call needs a stored URN.",
+      "The Featured section: what the target chose to pin (posts, links, media). Small, cheap, high-signal for personalization: pinned content is what the person WANTS noticed. cached 7d. Not paginated. Address by any identifier: a slug's URN is found for you. The items carry no picture.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-featured' },
     operation: 'action',
@@ -748,7 +753,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_languages',
     description:
-      'The Languages section: spoken languages with self-declared proficiency. Cheap localization signal: write the opener in the prospect\'s native language. cached 7d. Most profiles declare NONE, so an empty list is a real answer about the person rather than a failed read. proficiency is the RAW string LinkedIn renders, suffix included ("Native or bilingual proficiency", "Full professional proficiency", ...), localized on non-English sessions and null when the member declared the language without a level. Address by profile_id XOR public_identifier; like certifications, the screen behind this one is addressed by the vanity slug, so public_identifier is the one request and a profile_id costs a resolve of the slug first (free when this team enriched the person before).',
+      'The Languages section: spoken languages with self-declared proficiency. Cheap localization signal: write the opener in the prospect\'s native language. cached 7d. Most profiles declare NONE, so an empty list is a real answer about the person rather than a failed read. proficiency is the RAW string LinkedIn renders, suffix included ("Native or bilingual proficiency", "Full professional proficiency", ...), localized on non-English sessions and null when the member declared the language without a level. Address by any identifier. The screen takes the slug with the profile id beside it: whichever you did not give is found for you, free when your team or the corpus knows it, else by one extra LinkedIn request (data_request.target_resolved_via: "browser").',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-languages' },
     operation: 'action',
@@ -805,7 +810,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_comment_activity',
     description:
-      "The target's recent comments across OTHER people's posts (activity feed, Comments tab): where the target spends attention, and warm entry points for an opener. Each item carries the PARENT POST too, so you can read what they were reacting to without a second call. cached 7d, paginated. Addressed by profile_id alone. PAGING: the end of the feed is a MISSING paging.next_page_cursor, never an empty page, because member filtering can empty a page mid-feed; there is no total, LinkedIn reports 0 for this feed whatever is in it. The target's OWN posts are person-posts; the commenters OF a post are scraping.",
+      "The target's recent comments across OTHER people's posts (activity feed, Comments tab): where the target spends attention, and warm entry points for an opener. Each item carries the PARENT POST too, so you can read what they were reacting to without a second call. cached 7d, paginated. Address by any identifier (a slug\'s URN is found for you). PAGING: the end of the feed is a MISSING paging.next_page_cursor, never an empty page, because member filtering can empty a page mid-feed; there is no total, LinkedIn reports 0 for this feed whatever is in it. The target's OWN posts are person-posts; the commenters OF a post are scraping.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-comment-activity' },
     operation: 'action',
@@ -826,7 +831,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_reaction_activity',
     description:
-      "The target's recent reactions on OTHER people's posts (activity feed, Reactions tab): topical interest signal, cheaper to act on than comments. Each item carries the reaction type, when they reacted, and the PARENT POST whole. cached 7d, paginated. Addressed by profile_id alone. PAGING: the end of the feed is a MISSING paging.next_page_cursor, never an empty page; there is no total, LinkedIn reports 0 for this feed whatever is in it. reaction_type is null when the header phrase did not map, which is normal. The reactors OF a post are scraping (get-post-reactors).",
+      "The target's recent reactions on OTHER people's posts (activity feed, Reactions tab): topical interest signal, cheaper to act on than comments. Each item carries the reaction type, when they reacted, and the PARENT POST whole. cached 7d, paginated. Address by any identifier (a slug\'s URN is found for you). PAGING: the end of the feed is a MISSING paging.next_page_cursor, never an empty page; there is no total, LinkedIn reports 0 for this feed whatever is in it. reaction_type is null when the header phrase did not map, which is normal. The reactors OF a post are scraping (get-post-reactors).",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-reaction-activity' },
     operation: 'action',
@@ -847,7 +852,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_person_interests',
     description:
-      'ONE tab of the Interests section per call: top_voices (the default), companies, groups, newsletters or schools. Cheap ICP-fit and conversation-hook signal. cached 7d, paginated. The wire pages a single tab, so reading all five spends the method five times; the requested tab is echoed at result.tab so a caller looping the vocabulary can tell the responses apart. Addressed by public_identifier ONLY: a urn-only call is ledgered and then refused not_dispatchable, so run person-lite-profile first if all you have is the urn.',
+      'ONE tab of the Interests section per call: top_voices (the default), companies, groups, newsletters or schools. Cheap ICP-fit and conversation-hook signal. cached 7d, paginated. The wire pages a single tab, so reading all five spends the method five times; the requested tab is echoed at result.tab so a caller looping the vocabulary can tell the responses apart. The wire takes the slug: address by any identifier and a URN\'s slug is found for you.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-interests' },
     operation: 'action',
@@ -910,7 +915,7 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     ...base,
     name: 'enrich_linkedin_company_posts',
     description:
-      "The company page's own feed, newest-first: the company-side twin of person-posts (author = the company page). Addressed by NUMERIC company id, nested: {company:{company_ln_id}}. If all you have is a company URL or slug, call enrich_linkedin_company_profile first and take company_id off its result; passing {company:{company_url}} here validates and is then refused not_dispatchable, having still opened a ledger row. cached 7d, paginated.",
+      "The company page's own feed, newest-first: the company-side twin of person-posts (author = the company page). The wire takes the numeric company id; address the company nested, by either key in any form: {company:{company_ln_id}} or {company:{company_url}} each read the id, a company urn, a /company/<id>/ link, the page link or its slug, and the id of a slug is found for you (data_request.target_resolved_via says how). cached 7d, paginated.",
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/company-posts' },
     operation: 'action',
