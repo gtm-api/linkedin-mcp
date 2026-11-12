@@ -2825,6 +2825,277 @@
             },
             "filter": null
         },
+        "EmailBox": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\EmailBoxDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "plan",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "location",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "suspended_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "complimentary",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "seats_cap",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "seats_used",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "ipv4",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "release",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "run",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Values\\EmailBoxRunValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "price",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Values\\EmailBoxPriceValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "renews_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "paid_through",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "failed_error_code",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "provisioned_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "suspended_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Responses\\EmailBoxResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "name",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "plan",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "location",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "suspended_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "complimentary",
+                        "type": "bool",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "seats_cap",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "seats_used",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "ipv4",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "release",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "run",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Values\\EmailBoxRunValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "price",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Values\\EmailBoxPriceValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "renews_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "paid_through",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "failed_error_code",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "provisioned_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "suspended_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\EmailBoxFilter",
+                "fields": [
+                    "sid",
+                    "status"
+                ]
+            }
+        },
         "Notification": {
             "domain": {
                 "class": "Gtm\\Lib\\Common\\Microservices\\Id\\Notification\\NotificationDomain",
@@ -6290,6 +6561,90 @@
                 {
                     "name": "Expiry",
                     "value": "expiry"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Enums\\EmailBoxLocationEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Helsinki",
+                    "value": "hel1"
+                },
+                {
+                    "name": "Falkenstein",
+                    "value": "fsn1"
+                },
+                {
+                    "name": "Nuremberg",
+                    "value": "nbg1"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Enums\\EmailBoxPlanEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Starter",
+                    "value": "starter"
+                },
+                {
+                    "name": "Growth",
+                    "value": "growth"
+                },
+                {
+                    "name": "Agency",
+                    "value": "agency"
+                },
+                {
+                    "name": "Dedicated",
+                    "value": "dedicated"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Enums\\EmailBoxStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Provisioning",
+                    "value": "provisioning"
+                },
+                {
+                    "name": "Active",
+                    "value": "active"
+                },
+                {
+                    "name": "Suspended",
+                    "value": "suspended"
+                },
+                {
+                    "name": "Resizing",
+                    "value": "resizing"
+                },
+                {
+                    "name": "Destroying",
+                    "value": "destroying"
+                },
+                {
+                    "name": "Destroyed",
+                    "value": "destroyed"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Enums\\EmailBoxSuspendedReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "PaymentFailed",
+                    "value": "payment_failed"
+                },
+                {
+                    "name": "Unpaid",
+                    "value": "unpaid"
                 }
             ]
         },
@@ -14113,6 +14468,486 @@
         },
         {
             "method": "POST",
+            "uri": "api/email-boxes",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "create",
+            "operation": "create",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_billing",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailBoxCreateRequest",
+            "rules": [
+                {
+                    "field": "name",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:60"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 60,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"starter\",\"growth\",\"agency\",\"dedicated\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "starter",
+                        "growth",
+                        "agency",
+                        "dedicated"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "location",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"hel1\",\"fsn1\",\"nbg1\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "hel1",
+                        "fsn1",
+                        "nbg1"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "copy_settings_from",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-boxes/confirm-checkout",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "confirmCheckout",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_billing",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailBoxConfirmCheckoutRequest",
+            "rules": [
+                {
+                    "field": "paddle_transaction_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:txn_",
+                        "max:64"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-boxes/search",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "search",
+            "operation": "search",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailBoxSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.status",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "limit",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "DELETE",
+            "uri": "api/email-boxes/{sid}",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "delete",
+            "operation": "delete",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_billing",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "PATCH",
+            "uri": "api/email-boxes/{sid}",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "update",
+            "operation": "update",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_update_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailBoxUpdateRequest",
+            "rules": [
+                {
+                    "field": "name",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:60"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 60,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-boxes/{sid}/move-in",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "moveIn",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_update_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailBoxMoveInRequest",
+            "rules": [
+                {
+                    "field": "from_email_box_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18",
+                        "distinct"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-boxes/{sid}/preview-resize",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "previewResize",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_billing",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailBoxResizeRequest",
+            "rules": [
+                {
+                    "field": "plan",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"starter\",\"growth\",\"agency\",\"dedicated\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "starter",
+                        "growth",
+                        "agency",
+                        "dedicated"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-boxes/{sid}/resize",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "resize",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_billing",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailBoxResizeRequest",
+            "rules": [
+                {
+                    "field": "plan",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"starter\",\"growth\",\"agency\",\"dedicated\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "starter",
+                        "growth",
+                        "agency",
+                        "dedicated"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-boxes/{sid}/retry",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "retry",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_billing",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
             "uri": "api/media-uploads/request-upload",
             "controller": "App\\Entities\\MediaUpload\\MediaUploadController",
             "action": "requestUpload",
@@ -20503,6 +21338,23 @@
         },
         {
             "method": "POST",
+            "uri": "internal/email-boxes/address-for-account",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
+            "action": "addressForAccount",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
             "uri": "internal/email-boxes/bootstrap/redeem",
             "controller": "App\\Entities\\EmailBox\\InternalEmailBoxController",
             "action": "redeemBootstrap",
@@ -20653,6 +21505,142 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action takes no request object"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-suppressions/fanout",
+            "controller": "App\\Entities\\EmailBox\\InternalEmailSuppressionController",
+            "action": "fanout",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailSuppressionFanoutRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "from_email_box_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "action",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"add\",\"lift\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "add",
+                        "lift"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "items",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:500"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "items.*.address",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:320"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "items.*.origin",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "items.*.reason",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -20856,9 +21844,131 @@
             "declared_arguments": [],
             "required_permission": null,
             "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\Team\\Requests\\TeamSlotEmailBoxRequest",
+            "rules": [
+                {
+                    "field": "email_box_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/slots/move",
+            "controller": "App\\Entities\\Team\\InternalTeamController",
+            "action": "moveSlots",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\Team\\Requests\\TeamSlotMoveRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18",
+                        "distinct"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "from_email_box_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "to_email_box_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18",
+                        "different:from_email_box_sid"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -20873,9 +21983,27 @@
             "declared_arguments": [],
             "required_permission": null,
             "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\Team\\Requests\\TeamSlotEmailBoxRequest",
+            "rules": [
+                {
+                    "field": "email_box_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -20959,9 +22087,27 @@
             "declared_arguments": [],
             "required_permission": null,
             "internal": true,
-            "request_class": null,
-            "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "request_class": "App\\Entities\\Team\\Requests\\TeamSlotEmailBoxRequest",
+            "rules": [
+                {
+                    "field": "email_box_sid",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -24779,13 +25925,26 @@
         "channel_no_cross_cluster": "The two workspaces live on different clusters and this channel cannot hand an account across clusters.",
         "channel_unavailable": "The channel service did not answer; retry in a minute.",
         "channel_unreachable": "The channel service could not be reached; retry in a minute.",
+        "checkout_not_paid": "The billing provider has not settled this checkout yet; ask again in a few seconds.",
         "confirmation_count_mismatch": "confirmation_count does not match the number of accounts the filter matched; re-read the count and confirm again.",
         "domain_active_in_another_team": "This domain has an active certificate in another workspace.",
         "domain_already_active": "This domain already has an active certificate.",
         "domain_required": "domain is required.",
+        "email_account_on_another_box": "Some of these mailboxes are on a different email server than the one named as the source.",
+        "email_box_already_on_plan": "This email server is already on that plan.",
+        "email_box_busy": "This email server is in the middle of a change; wait for it to finish.",
+        "email_box_complimentary": "This email server is included with the workspace and is not billed, so it cannot be resized or deleted here.",
+        "email_box_does_not_fit": "This email server holds more mailboxes than the chosen plan allows; move or remove mailboxes first, or choose a larger plan.",
+        "email_box_has_mailboxes": "This email server still holds mailboxes; move or remove them before deleting it.",
         "email_box_has_no_bundle": "A secrets merge needs a stored bundle to merge into, and this box has none; send the full bundle.",
+        "email_box_no_failed_run": "This email server has no failed operation to retry.",
+        "email_box_not_billed": "No live subscription pays for this email server, so its plan cannot be changed; restore the subscription first.",
+        "email_box_not_ready": "The email server that holds this mailbox is not active right now.",
         "email_box_not_replaceable": "The box named in replaces_email_box_sid is not the workspace's single live box (or is not active or suspended), so it cannot be replaced.",
+        "email_box_not_serving": "Settings can be copied from a server that is running; {field} names one that is not.",
         "email_box_unaddressable": "This box is not live or has no hostname and access key yet, so it cannot be addressed.",
+        "email_server_price_missing": "The billing catalog has no price for this email server plan yet; try again later.",
+        "email_servers_not_offered": "Email servers cannot be bought on this deployment yet.",
         "email_taken": "An account with this email already exists; sign in and connect the agent from the app instead.",
         "handover_in_flight": "A handover of this account is already in progress; wait for it to finish.",
         "holder_team_unavailable": "The receiving workspace does not exist or is not active.",
@@ -24799,11 +25958,13 @@
         "issuance_already_in_progress": "A certificate for this domain is being issued right now; wait for it.",
         "no_default_team": "This user belongs to no workspace yet; create one or accept an invitation first.",
         "no_erasure_pending": "No erasure is pending for this account.",
+        "not_enough_seats": "The target email server has no room for these mailboxes; free up seats or resize it first.",
         "oauth_mint_lock_timeout": "Another token mint for this client is in progress; retry in a few seconds.",
         "owner_cannot_be_removed": "The workspace owner cannot be removed; transfer ownership first.",
         "owner_cannot_be_rescoped": "The workspace owner sees every account; a sender slice applies to other members only.",
         "paddle_unavailable": "The billing provider did not answer; retry in a minute.",
         "paid_subscription_applied": "A paid subscription is applied to this workspace; unapply and cancel it before deleting the workspace.",
+        "partner_managed": "This workspace is managed by a partner; email servers come through the partner.",
         "partner_sentinel_missing": "The partner-managed workspace has no internal subscription row; provisioning did not finish.",
         "password_already_set": "This account already has a password; use the reset flow to change it.",
         "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",
@@ -24817,11 +25978,13 @@
         "share_not_active": "This share is not active, so it cannot be recalled or returned.",
         "slug_collision": "Another product already carries this slug; the catalog cannot map two products to one slug.",
         "subscription_canceled": "This subscription is canceled and cannot be changed.",
+        "subscription_has_no_plan": "This subscription has no plan line to change; it carries add-ons only.",
         "subscription_locked_pending_changes": "This subscription has a scheduled change pending; wait for it to apply or cancel it first.",
         "subscription_not_floating": "This subscription is already applied to another workspace.",
         "team_already_has_subscription": "This workspace already has a subscription applied; cancel or replace it first.",
         "team_partner_managed": "This workspace is managed by a partner; billing changes come through the partner.",
         "team_unavailable": "That workspace does not exist or was deleted.",
-        "too_many_splits": "group_by would produce more than 500 groups; narrow the filter or split on a field with fewer values."
+        "too_many_splits": "group_by would produce more than 500 groups; narrow the filter or split on a field with fewer values.",
+        "unknown_filter_operator": "{field} uses an operator this filter does not know; use eq, in or is_null."
     }
 }

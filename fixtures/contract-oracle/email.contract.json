@@ -174,6 +174,54 @@
                         "has_default": true
                     },
                     {
+                        "name": "email_box_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "label",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "address_domain",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "sent_today",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "daily_cap_today",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "warmup_day",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "auth_suspect",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccount\\Values\\EmailAccountAuthSuspectValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subscription_hold_reason",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccount\\Enums\\EmailAccountSubscriptionHoldReasonEnum|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -353,6 +401,66 @@
                         "has_default": true
                     },
                     {
+                        "name": "sending_paused_until",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "reconnect_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_box_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "label",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "address_domain",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "sent_today",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "daily_cap_today",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "warmup_day",
+                        "type": "?int",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "auth_suspect",
+                        "type": "?array",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "subscription_hold_reason",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -377,11 +485,14 @@
                 "fields": [
                     "q",
                     "sid",
+                    "email_box_sid",
                     "email_sending_domain_sid",
                     "email_tracking_domain_sid",
                     "email_oauth_app_sid",
                     "provider",
                     "address",
+                    "address_domain",
+                    "label",
                     "status",
                     "sending_paused_at",
                     "sending_paused_reason",
@@ -1157,6 +1268,164 @@
                     "occurred_at"
                 ]
             }
+        },
+        "EmailBoxSettings": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailBoxSettings\\EmailBoxSettingsDomain",
+                "fields": [
+                    {
+                        "name": "email_box_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "defaults",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailBoxSettings\\Values\\EmailBoxSettingsDefaultsValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "alert_recipients",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailBoxSettings\\Responses\\EmailBoxSettingsResponse",
+                "fields": [
+                    {
+                        "name": "email_box_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "defaults",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "alert_recipients",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": null
+        },
+        "EmailDomain": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailDomain\\EmailDomainDomain",
+                "fields": [
+                    {
+                        "name": "domain",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "provider",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccount\\Enums\\EmailAccountProviderEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "accounts_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "dns",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailDomain\\Values\\EmailDomainDnsValue|array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "dns_checked_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_tracking_domain_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "tracking_host",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Email\\EmailDomain\\Responses\\EmailDomainResponse",
+                "fields": [
+                    {
+                        "name": "domain",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "provider",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "accounts_count",
+                        "type": "int",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "dns",
+                        "type": "array",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "dns_checked_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "email_tracking_domain_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "tracking_host",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": null
         },
         "EmailEngagement": {
             "domain": {
@@ -2813,6 +3082,35 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccount\\Enums\\EmailAccountBulkActionEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Pause",
+                    "value": "pause"
+                },
+                {
+                    "name": "Resume",
+                    "value": "resume"
+                },
+                {
+                    "name": "Update",
+                    "value": "update"
+                },
+                {
+                    "name": "Disconnect",
+                    "value": "disconnect"
+                },
+                {
+                    "name": "Delete",
+                    "value": "delete"
+                },
+                {
+                    "name": "Sync",
+                    "value": "sync"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccount\\Enums\\EmailAccountConnectionEncryptionEnum": {
             "backing": "string",
             "cases": [
@@ -2905,6 +3203,19 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccount\\Enums\\EmailAccountSubscriptionHoldReasonEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "ServerFull",
+                    "value": "server_full"
+                },
+                {
+                    "name": "ServerSuspended",
+                    "value": "server_suspended"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Email\\EmailAccount\\Enums\\EmailAccountSyncConfigKeyEnum": {
             "backing": "string",
             "cases": [
@@ -2982,6 +3293,31 @@
                 {
                     "name": "Heuristic",
                     "value": "heuristic"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Email\\EmailDomain\\Enums\\EmailDomainDnsStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Valid",
+                    "value": "valid"
+                },
+                {
+                    "name": "Invalid",
+                    "value": "invalid"
+                },
+                {
+                    "name": "Missing",
+                    "value": "missing"
+                },
+                {
+                    "name": "Pending",
+                    "value": "pending"
+                },
+                {
+                    "name": "Na",
+                    "value": "na"
                 }
             ]
         },
@@ -5098,6 +5434,22 @@
                     "between": null
                 },
                 {
+                    "field": "label",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "oauth_refresh_token",
                     "rules": [
                         "nullable",
@@ -5366,6 +5718,164 @@
         },
         {
             "method": "POST",
+            "uri": "api/email-accounts/bulk-action",
+            "controller": "App\\Entities\\EmailAccount\\EmailAccountController",
+            "action": "bulkAction",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_update_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountBulkActionRequest",
+            "rules": [
+                {
+                    "field": "action",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"pause\",\"resume\",\"update\",\"disconnect\",\"delete\",\"sync\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "pause",
+                        "resume",
+                        "update",
+                        "disconnect",
+                        "delete",
+                        "sync"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:500"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18",
+                        "distinct"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "update",
+                    "rules": [
+                        "required_if:action,update",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "update.label",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "update.sending_limits",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "update.warmup_config",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/email-accounts/bulk-create",
             "controller": "App\\Entities\\EmailAccount\\EmailAccountController",
             "action": "bulkCreate",
@@ -5450,6 +5960,455 @@
                     "min": 0,
                     "max": 3650,
                     "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-accounts/bulk-create-imap",
+            "controller": "App\\Entities\\EmailAccount\\EmailAccountController",
+            "action": "bulkCreateImap",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountBulkCreateImapRequest",
+            "rules": [
+                {
+                    "field": "rows",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.address",
+                    "rules": [
+                        "required",
+                        "email",
+                        "max:320",
+                        "distinct:ignore_case"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "email",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.display_name",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.label",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection.imap_host",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection.imap_port",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:1",
+                        "max:65535"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 65535,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection.imap_encryption",
+                    "rules": [
+                        "required",
+                        "in:\"ssl\",\"starttls\",\"none\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": null,
+                    "in": [
+                        "ssl",
+                        "starttls",
+                        "none"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection.imap_username",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:320"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection.smtp_host",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection.smtp_port",
+                    "rules": [
+                        "required",
+                        "integer",
+                        "min:1",
+                        "max:65535"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 65535,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection.smtp_encryption",
+                    "rules": [
+                        "required",
+                        "in:\"ssl\",\"starttls\",\"none\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": null,
+                    "in": [
+                        "ssl",
+                        "starttls",
+                        "none"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.connection.smtp_username",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:320"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.imap_password",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:1024"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 1024,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "rows.*.smtp_password",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:1024"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 1024,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "backfill_days",
+                    "rules": [
+                        "nullable",
+                        "integer",
+                        "min:0",
+                        "max:3650"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 3650,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-accounts/daily-sends",
+            "controller": "App\\Entities\\EmailAccount\\EmailAccountController",
+            "action": "dailySends",
+            "operation": "metrics",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailAccount\\Requests\\EmailAccountDailySendsRequest",
+            "rules": [
+                {
+                    "field": "period",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "period.from",
+                    "rules": [
+                        "required",
+                        "date"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "period.to",
+                    "rules": [
+                        "required",
+                        "date"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.email_account_sid",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.email_account_sid.in",
+                    "rules": [
+                        "required_with:filter.email_account_sid",
+                        "array",
+                        "min:1",
+                        "max:500"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.email_account_sid.in.*",
+                    "rules": [
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 },
                 {
@@ -5748,6 +6707,22 @@
                     "between": null
                 },
                 {
+                    "field": "label",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "_meta",
                     "rules": [
                         "nullable",
@@ -5817,6 +6792,48 @@
                 },
                 {
                     "field": "filter.sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.email_box_sid",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.label",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.address_domain",
                     "rules": [
                         "nullable"
                     ],
@@ -6091,7 +7108,7 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "in:\"created_at\",\"updated_at\",\"address\",\"connected_at\",\"last_messages_sync_at\""
+                        "in:\"created_at\",\"updated_at\",\"address\",\"connected_at\",\"last_messages_sync_at\",\"label\",\"sent_today\""
                     ],
                     "required": false,
                     "nullable": true,
@@ -6101,7 +7118,9 @@
                         "updated_at",
                         "address",
                         "connected_at",
-                        "last_messages_sync_at"
+                        "last_messages_sync_at",
+                        "label",
+                        "sent_today"
                     ],
                     "min": null,
                     "max": null,
@@ -6252,6 +7271,23 @@
                     "in": null,
                     "min": null,
                     "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "label",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
                     "size": null,
                     "between": null
                 },
@@ -7342,6 +8378,575 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
+            "uri": "api/email-box",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "show",
+            "operation": "get",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_email_accounts",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "GET",
+            "uri": "api/email-box-settings",
+            "controller": "App\\Entities\\EmailBoxSettings\\EmailBoxSettingsController",
+            "action": "show",
+            "operation": "get",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_email_accounts",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "PATCH",
+            "uri": "api/email-box-settings",
+            "controller": "App\\Entities\\EmailBoxSettings\\EmailBoxSettingsController",
+            "action": "update",
+            "operation": "update",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_update_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBoxSettings\\Requests\\EmailBoxSettingsUpdateRequest",
+            "rules": [
+                {
+                    "field": "defaults",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window.time_zone",
+                    "rules": [
+                        "required_with:defaults.sending_window",
+                        "string",
+                        "timezone",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window.days",
+                    "rules": [
+                        "required_with:defaults.sending_window",
+                        "array",
+                        "min:1",
+                        "max:7"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 7,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window.days.*",
+                    "rules": [
+                        "integer",
+                        "between:1,7",
+                        "distinct"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1,
+                        7
+                    ]
+                },
+                {
+                    "field": "defaults.sending_window.start",
+                    "rules": [
+                        "required_with:defaults.sending_window",
+                        "string",
+                        "date_format:H:i"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window.end",
+                    "rules": [
+                        "required_with:defaults.sending_window",
+                        "string",
+                        "date_format:H:i"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.daily_limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:2000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 2000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.min_interval_seconds",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:3600"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 3600,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config.enabled",
+                    "rules": [
+                        "required_with:defaults.warmup_config",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config.ramp_start_daily",
+                    "rules": [
+                        "required_with:defaults.warmup_config",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config.ramp_step_per_day",
+                    "rules": [
+                        "required_with:defaults.warmup_config",
+                        "integer",
+                        "min:1",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config.target_daily",
+                    "rules": [
+                        "required_with:defaults.warmup_config",
+                        "integer",
+                        "min:5",
+                        "max:2000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 5,
+                    "max": 2000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.google_email_oauth_app_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:em_oa_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "defaults.microsoft_email_oauth_app_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:em_oa_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "alert_recipients",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "max:20"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 20,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "alert_recipients.*",
+                    "rules": [
+                        "string",
+                        "email",
+                        "max:320"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-box-settings/apply-defaults",
+            "controller": "App\\Entities\\EmailBoxSettings\\EmailBoxSettingsController",
+            "action": "applyDefaults",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_update_email_accounts",
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-domains/check-dns",
+            "controller": "App\\Entities\\EmailDomain\\EmailDomainController",
+            "action": "checkDns",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailDomain\\Requests\\EmailDomainCheckDnsRequest",
+            "rules": [
+                {
+                    "field": "domain",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:255",
+                        "regex:/^[A-Za-z0-9]([A-Za-z0-9.-]*[A-Za-z0-9])?$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "_meta",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/email-domains/search",
+            "controller": "App\\Entities\\EmailDomain\\EmailDomainController",
+            "action": "search",
+            "operation": "search",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_view_email_accounts",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailDomain\\Requests\\EmailDomainSearchRequest",
+            "rules": [
+                {
+                    "field": "filter",
+                    "rules": [
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.domain",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.domain.eq",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.domain.in",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "filter.domain.in.*",
+                    "rules": [
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 },
@@ -12434,7 +14039,24 @@
             "internal": false,
             "request_class": null,
             "rules": null,
-            "rules_reason": "the action takes no request object"
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "connect/{token}",
+            "controller": "App\\Entities\\EmailAccount\\Connect\\EmailAccountConnectController",
+            "action": "submit",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
         },
         {
             "method": "POST",
@@ -12452,6 +14074,759 @@
             "request_class": null,
             "rules": null,
             "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-accounts/move/cancel",
+            "controller": "App\\Entities\\EmailAccount\\InternalEmailAccountController",
+            "action": "moveCancel",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailAccount\\Requests\\InternalEmailAccountMoveRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "transfer_key",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "min:32",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 32,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18",
+                        "distinct"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-accounts/move/export",
+            "controller": "App\\Entities\\EmailAccount\\InternalEmailAccountController",
+            "action": "moveExport",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailAccount\\Requests\\InternalEmailAccountMoveRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "transfer_key",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "min:32",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 32,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18",
+                        "distinct"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-accounts/move/finalize",
+            "controller": "App\\Entities\\EmailAccount\\InternalEmailAccountController",
+            "action": "moveFinalize",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailAccount\\Requests\\InternalEmailAccountMoveRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "transfer_key",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "min:32",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 32,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18",
+                        "distinct"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-accounts/move/import",
+            "controller": "App\\Entities\\EmailAccount\\InternalEmailAccountController",
+            "action": "moveImport",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailAccount\\Requests\\InternalEmailAccountMoveRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "transfer_key",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "min:32",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": 32,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "email_account_sids.*",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_ac_",
+                        "size:18",
+                        "distinct"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-box-settings/export",
+            "controller": "App\\Entities\\EmailBoxSettings\\InternalEmailBoxSettingsController",
+            "action": "export",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailBoxSettings\\Requests\\InternalEmailBoxSettingsExportRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "email_box_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^em_bx_[A-Za-z0-9]{12}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-box-settings/import",
+            "controller": "App\\Entities\\EmailBoxSettings\\InternalEmailBoxSettingsController",
+            "action": "import",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailBoxSettings\\Requests\\InternalEmailBoxSettingsImportRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "email_box_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^em_bx_[A-Za-z0-9]{12}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults",
+                    "rules": [
+                        "required",
+                        "array"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window.time_zone",
+                    "rules": [
+                        "required_with:defaults.sending_window",
+                        "string",
+                        "timezone",
+                        "max:64"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window.days",
+                    "rules": [
+                        "required_with:defaults.sending_window",
+                        "array",
+                        "min:1",
+                        "max:7"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 7,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window.days.*",
+                    "rules": [
+                        "integer",
+                        "between:1,7",
+                        "distinct"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": [
+                        1,
+                        7
+                    ]
+                },
+                {
+                    "field": "defaults.sending_window.start",
+                    "rules": [
+                        "required_with:defaults.sending_window",
+                        "string",
+                        "date_format:H:i"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.sending_window.end",
+                    "rules": [
+                        "required_with:defaults.sending_window",
+                        "string",
+                        "date_format:H:i"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.daily_limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:2000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 2000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.min_interval_seconds",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:0",
+                        "max:3600"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 0,
+                    "max": 3600,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config.enabled",
+                    "rules": [
+                        "required_with:defaults.warmup_config",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config.ramp_start_daily",
+                    "rules": [
+                        "required_with:defaults.warmup_config",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config.ramp_step_per_day",
+                    "rules": [
+                        "required_with:defaults.warmup_config",
+                        "integer",
+                        "min:1",
+                        "max:50"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 50,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.warmup_config.target_daily",
+                    "rules": [
+                        "required_with:defaults.warmup_config",
+                        "integer",
+                        "min:5",
+                        "max:2000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 5,
+                    "max": 2000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "defaults.google_email_oauth_app_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:em_oa_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "defaults.microsoft_email_oauth_app_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:em_oa_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "alert_recipients",
+                    "rules": [
+                        "present",
+                        "array",
+                        "max:20"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": 20,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "alert_recipients.*",
+                    "rules": [
+                        "string",
+                        "email",
+                        "max:320"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
         },
         {
             "method": "POST",
@@ -12980,6 +15355,200 @@
                     "min": null,
                     "max": null,
                     "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-suppressions/apply",
+            "controller": "App\\Entities\\EmailSuppression\\InternalEmailSuppressionController",
+            "action": "apply",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailSuppression\\Requests\\InternalEmailSuppressionApplyRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "action",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"add\",\"lift\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "add",
+                        "lift"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "items",
+                    "rules": [
+                        "required",
+                        "array",
+                        "min:1",
+                        "max:500"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": 500,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "items.*.address",
+                    "rules": [
+                        "required",
+                        "string",
+                        "email",
+                        "max:320"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "items.*.origin",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "in:\"manual\",\"bounce\",\"unsubscribe\",\"complaint\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "manual",
+                        "bounce",
+                        "unsubscribe",
+                        "complaint"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "items.*.reason",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-suppressions/export",
+            "controller": "App\\Entities\\EmailSuppression\\InternalEmailSuppressionController",
+            "action": "export",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailSuppression\\Requests\\InternalEmailSuppressionExportRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "after",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:320"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 320,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "limit",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:1000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 1000,
+                    "size": null,
                     "between": null
                 }
             ],
@@ -14007,6 +16576,23 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "email_box_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "regex:/^em_bx_[A-Za-z0-9]{12}$/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -14184,7 +16770,10 @@
     ],
     "error_catalog": {
         "account_bound_other_team": "This mailbox is already connected in another workspace.",
+        "account_has_queued_sends": "This mailbox has mail queued to go out on its current email server; it moves once the queue is empty (or the queued messages are cancelled).",
+        "account_moving": "This mailbox is being moved to another email server; it sends again once the move has finished.",
         "account_not_active": "This email account is not active (see context.status), so it cannot send; reconnect it first.",
+        "account_not_movable": "A hosted mailbox cannot be moved to another email server: its mail lives only on the server it was created on.",
         "account_not_searchable": "The mailbox cannot be searched at its provider right now: it is not active, or it is a hosted mailbox whose mirror already holds every message; reconnect it, or search the mirror with email-messages.search.",
         "account_not_syncable": "This account has no sync runs (see context.detail).",
         "account_sending_paused": "Sending from this account is paused (see context.reason); resume it, or send from another account.",
@@ -14197,12 +16786,14 @@
         "callback_host_registry_unavailable": "The identity service did not answer the callback-host lookup; retry in a minute.",
         "client_reference_frozen": "This message was already sent (or tried) under its client_reference, which its repeat and check-sent find it by; the client_reference cannot be set, changed or cleared now.",
         "daily_limit_exceeded": "This account has used its daily sending budget; pass scheduled_at and the queue sends when budget allows.",
+        "daily_sends_period_too_wide": "The period spans more than 31 days; narrow period.from / period.to.",
         "delegation_not_authorized": "The Workspace admin has not authorized this service account's client id for the Gmail scope (Admin console > Security > API controls > Domain-wide delegation: the client id with https://www.googleapis.com/auth/gmail.modify), so no mailbox token can be minted.",
         "dispatch_in_flight": "A send of this message is on its way (context.send_outcome in_flight), or it went out and its row is not stored (sent); ask again after context.retry_after, or ask check-sent. A sent answer without context.retry_after is final: the mail went out and no row will come.",
         "dns_resolvers_unavailable": "The DNS resolvers did not answer, so the domain could not be verified; retry in a minute.",
         "domain_bound_other_team": "This domain is already registered in another workspace.",
         "email_box_dump_not_ready": "The mailbox dump is not finished (see context.status); retry once it is done.",
         "email_box_ops_disabled": "This deployment is not a workspace mailbox host; box operations are off here.",
+        "email_box_required": "Name the email server this call is for in the Email-Box-SID header.",
         "grant_connect_needs_oauth_provider": "A grant application connects google or microsoft mailboxes only.",
         "header_not_allowed": "A send may set X-* headers, List-Unsubscribe and Reply-To, each named in printable ASCII with no space or colon; drop or rename the header {field} names.",
         "header_reserved": "X-Gtm-Message-Sid is the mark the platform stamps on every send, by which check-sent and the Sent-folder sync find it, so a send cannot set it; drop it.",
@@ -14211,16 +16802,33 @@
         "held_by_another_send": "Another send of the same mail to the same recipients is on its way or may already have gone out (context.blocking_activity_log_sid names its attempt, context.blocking_email_message_sid its row, when known), so this one was not sent; ask again after context.retry_after.",
         "idempotency_key_busy": "A send with this idempotency_key is in progress; ask again after context.retry_after.",
         "idempotency_key_reused": "This idempotency_key was used for a different send; use a new key for a new message.",
+        "imap_app_password_required": "The IMAP server requires an app password instead of the account password; create one in the mailbox's security settings and send it as imap_password.",
+        "imap_auth_failed": "The IMAP server refused this username and password; check them, and use an app password where the provider requires one.",
+        "imap_connection_failed": "The IMAP server could not be reached at this host and port (refused, no route, or it is not an IMAP server); check connection.imap_host and connection.imap_port.",
+        "imap_connection_limit": "The IMAP server is refusing another connection to this mailbox right now (too many open sessions, or a provider limit); wait a few minutes and try again.",
+        "imap_disabled": "IMAP access is turned off for this mailbox; enable it in the mailbox's settings (or ask its administrator), then connect again.",
+        "imap_mailbox_unavailable": "The IMAP server accepted the sign-in but would not open INBOX; check that connection.imap_username names the mailbox.",
+        "imap_timeout": "The IMAP server did not answer in time; check connection.imap_host and connection.imap_port, or try again shortly.",
+        "imap_tls_failed": "The encrypted connection to the IMAP server could not be set up (the TLS handshake failed, the certificate does not match the host, or the server does not offer STARTTLS); check that connection.imap_encryption matches the port (ssl is usually 993, starttls 143).",
         "invalid_transition": "This status change is not allowed while the account is connecting.",
+        "mail_host_not_allowed": "{field} is, or resolves to, an address that is not on the public internet (loopback, private, link-local or reserved); name the mail server's public host.",
+        "mail_host_unresolvable": "{field} is not a host name or address that resolves; check the spelling.",
         "mailbox_not_found": "The grant application cannot reach this mailbox: no such user in the Workspace or tenant the grant covers (check the address, or that the service account key is the one Google knows).",
         "message_not_outbound": "Only a message this mailbox sent can be checked for having gone out; this one was received.",
+        "move_bundle_other_team": "The move bundle was exported for another workspace.",
+        "move_bundle_unreadable": "The move bundle cannot be read on this server (a different key, or not a bundle); export it again with the transfer_key both servers are given.",
+        "move_key_not_configured": "This deployment has no internal key to seal a move bundle with; pass a transfer_key.",
+        "move_oauth_app_missing": "The sign-in application this mailbox uses (context.email_oauth_app_sid) is not registered on the target server; register it there, or reconnect the mailbox through the platform application, then move it.",
+        "move_target_row_conflict": "A mailbox with this sid already exists on the target server and is not the one being moved (deleted, or another workspace's).",
         "no_mailbox_license": "This Microsoft account has no mailbox (no Exchange license), so there is nothing to connect.",
         "not_this_message": "{field} names the activity_log_sid of an earlier attempt of this same message (the same client_reference and recipients, or without a key the same content and recipients) that is in doubt; this one is not.",
+        "nothing_to_move": "None of the named mailboxes can move to another email server; context.refused says why for each.",
         "oauth_app_failed": "This OAuth app is not verified (see context); fix its credentials and probe it again.",
         "oauth_app_probe_rate_limited": "The OAuth app was probed too often; retry after retry_after.",
         "oauth_grant_invalid": "The provider refused this refresh token (revoked, expired, or from a mailbox that changed); connect the account again with a fresh consent.",
         "oauth_scope_insufficient": "The consent did not grant the mailbox scope this connection needs; connect again and accept the mail permission.",
         "outside_sending_window": "The account's sending window is closed right now; pass scheduled_at, or widen the window on the account.",
+        "period_inverted": "period.from is after period.to; swap them.",
         "period_too_wide": "The period spans more than 90 days; narrow period.from / period.to.",
         "place_required": "This client_reference names sends to more than one set of recipients; ask with the recipients of the send you mean (to, cc, bcc). context.places lists them.",
         "provider_app_not_configured": "No OAuth client of this provider is configured on this deployment; the connection cannot be probed.",
@@ -14237,12 +16845,18 @@
         "send_outcome_settled": "confirmed_sent names an attempt that was already proven not sent (context.activity_log_sid, why in context.check_reason), so the word cannot be taken; nothing was sent.",
         "send_outcome_unknown": "This message may already have gone out (the provider gave no verdict), so it is not sent again until the mailbox shows whether it left; ask again after context.retry_after, or ask check-sent (context.activity_log_sid names the attempt).",
         "service_account_key_rejected": "Google does not accept this service account key (deleted, rotated, or not this account's); upload the current key with email-oauth-apps.update.",
+        "smtp_auth_failed": "The SMTP server refused this username and password; check them, and use an app password where the provider requires one.",
+        "smtp_connection_failed": "The SMTP server could not be reached at this host and port, or it ended the session before authentication; check connection.smtp_host and connection.smtp_port.",
+        "smtp_encryption_required": "A password is not sent over an unencrypted SMTP connection on this deployment; set connection.smtp_encryption to ssl or starttls.",
+        "smtp_timeout": "The SMTP server did not answer in time; check connection.smtp_host and connection.smtp_port, or try again shortly.",
+        "smtp_tls_failed": "The encrypted connection to the SMTP server could not be set up (the TLS handshake failed, the certificate does not match the host, or the server and connection.smtp_encryption disagree about STARTTLS); check that the encryption matches the port (ssl is usually 465, starttls 587).",
         "source_fetch_failed": "The provider did not hand over the raw source (see context.detail); retry shortly.",
         "source_not_available": "This message has no raw source to download (see context.detail): a scheduled message has not been sent yet, and a hosted mailbox keeps the parsed message only.",
         "source_too_large": "The raw source is larger than the download cap (context.size_bytes against context.max_bytes); read the message through get and get-attachment instead.",
         "sync_in_progress": "A sync of this account is already running (context.open_sync_run_sid); wait for it to finish.",
         "too_many_recipients": "A send reaches at most 50 recipients across to, cc and bcc together; split it into several sends.",
         "tracking_domain_not_verified": "The account's tracking domain is not verified, so tracking cannot be injected; verify the domain or send without tracking.",
-        "trash_folder_missing": "This IMAP mailbox mirrors no folder with the trash role, so the message cannot be moved to Trash; move it to a folder of your choice with email-messages.update instead."
+        "trash_folder_missing": "This IMAP mailbox mirrors no folder with the trash role, so the message cannot be moved to Trash; move it to a folder of your choice with email-messages.update instead.",
+        "wrong_email_box": "This call names another email server than the one that received it (context.served_email_box_sid); send it with the Email-Box-SID of the server it is for, the gateway routes by that header."
     }
 }
