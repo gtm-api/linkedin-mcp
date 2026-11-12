@@ -49,7 +49,7 @@ Headless clients can skip the browser. The same API key (`gtm_live_...`) that au
 claude mcp add --transport http gtm-api https://mcp.gtm-api.com/mcp --header "Authorization: Bearer gtm_live_..."
 ```
 
-For command-spawning clients, the launcher below reads the key from `GTM_API_KEY` instead. Use 1.3.2 or newer with a key: npm deprecates 1.1.0, 1.3.0 and 1.3.1, which put the key in the process list and the MCP client's log (rotate a key used with one of them), and 1.2.x ignores the variable and does OAuth only. Pick one mode per connection: with a key attached, the OAuth flow never starts. Interactive clients such as claude.ai connectors have no header field and always use OAuth. Full matrix: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
+For command-spawning clients, the launcher below reads the key from `GTM_API_KEY` instead. Use 1.3.2 or newer with a key: npm deprecates 1.1.0, 1.3.0 and 1.3.1, which put the key in the process list and the MCP client's log (rotate a key used with one of them), and 1.2.x ignores the variable and does OAuth only. Pick one mode per connection: with a key attached, the OAuth flow never starts. Connectors on claude.ai and in Claude Desktop sign in through the browser, and take a key only in Anthropic's [request headers](https://claude.com/docs/connectors/custom/add-unlisted#authenticate-with-request-headers) section, which is in beta for a limited set of organizations. Full matrix: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
 
 Client can only spawn a command, not open a URL? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint and runs the same OAuth flow (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
 
@@ -95,7 +95,7 @@ This repository is also a Cursor plugin ([`.cursor-plugin/plugin.json`](./.curso
 - The hosted MCP server, `https://mcp.gtm-api.com/mcp`, declared in [`.mcp.json`](./.mcp.json).
 - The [`gtm-api-linkedin`](./skills/gtm-api-linkedin/SKILL.md) skill. It tells the agent to discover tools before calling them, to show you the preview of every send before it commits, and to stop on a limit refusal instead of retrying it.
 
-The Cursor Marketplace listing is in review. Until it is live, the one-click Cursor link on [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect) adds the MCP server alone, and the whole plugin, skill included, installs from this repository into Cursor's local plugin folder:
+The plugin is not on the Cursor Marketplace yet. Until it is, the one-click Cursor link on [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect) adds the MCP server alone, and the whole plugin, skill included, installs from this repository into Cursor's local plugin folder:
 
 ```bash
 git clone https://github.com/gtm-api/linkedin-mcp.git /tmp/linkedin-mcp
