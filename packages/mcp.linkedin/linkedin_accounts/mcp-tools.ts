@@ -63,6 +63,11 @@ const LinkedinAccountStatus = z.enum([
 // The account's LinkedIn Recruiter status (2026-09-15; the has_recruiter flag became this).
 const LinkedinAccountRecruiterStatus = z.enum(['active', 'signed_out']);
 
+// The caller's own reference on the endorsement verbs (2026-11-12): the same
+// meaning as on the sends, and the key of the resolve read of a slug-only target.
+const ENDORSE_CLIENT_REFERENCE = z.string().max(255).nullable().optional()
+  .describe('Your own reference for this action (a task id; max 255, never parsed). Stored on the action\'s activity log rows and a filter of search_linkedin_account_activity_log. When the target is named by a slug alone, the one profile read that finds its URN is keyed by it and the person (journaled as <client_reference>:resolve:<16 hex>), so a metering caller can pair that read with its task. Unlike a send\'s key it answers no repeat: a repeated call endorses again.');
+
 // Target person for outward/probe actions: at least one identifier (backend-validated).
 const Target = z.object({
   ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…). A URN of another surface in this key is filed by what it is.'),
@@ -1467,6 +1472,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
       sid: SID,
       target: Target,
       skills_count: z.number().int().min(1).max(10).optional().describe('How many skills to endorse (1..10, default 1).'),
+      client_reference: ENDORSE_CLIENT_REFERENCE,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount),
@@ -1501,6 +1507,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
       sid: SID,
       target: Target,
       skill_id: z.string().min(1).max(64).describe('The skill id from a person-skills read (a numeric string on every proven id; LinkedIn owns the namespace).'),
+      client_reference: ENDORSE_CLIENT_REFERENCE,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount, SkillVerbResult),
@@ -1525,6 +1532,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
       sid: SID,
       target: Target,
       skill_id: z.string().min(1).max(64).describe('The skill id this account endorsed (from a person-skills read, or the skill_id the endorse answered).'),
+      client_reference: ENDORSE_CLIENT_REFERENCE,
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(LinkedinAccount, SkillVerbResult),

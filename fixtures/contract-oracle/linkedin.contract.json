@@ -2806,6 +2806,7 @@
                     "target_recruiter_id",
                     "target_entity_urn",
                     "target_entity_type",
+                    "client_reference",
                     "duration_ms",
                     "created_at",
                     "updated_at",
@@ -29442,6 +29443,20 @@
                     "between": null
                 },
                 {
+                    "field": "filter.client_reference",
+                    "rules": [
+                        "nullable"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": null,
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "filter.duration_ms",
                     "rules": [
                         "nullable"
@@ -31802,6 +31817,23 @@
                     "max": 10,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -31942,6 +31974,23 @@
                     "in": null,
                     "min": null,
                     "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 }
@@ -34263,6 +34312,23 @@
                     "in": null,
                     "min": null,
                     "max": 64,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
                     "size": null,
                     "between": null
                 }

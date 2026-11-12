@@ -24,7 +24,13 @@ const required = (tool: ToolDefinition, key: string): boolean =>
   takes(tool, key) && !(tool.inputSchema.shape[key] as { isOptional(): boolean }).isOptional();
 
 // A send is an outward write (the preview gate's dangerous) that takes a key.
-const keyedSends = tools.filter((tool) => tool.dangerous && takes(tool, 'client_reference'));
+// The endorsement verbs take a client_reference since 2026-11-12, but not as a
+// send's key: it keys the resolve read of a slug-only target and rides their
+// activity log rows, and an endorsement keeps no send outcome a check could
+// answer (a repeated call endorses again, a no-op on LinkedIn). Outward writes
+// with a key that are not sends.
+const KEYED_NOT_SENDS = new Set(['endorse_linkedin_account_skill', 'endorse_linkedin_account_skill_by_id', 'unendorse_linkedin_account_skill']);
+const keyedSends = tools.filter((tool) => tool.dangerous && takes(tool, 'client_reference') && !KEYED_NOT_SENDS.has(tool.name));
 const declared = tools.filter((tool) => tool.sentCheck !== undefined);
 
 describe('sentCheck', () => {
