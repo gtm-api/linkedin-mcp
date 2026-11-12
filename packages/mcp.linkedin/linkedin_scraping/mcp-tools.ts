@@ -62,7 +62,7 @@ const requestBase = {
   linkedin_account_sid: z.string().length(18).startsWith('ln_ac_').nullable().optional()
     .describe('Executor account (ln_ac_...). OPTIONAL everywhere on this surface. Given: the call runs on that account ONLY; a saturated or held scraping bucket refuses 429 bucket_saturated (with retry_after). Omitted: the service auto-picks one of your connected accounts with remaining capacity (SN verbs pick only Sales-Navigator seats; 422 no_connected_accounts when none is ready, 429 when all are at capacity).'),
   idempotency_key: z.string().max(128).nullable().optional()
-    .describe('Ledger replay guard: a repeat call with the same (team, key) returns the stored outcome; no re-execution. Recommended on every search run. The KEY ALONE decides: the probe does not compare arguments, so reusing one key after changing the arguments hands back the FIRST result. On the twelve search verbs that matters twice over, because switching a call from filters to url (or back) under one key replays instead of running the new search. New search, new key.'),
+    .describe('Ledger replay guard: a repeat call with the same (team, key) returns the stored outcome; no re-execution. Recommended on every search run. The KEY ALONE decides: the probe does not compare arguments, so reusing one key after changing the arguments hands back the FIRST result. On the twelve search verbs that matters twice over, because switching a call from filters to url (or back) under one key replays instead of running the new search. New search, new key. A target named by another key than the one the wire takes spends at most ONE resolve read, journaled under this key plus ":resolve" (sha256:<64 hex>:resolve past 120 characters), which a repeat replays; a stored read of another target never answers. While that read runs, a repeat is 429 target_resolve_in_progress (retry_after). A refusal after it names it (error.context.data_request_sid, target_resolved_via "browser").'),
 } as const;
 
 // ═══════════════════════════════════════════════════════════════
@@ -591,7 +591,7 @@ const ProfileTarget = z.object({
   ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…). A URN of another surface in this key is filed by what it is.'),
   sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN (ACwAA…).'),
   recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
-  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The member number: the digits, or urn:li:member:<n>.'),
   nickname: z.string().max(2048).nullable().optional().describe('Vanity slug, or any profile link or id: read by its shape.'),
 }).describe('Target profile, by any identifier: at least one of ln_id / sn_id / recruiter_id / ln_member_id / nickname. The key the wire takes is found for you (data_request.target_resolved_via says how: "ledger", "corpus", or "browser" for ONE extra LinkedIn request).');
 

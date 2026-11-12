@@ -316,8 +316,8 @@ const newThreadPerson = {
   ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…) for a new thread.'),
   sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN (ACwAA…); interchangeable with ln_id.'),
   recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
-  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
-  public_identifier: z.string().max(2048).nullable().optional().describe("A vanity slug, any profile link or any id, read by its shape. Whatever names the person resolves server-side to the URN the send dispatches on: your team's own rows, then the stored corpus, then ONE lite profile read on the sender (it spends self_account_sync, never the send's bucket). result.target_resolved_via says which: \"ledger\", \"corpus\", \"browser\", or null when a URN was given. A slug LinkedIn does not know is 422 public_identifier_unresolved."),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The member number: the digits, or urn:li:member:<n>.'),
+  public_identifier: z.string().max(2048).nullable().optional().describe("A vanity slug, any profile link or any id, read by its shape. Whatever names the person resolves server-side to the URN the send dispatches on: your team's own rows, then the stored corpus, then ONE lite profile read on the sender (it spends self_account_sync, never the send's bucket; keyed by your client_reference and the person, so one reference serves many people). result.target_resolved_via says which: \"ledger\", \"corpus\", \"browser\", or null when a URN was given. A slug LinkedIn does not know is 422 public_identifier_unresolved."),
 };
 
 export const linkedinMessagesTools: ToolDefinition[] = [
@@ -564,7 +564,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     mount: 'linkedin.recruiter',
     name: 'send_linkedin_recruiter_message',
     description:
-      "Send one LinkedIn Recruiter InMail (outward action): open a NEW recruiter thread via recruiter_id (AEMAA… id; ln_id / sn_id work too), or reply INTO an existing thread via linkedin_conversation_sid (messenger_type='recruiter'). Guards, in order: Recruiter seat (422 recruiter_required); live Recruiter session (409 recruiter_reauth_required: only the seat holder renews Recruiter's 30-day session, by signing in again in the account's browser; tell the user, do not retry); stamped seat on a reply (422 recruiter_seat_unresolvable); LinkedIn's one InMail per candidate per 24 h (429 recruiter_inmail_cooldown, cooldown_ends_at: refresh the thread with get_my_latest_linkedin_messages_recruiter if a reply may have landed, else wait). Spends send_inmails and an InMail credit. "
+      "Send one LinkedIn Recruiter InMail (outward action): open a NEW recruiter thread via a recipient (recruiter_id AEMAA…, ln_id, sn_id, public_identifier or ln_member_id), or reply INTO a recruiter thread via linkedin_conversation_sid. Guards, in order: Recruiter seat (422 recruiter_required); live Recruiter session (409 recruiter_reauth_required: only the seat holder renews the 30-day session, by signing in again in the account's browser; tell the user, do not retry); stamped seat on a reply (422 recruiter_seat_unresolvable); one InMail per candidate per 24 h (429 recruiter_inmail_cooldown, cooldown_ends_at: refresh the thread with get_my_latest_linkedin_messages_recruiter if a reply may have landed, else wait). Spends send_inmails and an InMail credit. "
       + sendOnce('place')
       + ' When NOT: basic threads → send_linkedin_message; SN → send_linkedin_sales_nav_message.',
     toolClass: 'complex',
@@ -583,6 +583,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       recruiter_id: z.string().max(64).nullable().optional().describe('The recipient\'s Recruiter (talent) profile id (AEMAA…), from a recruiter thread\'s recruiter_id or participants[].recruiter_id. New-thread mode.'),
       ln_id: z.string().max(128).nullable().optional().describe('A regular-profile URN (ACoAA…) for a new thread; the wire resolves it too.'),
       sn_id: z.string().max(64).nullable().optional().describe('A Sales Navigator URN (ACwAA…) for a new thread; the wire resolves it too.'),
+      // Since 2026-11-12 a slug or a member number too: resolved to the profile URN on the sending account first.
+      public_identifier: newThreadPerson.public_identifier,
+      ln_member_id: newThreadPerson.ln_member_id,
       subject: z.string().min(1).max(200).describe('InMail subject; 1..200 chars, required on both wires.'),
       text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars, \\n line breaks. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attributes: z.array(z.object({
@@ -713,7 +716,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
         ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN.'),
         sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN; interchangeable with ln_id.'),
         recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…).'),
-        ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+        ln_member_id: z.string().max(64).nullable().optional().describe('The member number: the digits, or urn:li:member:<n>.'),
         public_identifier: z.string().max(2048).nullable().optional().describe('Vanity slug, or any profile link or id.'),
       })).min(2).max(20).describe('2..20 other participants, each by any identifier (at least one key). Whatever is given resolves to the URN the wire takes; result.targets_resolved_via lists how, in this order.'),
       text: z.string().min(1).max(8000).describe('Opening message; 1..8000 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),

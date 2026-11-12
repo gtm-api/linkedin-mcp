@@ -41,7 +41,7 @@ const executorFields = {
   linkedin_account_sid: z.string().length(18).startsWith('ln_ac_').nullable().optional()
     .describe('Executor account (ln_ac_...). Given: the call runs on that account ONLY; a saturated or held enrichment bucket refuses 429 bucket_saturated (with retry_after). Omitted: the service auto-picks one of your connected accounts with remaining capacity (422 no_connected_accounts when none is ready, 429 when all are at capacity).'),
   idempotency_key: z.string().max(128).nullable().optional()
-    .describe('Replay guard (team_sid, idempotency_key). A repeat with the same key returns the stored ledger outcome without running again, except a failure that answered with retry_after: once that time has passed, a repeat under the same key runs again.'),
+    .describe('Replay guard (team_sid, idempotency_key). A repeat with the same key returns the stored ledger outcome without running again, except a failure that answered with retry_after: once that time has passed, a repeat under the same key runs again. A target named by another key than the one the wire takes spends at most ONE resolve read, journaled under this key plus ":resolve" (sha256:<64 hex>:resolve past 120 characters), which a repeat replays; a stored read of another target never answers. While that read runs, a repeat is 429 target_resolve_in_progress (retry_after). A refusal after it names it (error.context.data_request_sid, target_resolved_via "browser").'),
   trust_cache_max_age_days: z.number().int().min(1).max(3650).nullable().optional()
     .describe('Accept a stored payload this many days old instead of fetching (probe tier 2, §9.5): a hit answers with served_from_cache / cache_source "data_cluster", spending no browser run and no bucket slot. Omitted, the stored payload is never consulted and the call always dispatches.'),
 };
@@ -56,7 +56,7 @@ const personTargetFields = {
   public_identifier: z.string().max(2048).optional()
     .describe('The same field under the slug\'s name: a vanity slug from /in/…, the whole profile link (any linkedin.com host, a Sales Navigator lead link too) or a URN; read by its shape, so a URN here and a slug in profile_id both work, and a link and its slug share one ledger entry. A value that names no member (a company page, a feed link) is 422 public_identifier_not_resolvable. Whatever key the method\'s wire takes is found for you: from your team\'s own history or the stored corpus for free, else by ONE extra LinkedIn request, and the receipt says which (data_request.target_resolved_via: "ledger" | "corpus" | "browser", null when nothing had to be resolved). A slug LinkedIn does not know is 422 public_identifier_unresolved.'),
   ln_member_id: z.string().max(64).optional()
-    .describe('The bare member number (digits). It resolves from your team\'s history or the stored corpus; a number nobody knows is 422 ln_member_id_unresolved, since LinkedIn opens no profile by the number.'),
+    .describe('The member number: the digits, or urn:li:member:<n>. It resolves from your team\'s history or the stored corpus; a number nobody knows is 422 ln_member_id_unresolved, since LinkedIn opens no profile by the number.'),
   recruiter_id: z.string().max(128).optional()
     .describe('A Recruiter (talent) id (AEMAA…): it names the member it decodes to.'),
 };

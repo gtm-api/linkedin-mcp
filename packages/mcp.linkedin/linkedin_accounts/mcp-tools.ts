@@ -68,7 +68,7 @@ const Target = z.object({
   ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…). A URN of another surface in this key is filed by what it is.'),
   sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN (ACwAA…).'),
   recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
-  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The member number: the digits, or urn:li:member:<n>.'),
   nickname: z.string().max(2048).nullable().optional().describe('Vanity slug, or any profile link or id: read by its shape.'),
 }).describe("Target person, by any identifier: at least one of ln_id / sn_id / recruiter_id / ln_member_id / nickname. The key the verb's wire takes is found for you: your team's own rows, then the stored corpus, then ONE lite profile read on the acting account; the answer says which (result.target_resolved_via: \"ledger\", \"corpus\", \"browser\", or null when the input already held the key).");
 
@@ -784,7 +784,7 @@ const FollowTarget = z.object({
     .describe('LinkedIn member id (ACoAA…). Dispatched straight through as the wire\'s profile_id, so a target carrying one needs no member lookup.'),
   sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator member id.'),
   recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
-  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The member number: the digits, or urn:li:member:<n>.'),
   nickname: z.string().max(2048).nullable().optional()
     .describe('Public profile slug, the vanity name in the profile URL (a whole profile link is read too). Pass it whenever you know it, INCLUDING alongside ln_id: it rides the wire as public_identifier and saves LinkedIn a member-resolution round trip, cutting the action from three requests to two. A nickname-ONLY target costs an extra profile read before the action instead.'),
 }).describe('Target person, by any identifier: at least one of ln_id / sn_id / recruiter_id / ln_member_id / nickname. Best case is a member id plus the nickname. result.target_resolved_via says how a missing member id was come by.');
@@ -833,7 +833,7 @@ const EventInviteTarget = z.object({
     .describe('LinkedIn member id (ACoAA...), sent as is in the batch. The address to prefer: it costs no lookup.'),
   sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator id (ACwAA…): resolved to the member id the batch takes.'),
   recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…).'),
-  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The member number: the digits, or urn:li:member:<n>.'),
   nickname: z.string().max(2048).nullable().optional()
     .describe('Public profile slug, the vanity name in the profile URL, or the whole profile link. A target with no ln_id resolves to it from your team\'s rows or the stored corpus, else by one profile read (self_account_sync) before the batch; next to ln_id it is ignored, the id is the address.'),
 }).describe('One person to invite, by any identifier: at least one key. result.targets_resolved_via lists how each member id was come by, in this order.');

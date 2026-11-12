@@ -30,7 +30,7 @@ const Target = z.object({
   ln_id: z.string().max(128).nullable().optional().describe('Regular-profile URN (ACoAA…). A URN of another surface in this key is filed by what it is.'),
   sn_id: z.string().max(128).nullable().optional().describe('Sales Navigator URN (ACwAA…).'),
   recruiter_id: z.string().max(128).nullable().optional().describe('Recruiter (talent) id (AEMAA…): names the member it decodes to.'),
-  ln_member_id: z.string().max(64).nullable().optional().describe('The bare member number (digits).'),
+  ln_member_id: z.string().max(64).nullable().optional().describe('The member number: the digits, or urn:li:member:<n>.'),
   nickname: z.string().max(2048).nullable().optional().describe('Vanity slug, or any profile link or id: read by its shape.'),
 }).describe('Target person, by any identifier: at least one of ln_id / sn_id / recruiter_id / ln_member_id / nickname.');
 
