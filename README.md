@@ -29,7 +29,7 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 
 **1. Sign up.** Create an account at [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and connect a LinkedIn account. It opens in a dedicated anti-detect cloud browser with its own proxy.
 
-**2. Add the server to your MCP client.** For Claude Desktop, edit `claude_desktop_config.json` (example in [`examples/`](./examples/claude_desktop_config.json)):
+**2. Add the server to your MCP client.** On claude.ai and in Claude Desktop, open Customize, Connectors, then Add, "Add custom connector", paste `https://mcp.gtm-api.com/mcp` and approve access ([Anthropic's steps](https://claude.com/docs/connectors/custom/add-unlisted)). Clients that read a server URL from their config file, such as Cursor's `mcp.json`, take this entry (the repo's own [`.mcp.json`](./.mcp.json) is the same):
 
 ```json
 {
@@ -51,7 +51,7 @@ claude mcp add --transport http gtm-api https://mcp.gtm-api.com/mcp --header "Au
 
 For command-spawning clients, the launcher below reads the key from `GTM_API_KEY` instead. Use 1.3.2 or newer with a key: npm deprecates 1.1.0, 1.3.0 and 1.3.1, which put the key in the process list and the MCP client's log (rotate a key used with one of them), and 1.2.x ignores the variable and does OAuth only. Pick one mode per connection: with a key attached, the OAuth flow never starts. Connectors on claude.ai and in Claude Desktop sign in through the browser, and take a key only in Anthropic's [request headers](https://claude.com/docs/connectors/custom/add-unlisted#authenticate-with-request-headers) section, which is in beta for a limited set of organizations. Full matrix: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
 
-Client can only spawn a command, not open a URL? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint and runs the same OAuth flow (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
+Client can only spawn a command, not open a URL, as with Claude Desktop's `claude_desktop_config.json`? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint and runs the same OAuth flow (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
 
 ```json
 {
