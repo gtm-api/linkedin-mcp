@@ -1,4 +1,4 @@
-export { generate, partitionTools } from './generate';
+export { CLIENT_ERROR_EXAMPLES, SERVER_ERROR_EXAMPLES, generate, partitionTools } from './generate';
 export type { ExcludedTool, GeneratedDocument, GenerationReport } from './generate';
 export { renderYaml, serviceSpecPath, writeSpec } from './emit';
 export { PUBLIC_SERVICES, SERVICE_META, SPEC_VERSION } from './services';

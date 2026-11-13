@@ -12,6 +12,12 @@
 // repeats into YAML anchors/aliases. Valid YAML, but this document is published
 // to external integrators whose tooling may not resolve them, and the anchor
 // names depend on JS object identity rather than on content. Write it expanded.
+//
+// `customTags: ['timestamp']` is there for the readers, not for us: a string
+// that is a whole ISO time (an example's `meta.timestamp`) is plain text under
+// YAML 1.2 and a date under YAML 1.1, which PyYAML and js-yaml still speak, and a
+// docs renderer on one of those would print the date its own way. Knowing the
+// tag makes the serializer quote exactly those strings and nothing else.
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -32,7 +38,7 @@ export const serviceSpecPath = (outDir: string, service: PublicServiceId): strin
   join(outDir, 'services', service, 'openapi.yaml');
 
 export const renderYaml = (document: JsonSchema): string =>
-  `${BANNER}${stringify(document, { lineWidth: 0, aliasDuplicateObjects: false })}`;
+  `${BANNER}${stringify(document, { lineWidth: 0, aliasDuplicateObjects: false, customTags: ['timestamp'] })}`;
 
 export function writeSpec(outDir: string, service: PublicServiceId, document: JsonSchema): string {
   const target = serviceSpecPath(outDir, service);

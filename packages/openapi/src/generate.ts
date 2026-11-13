@@ -54,6 +54,86 @@ const NON_WIRE_INPUT_FIELDS = new Set(['_meta']);
 const STUB_REASON =
   'Not shipped yet. The registry marks this route availability=stub_501: the backend validates the whole request and then answers 501 not_implemented. The request contract is final, so integrations can be written and tested against it today. Marked deprecated so generated clients flag it at compile time; this is a NOT-YET flag, not a sunset.';
 
+// Real answers for the two error responses. With none, a docs renderer invents
+// the example from the schema: the first value of the shared `error.code` enum
+// (`validation_failed`) and `<string>` for every text, under 5XX as under 4XX. A
+// customer read that under 5XX as the answer his own call had got (2026-11-10).
+//
+// Each value is an envelope the backends render today, taken from a live answer
+// with its ids replaced, and the same in every service: the two client ones come
+// out of the shared request validation and the token guard, the two server ones
+// out of the shared exception handler. tests/openapi-public-drift.test.ts parses
+// each with McpErrorResponse and holds its code to the class of the response it
+// stands under, so an example can neither rot nor wander into the wrong tab.
+const EXAMPLE_META = {
+  trace_id: '019a7c2e-5b1d-7c3a-9f4e-2a6b8d0c1e3f',
+  span_id: '5f0c9a2e7b4d1c38',
+  timestamp: '2026-11-13T09:30:00Z',
+  duration_ms: 41,
+  team_sid: 'ts_tm_Bv9nK4xP1sD7',
+  actor_type: 'api_key',
+};
+
+export const CLIENT_ERROR_EXAMPLES: Record<string, { summary: string; value: Record<string, unknown> }> = {
+  validation_failed: {
+    summary: '422: a field of the request failed validation',
+    value: {
+      success: false,
+      error: {
+        code: 'validation_failed',
+        message: 'Validation failed',
+        recoverable: true,
+        field_errors: {
+          page_size: [{ rule: 'max', message: 'The page size field must not be greater than 1000.' }],
+        },
+      },
+      meta: EXAMPLE_META,
+    },
+  },
+  unauthorized: {
+    summary: '401: no bearer token, or one that does not verify',
+    value: {
+      success: false,
+      error: {
+        code: 'unauthorized',
+        message: 'Authentication required',
+        recoverable: true,
+        context: { reason: 'missing_or_invalid_token' },
+      },
+      meta: { ...EXAMPLE_META, team_sid: null, actor_type: null },
+    },
+  },
+};
+
+export const SERVER_ERROR_EXAMPLES: Record<string, { summary: string; value: Record<string, unknown> }> = {
+  service_unavailable: {
+    summary: '503: something the call depends on did not answer; the same call can be made again',
+    value: {
+      success: false,
+      error: {
+        code: 'service_unavailable',
+        message: 'Service unavailable: upstream unavailable',
+        recoverable: true,
+        context: { reason: 'upstream_unavailable' },
+      },
+      meta: EXAMPLE_META,
+    },
+  },
+  internal_error: {
+    summary: '500: a fault on our side; a retry does not help, report meta.trace_id',
+    value: {
+      success: false,
+      error: {
+        code: 'internal_error',
+        message: 'Internal error',
+        recoverable: false,
+        context: { reason: 'internal_error' },
+      },
+      meta: EXAMPLE_META,
+    },
+  },
+};
+
 export interface ExcludedTool {
   tool: string;
   service: string;
@@ -396,11 +476,21 @@ function buildDocument(
         McpClientError: {
           description:
             'MCP error envelope. `error.code` is one of validation_failed, nothing_to_update, not_found, relation_not_found, invalid_transition, limit_exceeded, payment_required, duplicate_rejected, conflict, delete_blocked, unauthorized, forbidden, rate_limited, not_implemented.',
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/McpError' } } },
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/McpError' },
+              examples: CLIENT_ERROR_EXAMPLES,
+            },
+          },
         },
         McpServerError: {
           description: 'MCP error envelope with `error.code` internal_error or service_unavailable.',
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/McpError' } } },
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/McpError' },
+              examples: SERVER_ERROR_EXAMPLES,
+            },
+          },
         },
       },
       schemas: sortKeys(schemas),
