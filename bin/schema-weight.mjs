@@ -24,11 +24,12 @@ const { z } = await import(pathToFileURL(req.resolve('zod')).href);
 const sdkReq = createRequire(req.resolve('@modelcontextprotocol/sdk/package.json'));
 const { zodToJsonSchema } = await import(pathToFileURL(sdkReq.resolve('zod-to-json-schema')).href);
 
-const [{ linkedinPackages }, { idPackages }, { orchestrationPackages }, { supportPackages }, { registeredShape }] =
+const [{ linkedinPackages }, { idPackages }, { orchestrationPackages }, { emailPackages }, { supportPackages }, { registeredShape }] =
   await Promise.all([
     import(pathToFileURL(join(ROOT, 'packages/mcp.linkedin/index.ts')).href),
     import(pathToFileURL(join(ROOT, 'packages/mcp.id/index.ts')).href),
     import(pathToFileURL(join(ROOT, 'packages/mcp.orchestration/index.ts')).href),
+    import(pathToFileURL(join(ROOT, 'packages/mcp.email/index.ts')).href),
     import(pathToFileURL(join(ROOT, 'packages/mcp.support/index.ts')).href),
     import(pathToFileURL(join(ROOT, 'packages/runtime/src/input-schema.ts')).href),
   ]);
@@ -42,7 +43,7 @@ const tok = (s) => Math.round(s.length / 3.5);
 const rows = [];
 const services = new Map();
 
-for (const pkg of [...linkedinPackages, ...idPackages, ...orchestrationPackages, ...supportPackages]) {
+for (const pkg of [...linkedinPackages, ...idPackages, ...orchestrationPackages, ...emailPackages, ...supportPackages]) {
   for (const tool of pkg.tools) {
     let schemaTok = 0;
     let err = null;

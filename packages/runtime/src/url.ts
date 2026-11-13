@@ -3,10 +3,26 @@ import type { DispatchContext } from './types';
 export interface BuiltRequest {
   url: string;
   body: Record<string, unknown> | undefined;
+  /** The route's own headers (route.headerParams), without the ones every call carries. */
+  headers: Record<string, string>;
 }
+
+// A header value is printable ASCII and nothing else: a line break in one would
+// be a second header of the caller's choosing.
+const HEADER_VALUE_RE = /^[\x20-\x7E]+$/;
+
+// The headers backend-client.ts sets on every call, lowercase. A route may not
+// bind one (route.headerParams): header names are case-insensitive on the wire,
+// so `authorization` beside `Authorization` would reach the backend as one
+// header with two values. buildRegistry refuses the binding at build time and
+// buildRequest refuses it again at call time.
+export const RESERVED_HEADERS: ReadonlySet<string> = new Set([
+  'authorization', 'team-sid', 'x-trace-id', 'accept', 'content-type', 'content-length', 'cookie', 'host',
+]);
 
 // Turn a tool call into a concrete backend request:
 //  - substitute {sid} (from sidParam, default 'sid') and any pathParams;
+//  - lift the route's headerParams out of the args into headers;
 //  - GET/DELETE  → remaining args become query params (arrays as key[]=v);
 //  - POST/PUT/PATCH → remaining args become the JSON body.
 // `_meta` is always dropped (usage analytics, never sent to the backend).
@@ -60,6 +76,24 @@ export function buildRequest(ctx: DispatchContext, opts: { validateOnly?: boolea
     }
   }
 
+  // The route's own headers. The bound key never reaches the body or the query,
+  // whether or not the caller sent it: the backend reads it off the request.
+  const headers: Record<string, string> = {};
+  if (route.headerParams) {
+    for (const [header, key] of Object.entries(route.headerParams)) {
+      if (RESERVED_HEADERS.has(header.toLowerCase())) {
+        throw new Error(`tool ${tool.name}: the ${header} header is set by the runtime and cannot be bound to '${key}'`);
+      }
+      consumed.add(key);
+      const value = args[key];
+      if (value === undefined || value === null || value === '') continue;
+      if (typeof value !== 'string' || !HEADER_VALUE_RE.test(value)) {
+        throw new Error(`tool ${tool.name}: expected '${key}' to be a plain string for the ${header} header`);
+      }
+      headers[header] = value;
+    }
+  }
+
   const rest: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(args)) {
     if (consumed.has(key) || value === undefined) continue;
@@ -81,8 +115,8 @@ export function buildRequest(ctx: DispatchContext, opts: { validateOnly?: boolea
         url.searchParams.set(key, String(value));
       }
     }
-    return { url: url.toString(), body: undefined };
+    return { url: url.toString(), body: undefined, headers };
   }
 
-  return { url: url.toString(), body: rest };
+  return { url: url.toString(), body: rest, headers };
 }

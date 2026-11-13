@@ -36,6 +36,7 @@ describe('gtm.openapi.public', () => {
       'linkedin',
       'id',
       'orchestration',
+      'email',
     ]);
     for (const document of result.documents) {
       expect(document.operations, `${document.service} generated zero operations`).toBeGreaterThan(0);

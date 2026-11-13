@@ -166,4 +166,68 @@ describe('buildRegistry dash ban', () => {
     })])]);
     expect(r.byName.has('search_things')).toBe(true);
   });
+
+  // route.headerParams: an input that travels as a request header (2026-11-13,
+  // the Email-Box-SID of gtm.service.email).
+  describe('headerParams', () => {
+    const withHeader = (headerParams: Record<string, string>, shape: z.ZodRawShape = { email_box_sid: z.string().optional() }) =>
+      tool({
+        route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/things/search', headerParams },
+        inputSchema: z.object({ ...shape, _meta: z.any().optional() }),
+      });
+
+    it('accepts a header bound to an input the tool declares', () => {
+      expect(() => buildRegistry([pkg([withHeader({ 'Email-Box-SID': 'email_box_sid' })])])).not.toThrow();
+    });
+
+    it('rejects a binding to an input the schema does not declare', () => {
+      expect(() => buildRegistry([pkg([withHeader({ 'Email-Box-SID': 'email_box_sid' }, {})])])).toThrow(/does not declare/);
+    });
+
+    it('rejects a header the runtime sets itself, in any case', () => {
+      for (const header of ['Authorization', 'team-sid', 'X-Trace-Id', 'Content-Type']) {
+        expect(() => buildRegistry([pkg([withHeader({ [header]: 'email_box_sid' })])]), header).toThrow(/sets itself/);
+      }
+    });
+
+    it('rejects a name that is not a header name', () => {
+      expect(() => buildRegistry([pkg([withHeader({ 'Email Box: SID': 'email_box_sid' })])])).toThrow(/not a header name/);
+    });
+
+    it('rejects a key that already travels in the path, as _meta or as the commit token', () => {
+      expect(() => buildRegistry([pkg([tool({
+        name: 'get_thing', operation: 'get', envelope: 'get',
+        route: { service: 'linkedin', method: 'GET', pathTemplate: '/api/things/{sid}', headerParams: { 'X-Thing': 'sid' } },
+        inputSchema: z.object({ sid: z.string(), _meta: z.any().optional() }),
+      })])])).toThrow(/already travels elsewhere/);
+      expect(() => buildRegistry([pkg([withHeader({ 'X-Meta': '_meta' })])])).toThrow(/already travels elsewhere/);
+    });
+
+    it('holds a previewRoute to the same rules', () => {
+      expect(() => buildRegistry([pkg([actionTool({
+        dangerous: true,
+        annotations: { title: 't', readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
+        previewRoute: { service: 'linkedin', method: 'POST', pathTemplate: '/api/things/{sid}/preview-send', headerParams: { Authorization: 'sid' } },
+        inputSchema: z.object({ sid: z.string(), _meta: z.any().optional() }),
+      })])])).toThrow(/previewRoute\.headerParams/);
+    });
+  });
+
+  // restOnlyInputs: a field of the REST route the tool does not offer (a password).
+  describe('restOnlyInputs', () => {
+    const withSecret = (restOnlyInputs: string[], shape: z.ZodRawShape) =>
+      actionTool({ restOnlyInputs, inputSchema: z.object({ sid: z.string(), ...shape, _meta: z.any().optional() }) });
+
+    it('accepts an optional field the schema declares', () => {
+      expect(() => buildRegistry([pkg([withSecret(['imap_password'], { imap_password: z.string().optional() })])])).not.toThrow();
+    });
+
+    it('rejects a field the schema does not declare', () => {
+      expect(() => buildRegistry([pkg([withSecret(['imap_password'], {})])])).toThrow(/does not declare/);
+    });
+
+    it('rejects a required field: a tool that cannot be called without its secret is surface api', () => {
+      expect(() => buildRegistry([pkg([withSecret(['imap_password'], { imap_password: z.string() })])])).toThrow(/surface api/);
+    });
+  });
 });

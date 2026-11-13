@@ -4,7 +4,7 @@ import { httpErrorResult, mapErrorEnvelope, transportErrorResult } from './error
 import type { DispatchContext, RuntimeDeps, ToolDefinition } from './types';
 
 const deps = {
-  config: { envName: 'test', version: '0', baseUrls: { linkedin: '', id: '', orchestration: '', support: '' }, backendTimeoutMs: 1, responseCharBudget: 1, maxBatchSize: 16, rateLimit: { enabled: false, windowSeconds: 60, callsPerWindow: 0, writesPerWindow: 0 }, previewGate: { enabled: false, secret: null, ttlSeconds: 1 } },
+  config: { envName: 'test', version: '0', baseUrls: { linkedin: '', id: '', orchestration: '', email: '', support: '' }, backendTimeoutMs: 1, responseCharBudget: 1, maxBatchSize: 16, rateLimit: { enabled: false, windowSeconds: 60, callsPerWindow: 0, writesPerWindow: 0 }, previewGate: { enabled: false, secret: null, ttlSeconds: 1 } },
   logger: { info() {}, error() {} },
 } as RuntimeDeps;
 
@@ -198,6 +198,44 @@ describe('transportErrorResult on a timeout', () => {
     expect(text).toContain('Give every send a client_reference from now on: check_linkedin_connection_request_sent answers by it');
     // An invitation has no thread to read.
     expect(text).not.toContain('thread');
+  });
+
+  // The email send asks by its own account field, and the check has to reach
+  // the server the send ran on: the server is named in a header (2026-11-13).
+  const emailSend = writeTool({
+    name: 'send_email_message',
+    route: { service: 'email', method: 'POST', pathTemplate: '/api/email-messages/send', headerParams: { 'Email-Box-SID': 'email_box_sid' } },
+    sentCheck: { tool: 'check_email_message_sent', accountKey: 'email_account_sid', activityLogTool: 'search_email_account_activity_log' },
+  });
+
+  it('hands a keyed email send its check call, by email_account_sid and on the same server', () => {
+    const r = transportErrorResult(
+      ({
+        tool: emailSend,
+        args: { email_account_sid: 'em_ac_aaaaaaaaaaaa', body_text: 'Hi', client_reference: 'crm-1', email_box_sid: 'em_bx_cccccccccccc' },
+      } as unknown as DispatchContext),
+      timeout,
+    );
+    expect(r.content[0].text).toContain(
+      'Ask check_email_message_sent with {"email_account_sid":"em_ac_aaaaaaaaaaaa","client_reference":"crm-1","email_box_sid":"em_bx_cccccccccccc"}:',
+    );
+  });
+
+  it('names no server in the check call of a send that named none', () => {
+    const r = transportErrorResult(
+      ({ tool: emailSend, args: { email_account_sid: 'em_ac_aaaaaaaaaaaa', body_text: 'Hi', client_reference: 'crm-1' } } as unknown as DispatchContext),
+      timeout,
+    );
+    expect(r.content[0].text).toContain('Ask check_email_message_sent with {"email_account_sid":"em_ac_aaaaaaaaaaaa","client_reference":"crm-1"}:');
+  });
+
+  it("points a keyless email send at the mailbox's own activity log", () => {
+    const r = transportErrorResult(
+      ({ tool: emailSend, args: { email_account_sid: 'em_ac_aaaaaaaaaaaa', body_text: 'Hi' } } as unknown as DispatchContext),
+      timeout,
+    );
+    expect(r.content[0].text).toContain('search_email_account_activity_log for its email_account_sid');
+    expect(r.content[0].text).not.toContain('linkedin');
   });
 
   it('tells any other write to check what landed', () => {

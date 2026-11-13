@@ -9,8 +9,9 @@ the mounts, and the coverage gate tracks progress toward full coverage.
 
 Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below are read off the
 **built registry** (`buildRegistry` + `resolveMounts` over the packages the worker mounts), not off
-a plan. Every row below is ✅ shipped: three services are at full MCP coverage and the only remaining
-gap is `gtm.service.email`, which has no package and therefore no row.
+a plan. Every row marked ✅ is shipped. All four backend services are at full MCP coverage:
+`gtm.service.email` got its package on 2026-11-13, and its four mounts read "built" until the worker
+that serves them is deployed.
 
 Since 2026-11-06 a tool definition carries a `surface`: `both` (the default, a tool on its mount and
 a line in the public REST reference) or `api` (the line in the reference and NO tool: the definition
@@ -20,7 +21,8 @@ MCP_SURFACE_V2.md section 7 of the getsales umbrella: 28 of the 32 gs.mcp cut on
 of a shared tool waits on gtm's own call numbers; the other four, the certificate verbs, came back
 on 2026-11-07, gtm has no brand to fold them into), and two more on 2026-11-07, whose routes the app
 still calls. Two of gtm's own joined them on 2026-11-12, the email-boxes `preview-resize` and
-`confirm-checkout` routes, 32 in all. So a row below reads **defined (served)** where the two differ,
+`confirm-checkout` routes, 32 in all, and four of gtm.service.email's on 2026-11-13 (the mcp.email
+section says which and why), 36 in all. So a row below reads **defined (served)** where the two differ,
 and a mount's count is what it serves.
 
 ## mcp.linkedin: 12 mounts / 190 tools
@@ -254,22 +256,64 @@ from `fixtures/contract-oracle/mass-action-allowlist.json` (`recall` and `return
 `massAction: true`, which is what closes the waiver; declaring `false` would have failed the parity
 gate the other way).
 
-## mcp.email: no package, 51 routes of debt
+## mcp.email: 4 mounts / 65 tools defined, 61 served
 
-`gtm.service.email` has no MCP package at all, so nothing in this file describes it and
-nothing in the worker serves it. That is a coverage gap the size of a service: **51** public
-routes (44 on 2026-07-27, the five email-oauth-apps routes of September 2026 and the two check-sent
-routes of October 2026), 16 of them ACTION, 0 covered.
+| Mount group | Mount | Registry packages (tools) | Tools | Status |
+|---|---|---|---|---|
+| accounts | `/mcp/email/accounts` | email_accounts (18 defined, 15 served), email_account_sync_runs (1), email_account_activity_log (1), email_account_health (1), and `search_email_boxes` of mcp.id by tool selector | 19 | built, not deployed |
+| infrastructure | `/mcp/email/infrastructure` | email_box_settings (4), email_oauth_apps (5 defined, 4 served), email_domains (2), email_tracking_domains (4), email_sending_domains (4), and `search_email_boxes` | 19 | built, not deployed |
+| messaging | `/mcp/email/messaging` | email_messages (12), email_threads (4), email_folders (1), and `search_email_boxes` | 18 | built, not deployed |
+| deliverability | `/mcp/email/deliverability` | email_suppressions (4), email_bounce_log (2), email_engagements (2), and `search_email_boxes` | 9 | built, not deployed |
 
-⚠️ `POST api/email-messages/send` is `stepEligible: true` + `scheduleRequired: true`. The
-orchestration engine may name it as a mass-action plan step and call it once per item over its
-`/internal` hop, so a run can spend its whole target set on a verb no agent can describe,
-inspect or call. It is waived by name in `fixtures/contract-oracle/step-eligible-allowlist.json`
-until the tool ships.
+2026-11-13 - `@gtm/mcp-email`, authored by the `research-to-mcp` skill from
+`product/research/gtm.service.email/entities/`: one definition per public route, 65 in 15 packages.
+The ratchet fell from 65 to 0 and the ledger is empty.
 
-Since 2026-07-27 the three registry-keyed gates carry email with an empty package set instead
-of skipping it, so the routes are counted like any other debt: `ratchet.json` baseline `51`,
-all 51 listed in `drift-ledger.json`. Authoring the package burns both down route by route.
+**The server a call is for.** A workspace may own several email servers (email boxes, `em_bx_*`, the
+registry is `mcp.id/email_boxes`), each its own deployment of gtm.service.email with its own database,
+behind one public prefix. The gateway routes a request by its `Email-Box-SID` header, and a request
+that names none lands on the workspace's primary server. So every email tool takes an optional
+`email_box_sid` (`packages/mcp.email/shared.ts`), and the runtime takes it out of the body and the
+query and sends it as that header: `route.headerParams`, new with this package
+(`packages/runtime/src/url.ts`; a header the runtime sets itself cannot be bound). `search_email_boxes`
+rides on all four mounts by tool selector, so a client that mounted one email URL can read the sids
+it may name. The public reference documents the header once per document (`components.parameters`).
+
+**REST only (surface api), 4.** `create_email_account` (three of its four forms carry a refresh token
+or IMAP and SMTP passwords; the grant form is `bulk_create_email_accounts` with one address, and a
+person's own sign-in is `request_email_account_connect_link`), `bulk_create_email_accounts_imap` (up
+to 100 rows, each with its passwords), `create_email_oauth_app` (the application's secret) and
+`bulk_action_email_accounts` (six verbs behind one name, two of which take mailboxes away, over up to
+500 sids; a model runs the single verbs, each behind its own gate). The rule is MCP_SURFACE_V2.md
+section 2 of the getsales umbrella: a secret or a bulk payload never passes through a model.
+
+**A tool without its secret.** `reconnect_email_account` and `update_email_oauth_app` are tools whose
+REST routes also take credentials (`connection`, `imap_password`, `smtp_password`; `client_secret`).
+Those fields are `restOnlyInputs`, new with this package: on the schema, so the REST reference
+documents them, and never shown to an MCP client (`input-schema.ts` leaves them out and the strict
+parse refuses one sent anyway).
+
+**Behind the preview gate, 10.** `send_email_message`; `delete_email_account`,
+`disconnect_email_account`, `delete_email_message`, `delete_email_suppression`,
+`delete_email_tracking_domain`, `delete_email_sending_domain`, `delete_email_oauth_app`;
+`apply_email_box_settings_defaults` (it overwrites the limits of every mailbox of a server); and
+`bulk_action_email_accounts`, which is REST only and carries the flag for the reference.
+
+**A send in doubt.** `send_email_message` names its check (`sentCheck`, generalized on 2026-11-13 to
+the account field of the service: `email_account_sid` here). A send this worker's fuse cut is answered
+with the `check_email_message_sent` call, filled with the mailbox, the key and the server the send
+named, never with "retry". `tests/sent-check-parity.test.ts` holds it.
+
+**Where a tool is narrower than its research block**, the block says so under "As built" and the gate
+that would otherwise fail carries the reason: the four metrics tools that take `period` alone
+(`request-parity-baseline.json`, `missing_keys`), the two message filters the search request's rule
+list omits (`unknown_keys`), the daily-sends filter and the machine read
+(`FILTER_NOT_THE_ENTITY_FILTER` and `ITEM_NOT_A_DOMAIN` in `tests/contract-parity.test.ts`), and one
+enum with no PHP rule behind it (`enum-parity-baseline.json`).
+
+Three choices are built as working answers and wait for the owner: the optional `email_box_sid` on
+every tool, `bulk-action` REST only, and `daily-sends` as a tool with an output schema of its own. Each
+is one switch on this branch.
 
 ## mcp.support: 1 mount / 2 tools
 
@@ -284,9 +328,9 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all four services, **269 tools served**
-(linkedin 192 + id 55 + orchestration 20 + support 2) of 301 defined: the 32 REST-only definitions
-(surface api) are in no toolset, and `call_tool` refuses them by name.
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all five services, **330 tools served**
+(linkedin 192 + id 55 + orchestration 20 + email 61 + support 2) of 366 defined: the 36 REST-only
+definitions (surface api) are in no toolset, and `call_tool` refuses them by name.
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
 service". That was wrong twice over. `support` is a `ServiceId` like the other three, and the
@@ -301,10 +345,10 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **50 registry packages / 301 tools defined, 269 served**, over **18 mounts + 1 facade**. By
+Totals: **65 registry packages / 366 tools defined, 330 served**, over **22 mounts + 1 facade**. By
 service: linkedin 192 (27 packages), id 84 defined and 55 served (18), orchestration 23 defined and 20
-served (4), support 2 (1). Every number in this file is read off the built registry (`buildRegistry`
-over the four barrels, then `resolveMounts` over `MOUNTS`); the per-mount ones are the headroom table
+served (4), email 65 defined and 61 served (15), support 2 (1). Every number in this file is read off
+the built registry (`buildRegistry` over the five barrels, then `resolveMounts` over `MOUNTS`); the per-mount ones are the headroom table
 `tests/worker-boot.test.ts` prints on a green run, so re-run it rather than editing a count by hand.
 
 2026-11-06 - linkedin 189 to 192 and scraping 24 to 25 (at cap) is this file catching up with the
@@ -312,9 +356,10 @@ registry on the day the surface flag landed, not the surface changing: the tools
 October and November linkedin work and were never counted here. /health counts the served registry
 (`tools: 262` today) since the same day.
 
-Remaining coverage debt is **51** routes and all of it is `gtm.service.email`. `gtm.service.linkedin`,
-`gtm.service.id` and `gtm.service.orchestration` are each at full coverage (ratchet 0, empty ledger):
-linkedin and id got there on 2026-07-27 with the auto-scrapes and account-shares packages.
+No coverage debt remains. `gtm.service.linkedin`, `gtm.service.id`, `gtm.service.orchestration` and
+`gtm.service.email` are each at full coverage (ratchet 0, empty ledger): linkedin and id got there on
+2026-07-27 with the auto-scrapes and account-shares packages, email on 2026-11-13 with its whole
+package at once (65 routes, the service's entire public surface until that day).
 
 Live smoke coverage is no longer a thing to remember. `/mcp/linkedin/auto-scrapes` shipped without a
 row and the gap sat here as a written-down follow-up; `/mcp/support/knowledge` had the same gap and

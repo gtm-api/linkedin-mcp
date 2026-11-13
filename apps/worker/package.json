@@ -7,6 +7,7 @@
     "@gtm/mcp-shared": "workspace:*",
     "@gtm/mcp-runtime": "workspace:*",
     "@gtm/mcp-linkedin": "workspace:*",
+    "@gtm/mcp-email": "workspace:*",
     "@gtm/mcp-id": "workspace:*",
     "@gtm/mcp-orchestration": "workspace:*",
     "@gtm/mcp-support": "workspace:*",

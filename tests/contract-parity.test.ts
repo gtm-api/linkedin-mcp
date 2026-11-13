@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import type { ToolDefinition, ToolPackage } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 
 // Contract parity gates: the Zod contract must not promise more than the PHP
@@ -156,6 +157,25 @@ const FILTER_FIELDS_NOT_OFFERED: Record<string, Record<string, string>> = {
   },
 };
 
+// A tool whose `filter` is NOT the entity's {Entity}Filter, tool name -> the
+// reason: the route validates a filter of its own in its FormRequest, and the
+// request gates below hold that one key by key against the route rules. Printed
+// as a skip; an entry whose keys all sit on the entity filter again fails.
+const FILTER_NOT_THE_ENTITY_FILTER: Record<string, string> = {
+  get_email_accounts_daily_sends:
+    "EmailAccountDailySendsRequest declares its own filter (filter.email_account_sid.in, read over the mailboxes' sent messages), not EmailAccountFilter",
+};
+
+// A search or get tool whose item is NOT a projection of the entity's Domain,
+// tool name -> the reason. The item gate measures a projection against the PHP
+// {Entity}Domain, and has nothing to measure where the route answers another
+// shape under the entity's route group. Printed as a skip, never a silent pass;
+// an entry whose tool is gone, or whose item fits the Domain again, fails.
+const ITEM_NOT_A_DOMAIN: Record<string, string> = {
+  get_email_box_machine:
+    'GET api/email-box answers the machine facts of the server (release, disk, row counts), built by EmailBoxController as a plain array; EmailBoxSettingsDomain is the settings row of the same route group',
+};
+
 const readJson = (path: string) =>
   JSON.parse(readFileSync(new URL(path, import.meta.url), 'utf8'));
 
@@ -170,12 +190,13 @@ const requestBaseline: RequestBaseline = readJson(`../${REQUEST_BASELINE_FILE}`)
 // the REVERSE direction of gates 3 and 4 is exactly what a package-less service
 // needs: it reads the backend's own flags, so a mass-action or step-eligible verb
 // with no tool has to be waived by name with a reason instead of passing because
-// nobody listed the service. gtm.service.email is that case today.
+// nobody listed the service. gtm.service.email was that case until 2026-11-13,
+// when @gtm/mcp-email was authored.
 const SERVICES: { name: 'linkedin' | 'id' | 'orchestration' | 'email'; packages: ToolPackage[]; oracle: Oracle }[] = [
   { name: 'linkedin', packages: linkedinPackages, oracle: load('linkedin.contract.json') },
   { name: 'id', packages: idPackages, oracle: load('id.contract.json') },
   { name: 'orchestration', packages: orchestrationPackages, oracle: load('orchestration.contract.json') },
-  { name: 'email', packages: [], oracle: load('email.contract.json') },
+  { name: 'email', packages: emailPackages, oracle: load('email.contract.json') },
 ];
 
 // ─── Zod introspection ──────────────────────────────────────────────────
@@ -499,6 +520,20 @@ for (const svc of SERVICES) {
           continue;
         }
 
+        const ownFilter = FILTER_NOT_THE_ENTITY_FILTER[tool.name];
+        if (ownFilter !== undefined) {
+          const fields = candidates.flatMap((key) => {
+            const filter = svc.oracle.entities[key].filter!;
+            return [...filter.fields, ...(filter.json_path_fields ?? [])];
+          });
+          if (keys.every((key) => fields.includes(key))) {
+            violations.push(`FILTER_NOT_THE_ENTITY_FILTER['${tool.name}'] no longer drifts: every filter key sits on the entity filter, delete the entry`);
+          } else {
+            skipped.push(`${tool.name}: its filter is the route's own, not the entity filter (${ownFilter})`);
+          }
+          continue;
+        }
+
         const { pick, tied } = attribute(
           candidates.map((key) => {
             const filter = svc.oracle.entities[key].filter!;
@@ -593,6 +628,17 @@ for (const svc of SERVICES) {
         const candidates = candidatesFor(tool.entity);
         if (!candidates.length) {
           skipped.push(`${tool.name}: entity '${tool.entity}' is absent from the oracle`);
+          continue;
+        }
+
+        const notADomain = ITEM_NOT_A_DOMAIN[tool.name];
+        if (notADomain !== undefined) {
+          const fields = candidates.flatMap((key) => svc.oracle.entities[key].domain.fields.map((field) => field.name));
+          if (Object.keys(itemShape).every((key) => fields.includes(key))) {
+            invented.push(`ITEM_NOT_A_DOMAIN['${tool.name}'] no longer drifts: the item fits the Domain, delete the entry`);
+          } else {
+            skipped.push(`${tool.name}: its item is not a Domain projection (${notADomain})`);
+          }
           continue;
         }
 
@@ -793,6 +839,7 @@ for (const svc of SERVICES) {
       if (tool.dangerous) consumed.add('commit_token');
       if (tool.route.pathTemplate.includes('{sid}')) consumed.add(tool.route.sidParam ?? 'sid');
       for (const bound of Object.values(tool.route.pathParams ?? {})) consumed.add(bound);
+      for (const bound of Object.values(tool.route.headerParams ?? {})) consumed.add(bound);
 
       requestCases.push({ tool, route, rules: route.rules, paths: inputPathsOf(tool), consumed });
     }
@@ -1130,6 +1177,14 @@ for (const svc of SERVICES) {
 // is the only place that difference survives.
 
 const ORACLE_SERVICES = ['linkedin', 'id', 'orchestration', 'email'] as const;
+
+describe('filter and item parity exemptions', () => {
+  it('FILTER_NOT_THE_ENTITY_FILTER and ITEM_NOT_A_DOMAIN name only registered tools', () => {
+    const names = new Set(SERVICES.flatMap((svc) => svc.packages.flatMap((pkg) => pkg.tools.map((tool) => tool.name))));
+    const listed = [...Object.keys(FILTER_NOT_THE_ENTITY_FILTER), ...Object.keys(ITEM_NOT_A_DOMAIN)];
+    expect(listed.filter((name) => !names.has(name))).toEqual([]);
+  });
+});
 
 describe('bulk-flag declaration gate', () => {
   for (const service of ORACLE_SERVICES) {

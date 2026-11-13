@@ -16,6 +16,7 @@ import {
 } from '@gtm/mcp-runtime';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 import { MOUNTS } from './mounts.config';
@@ -31,6 +32,7 @@ const REGISTRY = buildRegistry([
   ...linkedinPackages,
   ...idPackages,
   ...orchestrationPackages,
+  ...emailPackages,
   ...supportPackages,
 ]);
 const RESOLVED = resolveMounts(REGISTRY, MOUNTS);

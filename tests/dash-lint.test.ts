@@ -5,6 +5,7 @@ import { join, relative, sep } from 'node:path';
 import { buildRegistry } from '@gtm/mcp-runtime';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 
@@ -185,6 +186,7 @@ const REGISTRY = buildRegistry([
   ...linkedinPackages,
   ...idPackages,
   ...orchestrationPackages,
+  ...emailPackages,
   ...supportPackages,
 ]);
 

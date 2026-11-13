@@ -4,6 +4,7 @@ import { buildRegistry } from '@gtm/mcp-runtime/registry';
 import type { ToolDefinition, ToolPackage } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 
 // Coverage gate: the registry and the live backend surface must agree.
@@ -18,11 +19,12 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 // in oracle-freshness.test.ts.
 //
 // A service with NO MCP package is carried here with an empty package set rather
-// than left out. gtm.service.email is that case: skipping it would have made its
-// 44 uncovered routes count as zero, which is not the same statement as "44
-// uncovered, all of them written down". An empty set measures the debt exactly
-// the way every other service is measured, and the ratchet then holds it from
-// growing while the coverage is missing.
+// than left out. gtm.service.email was that case until 2026-11-13: skipping it
+// would have made its uncovered routes count as zero, which is not the same
+// statement as "uncovered, all of them written down". An empty set measures the
+// debt exactly the way every other service is measured, and the ratchet then
+// holds it from growing while the coverage is missing. @gtm/mcp-email covers the
+// whole surface since that day (65 routes, 4 of them REST only), baseline 0.
 
 type ContractRoute = { method: string; uri: string; operation: string | null; internal: boolean };
 type Contract = { service: string; entities: Record<string, unknown>; routes: ContractRoute[] };
@@ -56,13 +58,11 @@ const SERVICES: { name: 'linkedin' | 'id' | 'orchestration' | 'email'; packages:
   { name: 'linkedin', packages: linkedinPackages, oracle: publicRoutes('linkedin'), baseline: ratchet.linkedin.baseline },
   { name: 'id', packages: idPackages, oracle: publicRoutes('id'), baseline: ratchet.id.baseline },
   { name: 'orchestration', packages: orchestrationPackages, oracle: publicRoutes('orchestration'), baseline: ratchet.orchestration.baseline },
-  // No @gtm/mcp-email package exists. The empty set is the honest input, not a
-  // placeholder: replace it with `emailPackages` the day one is authored.
-  { name: 'email', packages: [], oracle: publicRoutes('email'), baseline: ratchet.email.baseline },
+  { name: 'email', packages: emailPackages, oracle: publicRoutes('email'), baseline: ratchet.email.baseline },
 ];
 
 it('registry builds: all v2 invariants hold across every service', () => {
-  expect(() => buildRegistry([...linkedinPackages, ...idPackages, ...orchestrationPackages])).not.toThrow();
+  expect(() => buildRegistry([...linkedinPackages, ...idPackages, ...orchestrationPackages, ...emailPackages])).not.toThrow();
 });
 
 for (const svc of SERVICES) {

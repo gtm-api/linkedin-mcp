@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import type { ToolDefinition, ToolPackage } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 import { RESEARCH_ROOT } from './umbrella';
@@ -95,6 +96,7 @@ const SERVICES: ServiceSpec[] = [
   { name: 'linkedin', researchDir: 'gtm.service.linkedin', packages: linkedinPackages },
   { name: 'id', researchDir: 'gtm.service.id', packages: idPackages },
   { name: 'orchestration', researchDir: 'gtm.service.orchestration', packages: orchestrationPackages },
+  { name: 'email', researchDir: 'gtm.service.email', packages: emailPackages },
   // gtm.service.support is a worker-local knowledge surface with no backend service
   // and no research directory. Carried explicitly so its tools are reported as skips
   // with a reason instead of vanishing from the tool side of the count.

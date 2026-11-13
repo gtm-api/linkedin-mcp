@@ -25,10 +25,12 @@ export interface ServiceMeta {
   title: string;
   summary: string;
   servers: ServerEntry[];
+  /** Conventions of this service alone, appended to the shared list of the document. */
+  conventions?: string[];
 }
 
 /** The services that have a public `/api` surface in the registry. */
-export const PUBLIC_SERVICES: PublicServiceId[] = ['linkedin', 'id', 'orchestration'];
+export const PUBLIC_SERVICES: PublicServiceId[] = ['linkedin', 'id', 'orchestration', 'email'];
 
 export const SERVICE_META: Record<PublicServiceId, ServiceMeta> = {
   linkedin: {
@@ -53,6 +55,17 @@ export const SERVICE_META: Record<PublicServiceId, ServiceMeta> = {
       'The cross-service execution plane: the platform-wide webhook registry and delivery log, plus mass actions (preview, commit, pace, pause, resume, canary) and their per-item child rows.',
     servers: [
       { url: 'https://app.gtm-api.com/orchestration/v4', description: 'Production, through the app.gtm-api.com gateway' },
+    ],
+  },
+  email: {
+    title: 'GTM API public contract: gtm.service.email',
+    summary:
+      "Connected mailboxes and everything driven through them: Google, Microsoft and IMAP/SMTP accounts with their limits, warmup and health, the mirrored inbox (threads, messages, folders), sending now or on a schedule (a repeat under the caller's own key is answered by the first send), the stop-list, bounces and engagement, the sign-in applications mailboxes connect through, and tracking and sending domains.",
+    servers: [
+      { url: 'https://app.gtm-api.com/email/v4', description: 'Production, through the app.gtm-api.com gateway' },
+    ],
+    conventions: [
+      "- A workspace may own several email servers, each with its own mailboxes and data, behind this one address. The `Email-Box-SID` header names the server a call is for (`em_bx_...`, listed by `POST /api/email-boxes/search` of gtm.service.id); without it the call goes to the workspace's primary server. A sid belongs to the server that answered it: on another server it is `not_found`. A workspace with no server serving yet answers 409 `conflict`, reason `email_box_not_ready`.",
     ],
   },
 };

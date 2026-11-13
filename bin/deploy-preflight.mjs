@@ -155,7 +155,7 @@ for (const [key, value] of Object.entries(vars)) {
 }
 
 // ── 2. the vars config.ts treats as fatal ──────────────────────────────────
-const REQUIRED_URLS = ['LINKEDIN_BASE_URL', 'ID_BASE_URL', 'ORCHESTRATION_BASE_URL', 'AUTH_ISSUER', 'MCP_RESOURCE_URL'];
+const REQUIRED_URLS = ['LINKEDIN_BASE_URL', 'ID_BASE_URL', 'ORCHESTRATION_BASE_URL', 'EMAIL_BASE_URL', 'AUTH_ISSUER', 'MCP_RESOURCE_URL'];
 for (const key of REQUIRED_URLS) {
   const value = vars[key];
   if (value === undefined || value.trim() === '') {
@@ -360,6 +360,47 @@ for (const [varName, service] of SERVICE_URL_VARS) {
     block(
       varName,
       `GET ${probe} answers ${result.status} but the body is not the service's health document: ${shape}. Something other than gtm.service.${service} owns that prefix at the edge, so every '${service}' tool would dispatch into it. ${gatewayHint}`,
+    );
+  }
+}
+
+// 6b. The email prefix answers at the edge.
+//
+// gtm.service.email is not one origin behind its prefix: every workspace's email
+// servers sit behind /email/v4 and the gateway picks one per request, by the
+// Email-Box-SID header or by the token's team (ansible, roles/gateway,
+// gtm_email_map.lua). GET {prefix}/live carries neither, so the gateway answers
+// for its DEFAULT deployment, and production has none
+// (gateway_email_default_backend is ""): the edge's own 409, reason
+// email_box_not_ready, in the platform's error shape. So two answers mean "the
+// prefix is published": the health document of a default deployment, where one
+// exists, and that 409. A 404 or HTML means it is not.
+//
+// What this probe CANNOT see is the release each server runs. A server on a
+// release older than a route answers 404 for that route alone, under a green
+// preflight; the umbrella's product/deployment/DEPLOY_QUEUE.md holds that check
+// for the release that ships the email mounts.
+{
+  const base = (vars.EMAIL_BASE_URL ?? '').replace(/\/$/, '');
+  const probe = `${base}/live`;
+  const result = await get(probe);
+  const boxNotReady = result.status === 409 && /"reason"\s*:\s*"email_box_not_ready"/.test(result.text);
+  if (!result.ok) {
+    block('EMAIL_BASE_URL', `could not be reached: GET ${probe} failed (${result.error}). A base URL nothing answers means every 'email' tool fails at dispatch.`);
+  } else if (result.status >= 500) {
+    block('EMAIL_BASE_URL', `GET ${probe} answers ${result.status}: the prefix is routed and what is behind it is not healthy. Fix that first, then re-run.`);
+  } else if (result.status === 404) {
+    block(
+      'EMAIL_BASE_URL',
+      `GET ${probe} answers 404: the edge has no such prefix. The email route is published by the gateway role of the ansible repo (provision-id.yml --tags gateway). Until that runs, every 'email' tool 404s at dispatch under a green /health.`,
+    );
+  } else if (boxNotReady) {
+    notes.push(`${probe} answers the edge's 409 email_box_not_ready: the email prefix is published and no default deployment stands behind it, as in production. Which release each email server runs is not visible from here.`);
+  } else if (!LIVE_BODY.test(result.text)) {
+    const shape = /^\s*</.test(result.text) ? 'HTML (the SPA catch-all, which serves index.html for any unrouted path)' : `${result.text.slice(0, 60).replace(/\s+/g, ' ')}...`;
+    block(
+      'EMAIL_BASE_URL',
+      `GET ${probe} answers ${result.status} and the body is neither a health document nor the edge's 409 email_box_not_ready: ${shape}. Something other than the email gateway route owns that prefix, so every 'email' tool would dispatch into it.`,
     );
   }
 }

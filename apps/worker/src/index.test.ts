@@ -18,6 +18,7 @@ const healthy = (over: Partial<Env> = {}): Env => ({
   LINKEDIN_BASE_URL: 'https://linkedin.gtm-api.test',
   ID_BASE_URL: ISSUER,
   ORCHESTRATION_BASE_URL: 'https://orchestration.gtm-api.test',
+  EMAIL_BASE_URL: 'https://email.gtm-api.test',
   AUTH_MODE: 'jwt',
   AUTH_ISSUER: ISSUER,
   MCP_RESOURCE_URL: RESOURCE,
@@ -35,6 +36,7 @@ const asShipped = (): Env => ({
   LINKEDIN_BASE_URL: 'https://TODO-linkedin-prod-url',
   ID_BASE_URL: 'https://TODO-id-prod-url',
   ORCHESTRATION_BASE_URL: 'https://TODO-orchestration-prod-url',
+  EMAIL_BASE_URL: 'https://TODO-email-prod-url',
   AUTH_MODE: 'jwt',
 });
 
@@ -86,6 +88,7 @@ describe('/health', () => {
         'LINKEDIN_BASE_URL',
         'ID_BASE_URL',
         'ORCHESTRATION_BASE_URL',
+        'EMAIL_BASE_URL',
         'AUTH_ISSUER',
         'MCP_RESOURCE_URL',
       ]),

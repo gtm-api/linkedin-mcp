@@ -3,6 +3,7 @@ import type { ToolDefinition } from '@gtm/mcp-runtime/types';
 import { McpErrorResponse } from '@gtm/mcp-shared';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { mintDevToken } from './e2e/token';
 import { COVERAGE_OUT, formatReport, writeReport } from './e2e/coverage';
@@ -21,7 +22,7 @@ const RUN = process.env.RUN_E2E === '1';
 const FACADE = `${process.env.MCP_URL ?? 'http://localhost:8788'}/mcp`;
 
 const READ_OPS = new Set(['search', 'get', 'metrics']);
-const allTools: ToolDefinition[] = [...linkedinPackages, ...idPackages, ...orchestrationPackages]
+const allTools: ToolDefinition[] = [...linkedinPackages, ...idPackages, ...orchestrationPackages, ...emailPackages]
   .flatMap((p) => p.tools);
 const readTools = allTools.filter((t) => READ_OPS.has(t.operation));
 const searchNameByEntity = new Map<string, string>();

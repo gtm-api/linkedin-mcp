@@ -6,7 +6,8 @@ export type BackendResult =
   | { kind: 'ok'; status: number; envelope: unknown }
   | { kind: 'transport_error'; reason: 'timeout' | 'network' | 'non_json'; status?: number; detail: string };
 
-// Single backend call for one tool. Attaches auth + trace headers, times out
+// Single backend call for one tool. Attaches auth + trace headers and the
+// route's own (route.headerParams), times out
 // via AbortController, and returns any JSON body (incl. 4xx/5xx error
 // envelopes) as kind:'ok' - only non-JSON / network / timeout is a
 // transport_error. Never throws. The fuse is the config's backendTimeoutMs (55 s
@@ -19,12 +20,15 @@ export async function backendFetch(
   opts: { validateOnly?: boolean; timeoutMs?: number; kind?: 'tool' | 'preview' } = {},
 ): Promise<BackendResult> {
   const { tool, scope, deps } = ctx;
-  const { url, body } = buildRequest(ctx, opts);
+  const { url, body, headers: routeHeaders } = buildRequest(ctx, opts);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? deps.config.backendTimeoutMs);
 
+  // The route's own headers (route.headerParams, e.g. Email-Box-SID). None of
+  // them is one of the headers set below: buildRequest refuses that binding.
   const headers: Record<string, string> = {
+    ...routeHeaders,
     Authorization: `Bearer ${scope.token}`,
     Accept: 'application/json',
     'X-Trace-Id': scope.traceId,

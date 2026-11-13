@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { buildRegistry, resolveMounts, type MountConfig, type ResolvedMount } from '@gtm/mcp-runtime';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 import { MOUNTS } from '@gtm/mcp-worker/src/mounts.config';
@@ -37,6 +38,7 @@ const WORKER_PACKAGES = [
   ...linkedinPackages,
   ...idPackages,
   ...orchestrationPackages,
+  ...emailPackages,
   ...supportPackages,
 ];
 

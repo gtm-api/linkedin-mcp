@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 
-export type ServiceId = 'linkedin' | 'id' | 'orchestration' | 'support';
+export type ServiceId = 'linkedin' | 'id' | 'orchestration' | 'email' | 'support';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -29,6 +29,18 @@ export interface RouteMeta {
   /** GET/DELETE: which input keys become query params. Default: all non-path,
    *  non-_meta keys. */
   queryParams?: string[];
+  /**
+   * Input keys that travel as request HEADERS: header name -> input key
+   * (2026-11-13). For an argument the backend reads off the request and not
+   * off its body or query: gtm.service.email runs one deployment per email
+   * server of a workspace, and the server a call is for is named by the
+   * `Email-Box-SID` header, which the gateway routes on before any controller
+   * runs. The key is taken out of the body and the query; an absent, null or
+   * empty value sends no header. A header this runtime sets itself
+   * (Authorization, Team-SID, X-Trace-Id, Accept, Content-Type) cannot be
+   * bound: buildRegistry refuses it.
+   */
+  headerParams?: Record<string, string>;
 }
 
 export interface ToolAnnotations {
@@ -42,10 +54,21 @@ export interface ToolAnnotations {
 
 /** See ToolDefinition.sentCheck. */
 export interface SentCheck {
-  /** A served tool that takes linkedin_account_sid and client_reference. */
+  /** A served tool that takes the send's account field and client_reference. */
   tool: string;
   /** Arguments fixed per send verb, e.g. check_linkedin_posting_sent's verb. */
   args?: Record<string, string>;
+  /**
+   * The input that names the account the send ran on, on the send and on the
+   * check alike. Default 'linkedin_account_sid'; the email send asks by
+   * 'email_account_sid' (2026-11-13).
+   */
+  accountKey?: string;
+  /**
+   * The tool that lists the account's attempts, named to a send that carried no
+   * key. Default 'search_linkedin_account_activity_log'.
+   */
+  activityLogTool?: string;
 }
 
 export interface ToolDefinition {
@@ -76,8 +99,10 @@ export interface ToolDefinition {
    * the send came to without sending (sent, in_flight, unknown, not_sent), and
    * the arguments it takes fixed for this verb. A send this worker's fuse cut
    * is in doubt, not failed, so the timeout answer hands the caller that call,
-   * filled with the send's own linkedin_account_sid and client_reference
-   * (error-map.ts timeoutAdvice, 2026-11-11). tests/sent-check-parity.test.ts
+   * filled with the send's own account, client_reference and whatever the send
+   * said in a header, the email server among them (error-map.ts timeoutAdvice,
+   * 2026-11-11; the account field and the headers 2026-11-13).
+   * tests/sent-check-parity.test.ts
    * holds every keyed send to naming a served check tool.
    */
   sentCheck?: SentCheck;
@@ -94,6 +119,18 @@ export interface ToolDefinition {
    * own call numbers say which may go.
    */
   surface?: 'both' | 'api';
+  /**
+   * Input fields the REST route takes and the TOOL does not offer (2026-11-13):
+   * what cannot pass through a model, a password or a key. The public REST
+   * reference documents them, since it is projected from `inputSchema`; an MCP
+   * client is never shown the slot (input-schema.ts registeredShape leaves them
+   * out), and the strict parse refuses one sent anyway. For a route that is
+   * worth a tool without its secret: gtm.service.email's reconnect answers a
+   * link the mailbox's owner signs in on, and also takes IMAP passwords inline.
+   * Top-level keys only, each optional in `inputSchema`: a route that needs a
+   * secret on every call is `surface: 'api'` as a whole.
+   */
+  restOnlyInputs?: string[];
   /** ACTION verbs only: this verb's OWN surface takes a filter/targets[] set, which
    *  the owning service drains. Mirrors #[ApiMethod(..., massAction:)] (§R4). */
   massAction?: boolean;

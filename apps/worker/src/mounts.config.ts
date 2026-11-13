@@ -7,6 +7,20 @@ import type { MountConfig } from '@gtm/mcp-runtime';
 const p = (entity: string) => ({ kind: 'package' as const, id: `mcp.linkedin/${entity}` });
 const pid = (entity: string) => ({ kind: 'package' as const, id: `mcp.id/${entity}` });
 const por = (entity: string) => ({ kind: 'package' as const, id: `mcp.orchestration/${entity}` });
+const pem = (entity: string) => ({ kind: 'package' as const, id: `mcp.email/${entity}` });
+
+// What every email mount says about the server field. A workspace may own
+// several email servers, each its own deployment with its own mailboxes and
+// data, behind one public prefix; a call names its server in `email_box_sid`
+// (the runtime sends it as the Email-Box-SID header the gateway routes on), and
+// a call that names none lands on the workspace's primary server. Said once per
+// mount, because a client mounts one URL and reads that mount's instructions.
+const EMAIL_SERVER_NOTE =
+  ' Every tool takes an optional email_box_sid, the email server the call is for: a workspace may own several, each with its own mailboxes and data, and search_email_boxes lists them. Left out, the call goes to the primary server. A sid belongs to the server that answered it, so pass the same email_box_sid with it: on another server it reads as not found. 409 email_box_not_ready: the workspace has no server serving yet.';
+// The registry of servers is gtm.service.id's (mcp.id/email_boxes, mounted on
+// /mcp/id/billing with the verbs that buy and resize one). Its read rides on
+// every email mount too, so a client that mounted one of them can name a server.
+const emailBoxes = { kind: 'tool' as const, name: 'search_email_boxes' };
 
 export const MOUNTS: MountConfig[] = [
   {
@@ -391,6 +405,75 @@ export const MOUNTS: MountConfig[] = [
     facade: 'none',
   },
   {
+    // gtm.service.email (2026-11-13), four mounts by what an agent is doing:
+    // running mailboxes, setting a server up, working the inbox, and list
+    // hygiene. Each is under the default 25 with room to grow. The three
+    // definitions of email_accounts that are REST only (create, bulk-create-imap,
+    // bulk-action) and create of email_oauth_apps serve nothing here: a secret
+    // or a bulk payload never passes through a model.
+    path: '/mcp/email/accounts',
+    name: 'gtm-email-accounts',
+    instructions:
+      'GTM email mailboxes: find one with search_email_accounts, then read it, change its limits, warmup and tracking, pause or resume its sending, start a sync, and follow its sync runs, activity log and health. To connect a mailbox, request_email_account_connect_link returns a page its owner signs in on, so no password passes through here; bulk_create_email_accounts connects many through a service account or an app-only application; a mailbox that needs new credentials takes reconnect_email_account. Connecting with a password or a refresh token in the request, and the batch verbs over many mailboxes, are REST only. Disconnect and delete are protected (preview → confirm).'
+      + EMAIL_SERVER_NOTE,
+    selectors: [
+      pem('email_accounts'),
+      pem('email_account_sync_runs'),
+      pem('email_account_activity_log'),
+      pem('email_account_health'),
+      emailBoxes,
+    ],
+    maxTools: 25,
+    facade: 'none',
+  },
+  {
+    path: '/mcp/email/infrastructure',
+    name: 'gtm-email-infrastructure',
+    instructions:
+      "GTM email setup, per server: the server's settings and what a new mailbox starts with (get_email_box_settings, update_email_box_settings, apply_email_box_settings_defaults), the sign-in applications mailboxes connect through (Google and Microsoft: search, update, verify, delete; registering one carries its secret and is REST only), the domains mailboxes send from with their public DNS state (search_email_domains, check_email_domain_dns), and tracking and sending domains (add, verify DNS, delete). Deletes and applying the defaults to every mailbox are protected (preview → confirm)."
+      + EMAIL_SERVER_NOTE,
+    selectors: [
+      pem('email_box_settings'),
+      pem('email_oauth_apps'),
+      pem('email_domains'),
+      pem('email_tracking_domains'),
+      pem('email_sending_domains'),
+      emailBoxes,
+    ],
+    maxTools: 25,
+    facade: 'none',
+  },
+  {
+    path: '/mcp/email/messaging',
+    name: 'gtm-email-messaging',
+    instructions:
+      'GTM email inbox and sending: search_email_threads for triage, get_email_thread_llm_context to read a conversation, send_email_message to write (new mail, a reply by reply_to_email_message_sid, a forward; now or scheduled). Give every send a client_reference: a repeat under the same key is never sent twice, and after a timeout check_email_message_sent says what the send came to. Single messages: search, get with the body, update (read, flag, folders), archive, delete, attachments and the raw source. Sending and deleting are protected (preview → confirm).'
+      + EMAIL_SERVER_NOTE,
+    selectors: [
+      pem('email_messages'),
+      pem('email_threads'),
+      pem('email_folders'),
+      emailBoxes,
+    ],
+    maxTools: 25,
+    facade: 'none',
+  },
+  {
+    path: '/mcp/email/deliverability',
+    name: 'gtm-email-deliverability',
+    instructions:
+      'GTM email deliverability: the stop-list (addresses no mailbox of the workspace writes to: search, add, lift, metrics), the bounce and complaint log, and opens, clicks and unsubscribes (search and metrics each). Check an address against the stop-list before a campaign with search_email_suppressions. Lifting an address is protected (preview → confirm).'
+      + EMAIL_SERVER_NOTE,
+    selectors: [
+      pem('email_suppressions'),
+      pem('email_bounce_log'),
+      pem('email_engagements'),
+      emailBoxes,
+    ],
+    maxTools: 25,
+    facade: 'none',
+  },
+  {
     path: '/mcp/support/knowledge',
     name: 'gtm-support-knowledge',
     instructions:
@@ -406,7 +489,7 @@ export const MOUNTS: MountConfig[] = [
     name: 'gtm-mcp',
     instructions:
       'GTM unified MCP endpoint: the whole platform behind 3 meta-tools. Call list_toolsets to see the domains, get_toolset_tools to inspect one, then call_tool to run any tool by name. Dangerous tools still require the preview → confirm step.',
-    // All FOUR services, support included. The facade does not route through
+    // All FIVE services, support included. The facade does not route through
     // these selectors: discovery comes from the catalog of domain mounts that
     // index.ts passes in (every non-facade mount, support.knowledge among them)
     // and call_tool resolves against the whole registry, so the KB tools were
@@ -421,6 +504,7 @@ export const MOUNTS: MountConfig[] = [
       { kind: 'service', service: 'linkedin' },
       { kind: 'service', service: 'id' },
       { kind: 'service', service: 'orchestration' },
+      { kind: 'service', service: 'email' },
       { kind: 'service', service: 'support' },
     ],
     facade: 'toolsets',

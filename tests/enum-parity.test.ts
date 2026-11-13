@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import type { ToolDefinition, ToolPackage } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 
 // ENUM PARITY. A sibling file to contract-parity.test.ts rather than a sixth
@@ -123,19 +124,23 @@ const baseline: Baseline = readJson(`../${BASELINE_FILE}`);
 // Same service list and same reasoning as contract-parity.test.ts: a service
 // with no MCP package is carried with an empty package set rather than left out,
 // so "no tools at all" reads as no Zod side to check rather than as nothing to
-// check. gtm.service.email is that case today.
+// check. gtm.service.email was that case until 2026-11-13.
 const SERVICES: { name: string; packages: ToolPackage[]; oracle: Oracle }[] = [
   { name: 'linkedin', packages: linkedinPackages, oracle: load('linkedin.contract.json') },
   { name: 'id', packages: idPackages, oracle: load('id.contract.json') },
   { name: 'orchestration', packages: orchestrationPackages, oracle: load('orchestration.contract.json') },
-  { name: 'email', packages: [], oracle: load('email.contract.json') },
+  { name: 'email', packages: emailPackages, oracle: load('email.contract.json') },
 ];
 
 // ─── source B: the manual bridge ────────────────────────────────────────
 // `entity` is the MCP package entity ('*' for a shared value object reused
-// everywhere). `at` matches EITHER the envelope-stripped path or the bare field
-// name. `enumClass` is the FQCN's last segment. Every entry states why the name
-// convention cannot reach it, because an unexplained entry here is
+// everywhere). `at` matches the full path, the envelope-stripped path, the bare
+// field name, or the TAIL of the path at a segment boundary ('sync_run.status'
+// matches 'items.*.included.sync_run.status' and 'result.catch_up...' does not),
+// which is how one line pins a row that is embedded at several depths. The
+// first entry that matches wins, so a path-qualified line sits above the bare
+// field it narrows. `enumClass` is the FQCN's last segment. Every entry states
+// why the name convention cannot reach it, because an unexplained entry here is
 // indistinguishable from a wrong one.
 type BridgeEntry = { service: string; entity: string; at: string; enumClass: string };
 
@@ -214,6 +219,78 @@ const MANUAL_BRIDGE: BridgeEntry[] = [
   // WebhookReplayStatusEnum is the 3-case terminal subset of the log row's
   // 6-case status, not a "statuses" enum of the webhook entity.
   { service: 'orchestration', entity: 'webhooks', at: 'statuses', enumClass: 'WebhookReplayStatusEnum' },
+
+  // ── email ──
+  // gtm.service.email answers rows embedded in other rows more than any other
+  // service: a message under a thread, a bounce, a stop-list row or a provider
+  // search; an account and a sync run under an activity log row; the latest
+  // health snapshot under an account. The convention builds its candidates from
+  // the entity of the TOOL, so an embedded row's field either reaches nothing or,
+  // where the tool's own entity has a field of the same name (status, kind),
+  // reaches the WRONG class. Path-qualified lines first, then the fields whose
+  // name means one thing across the whole service.
+  //
+  // A DNS record's status on a tracking or sending domain is the record's own
+  // 3-case vocabulary; it sits above the bare `status` lines of those entities.
+  { service: 'email', entity: '*', at: 'dns_records.*.status', enumClass: 'DnsRecordStatusEnum' },
+  // An embedded message: under a bounce or an engagement (email_message, and the
+  // bounce report as a mailbox row), under a stop-list row, under a thread, and
+  // as the hits of the provider search, which is an email_accounts verb.
+  { service: 'email', entity: '*', at: 'email_message.kind', enumClass: 'EmailMessageKindEnum' },
+  { service: 'email', entity: '*', at: 'ndr_email_message.kind', enumClass: 'EmailMessageKindEnum' },
+  { service: 'email', entity: '*', at: 'ndr_email_message.status', enumClass: 'EmailMessageStatusEnum' },
+  { service: 'email', entity: '*', at: 'ndr_email_message.direction', enumClass: 'EmailMessageDirectionEnum' },
+  { service: 'email', entity: '*', at: 'source_email_message.kind', enumClass: 'EmailMessageKindEnum' },
+  { service: 'email', entity: '*', at: 'source_email_message.status', enumClass: 'EmailMessageStatusEnum' },
+  { service: 'email', entity: '*', at: 'source_email_message.direction', enumClass: 'EmailMessageDirectionEnum' },
+  { service: 'email', entity: '*', at: 'last_messages.*.kind', enumClass: 'EmailMessageKindEnum' },
+  { service: 'email', entity: '*', at: 'last_messages.*.status', enumClass: 'EmailMessageStatusEnum' },
+  { service: 'email', entity: '*', at: 'last_messages.*.direction', enumClass: 'EmailMessageDirectionEnum' },
+  { service: 'email', entity: 'email_accounts', at: 'result.items.*.kind', enumClass: 'EmailMessageKindEnum' },
+  { service: 'email', entity: 'email_accounts', at: 'result.items.*.status', enumClass: 'EmailMessageStatusEnum' },
+  { service: 'email', entity: 'email_accounts', at: 'result.items.*.direction', enumClass: 'EmailMessageDirectionEnum' },
+  // The folder a provider search was asked in, echoed in its result.
+  { service: 'email', entity: 'email_accounts', at: 'folder.role', enumClass: 'EmailFolderRoleEnum' },
+  // An embedded account, sync run and activity log row: the lifecycle status of
+  // each, under tools whose own entity has a status enum of its own.
+  { service: 'email', entity: '*', at: 'email_account.status', enumClass: 'EmailAccountStatusEnum' },
+  { service: 'email', entity: '*', at: 'sync_run.status', enumClass: 'EmailAccountSyncRunStatusEnum' },
+  { service: 'email', entity: '*', at: 'catch_up_sync_run.status', enumClass: 'EmailAccountSyncRunStatusEnum' },
+  { service: 'email', entity: '*', at: 'activity_log.status', enumClass: 'EmailAccountActivityLogStatusEnum' },
+  // The six DNS readings of a health snapshot are one enum, keyed by the record,
+  // and the four of a sender domain are another (it adds `missing`).
+  { service: 'email', entity: '*', at: 'dns_health.mx', enumClass: 'EmailAccountHealthDnsStatusEnum' },
+  { service: 'email', entity: '*', at: 'dns_health.spf', enumClass: 'EmailAccountHealthDnsStatusEnum' },
+  { service: 'email', entity: '*', at: 'dns_health.dkim', enumClass: 'EmailAccountHealthDnsStatusEnum' },
+  { service: 'email', entity: '*', at: 'dns_health.dmarc', enumClass: 'EmailAccountHealthDnsStatusEnum' },
+  { service: 'email', entity: '*', at: 'dns_health.return_path', enumClass: 'EmailAccountHealthDnsStatusEnum' },
+  { service: 'email', entity: '*', at: 'dns_health.tracking_domain', enumClass: 'EmailAccountHealthDnsStatusEnum' },
+  { service: 'email', entity: 'email_domains', at: 'dns.mx', enumClass: 'EmailDomainDnsStatusEnum' },
+  { service: 'email', entity: 'email_domains', at: 'dns.spf', enumClass: 'EmailDomainDnsStatusEnum' },
+  { service: 'email', entity: 'email_domains', at: 'dns.dkim', enumClass: 'EmailDomainDnsStatusEnum' },
+  { service: 'email', entity: 'email_domains', at: 'dns.dmarc', enumClass: 'EmailDomainDnsStatusEnum' },
+  // A sender domain is a rollup of the mailboxes on it, and its provider is theirs.
+  { service: 'email', entity: 'email_domains', at: 'provider', enumClass: 'EmailAccountProviderEnum' },
+  // Tracking and sending domains share one verification vocabulary, named after
+  // neither; verify-dns echoes the status the domain held before the check, and
+  // the application's verify echoes its own two-case one.
+  { service: 'email', entity: 'email_tracking_domains', at: 'status', enumClass: 'EmailDomainVerificationStatusEnum' },
+  { service: 'email', entity: 'email_tracking_domains', at: 'previous_status', enumClass: 'EmailDomainVerificationStatusEnum' },
+  { service: 'email', entity: 'email_sending_domains', at: 'status', enumClass: 'EmailDomainVerificationStatusEnum' },
+  { service: 'email', entity: 'email_sending_domains', at: 'previous_status', enumClass: 'EmailDomainVerificationStatusEnum' },
+  { service: 'email', entity: 'email_oauth_apps', at: 'previous_status', enumClass: 'EmailOauthAppStatusEnum' },
+  // Fields whose name means one thing across the service, owned by the message,
+  // the folder, the account, the sync run and the activity log.
+  { service: 'email', entity: '*', at: 'folder_role', enumClass: 'EmailFolderRoleEnum' },
+  { service: 'email', entity: '*', at: 'bounce_type', enumClass: 'EmailMessageBounceTypeEnum' },
+  { service: 'email', entity: '*', at: 'imap_encryption', enumClass: 'EmailAccountConnectionEncryptionEnum' },
+  { service: 'email', entity: '*', at: 'smtp_encryption', enumClass: 'EmailAccountConnectionEncryptionEnum' },
+  { service: 'email', entity: '*', at: 'sending_paused_reason', enumClass: 'EmailAccountSendingPausedReasonEnum' },
+  { service: 'email', entity: '*', at: 'sync_mode', enumClass: 'EmailAccountSyncRunSyncModeEnum' },
+  { service: 'email', entity: '*', at: 'sync_type', enumClass: 'EmailAccountSyncRunSyncTypeEnum' },
+  { service: 'email', entity: '*', at: 'triggered_by', enumClass: 'EmailAccountSyncRunTriggeredByEnum' },
+  { service: 'email', entity: '*', at: 'wait_reason', enumClass: 'EmailAccountSyncRunWaitReasonEnum' },
+  { service: 'email', entity: '*', at: 'action_type', enumClass: 'EmailAccountActivityLogActionTypeEnum' },
 ];
 
 // Alternative class-name prefixes for one oracle entity, tried after the entity
@@ -474,10 +551,10 @@ for (const service of SERVICES) {
             continue;
           }
 
-          // B. Manual bridge, by full path, envelope-stripped path or bare field.
+          // B. Manual bridge, by full path, envelope-stripped path, bare field or path tail.
           const manual = bridge.find(
             (entry) => (entry.entity === tool.entity || entry.entity === '*')
-              && (entry.at === site.path || entry.at === stripped || entry.at === field),
+              && (entry.at === site.path || entry.at === stripped || entry.at === field || site.path.endsWith(`.${entry.at}`)),
           );
           if (manual) bridgeUsed.add(manual);
 
