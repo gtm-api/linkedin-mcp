@@ -61,6 +61,41 @@ describe('backend calls on the wide event', () => {
     expect((init.headers as Record<string, string>)['X-Trace-Id']).toBe(TRACE);
   });
 
+  // route.headerParams: the bound argument goes out as a header beside the three
+  // every call carries, and never in the body (2026-11-13, Email-Box-SID).
+  it('sends a header the route binds, out of the body, beside its own', async () => {
+    const fetchSpy = vi.fn(async () => answer('{"success":true}'));
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const ctx = mkCtx();
+    ctx.tool = { ...ctx.tool, route: { ...ctx.tool.route, headerParams: { 'Email-Box-SID': 'email_box_sid' } } };
+    ctx.args = { page_size: 5, email_box_sid: 'em_bx_Hx7kQ3mN2pL4' };
+    await backendFetch(ctx);
+
+    const [, init] = fetchSpy.mock.calls[0] as unknown as [string, RequestInit];
+    const headers = init.headers as Record<string, string>;
+    expect(headers['Email-Box-SID']).toBe('em_bx_Hx7kQ3mN2pL4');
+    expect(headers.Authorization).toBe('Bearer jwt');
+    expect(headers['X-Trace-Id']).toBe(TRACE);
+    expect(JSON.parse(init.body as string)).toEqual({ page_size: 5 });
+  });
+
+  // Header names are case-insensitive on the wire: `authorization` beside the
+  // client's own `Authorization` would reach the backend as one header with two
+  // values. The registry refuses such a binding; a tool that got past it never
+  // leaves the worker.
+  it('makes no call for a route that binds a header the client sets itself', async () => {
+    const fetchSpy = vi.fn(async () => answer('{"success":true}'));
+    vi.stubGlobal('fetch', fetchSpy);
+
+    const ctx = mkCtx();
+    ctx.tool = { ...ctx.tool, route: { ...ctx.tool.route, headerParams: { authorization: 'forged' } } };
+    ctx.args = { page_size: 5, forged: 'Bearer other' };
+
+    await expect(backendFetch(ctx)).rejects.toThrow(/set by the runtime/);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
   it('notes a call whose headers never came as a timeout at the fuse, with no status', async () => {
     vi.useFakeTimers();
     vi.stubGlobal('fetch', hangingFetch());

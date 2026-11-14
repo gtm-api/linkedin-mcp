@@ -50,14 +50,20 @@ export function toolOwnsTeamSid(tool: ToolDefinition): boolean {
 }
 
 /**
- * The tool's own inputSchema shape, plus `commit_token` on dangerous tools.
- * Added here rather than in the entity files so the preview-gate field stays
- * consistent and the entity files stay clean.
+ * The tool's own inputSchema shape, minus the fields that are REST only
+ * (`restOnlyInputs`: a password or a key the route takes and a model must never
+ * carry), plus `commit_token` on dangerous tools. The gate field is added here
+ * rather than in the entity files so it stays consistent and the entity files
+ * stay clean; the REST-only fields are dropped here so neither entry point can
+ * advertise or accept one.
  */
 export function registeredShape(tool: ToolDefinition): z.ZodRawShape {
-  return tool.dangerous
-    ? { ...tool.inputSchema.shape, commit_token: COMMIT_TOKEN }
-    : tool.inputSchema.shape;
+  let shape: z.ZodRawShape = tool.inputSchema.shape;
+  if (tool.restOnlyInputs?.length) {
+    const hidden = new Set(tool.restOnlyInputs);
+    shape = Object.fromEntries(Object.entries(shape).filter(([key]) => !hidden.has(key)));
+  }
+  return tool.dangerous ? { ...shape, commit_token: COMMIT_TOKEN } : shape;
 }
 
 /**
@@ -123,6 +129,9 @@ const TOOL_KEY_HINTS: Record<string, Record<string, string>> = {
 export function unknownKeyHint(tool: ToolDefinition, path: PropertyKey[], key: string): string {
   const specific = TOOL_KEY_HINTS[tool.name]?.[key];
   if (specific) return `unknown key "${key}": ${specific}`;
+  if (path.length === 0 && tool.restOnlyInputs?.includes(key)) {
+    return `unknown key "${key}": the REST route takes it and this tool does not, because a secret never passes through a model; leave it out`;
+  }
   const dotted = /^([A-Za-z0-9_]+)\.([a-z_]+)$/.exec(key);
   if (dotted) {
     const [, field, op] = dotted;

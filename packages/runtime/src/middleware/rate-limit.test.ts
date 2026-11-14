@@ -55,7 +55,7 @@ function mkDeps(
     config: {
       envName: 'test',
       version: '0',
-      baseUrls: { linkedin: '', id: '', orchestration: '', support: '' },
+      baseUrls: { linkedin: '', id: '', orchestration: '', email: '', support: '' },
       backendTimeoutMs: 1000,
       responseCharBudget: 0,
       maxBatchSize: 16,

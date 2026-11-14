@@ -142,6 +142,23 @@ ID_BASE_URL = "https://app.gtm-api.com/id/v4"
 # with every orchestration tool 502ing at dispatch.
 # Sequence and owner: product/deployment/RUNBOOK-orchestration.md § 3.
 ORCHESTRATION_BASE_URL = "https://app.gtm-api.com/orchestration/v4"
+# gtm.service.email. One prefix, many origins: every workspace's email servers
+# sit behind /email/v4 and the gateway picks one per request
+# (gtm.deployment.ansible roles/gateway/files/lua/gtm_email_map.lua): the
+# Email-Box-SID header when the call names a server (a tool's email_box_sid,
+# lifted by route.headerParams), else the primary server of the token's team.
+# The email mounts are served, so requiredBaseUrlServices() includes 'email'
+# and an unusable value here is FATAL like the three above.
+#
+# What differs from them is the probe. GET {this}/live carries no token, so the
+# gateway has no team to route by and answers for the default deployment, which
+# production does not have (gateway_email_default_backend is "" in
+# host_vars/id-beta.yml): the edge's own 409 email_box_not_ready. The preflight
+# reads that 409 as "the prefix is published" and a 404 or HTML as "it is not".
+# It cannot see which release each server runs: a server on a release older
+# than a route answers 404 for that route alone. product/deployment/DEPLOY_QUEUE.md
+# of the umbrella holds that check for the release that ships these mounts.
+EMAIL_BASE_URL = "https://app.gtm-api.com/email/v4"
 # OAuth resource-server identity. With AUTH_MODE=jwt these are REQUIRED: without
 # them the iss and aud checks would have nothing to compare against, so the
 # worker refuses every request with 503 and /health says which one is missing.

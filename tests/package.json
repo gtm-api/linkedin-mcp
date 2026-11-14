@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@gtm/mcp-email": "workspace:*",
     "@gtm/mcp-id": "workspace:*",
     "@gtm/mcp-linkedin": "workspace:*",
     "@gtm/mcp-openapi": "workspace:*",

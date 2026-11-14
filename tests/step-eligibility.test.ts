@@ -14,9 +14,9 @@ import { fileURLToPath } from 'node:url';
 // This is the only gate that sees every service at once, which is why it reads
 // the fixture DIRECTORY rather than a hardcoded list: a service whose backend
 // declares a step-eligible verb is checked here whether or not it has an MCP
-// package yet. gtm.service.email is exactly that case today - no @gtm/mcp-email,
-// but `email-messages.send` is the platform's paced bulk-send verb - so
-// email.contract.json exists for this gate.
+// package yet. gtm.service.email was exactly that case until 2026-11-13 - no
+// @gtm/mcp-email, while `email-messages.send` was already the platform's paced
+// bulk-send verb - which is why email.contract.json came to exist for this gate.
 //
 // What is checked, all of it derivable from the dumps:
 //   1. a step-eligible route is a public /api ACTION (the flag is a no-op

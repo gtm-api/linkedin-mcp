@@ -47,14 +47,12 @@ for arg in "$@"; do
   esac
 done
 
-# The services the mounts dispatch to. `email` is listed because the repo's other
-# live gate (pnpm oracle:check) needs all four and an operator who just ran this
-# wants to know it is down too, but NO mount serves an email tool today, so it
-# cannot fail this run. Keep that distinction honest: the day an email mount
-# lands, move it into the required column rather than leaving a service the
-# suites depend on reported as advisory.
-REQUIRED_SERVICES=("linkedin:8020" "id:8021" "orchestration:8025")
-ADVISORY_SERVICES=("email:8024")
+# The services the mounts dispatch to. `email` is required since 2026-11-13, when
+# the four /mcp/email mounts landed: its smoke suite (tests/e2e/email-mounts)
+# reads the local multi-tenant deployment on 8024. Until then it was reported as
+# advisory, a column that went with it: every service this run reaches is one a
+# mount dispatches to.
+REQUIRED_SERVICES=("linkedin:8020" "id:8021" "orchestration:8025" "email:8024")
 
 STARTED_WORKER_PGID=""
 cleanup() {
@@ -97,14 +95,6 @@ for entry in "${REQUIRED_SERVICES[@]}"; do
   else
     echo "  ✗ $svc  :$port  NOT REACHABLE"
     down="$down $svc"
-  fi
-done
-for entry in "${ADVISORY_SERVICES[@]}"; do
-  svc="${entry%%:*}"; port="${entry##*:}"
-  if live "$port"; then
-    echo "  ✓ $svc  :$port  (no mount dispatches here; checked for completeness)"
-  else
-    echo "  ~ $svc  :$port  not reachable, but no mount dispatches there, so this run can proceed"
   fi
 done
 

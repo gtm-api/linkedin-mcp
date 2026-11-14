@@ -6,7 +6,7 @@ import type { DispatchContext, RuntimeDeps, ToolDefinition } from './types';
 const deps: RuntimeDeps = {
   config: {
     envName: 'test', version: '0',
-    baseUrls: { linkedin: 'http://backend', id: 'http://id', orchestration: 'http://orchestration', support: '' },
+    baseUrls: { linkedin: 'http://backend', id: 'http://id', orchestration: 'http://orchestration', email: 'http://email', support: '' },
     backendTimeoutMs: 1000, responseCharBudget: 1000, maxBatchSize: 16, rateLimit: { enabled: false, windowSeconds: 60, callsPerWindow: 0, writesPerWindow: 0 },
     previewGate: { enabled: false, secret: null, ttlSeconds: 300 },
   },
@@ -64,5 +64,57 @@ describe('buildRequest', () => {
     const { url, body } = buildRequest(ctx(t, { sid: 'ln_ac_abcdefgh123', types: ['messaging'] }));
     expect(url).toBe('http://backend/api/x/ln_ac_abcdefgh123/reset-sync');
     expect(body).toEqual({ types: ['messaging'] });
+  });
+
+  // route.headerParams (2026-11-13): gtm.service.email reads the email server a
+  // call is for off the Email-Box-SID header, and the gateway routes on it, so
+  // the argument must leave the body and the query and travel as that header.
+  describe('headerParams', () => {
+    const emailRoute = { service: 'email' as const, headerParams: { 'Email-Box-SID': 'email_box_sid' } };
+
+    it('POST: lifts the bound key out of the body into a header', () => {
+      const t = tool({ service: 'email', route: { ...emailRoute, method: 'POST', pathTemplate: '/api/email-accounts/search' } });
+      const built = buildRequest(ctx(t, { email_box_sid: 'em_bx_Hx7kQ3mN2pL4', page_size: 3 }));
+      expect(built.url).toBe('http://email/api/email-accounts/search');
+      expect(built.body).toEqual({ page_size: 3 });
+      expect(built.headers).toEqual({ 'Email-Box-SID': 'em_bx_Hx7kQ3mN2pL4' });
+    });
+
+    it('GET: the bound key is a header, never a query param', () => {
+      const t = tool({ service: 'email', route: { ...emailRoute, method: 'GET', pathTemplate: '/api/email-accounts/{sid}' }, operation: 'get', envelope: 'get' });
+      const built = buildRequest(ctx(t, { sid: 'em_ac_abcdefgh1234', email_box_sid: 'em_bx_Hx7kQ3mN2pL4', include: ['health'] }));
+      expect(built.url).toBe('http://email/api/email-accounts/em_ac_abcdefgh1234?include%5B%5D=health');
+      expect(built.body).toBeUndefined();
+      expect(built.headers).toEqual({ 'Email-Box-SID': 'em_bx_Hx7kQ3mN2pL4' });
+    });
+
+    it('sends no header for an absent, null or empty value, and still keeps the key out of the body', () => {
+      const t = tool({ service: 'email', route: { ...emailRoute, method: 'POST', pathTemplate: '/api/email-accounts/search' } });
+      for (const value of [undefined, null, '']) {
+        const built = buildRequest(ctx(t, { email_box_sid: value, page_size: 1 }));
+        expect(built.headers).toEqual({});
+        expect(built.body).toEqual({ page_size: 1 });
+      }
+    });
+
+    it('a route with no binding sends no route headers and keeps the key in the body', () => {
+      const built = buildRequest(ctx(tool({}), { email_box_sid: 'em_bx_Hx7kQ3mN2pL4' }));
+      expect(built.headers).toEqual({});
+      expect(built.body).toEqual({ email_box_sid: 'em_bx_Hx7kQ3mN2pL4' });
+    });
+
+    it('the validate twin of the route carries the same header', () => {
+      const t = tool({ service: 'email', route: { ...emailRoute, method: 'POST', pathTemplate: '/api/email-messages/send' }, operation: 'action', envelope: 'action' });
+      const built = buildRequest(ctx(t, { email_box_sid: 'em_bx_Hx7kQ3mN2pL4', subject: 's' }), { validateOnly: true });
+      expect(built.url).toBe('http://email/api/_validate/email-messages/send');
+      expect(built.headers).toEqual({ 'Email-Box-SID': 'em_bx_Hx7kQ3mN2pL4' });
+      expect(built.body).toEqual({ subject: 's' });
+    });
+
+    it('refuses a value that is not a plain string: a line break would be a second header', () => {
+      const t = tool({ service: 'email', route: { ...emailRoute, method: 'POST', pathTemplate: '/api/email-accounts/search' } });
+      expect(() => buildRequest(ctx(t, { email_box_sid: 'em_bx_x\r\nTeam-SID: ts_tm_other' }))).toThrow(/Email-Box-SID/);
+      expect(() => buildRequest(ctx(t, { email_box_sid: 42 }))).toThrow(/Email-Box-SID/);
+    });
   });
 });

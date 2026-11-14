@@ -5,7 +5,10 @@
 //
 //   route.method + route.pathTemplate  ->  path item + operation
 //   inputSchema                        ->  path params, query params (GET and
-//                                          DELETE) or the JSON request body
+//                                          DELETE) or the JSON request body;
+//                                          a field the route binds to a header
+//                                          (route.headerParams) is a header
+//                                          parameter, declared once per document
 //   outputSchema                       ->  the 200 response
 //   description / annotations / flags  ->  summary, description, x- extensions
 //
@@ -26,6 +29,7 @@
 import type { ToolDefinition, ToolPackage } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 import { z } from 'zod';
@@ -44,6 +48,7 @@ const ALL_PACKAGES: ToolPackage[] = [
   ...linkedinPackages,
   ...idPackages,
   ...orchestrationPackages,
+  ...emailPackages,
   ...supportPackages,
 ];
 
@@ -226,6 +231,11 @@ const operationDescription = (tool: ToolDefinition): string => {
   lines.push(`- Operation \`${tool.operation}\`, response envelope \`${tool.envelope}\`.`);
   const flags = flagSentences(tool);
   lines.push(`- Flags: ${flags.length > 0 ? flags.join('; ') : 'none'}.`);
+  if (tool.restOnlyInputs?.length) {
+    lines.push(
+      `- REST only fields: ${tool.restOnlyInputs.map((field) => `\`${field}\``).join(', ')}. This route takes them; the MCP tool does not offer them, because a secret never passes through a model.`,
+    );
+  }
   if (tool.docsPath) lines.push(`- Entity reference: \`${tool.docsPath}\`.`);
   return lines.join('\n');
 };
@@ -251,6 +261,7 @@ const extensions = (tool: ToolDefinition): JsonSchema => {
     'x-gtm-schedule-required': tool.scheduleRequired === true,
   };
   if (tool.toolClass) ext['x-gtm-tool-class'] = tool.toolClass;
+  if (tool.restOnlyInputs?.length) ext['x-gtm-rest-only-inputs'] = [...tool.restOnlyInputs];
   if (tool.pacedBucket) ext['x-gtm-paced-bucket'] = tool.pacedBucket;
   if (tool.availability === 'stub_501') ext['x-gtm-not-implemented-reason'] = STUB_REASON;
   return ext;
@@ -288,6 +299,7 @@ const infoDescription = (service: PublicServiceId, toolCount: number): string =>
     '- Lists page with `page_size` (0 to 500, default 50) plus an opaque forward `cursor`; `page_size: 0` returns counts only.',
     '- On `GET` and `DELETE`, object-valued query parameters (`filter`, `sort`) travel as JSON text and array-valued ones repeat as `name[]=value`.',
     '- The MCP-only `_meta` field (usage analytics) never reaches the backend and is not part of this contract.',
+    ...(SERVICE_META[service].conventions ?? []),
   ].join('\n');
 
 /** Every registered tool, and why it is in or out of the public contract. */
@@ -340,6 +352,9 @@ function buildDocument(
 ): GeneratedDocument {
   const paths: Record<string, Record<string, unknown>> = {};
   const schemas: Record<string, JsonSchema> = {};
+  // Header parameters, one component per header: the same header rides every
+  // operation of a service (Email-Box-SID), so each operation refers to it.
+  const headerParameters: Record<string, JsonSchema> = {};
   const tags = new Map<string, string>();
   let deprecated = 0;
 
@@ -356,7 +371,14 @@ function buildDocument(
     const properties = (input.schema.properties ?? {}) as Record<string, JsonSchema>;
     const required = new Set((input.schema.required as string[] | undefined) ?? []);
 
-    const consumed = new Set<string>([...NON_WIRE_INPUT_FIELDS, ...bindings.values()]);
+    // Mirrors runtime/src/url.ts buildRequest(): a header-bound field leaves
+    // the body and the query and travels as the header.
+    const headerBindings = Object.entries(tool.route.headerParams ?? {});
+    const consumed = new Set<string>([
+      ...NON_WIRE_INPUT_FIELDS,
+      ...bindings.values(),
+      ...headerBindings.map(([, field]) => field),
+    ]);
     const wireFields = Object.keys(properties).filter((key) => !consumed.has(key));
 
     const parameters: JsonSchema[] = [];
@@ -369,6 +391,28 @@ function buildDocument(
         description: (schema.description as string | undefined) ?? `Path segment \`{${variable}}\`.`,
         schema,
       });
+    }
+
+    for (const [header, field] of headerBindings) {
+      const schema = properties[field] ?? { type: 'string' };
+      const { description, ...valueSchema } = schema as { description?: string } & JsonSchema;
+      const component = pascal(header.replace(/-/g, '_').toLowerCase());
+      const parameter: JsonSchema = {
+        name: header,
+        in: 'header',
+        required: required.has(field),
+        description: description ?? `Request header \`${header}\`.`,
+        schema: valueSchema,
+      };
+      const known = headerParameters[component];
+      if (known && JSON.stringify(known) !== JSON.stringify(parameter)) {
+        throw new Error(
+          `${tool.name} declares the ${header} header differently from another tool of ${service}. ` +
+            'One header is one parameter of the document; give every tool the same field definition.',
+        );
+      }
+      headerParameters[component] = parameter;
+      parameters.push({ $ref: `#/components/parameters/${component}` });
     }
 
     let requestBody: JsonSchema | undefined;
@@ -472,6 +516,7 @@ function buildDocument(
     paths: sortKeys(paths),
     components: {
       securitySchemes: SECURITY_SCHEMES,
+      ...(Object.keys(headerParameters).length > 0 ? { parameters: sortKeys(headerParameters) } : {}),
       responses: {
         McpClientError: {
           description:

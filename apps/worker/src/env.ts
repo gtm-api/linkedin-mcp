@@ -14,6 +14,14 @@ export interface Env {
   ID_BASE_URL: string;
   /** gtm.service.orchestration - webhooks, webhook delivery log, mass actions. */
   ORCHESTRATION_BASE_URL: string;
+  /**
+   * gtm.service.email, ONE prefix for every workspace's email servers: the
+   * gateway picks the server per request, by the Email-Box-SID header a tool's
+   * email_box_sid becomes (route.headerParams), else by the token's team, whose
+   * primary server answers. A workspace with no server gets the edge's own
+   * 409 email_box_not_ready, in the platform's error shape.
+   */
+  EMAIL_BASE_URL: string;
   AUTH_ISSUER?: string;
   MCP_RESOURCE_URL?: string;
   AUTH_MODE?: string;

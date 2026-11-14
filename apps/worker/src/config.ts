@@ -153,6 +153,7 @@ const BASE_URL_BINDINGS: Record<
   linkedin: { varName: 'LINKEDIN_BASE_URL', read: (env) => env.LINKEDIN_BASE_URL },
   id: { varName: 'ID_BASE_URL', read: (env) => env.ID_BASE_URL },
   orchestration: { varName: 'ORCHESTRATION_BASE_URL', read: (env) => env.ORCHESTRATION_BASE_URL },
+  email: { varName: 'EMAIL_BASE_URL', read: (env) => env.EMAIL_BASE_URL },
   support: null,
 };
 

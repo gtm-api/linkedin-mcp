@@ -1,4 +1,4 @@
-import type { DispatchContext, SentCheck, ToolResult } from './types';
+import type { DispatchContext, ToolDefinition, ToolResult } from './types';
 
 // The backend error envelope (McpException::render). `meta` is present only on
 // delete_blocked; most errors omit it.
@@ -237,7 +237,7 @@ function timeoutAdvice(ctx: DispatchContext): string[] {
       'and spent its budget, so do not repeat it blindly.',
   ];
   if (tool.sentCheck) {
-    lines.push(...sentCheckAdvice(tool.sentCheck, args, ctx.teamSidOverride));
+    lines.push(...sentCheckAdvice(tool, args, ctx.teamSidOverride));
   } else if ('idempotency_key' in (tool.inputSchema.shape ?? {})) {
     const key = args.idempotency_key;
     lines.push(
@@ -262,11 +262,21 @@ function timeoutAdvice(ctx: DispatchContext): string[] {
 // connection request does not have and a post is not in; a 13 MB video post
 // published after 34.7 s while its caller read a timeout, and only
 // check_linkedin_posting_sent said it was out (2026-11-10).
-function sentCheckAdvice(check: SentCheck, args: Record<string, unknown>, team?: string | null): string[] {
+function sentCheckAdvice(tool: ToolDefinition, args: Record<string, unknown>, team?: string | null): string[] {
+  const check = tool.sentCheck!;
+  // The account the send ran on, by the field this service names it with.
+  const accountKey = check.accountKey ?? 'linkedin_account_sid';
+  const activityLogTool = check.activityLogTool ?? 'search_linkedin_account_activity_log';
   const inTeam = typeof team === 'string' && team !== '' ? ` in team ${team}, as this send ran` : '';
   const key = args.client_reference;
   if (typeof key === 'string' && key !== '') {
-    const call = { linkedin_account_sid: args.linkedin_account_sid, client_reference: key, ...check.args };
+    const call: Record<string, unknown> = { [accountKey]: args[accountKey], client_reference: key, ...check.args };
+    // What the send said in a header the check says too (route.headerParams):
+    // an email send names its server there, and a check that left it out would
+    // ask another server, which holds neither the mailbox nor the send.
+    for (const bound of Object.values(tool.route.headerParams ?? {})) {
+      if (typeof args[bound] === 'string' && args[bound] !== '') call[bound] = args[bound];
+    }
     return [
       `Ask ${check.tool} with ${JSON.stringify(call)}${inTeam}: it answers what this send came to without sending ` +
         '(sent, in_flight, unknown with retry_after, not_sent). Send again only on not_sent, as the same request ' +
@@ -275,7 +285,7 @@ function sentCheckAdvice(check: SentCheck, args: Record<string, unknown>, team?:
   }
   return [
     `This send carried no client_reference, so ${check.tool} has nothing to ask it by. Before repeating it, read ` +
-      `what the account did: search_linkedin_account_activity_log for its linkedin_account_sid${inTeam}, newest ` +
+      `what the account did: ${activityLogTool} for its ${accountKey}${inTeam}, newest ` +
       'first, lists the attempt and its status. Give every send a client_reference from now on: ' +
       `${check.tool} answers by it, and a repeat under the key is never sent twice.`,
   ];

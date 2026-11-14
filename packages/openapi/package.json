@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@asteasolutions/zod-to-openapi": "7.3.4",
+    "@gtm/mcp-email": "workspace:*",
     "@gtm/mcp-id": "workspace:*",
     "@gtm/mcp-linkedin": "workspace:*",
     "@gtm/mcp-orchestration": "workspace:*",

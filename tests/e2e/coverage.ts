@@ -5,6 +5,7 @@ import { buildRegistry } from '@gtm/mcp-runtime';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 import { ALL_SMOKE_MOUNTS, SMOKE_CALLED_TOOLS } from './smoke-mounts';
@@ -29,6 +30,7 @@ const REGISTRY = buildRegistry([
   ...linkedinPackages,
   ...idPackages,
   ...orchestrationPackages,
+  ...emailPackages,
   ...supportPackages,
 ]);
 const ALL_TOOLS: ToolDefinition[] = [...REGISTRY.byName.values()].map((e) => e.tool);

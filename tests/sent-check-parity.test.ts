@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 
@@ -10,14 +11,23 @@ import { supportPackages } from '@gtm/mcp-support';
 // A send that carries the caller's client_reference has a tool that answers what
 // it came to without sending, and a send this worker's fuse cut is in doubt, not
 // failed. The timeout answer hands the caller that call, filled with the send's
-// own linkedin_account_sid and key (error-map.ts timeoutAdvice), and it can only
-// name what the definition declares in `sentCheck`. So every keyed send declares
-// one, and each is a call a caller can really make: a served tool that asks by the
-// account and the key, with fixed arguments its own schema takes.
+// own account and key (error-map.ts timeoutAdvice), and it can only name what the
+// definition declares in `sentCheck`. So every keyed send declares one, and each
+// is a call a caller can really make: a served tool that asks by the account and
+// the key, with fixed arguments its own schema takes. The account travels in the
+// field the service names it with: linkedin_account_sid by default,
+// email_account_sid on the email send (sentCheck.accountKey, 2026-11-13).
 
-const tools: ToolDefinition[] = [...linkedinPackages, ...idPackages, ...orchestrationPackages, ...supportPackages].flatMap(
+const tools: ToolDefinition[] = [...linkedinPackages, ...idPackages, ...orchestrationPackages, ...emailPackages, ...supportPackages].flatMap(
   (pkg) => pkg.tools,
 );
+/** The field a send and its check name the account with. */
+const accountKeyOf = (send: ToolDefinition): string => send.sentCheck?.accountKey ?? 'linkedin_account_sid';
+/** A well-formed sid for that field, by its prefix. */
+const SAMPLE_ACCOUNT: Record<string, string> = {
+  linkedin_account_sid: 'ln_ac_aaaaaaaaaaaa',
+  email_account_sid: 'em_ac_aaaaaaaaaaaa',
+};
 const byName = new Map(tools.map((tool) => [tool.name, tool]));
 const takes = (tool: ToolDefinition, key: string): boolean => key in (tool.inputSchema.shape ?? {});
 const required = (tool: ToolDefinition, key: string): boolean =>
@@ -49,7 +59,7 @@ describe('sentCheck', () => {
       if (!check) return [`${send.name}: ${send.sentCheck!.tool} is not in the registry`];
       const problems: string[] = [];
       if ((check.surface ?? 'both') !== 'both' || check.availability !== 'ga') problems.push('is not served');
-      if (!required(check, 'linkedin_account_sid')) problems.push('does not take linkedin_account_sid');
+      if (!required(check, accountKeyOf(send))) problems.push(`does not take ${accountKeyOf(send)}`);
       if (!takes(check, 'client_reference')) problems.push('does not take client_reference');
       if (check.dangerous || check.sentCheck) problems.push('is a send of its own');
       return problems.map((problem) => `${send.name}: ${check.name} ${problem}`);
@@ -59,18 +69,34 @@ describe('sentCheck', () => {
   });
 
   it('can be filled from the send: the send requires the account the check asks by', () => {
-    expect(declared.filter((send) => !required(send, 'linkedin_account_sid')).map((send) => send.name)).toEqual([]);
+    expect(declared.filter((send) => !required(send, accountKeyOf(send))).map((send) => send.name)).toEqual([]);
   });
 
   it('carries fixed arguments the check tool accepts as they are filled in', () => {
     const refused = declared.flatMap((send) => {
       const check = byName.get(send.sentCheck!.tool)!;
-      const call = { linkedin_account_sid: 'ln_ac_aaaaaaaaaaaa', client_reference: 'key-1', ...send.sentCheck!.args };
+      const call = { [accountKeyOf(send)]: SAMPLE_ACCOUNT[accountKeyOf(send)], client_reference: 'key-1', ...send.sentCheck!.args };
       const parsed = check.inputSchema.safeParse(call);
       return parsed.success ? [] : [`${send.name}: ${parsed.error.issues.map((issue) => issue.path.join('.') + ' ' + issue.message).join('; ')}`];
     });
 
     expect(refused).toEqual([]);
+  });
+
+  it('points a keyless send at a served search of the same account field', () => {
+    const wrong = declared.flatMap((send) => {
+      const name = send.sentCheck!.activityLogTool ?? 'search_linkedin_account_activity_log';
+      const log = byName.get(name);
+      if (!log) return [`${send.name}: ${name} is not in the registry`];
+      const filter = (log.inputSchema.shape.filter as { unwrap?: () => { shape?: Record<string, unknown> } } | undefined);
+      const filterShape = (filter?.unwrap?.() ?? filter) as { shape?: Record<string, unknown> } | undefined;
+      const problems: string[] = [];
+      if ((log.surface ?? 'both') !== 'both' || log.operation !== 'search') problems.push('is not a served search');
+      if (!filterShape?.shape || !(accountKeyOf(send) in filterShape.shape)) problems.push(`does not filter by ${accountKeyOf(send)}`);
+      return problems.map((problem) => `${send.name}: ${name} ${problem}`);
+    });
+
+    expect(wrong).toEqual([]);
   });
 
   // check_linkedin_posting_sent asks "by the client_reference and its verb", and

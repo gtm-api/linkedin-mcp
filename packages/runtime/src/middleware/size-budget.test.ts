@@ -398,7 +398,7 @@ describe('size-budget middleware', () => {
     config: {
       envName: 'test',
       version: '0',
-      baseUrls: { linkedin: '', id: '', orchestration: '', support: '' },
+      baseUrls: { linkedin: '', id: '', orchestration: '', email: '', support: '' },
       backendTimeoutMs: 1000,
       responseCharBudget: 48_000,
       maxBatchSize: 16,

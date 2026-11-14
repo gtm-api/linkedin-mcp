@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
 import { SMART_LIMIT_BUCKETS, linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 
 // Pacing gate.
@@ -21,7 +22,7 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 // full, so a new scrape / enrich / send tool cannot land unmarked.
 
 const linkedinTools: ToolDefinition[] = linkedinPackages.flatMap((pkg) => pkg.tools);
-const otherTools: ToolDefinition[] = [...idPackages, ...orchestrationPackages].flatMap((pkg) => pkg.tools);
+const otherTools: ToolDefinition[] = [...idPackages, ...orchestrationPackages, ...emailPackages].flatMap((pkg) => pkg.tools);
 const paced = linkedinTools.filter((tool) => tool.pacedBucket !== undefined);
 
 describe('pacedBucket', () => {

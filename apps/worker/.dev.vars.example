@@ -5,6 +5,10 @@ ENV_NAME=local
 LINKEDIN_BASE_URL=http://localhost:8020
 ID_BASE_URL=http://localhost:8021
 ORCHESTRATION_BASE_URL=http://localhost:8025
+# The local email deployment is the multi-tenant one: every email server of a
+# workspace shares its database, and the Email-Box-SID header (a tool's
+# email_box_sid) narrows a call to one of them.
+EMAIL_BASE_URL=http://localhost:8024
 
 # OAuth resource-server config (used from Stage 4 on).
 # AUTH_ISSUER must equal the id container's `config('jwt.issuer')`, which defaults

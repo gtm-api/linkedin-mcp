@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import type { ToolDefinition, ToolPackage } from '@gtm/mcp-runtime/types';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 
 // Ledger gate: keeps the debt the oracle fixtures expose written down, route by
@@ -28,8 +29,8 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 // with no ledger allowance, and caps it with ratchet.json.
 //
 // A service with no MCP package is carried here with an empty package set, not
-// skipped: gtm.service.email has no @gtm/mcp-email, and leaving it out would
-// have meant its 44 uncovered routes were never written down anywhere.
+// skipped: gtm.service.email had no @gtm/mcp-email until 2026-11-13, and leaving
+// it out would have meant its uncovered routes were never written down anywhere.
 //
 // Cheap and offline by construction: committed JSON plus the in-process
 // registry, no backend calls.
@@ -60,8 +61,7 @@ const SERVICES: { name: 'linkedin' | 'id' | 'orchestration' | 'email'; packages:
   { name: 'linkedin', packages: linkedinPackages },
   { name: 'id', packages: idPackages },
   { name: 'orchestration', packages: orchestrationPackages },
-  // No @gtm/mcp-email package exists; the empty set is the honest input.
-  { name: 'email', packages: [] },
+  { name: 'email', packages: emailPackages },
 ];
 
 const REFRESH = 'run `pnpm oracle:check` to prove the fixture is current, `pnpm oracle:refresh` to update it, then reconcile';

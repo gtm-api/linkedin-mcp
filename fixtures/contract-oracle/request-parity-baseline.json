@@ -43,7 +43,14 @@
     "   tool says the verb is not idempotent instead of promising a replay nothing implemented.",
     "   (paid off 2026-08-20) The antidetect BYO-proxy credential pair is gone: the connect modal now",
     "   collects username/password, so AntidetectBrowserCreateRequest declares them like update-proxy",
-    "   already did, and they no longer travel unvalidated."
+    "   already did, and they no longer travel unvalidated.",
+    "",
+    "2026-11-13: email joined with @gtm/mcp-email, and its lines are the service being measured for",
+    "the first time, not debt that grew. 11 under missing_keys, one class: four metrics routes",
+    "(accounts, messages, threads, bounce log) validate filter and group_by and compute their period",
+    "numbers without them, so the tools take what the route applies and each line says what would",
+    "clear it. 2 under unknown_keys: filter.is_flagged and filter.is_answered of",
+    "search_email_messages, which EmailMessageFilter applies and the request rule list omits."
   ],
   "unknown_keys": {
     "linkedin": [
@@ -156,7 +163,18 @@
       }
     ],
     "orchestration": [],
-    "email": []
+    "email": [
+      {
+        "tool": "search_email_messages",
+        "path": "filter.is_flagged",
+        "reason": "EmailMessageFilter applies it (a boolean column on the generic filter path) and the research lists it as filterable; EmailMessageSearchRequest's rule list was not extended when the field landed (2026-10-31). Every other filter key there is declared `nullable` and nothing more, so the tool sends nothing the route would have validated. Clears when the FormRequest names the key."
+      },
+      {
+        "tool": "search_email_messages",
+        "path": "filter.is_answered",
+        "reason": "EmailMessageFilter applies it (a boolean column on the generic filter path) and the research lists it as filterable; EmailMessageSearchRequest's rule list was not extended when the field landed (2026-10-31). Every other filter key there is declared `nullable` and nothing more, so the tool sends nothing the route would have validated. Clears when the FormRequest names the key."
+      }
+    ]
   },
   "missing_keys": {
     "linkedin": [
@@ -218,6 +236,63 @@
         "tool": "*",
         "path": "limit",
         "reason": "legacy `limit` alias of `page_size`, kept on the search FormRequests for the table frontends that still send it. Tools speak the cursor contract (`page_size` + `cursor`) and must not learn a second spelling of the same knob: two page-size keys on one tool is a 422 waiting for whichever the agent picks second. Class-wide by design (`tool: \"*\"`): one decision, not forty lines. Delete when the alias leaves the FormRequests."
+      }
+    ],
+    "email": [
+      {
+        "tool": "get_email_accounts_metrics",
+        "path": "filter",
+        "reason": "EmailAccountMetricsRequest validates it and the period numbers ignore it: EmailAccountMetricsService::compute takes the window alone, so the key narrows aggregated.counts only, which the entity's search answers with page_size 0. A tool that offered it would hand an agent numbers that read as filtered and are not. Clears when the metrics service applies the filter."
+      },
+      {
+        "tool": "get_email_accounts_metrics",
+        "path": "group_by",
+        "reason": "EmailAccountMetricsRequest validates it (provider, status) and the controller never reads it: the answer carries no groups[]. A tool that offered it would promise a split that does not happen. Clears when the route builds groups."
+      },
+      {
+        "tool": "get_email_messages_metrics",
+        "path": "filter",
+        "reason": "EmailMessageMetricsRequest validates it and the period numbers ignore it: EmailMessageMetricsService::compute takes the window alone, so the key narrows aggregated.counts only, which the entity's search answers with page_size 0. A tool that offered it would hand an agent numbers that read as filtered and are not. Clears when the metrics service applies the filter."
+      },
+      {
+        "tool": "get_email_messages_metrics",
+        "path": "group_by",
+        "reason": "EmailMessageMetricsRequest validates it (email_account_sid, direction, status, folder_role, is_read, kind) and the controller never reads it: the answer carries no groups[]. A tool that offered it would promise a split that does not happen. Clears when the route builds groups."
+      },
+      {
+        "tool": "get_email_threads_metrics",
+        "path": "filter",
+        "reason": "EmailThreadMetricsRequest validates it and the period numbers ignore it: the thread metrics service takes the window alone, so the key narrows aggregated.counts only, which the entity's search answers with page_size 0. A tool that offered it would hand an agent numbers that read as filtered and are not. Clears when the metrics service applies the filter."
+      },
+      {
+        "tool": "get_email_threads_metrics",
+        "path": "group_by",
+        "reason": "EmailThreadMetricsRequest validates it (email_account_sid) and the controller never reads it: the answer carries no groups[]. A tool that offered it would promise a split that does not happen. Clears when the route builds groups."
+      },
+      {
+        "tool": "get_email_bounce_log_metrics",
+        "path": "group_by",
+        "reason": "EmailBounceLogMetricsRequest validates it (kind, bounce_type, email_account_sid) and the controller never reads it: the answer carries no groups[]. A tool that offered it would promise a split that does not happen. Clears when the route builds groups."
+      },
+      {
+        "tool": "get_email_bounce_log_metrics",
+        "path": "filter.kind",
+        "reason": "EmailBounceLogMetricsRequest validates it and the period numbers read filter.email_account_sid.eq alone (EmailBounceLogController::metrics): the key narrows aggregated.counts only, which search_email_bounce_log answers with page_size 0. Clears when the metrics service applies the whole filter."
+      },
+      {
+        "tool": "get_email_bounce_log_metrics",
+        "path": "filter.bounce_type",
+        "reason": "EmailBounceLogMetricsRequest validates it and the period numbers read filter.email_account_sid.eq alone (EmailBounceLogController::metrics): the key narrows aggregated.counts only, which search_email_bounce_log answers with page_size 0. Clears when the metrics service applies the whole filter."
+      },
+      {
+        "tool": "get_email_bounce_log_metrics",
+        "path": "filter.source",
+        "reason": "EmailBounceLogMetricsRequest validates it and the period numbers read filter.email_account_sid.eq alone (EmailBounceLogController::metrics): the key narrows aggregated.counts only, which search_email_bounce_log answers with page_size 0. Clears when the metrics service applies the whole filter."
+      },
+      {
+        "tool": "get_email_bounce_log_metrics",
+        "path": "filter.occurred_at",
+        "reason": "EmailBounceLogMetricsRequest validates it and the period numbers read filter.email_account_sid.eq alone (EmailBounceLogController::metrics): the key narrows aggregated.counts only, which search_email_bounce_log answers with page_size 0. Clears when the metrics service applies the whole filter."
       }
     ]
   }

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { buildRegistry, resolveMounts } from '@gtm/mcp-runtime';
 import { linkedinPackages } from '@gtm/mcp-linkedin';
 import { idPackages } from '@gtm/mcp-id';
+import { emailPackages } from '@gtm/mcp-email';
 import { orchestrationPackages } from '@gtm/mcp-orchestration';
 import { supportPackages } from '@gtm/mcp-support';
 import { MOUNTS } from './mounts.config';
@@ -14,7 +15,7 @@ import { buildRuntimeConfig, type Env } from './env';
 const KV = { get: async () => null, put: async () => {} } as unknown as KVNamespace;
 const LIMITER = { limit: async () => ({ success: true }) } as unknown as RateLimit;
 
-const SERVICES = ['linkedin', 'id', 'orchestration'] as const;
+const SERVICES = ['linkedin', 'id', 'orchestration', 'email'] as const;
 
 /** A deployed worker with everything set. Every case below spoils one field. */
 const healthy = (over: Partial<Env> = {}): Env => ({
@@ -22,6 +23,7 @@ const healthy = (over: Partial<Env> = {}): Env => ({
   LINKEDIN_BASE_URL: 'https://linkedin.gtm-api.test',
   ID_BASE_URL: 'https://id.gtm-api.test',
   ORCHESTRATION_BASE_URL: 'https://orchestration.gtm-api.test',
+  EMAIL_BASE_URL: 'https://email.gtm-api.test',
   AUTH_MODE: 'jwt',
   AUTH_ISSUER: 'https://id.gtm-api.test',
   MCP_RESOURCE_URL: 'https://mcp.gtm-api.test/mcp',
@@ -39,14 +41,14 @@ const check = (env: Env) => inspectConfig(env, SERVICES);
 
 describe('required services are derived from the mounts, not listed', () => {
   const resolved = resolveMounts(
-    buildRegistry([...linkedinPackages, ...idPackages, ...orchestrationPackages, ...supportPackages]),
+    buildRegistry([...linkedinPackages, ...idPackages, ...orchestrationPackages, ...emailPackages, ...supportPackages]),
     MOUNTS,
   );
 
   it('demands a base URL for every service the worker dispatches to, and only those', () => {
     // 'support' runs in-worker (localHandler), so it must NOT be demanded: if it
     // is, someone gave a support tool an HTTP route and the check says so.
-    expect(requiredBaseUrlServices(resolved)).toEqual(['id', 'linkedin', 'orchestration']);
+    expect(requiredBaseUrlServices(resolved)).toEqual(['email', 'id', 'linkedin', 'orchestration']);
   });
 
   it('a service with no base URL variable mapped is fatal, not silently skipped', () => {
@@ -84,10 +86,11 @@ describe('base URLs', () => {
         LINKEDIN_BASE_URL: 'https://TODO-linkedin-prod-url',
         ID_BASE_URL: 'https://TODO-id-prod-url',
         ORCHESTRATION_BASE_URL: 'https://TODO-orchestration-prod-url',
+        EMAIL_BASE_URL: 'https://TODO-email-prod-url',
       }),
     );
     expect(report.status).toBe('fail');
-    expect(keys(report.problems, 'fatal')).toEqual(['ID_BASE_URL', 'LINKEDIN_BASE_URL', 'ORCHESTRATION_BASE_URL']);
+    expect(keys(report.problems, 'fatal')).toEqual(['EMAIL_BASE_URL', 'ID_BASE_URL', 'LINKEDIN_BASE_URL', 'ORCHESTRATION_BASE_URL']);
     expect(report.problems[0].detail).toContain('placeholder');
   });
 

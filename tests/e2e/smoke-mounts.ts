@@ -137,11 +137,23 @@ export const ID_MOUNTS: SmokeMount[] = [
   { path: '/mcp/id/platform', name: 'gtm-id-platform', search: 'search_notifications' },
 ];
 
+// gtm.service.email (2026-11-13). Each mount has a plain read of the server's own
+// store, so none of these rows dials a mailbox provider. The calls name no
+// email_box_sid: the local email deployment is the multi-tenant one (port 8024),
+// where a call without the header reads across the workspace's servers.
+export const EMAIL_MOUNTS: SmokeMount[] = [
+  { path: '/mcp/email/accounts', name: 'gtm-email-accounts', search: 'search_email_accounts' },
+  { path: '/mcp/email/infrastructure', name: 'gtm-email-infrastructure', search: 'search_email_oauth_apps' },
+  { path: '/mcp/email/messaging', name: 'gtm-email-messaging', search: 'search_email_threads' },
+  { path: '/mcp/email/deliverability', name: 'gtm-email-deliverability', search: 'search_email_suppressions' },
+];
+
 export const ALL_SMOKE_MOUNTS: SmokeMount[] = [
   ACCOUNTS_MOUNT,
   ...WAVE1_MOUNTS,
   ...WAVE2_MOUNTS,
   ...ID_MOUNTS,
+  ...EMAIL_MOUNTS,
 ];
 
 /** Every tool name the smoke suites call, for the coverage report. */

@@ -1,4 +1,5 @@
-import type { ToolDefinition, ToolPackage } from './types';
+import type { RouteMeta, ToolDefinition, ToolPackage } from './types';
+import { RESERVED_HEADERS } from './url';
 
 export interface Registry {
   packages: ToolPackage[];
@@ -59,6 +60,34 @@ function assertSchemaTextClean(toolName: string, schema: unknown, seen: Set<unkn
   }
 }
 
+// A header binding (route.headerParams) names a well-formed header this runtime
+// does not set itself (url.ts RESERVED_HEADERS says why), and an input the tool
+// really has.
+const HEADER_NAME_RE = /^[A-Za-z][A-Za-z0-9-]*$/;
+
+function assertHeaderParams(tool: ToolDefinition, route: RouteMeta, label: string): void {
+  if (!route.headerParams) return;
+  // The input keys the path template consumes, by the same rule as url.ts.
+  const pathBound = new Set<string>();
+  for (const match of route.pathTemplate.matchAll(/\{(\w+)\}/g)) {
+    pathBound.add(match[1] === 'sid' ? route.sidParam ?? 'sid' : route.pathParams?.[match[1]] ?? match[1]);
+  }
+  for (const [header, key] of Object.entries(route.headerParams)) {
+    if (!HEADER_NAME_RE.test(header)) {
+      throw new Error(`tool '${tool.name}': ${label} binds '${header}', which is not a header name`);
+    }
+    if (RESERVED_HEADERS.has(header.toLowerCase())) {
+      throw new Error(`tool '${tool.name}': ${label} binds the ${header} header, which the runtime sets itself`);
+    }
+    if (!(key in tool.inputSchema.shape)) {
+      throw new Error(`tool '${tool.name}': ${label} binds ${header} to '${key}', which the inputSchema does not declare`);
+    }
+    if (key === '_meta' || key === 'commit_token' || pathBound.has(key)) {
+      throw new Error(`tool '${tool.name}': ${label} binds ${header} to '${key}', which already travels elsewhere`);
+    }
+  }
+}
+
 // Assert the registry invariants that keep the server data-driven and safe.
 // Throws at module load (and in CI) on any violation.
 function assertInvariants(tool: ToolDefinition): void {
@@ -106,6 +135,20 @@ function assertInvariants(tool: ToolDefinition): void {
   }
   if (!('_meta' in tool.inputSchema.shape)) {
     throw new Error(`tool '${tool.name}': inputSchema must include _meta`);
+  }
+  assertHeaderParams(tool, tool.route, 'route.headerParams');
+  if (tool.previewRoute) assertHeaderParams(tool, tool.previewRoute, 'previewRoute.headerParams');
+  // A REST-only input is a field the tool can live without: it exists on the
+  // schema (the REST reference documents it) and is optional (a call without
+  // it is a valid call). A route that needs it every time is surface api.
+  for (const key of tool.restOnlyInputs ?? []) {
+    const field = tool.inputSchema.shape[key] as { isOptional?: () => boolean } | undefined;
+    if (!field) {
+      throw new Error(`tool '${tool.name}': restOnlyInputs names '${key}', which the inputSchema does not declare`);
+    }
+    if (key === '_meta' || !field.isOptional?.()) {
+      throw new Error(`tool '${tool.name}': restOnlyInputs names '${key}', which the tool cannot be called without; make the route surface api instead`);
+    }
   }
   assertNoDash(tool.name, 'description', tool.description);
   assertNoDash(tool.name, 'annotations.title', tool.annotations.title);

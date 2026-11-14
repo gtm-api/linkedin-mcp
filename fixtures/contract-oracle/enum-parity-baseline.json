@@ -24,12 +24,19 @@
     "2026-08-16: the CreditsSpentValue.reason / .executed_on class left this count with the",
     "platform-wide credits removal. The value object is deleted, so no Zod site reaches it and no",
     "promotion of its class constants to a real enum is owed any more. Ceilings re-derived from that",
-    "same run: linkedin 27 -> 25, id 7 -> 4, orchestration 7 -> 5."
+    "same run: linkedin 27 -> 25, id 7 -> 4, orchestration 7 -> 5.",
+    "",
+    "2026-11-13: email joined with @gtm/mcp-email. Ceiling 1, one site: include.* on",
+    "get_email_account. Its GET route declares no rules (the action reads the raw request), so the",
+    "builder's own list (EmailAccountIncludedBuilder::available) is in no dump; the same list on",
+    "search_email_accounts resolves positionally. Clears when the route validates its include.",
+    "The send outcome of the two check-sent tools is not in the count: the backend keeps it as",
+    "string constants (EmailSendOutcome), not an enum, and the tools model it as a described string."
   ],
   "unmapped_ceiling": {
     "linkedin": 25,
     "id": 4,
     "orchestration": 5,
-    "email": 0
+    "email": 1
   }
 }

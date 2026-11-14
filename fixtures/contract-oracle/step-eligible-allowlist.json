@@ -7,10 +7,5 @@
   "linkedin": [],
   "orchestration": [],
   "id": [],
-  "email": [
-    {
-      "route": "POST api/email-messages/send",
-      "reason": "gtm.service.email has no MCP package at all, so the platform's paced bulk-send verb is one orchestration plans and drives per item while no agent can describe, inspect or call it. Clears when the email_messages package ships its send tool with stepEligible: true and scheduleRequired: true."
-    }
-  ]
+  "email": []
 }

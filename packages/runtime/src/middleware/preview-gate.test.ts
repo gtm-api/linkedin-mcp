@@ -45,7 +45,7 @@ function memStore(): { store: CommitTokenStore; map: Map<string, string> } {
 function mkDeps(store: CommitTokenStore | undefined, secret: string | null): RuntimeDeps {
   return {
     config: {
-      envName: 'test', version: '0', baseUrls: { linkedin: '', id: '', orchestration: '', support: '' },
+      envName: 'test', version: '0', baseUrls: { linkedin: '', id: '', orchestration: '', email: '', support: '' },
       backendTimeoutMs: 1000, responseCharBudget: 1000, maxBatchSize: 16, rateLimit: { enabled: false, windowSeconds: 60, callsPerWindow: 0, writesPerWindow: 0 },
       previewGate: { enabled: !!secret, secret, ttlSeconds: 300 },
     },

@@ -23,29 +23,31 @@ and each is described at the bottom of this page. All of them shrink only.
 | `linkedin.contract.json` | `gtm.service.linkedin` | 25 | 173 (150) | coverage gate, ledger gate, contract parity, step-eligibility |
 | `id.contract.json` | `gtm.service.id` | 22 | 130 (81) | coverage gate, ledger gate, contract parity, step-eligibility |
 | `orchestration.contract.json` | `gtm.service.orchestration` | 4 | 30 (21) | coverage gate, ledger gate, contract parity, step-eligibility |
-| `email.contract.json` | `gtm.service.email` | 12 | 58 (44) | coverage gate, ledger gate, contract parity, step-eligibility |
+| `email.contract.json` | `gtm.service.email` | 15 | 109 (65) | coverage gate, ledger gate, contract parity, step-eligibility |
 
 `email.contract.json` landed on 2026-07-27 with the `step_eligible` field, for the
 cross-service step-eligibility gate: `gtm.service.email` owns `email-messages.send`,
 the platform's paced bulk-send verb and a mass-action plan step, and that gate reads
 the fixture *directory* rather than a service list.
 
-There is still no `@gtm/mcp-email` package. Until 2026-07-27 that meant the three
-registry-keyed gates left the service out entirely, and the arithmetic was worse
-than it looked: **all 44** public email routes were uncovered, 13 of them ACTION,
-and every gate counted that as zero. `POST api/email-messages/send` was the sharp
-end. It is `stepEligible: true` and `scheduleRequired: true`, so orchestration
-plans it and drives it once per item, while no MCP tool exists for an agent to
-describe, inspect or call it, and nothing said so out loud.
+`@gtm/mcp-email` exists since 2026-11-13 and covers the whole surface, so the
+gates read `emailPackages` like any other service's. The history is worth keeping
+for the next service that arrives before its package. Until 2026-07-27 the three
+registry-keyed gates left email out entirely, and the arithmetic was worse than
+it looked: **all 44** public email routes of that day were uncovered, 13 of them
+ACTION, and every gate counted that as zero. `POST api/email-messages/send` was
+the sharp end. It is `stepEligible: true` and `scheduleRequired: true`, so
+orchestration plans it and drives it once per item, while no MCP tool existed for
+an agent to describe, inspect or call it, and nothing said so out loud.
 
-Those three gates now carry email with an **empty package set** instead of
-skipping it (`packages: []` in `coverage-gate.test.ts`, `oracle-freshness.test.ts`
-and `contract-parity.test.ts`). The empty set is the honest input, not a
-placeholder: it makes the service measured exactly the way the other three are, so
-its 44 routes sit in `ratchet.json` and `drift-ledger.json` like any other debt,
-and `email-messages.send` is waived by name in `step-eligible-allowlist.json` with
-the reason it is not covered. Replace the empty set with `emailPackages` the day
-the package is authored, and burn the numbers down from there.
+From 2026-07-27 to 2026-11-13 those gates carried email with an **empty package
+set** instead of skipping it (`packages: []` in `coverage-gate.test.ts`,
+`oracle-freshness.test.ts` and `contract-parity.test.ts`). The empty set was the
+honest input, not a placeholder: it measured the service exactly the way the other
+three are, so its routes sat in `ratchet.json` and `drift-ledger.json` like any
+other debt (65 of them by 2026-11-12), and `email-messages.send` was waived by
+name in `step-eligible-allowlist.json` with the reason it was not covered. A
+service that gets a backend before a package starts the same way.
 
 A service appears here once its `src/bootstrap/app.php` registers the command
 via `->withCommands([ContractOracle::class])` and its key is added to `SERVICES`
@@ -316,9 +318,10 @@ the moment coverage improves (the gate prints the new number when it drops);
 never raise it to turn a red suite green. `0` means full coverage.
 
 Every service the oracle dumps has an entry, including one with no MCP package:
-`email` sits at `44`, its entire public surface. A service without a baseline is
-not a service without debt, it is a service whose debt nobody counts, which is
-what the `email` entry was fixing on 2026-07-27.
+`email` sat at its entire public surface (44 on 2026-07-27, 65 on 2026-11-12)
+until its package was authored on 2026-11-13, and reads `0` since. A service
+without a baseline is not a service without debt, it is a service whose debt
+nobody counts, which is what the `email` entry was fixing on 2026-07-27.
 
 ### The drift ledger (`drift-ledger.json`)
 
@@ -360,14 +363,14 @@ while the agent has no tool to describe, inspect or invoke it. Empty arrays are
 the goal state, not a placeholder, and the shrink discipline is identical: an
 entry that stopped applying fails the gate and prints the line to delete.
 
-`gtm.service.email` is in scope here since 2026-07-27, and carries the one waiver
-in this file: `POST api/email-messages/send`. It used to be excluded on the
+`gtm.service.email` is in scope here since 2026-07-27, and carried the one waiver
+this file ever held: `POST api/email-messages/send`. It used to be excluded on the
 grounds that a service with no MCP package cannot cover anything, which had it
 backwards. That verb is the platform's paced bulk-send: orchestration plans it and
-calls it once per item while no agent can describe, inspect or invoke it, which is
-precisely the failure this file exists to name. Leaving the service out did not
-make the debt smaller, it made it unwritten. The entry clears when the email
-package ships a `send` tool with `stepEligible: true`.
+calls it once per item while no agent could describe, inspect or invoke it, which
+is precisely the failure this file exists to name. Leaving the service out did not
+make the debt smaller, it made it unwritten. The entry cleared on 2026-11-13, when
+`send_email_message` shipped with `stepEligible: true`, and every array is empty.
 
 Its sibling entry in `mass-action-allowlist.json` is an empty array, and that is a
 different statement: `gtm.service.email` declares no `mass_action` route at all, so
