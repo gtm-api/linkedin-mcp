@@ -1,17 +1,18 @@
 // Entity: Email Account Directory (gtm.service.id): every mailbox of a workspace across its email servers
 // Source of truth: product/research/gtm.service.id/entities/email_account_directory.md
-// Format: registry v2. One definition, REST only (surface api): a line in the public REST
-// reference and in the coverage gate, served on no mount. Where the tool mounts is decided
-// with the owner's open question on whether email tools name only the mailbox (research
-// Decisions & deferrals; ADR 001 D13); serving it then is dropping `surface: 'api'` here and
-// `**surface:** api` in the research block. Authored 2026-11-13 with the route (gtm.service.id
-// branch mailbox-directory-2026-11-13).
+// Format: registry v2. One definition, served (surface both, MCP_SURFACE_V2.md section 2
+// rule 1: no secret, no bulk payload). It rides beside search_email_boxes on the email mounts
+// whose tools name a mailbox (accounts, messaging, deliverability; apps/worker/src/mounts.config.ts),
+// so a client finds a mailbox and the email_box_sid to address it with in one read; `mount`
+// names the first of them, which the public spec prints. Authored 2026-11-13 with the route
+// (gtm.service.id branch mailbox-directory-2026-11-13) as REST only while the owner's question
+// on naming only the mailbox was open; served from 2026-11-14, when that question was closed by
+// the rules (ADR 001 D13, research Decisions & deferrals).
 //
 // provider, status, subscription_hold_reason and sending_paused_reason are the email
 // service's enums, which a server rolled ahead of id may extend: id keeps the strings as
 // reported, so they are plain strings here with the known values in the description, and a
-// value added later passes through instead of failing a whole page. The mount is metadata
-// only while the surface is api.
+// value added later passes through instead of failing a whole page.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -73,7 +74,7 @@ const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, o
 const base = {
   service: 'id',
   entity: 'email_account_directory',
-  mount: 'id.platform',
+  mount: 'email.accounts',
 } as const;
 
 export const emailAccountDirectoryTools: ToolDefinition[] = [
@@ -88,7 +89,6 @@ export const emailAccountDirectoryTools: ToolDefinition[] = [
     envelope: 'search',
     availability: 'ga',
     dangerous: false,
-    surface: 'api',
     inputSchema: z.object({
       filter: EmailAccountDirectoryFilter.optional(),
       sort: z.object({

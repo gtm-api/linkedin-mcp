@@ -165,7 +165,7 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 4 mounts / 84 tools defined, 55 served
+## mcp.id: 4 mounts / 85 tools defined, 56 served
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
@@ -173,6 +173,14 @@ aggregation is the parent's `metrics` tool.
 | access | `/mcp/id/access` | api_keys (7 defined, 3 served), oauth_clients (5 defined, 0 served), oauth_authorizations (3 defined, 2 served), account_shares (5) | 10 | ✅ |
 | billing | `/mcp/id/billing` | billing_products (1 defined, 0 served), billing_subscriptions (14 defined, 7 served), billing_transactions (4 defined, 3 served), billing_payment_methods (3 defined, 2 served), email_boxes (9 defined, 7 served) | 19 | ✅ |
 | platform | `/mcp/id/platform` | notifications (4 defined, 3 served), ssl_certificates (7), support_requests (3), api_requests (2), media_uploads (1) | 16 | ✅ |
+
+2026-11-14 - id 84 defined and 55 served to 85 and 56: `mcp.id/email_account_directory`, one tool,
+`search_email_account_directory` over id's mailbox directory (ADR 001 D13: every mailbox of the workspace
+across its email servers, each with the server that holds it). It is served on no id mount: it rides
+beside `search_email_boxes` on the three email mounts whose tools name a mailbox (mcp.email below), so
+a client that mounted one of them finds a mailbox and the `email_box_sid` to address it with in one
+read. Defined on 2026-11-13 as `surface: api` while the owner's question on naming only the mailbox
+was open; served once that question was closed by the rules (2026-11-14).
 
 2026-11-12 - id 48 served to 55, billing 12 to 19: `mcp.id/email_boxes`, the workspace's email servers
 (ADR 001 D12, several per workspace), authored once the backend and the Email Accounts screen had
@@ -260,10 +268,10 @@ gate the other way).
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| accounts | `/mcp/email/accounts` | email_accounts (18 defined, 15 served), email_account_sync_runs (1), email_account_activity_log (1), email_account_health (1), and `search_email_boxes` of mcp.id by tool selector | 19 | built, not deployed |
+| accounts | `/mcp/email/accounts` | email_accounts (18 defined, 15 served), email_account_sync_runs (1), email_account_activity_log (1), email_account_health (1), and `search_email_boxes` and `search_email_account_directory` of mcp.id by tool selector | 20 | built, not deployed |
 | infrastructure | `/mcp/email/infrastructure` | email_box_settings (4), email_oauth_apps (5 defined, 4 served), email_domains (2), email_tracking_domains (4), email_sending_domains (4), and `search_email_boxes` | 19 | built, not deployed |
-| messaging | `/mcp/email/messaging` | email_messages (12), email_threads (4), email_folders (1), and `search_email_boxes` | 18 | built, not deployed |
-| deliverability | `/mcp/email/deliverability` | email_suppressions (4), email_bounce_log (2), email_engagements (2), and `search_email_boxes` | 9 | built, not deployed |
+| messaging | `/mcp/email/messaging` | email_messages (12), email_threads (4), email_folders (1), `search_email_boxes` and `search_email_account_directory` | 19 | built, not deployed |
+| deliverability | `/mcp/email/deliverability` | email_suppressions (4), email_bounce_log (2), email_engagements (2), `search_email_boxes` and `search_email_account_directory` | 10 | built, not deployed |
 
 2026-11-13 - `@gtm/mcp-email`, authored by the `research-to-mcp` skill from
 `product/research/gtm.service.email/entities/`: one definition per public route, 65 in 15 packages.
@@ -332,8 +340,8 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all five services, **330 tools served**
-(linkedin 192 + id 55 + orchestration 20 + email 61 + support 2) of 366 defined: the 36 REST-only
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all five services, **331 tools served**
+(linkedin 192 + id 56 + orchestration 20 + email 61 + support 2) of 367 defined: the 36 REST-only
 definitions (surface api) are in no toolset, and `call_tool` refuses them by name.
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
@@ -349,8 +357,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **65 registry packages / 366 tools defined, 330 served**, over **22 mounts + 1 facade**. By
-service: linkedin 192 (27 packages), id 84 defined and 55 served (18), orchestration 23 defined and 20
+Totals: **66 registry packages / 367 tools defined, 331 served**, over **22 mounts + 1 facade**. By
+service: linkedin 192 (27 packages), id 85 defined and 56 served (19), orchestration 23 defined and 20
 served (4), email 65 defined and 61 served (15), support 2 (1). Every number in this file is read off
 the built registry (`buildRegistry` over the five barrels, then `resolveMounts` over `MOUNTS`); the per-mount ones are the headroom table
 `tests/worker-boot.test.ts` prints on a green run, so re-run it rather than editing a count by hand.

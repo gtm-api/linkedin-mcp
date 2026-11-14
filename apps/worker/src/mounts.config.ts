@@ -21,6 +21,11 @@ const EMAIL_SERVER_NOTE =
 // /mcp/id/billing with the verbs that buy and resize one). Its read rides on
 // every email mount too, so a client that mounted one of them can name a server.
 const emailBoxes = { kind: 'tool' as const, name: 'search_email_boxes' };
+// id's mailbox directory (mcp.id/email_account_directory): every mailbox of the workspace in
+// one read, across its servers, each with the email_box_sid of the server that holds it. It
+// rides on the mounts whose tools name a mailbox; infrastructure names servers, applications
+// and domains, and goes without it.
+const emailAccountDirectory = { kind: 'tool' as const, name: 'search_email_account_directory' };
 
 export const MOUNTS: MountConfig[] = [
   {
@@ -422,6 +427,7 @@ export const MOUNTS: MountConfig[] = [
       pem('email_account_activity_log'),
       pem('email_account_health'),
       emailBoxes,
+      emailAccountDirectory,
     ],
     maxTools: 25,
     facade: 'none',
@@ -454,6 +460,7 @@ export const MOUNTS: MountConfig[] = [
       pem('email_threads'),
       pem('email_folders'),
       emailBoxes,
+      emailAccountDirectory,
     ],
     maxTools: 25,
     facade: 'none',
@@ -469,6 +476,7 @@ export const MOUNTS: MountConfig[] = [
       pem('email_bounce_log'),
       pem('email_engagements'),
       emailBoxes,
+      emailAccountDirectory,
     ],
     maxTools: 25,
     facade: 'none',
