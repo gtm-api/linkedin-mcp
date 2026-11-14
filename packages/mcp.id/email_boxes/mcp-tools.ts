@@ -27,8 +27,9 @@
 //                   confirm dialog calls the route, so it stays.
 //   resize          served, dangerous, previewRoute preview-resize: the first
 //                   call carries the quote and the fit.
-//   delete          served, dangerous. It gives back a paid unit and destroys the
-//                   machine.
+//   delete          served, dangerous. It destroys the machine and gives back its
+//                   paid unit, or keeps the unit paid when it is the subscription's
+//                   only item (Eugene, 2026-11-14).
 //   move-in         served. No money moves and nothing leaves the platform; the
 //                   run rolls back on a failure before the import.
 //   retry           served. It resumes a run that was already confirmed (and
@@ -170,7 +171,7 @@ export const emailBoxesTools: ToolDefinition[] = [
     ...base,
     name: 'create_email_box',
     description:
-      "Buy an email server, paid as one unit of the plan's price on the workspace's subscription. Spends money. With an active subscription the unit joins it on its own cycle and the prorated amount for the rest of the period is charged to its card in the call (409 payment_declined buys nothing); item is the new server in provisioning, run shows the build. Without one nothing is charged: item is null and checkout holds a Paddle checkout only the app can open, so the user pays on the Email Accounts screen (search_billing_subscriptions tells which case applies). Through MCP it takes two calls: the first, without commit_token, changes nothing and has no price quote; the second, same arguments plus commit_token, buys. The REST route takes no commit_token and buys on the call. Not idempotent: each confirmed call buys another server. 503 email_servers_not_offered: this deployment sells none. Requires can_manage_billing.",
+      "Buy an email server, paid as one unit of the plan's price on the workspace's subscription. Spends money. With an active subscription the unit joins it on its own cycle and the prorated amount for the rest of the period is charged to its card in the call (409 payment_declined buys nothing); item is the new server in provisioning, run shows the build. Without one nothing is charged: item is null and checkout holds a Paddle checkout only the app can open, so the user pays on the Email Accounts screen (search_billing_subscriptions tells which case applies). A seat delete_email_box kept (retained subscription_seat) goes to the next server of its plan, free. Through MCP it takes two calls: the first, without commit_token, changes nothing and has no price quote; the second, same arguments plus commit_token, buys. The REST route takes no commit_token and buys on the call. Not idempotent: each confirmed call buys another server. 503 email_servers_not_offered: this deployment sells none. Requires can_manage_billing.",
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/email-boxes' },
     operation: 'create',
@@ -284,7 +285,7 @@ export const emailBoxesTools: ToolDefinition[] = [
     ...base,
     name: 'delete_email_box',
     description:
-      "Delete an email server that holds no mailbox: it reads destroying at once, its paid unit goes back to the subscription with no refund (paid_through: the end of the paid period) and the machine is destroyed. Move its mailboxes out first (move_in_email_box_mailboxes on another server), else 409 email_box_has_mailboxes. 409 email_box_busy during a plan change, email_box_complimentary for the granted server. Repeating it is safe. Through MCP the first call only previews. Requires can_manage_billing.",
+      "Delete an email server that holds no mailbox: it reads destroying at once and the machine is destroyed. Its paid unit leaves the subscription with no refund (paid_through: the end of the paid period), except when it is the subscription's only item: then the subscription stays as it is, the unit stays paid (retained names subscription_seat, paid_through stays null) and the next create_email_box of the same plan takes it with no charge; ending the subscription is cancel_billing_subscription. Move its mailboxes out first (move_in_email_box_mailboxes on another server), else 409 email_box_has_mailboxes. 409 email_box_busy during a plan change, email_box_complimentary for the granted server. Repeating it is safe. Through MCP the first call only previews. Requires can_manage_billing.",
     toolClass: 'typical',
     route: { service: 'id', method: 'DELETE', pathTemplate: '/api/email-boxes/{sid}', sidParam: 'sid' },
     operation: 'delete',
