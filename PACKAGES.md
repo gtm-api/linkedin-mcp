@@ -311,9 +311,13 @@ list omits (`unknown_keys`), the daily-sends filter and the machine read
 (`FILTER_NOT_THE_ENTITY_FILTER` and `ITEM_NOT_A_DOMAIN` in `tests/contract-parity.test.ts`), and one
 enum with no PHP rule behind it (`enum-parity-baseline.json`).
 
-Three choices are built as working answers and wait for the owner: the optional `email_box_sid` on
-every tool, `bulk-action` REST only, and `daily-sends` as a tool with an output schema of its own. Each
-is one switch on this branch.
+Three choices were built as working answers on 2026-11-13 and closed by the rules on 2026-11-14, each
+as built. The optional `email_box_sid` on every tool is the box parameter ADR 001 D12 named for the
+agent surface; a tool that names the mailbox alone can come later as a change of the default, with the
+field still optional. `bulk-action` is REST only: one door per action (its six verbs are tools
+already), and a bulk payload does not pass through a model. `daily-sends` is a tool with an output
+schema of its own: its research row signs the route as `mcp`. The rule behind each is in the Decisions
+of `product/research/gtm.service.email/entities/email_box_settings.md` and `email_accounts.md`.
 
 ## mcp.support: 1 mount / 2 tools
 
