@@ -10,8 +10,8 @@ the mounts, and the coverage gate tracks progress toward full coverage.
 Rule: every public `/api` endpoint → exactly one tool (1:1). The counts below are read off the
 **built registry** (`buildRegistry` + `resolveMounts` over the packages the worker mounts), not off
 a plan. Every row marked ✅ is shipped. All four backend services are at full MCP coverage:
-`gtm.service.email` got its package on 2026-11-13, and its four mounts read "built" until the worker
-that serves them is deployed.
+`gtm.service.email` got its package on 2026-11-13, and the worker serves its four mounts since the release of
+2026-11-15 (version 511dd373).
 
 Since 2026-11-06 a tool definition carries a `surface`: `both` (the default, a tool on its mount and
 a line in the public REST reference) or `api` (the line in the reference and NO tool: the definition
@@ -268,10 +268,10 @@ gate the other way).
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
-| accounts | `/mcp/email/accounts` | email_accounts (18 defined, 15 served), email_account_sync_runs (1), email_account_activity_log (1), email_account_health (1), and `search_email_boxes` and `search_email_account_directory` of mcp.id by tool selector | 20 | built, not deployed |
-| infrastructure | `/mcp/email/infrastructure` | email_box_settings (4), email_oauth_apps (5 defined, 4 served), email_domains (2), email_tracking_domains (4), email_sending_domains (4), and `search_email_boxes` | 19 | built, not deployed |
-| messaging | `/mcp/email/messaging` | email_messages (12), email_threads (4), email_folders (1), `search_email_boxes` and `search_email_account_directory` | 19 | built, not deployed |
-| deliverability | `/mcp/email/deliverability` | email_suppressions (4), email_bounce_log (2), email_engagements (2), `search_email_boxes` and `search_email_account_directory` | 10 | built, not deployed |
+| accounts | `/mcp/email/accounts` | email_accounts (18 defined, 15 served), email_account_sync_runs (1), email_account_activity_log (1), email_account_health (1), and `search_email_boxes` and `search_email_account_directory` of mcp.id by tool selector | 20 | ✅ |
+| infrastructure | `/mcp/email/infrastructure` | email_box_settings (4), email_oauth_apps (5 defined, 4 served), email_domains (2), email_tracking_domains (4), email_sending_domains (4), and `search_email_boxes` | 19 | ✅ |
+| messaging | `/mcp/email/messaging` | email_messages (12), email_threads (4), email_folders (1), `search_email_boxes` and `search_email_account_directory` | 19 | ✅ |
+| deliverability | `/mcp/email/deliverability` | email_suppressions (4), email_bounce_log (2), email_engagements (2), `search_email_boxes` and `search_email_account_directory` | 10 | ✅ |
 
 2026-11-13 - `@gtm/mcp-email`, authored by the `research-to-mcp` skill from
 `product/research/gtm.service.email/entities/`: one definition per public route, 65 in 15 packages.
