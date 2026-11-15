@@ -138,8 +138,8 @@ protection away.
 
 Every outward action passes a server-side budget check before dispatch. Allowances depend on how
 old the connected account is and how it has been behaving: a new account starts well under the
-platform maximum and is raised as it builds history. Bulk work is spread with randomized gaps,
-because a fixed cadence is itself a detectable pattern.
+platform maximum and is raised as it builds history. Calls of one action type leave one at a
+time, and each gap is varied by up to 20%.
 
 When the check rejects an action, that is the system working.
 

@@ -3,9 +3,8 @@
 [![Site](https://img.shields.io/badge/site-gtm--api.com-bef264)](https://gtm-api.com/linkedin-mcp-server/)
 [![Protocol](https://img.shields.io/badge/protocol-MCP-blue)](https://modelcontextprotocol.io/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](./LICENSE)
-[![Smithery](https://smithery.ai/badge/gtm-api/linkedin-mcp)](https://smithery.ai/servers/gtm-api/linkedin-mcp)
 
-gtm-api is a managed LinkedIn MCP server. It gives an AI agent one endpoint, three MCP tools and 160+ typed LinkedIn actions over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
+A managed LinkedIn MCP server from gtm-api.com: it gives an AI agent one endpoint, three MCP tools and 190+ typed LinkedIn actions over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
 
 This repository holds the public interface: what the server exposes, how to connect a client, and how the safety layer works.
 
@@ -13,7 +12,7 @@ This repository holds the public interface: what the server exposes, how to conn
 
 A LinkedIn MCP server exposes LinkedIn actions as Model Context Protocol tools, so an AI agent calls them directly, the way a person would click through the UI. LinkedIn publishes no [official API](https://learn.microsoft.com/en-us/linkedin/shared/authentication/getting-access) for invitations, member messages or open profile search, so a LinkedIn MCP server works through an account you own rather than through [LinkedIn's developer platform](https://developer.linkedin.com/).
 
-Two shapes exist today. **Cookie-driven open-source servers** run a browser session with your own cookie and no pacing. **Managed servers** run each account in isolated infrastructure with limits enforced before every action. gtm-api is the second kind.
+Two shapes exist today. **Cookie-driven open-source servers** run a browser session with your own cookie and no pacing. **Managed servers** run each account in isolated infrastructure with limits enforced before every action. Of the two, gtm-api.com is the second kind.
 
 ## Which clients it works with
 
@@ -30,7 +29,7 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 
 **1. Sign up.** Create an account at [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and connect a LinkedIn account. It opens in a dedicated anti-detect cloud browser with its own proxy.
 
-**2. Add the server to your MCP client.** For Claude Desktop, edit `claude_desktop_config.json` (example in [`examples/`](./examples/claude_desktop_config.json)):
+**2. Add the server to your MCP client.** On claude.ai and in Claude Desktop, open Customize, Connectors, then Add, "Add custom connector", paste `https://mcp.gtm-api.com/mcp` and approve access ([Anthropic's steps](https://claude.com/docs/connectors/custom/add-unlisted)). Clients that read a server URL from their config file, such as Cursor's `mcp.json`, take this entry (the repo's own [`.mcp.json`](./.mcp.json) is the same):
 
 ```json
 {
@@ -50,9 +49,9 @@ Headless clients can skip the browser. The same API key (`gtm_live_...`) that au
 claude mcp add --transport http gtm-api https://mcp.gtm-api.com/mcp --header "Authorization: Bearer gtm_live_..."
 ```
 
-For command-spawning clients, the launcher below reads the key from `GTM_API_KEY` instead (1.3.0 or newer; older pins ignore it and do OAuth only). Pick one mode per connection: with a key attached, the OAuth flow never starts. Interactive clients such as claude.ai connectors have no header field and always use OAuth. Full matrix: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
+For command-spawning clients, the launcher below reads the key from `GTM_API_KEY` instead. Use 1.3.2 or newer with a key: npm deprecates 1.1.0, 1.3.0 and 1.3.1, which put the key in the process list and the MCP client's log (rotate a key used with one of them), and 1.2.x ignores the variable and does OAuth only. Pick one mode per connection: with a key attached, the OAuth flow never starts. Connectors on claude.ai and in Claude Desktop sign in through the browser, and take a key only in Anthropic's [request headers](https://claude.com/docs/connectors/custom/add-unlisted#authenticate-with-request-headers) section, which is in beta for a limited set of organizations. Full matrix: [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
 
-Client can only spawn a command, not open a URL? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint and runs the same OAuth flow (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
+Client can only spawn a command, not open a URL, as with Claude Desktop's `claude_desktop_config.json`? The [`@gtm-api/linkedin-mcp`](https://www.npmjs.com/package/@gtm-api/linkedin-mcp) launcher bridges stdio clients to the same endpoint and runs the same OAuth flow (config in [`examples/`](./examples/claude_desktop_config.npx.json)):
 
 ```json
 {
@@ -87,7 +86,7 @@ OAuth cannot finish inside a container: the consent page sends your browser back
 
 > "Every morning, accept new connection invitations from founders, reply with a short welcome, and add anyone hiring SDRs to a warm list."
 
-The agent discovers the actions and chains them: fetch the latest connection invitations, accept the ones that match, send each new contact a short message. Every outward action runs a preview-then-confirm step and a server-side daily-limit check before it reaches LinkedIn.
+The agent discovers the actions and chains them: fetch the latest connection invitations, accept the ones that match, send each new contact a short message. A single write such as the accept or the message goes through a preview-then-confirm step, and a bulk run is previewed once, as a plan. Either way, every call is checked against the account's daily budget on the server before it reaches LinkedIn.
 
 ## Cursor plugin
 
@@ -96,7 +95,7 @@ This repository is also a Cursor plugin ([`.cursor-plugin/plugin.json`](./.curso
 - The hosted MCP server, `https://mcp.gtm-api.com/mcp`, declared in [`.mcp.json`](./.mcp.json).
 - The [`gtm-api-linkedin`](./skills/gtm-api-linkedin/SKILL.md) skill. It tells the agent to discover tools before calling them, to show you the preview of every send before it commits, and to stop on a limit refusal instead of retrying it.
 
-Install it from the Cursor Marketplace: open **Customize**, search for `gtm-api`, select **Install**. To run it from this repository instead, copy the plugin into Cursor's local plugin folder:
+The plugin is not on the Cursor Marketplace yet. Until it is, the one-click Cursor link on [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect) adds the MCP server alone, and the whole plugin, skill included, installs from this repository into Cursor's local plugin folder:
 
 ```bash
 git clone https://github.com/gtm-api/linkedin-mcp.git /tmp/linkedin-mcp
@@ -106,11 +105,11 @@ cp -R /tmp/linkedin-mcp/.cursor-plugin /tmp/linkedin-mcp/.mcp.json /tmp/linkedin
 
 Then run **Developer: Reload Window** and check that **Customize** lists the skill and the MCP server.
 
-The plugin carries no key and needs no configuration. The first tool call opens a consent page in your browser: you sign in to [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and pick the workspace the agent acts in. Cursor registers itself as an OAuth client on that first call, so there is no client ID to create. To add the server without the skill, use the one-click Cursor link on [docs.gtm-api.com/mcp/connect](https://docs.gtm-api.com/mcp/connect).
+The plugin carries no key and needs no configuration. The first tool call opens a consent page in your browser: you sign in to [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and pick the workspace the agent acts in. Cursor registers itself as an OAuth client on that first call, so there is no client ID to create.
 
 ## MCP tools
 
-The server exposes exactly three MCP tools. Discovery is progressive: an agent lists the toolsets, inspects one, then invokes an action. The 160+ LinkedIn actions never load into the model's context at once, so the schema footprint stays around 400 tokens.
+The server exposes exactly three MCP tools. Discovery is progressive: an agent lists the toolsets, inspects one, then invokes an action. The 190+ LinkedIn actions never load into the model's context at once, so the schema footprint stays under 1,000 tokens.
 
 ```json
 [
@@ -150,7 +149,7 @@ The server exposes exactly three MCP tools. Discovery is progressive: an agent l
 
 ## What the agent can do
 
-160+ typed actions across 11 LinkedIn toolsets, grouped here into seven areas:
+190+ typed actions across 12 LinkedIn toolsets, grouped here into seven areas:
 
 | Toolset | What it covers |
 |---|---|
@@ -173,11 +172,11 @@ Safety is enforced by the server itself, under every tool call. Six mechanisms:
 - **Owned accounts.** The agent acts through an account you connected and control. There is no shared account pool.
 - **Session isolation.** Each account runs in its own anti-detect cloud browser with a dedicated proxy. One account, one session, one device signature.
 - **Warm-up.** A new account starts at a fraction of platform maximum, and its allowance is raised programmatically as the account ages and builds history.
-- **Server-side limits.** Per-action daily budgets are checked before dispatch, across 16 action buckets.
-- **Randomized pacing.** Bulk work is spread with per-gap randomized intervals, because a fixed cadence is itself a detectable pattern.
-- **Preview then confirm.** Outward actions return a preview and require confirmation, so an over-eager agent cannot burn an account.
+- **Server-side limits.** Per-action daily budgets are checked before dispatch, one for each of 14 action types.
+- **Randomized pacing.** Calls of one action type leave one at a time, and each gap is varied by up to 20%.
+- **Preview then confirm.** A single write to LinkedIn (a message, an invitation, a post, a reaction) returns a preview and a short-lived token bound to the tool, the exact arguments and the workspace, and it runs only when a second call brings that token back. A bulk run is previewed once as a plan, and leads added to it later run on that approval.
 
-On this setup, 20,000+ LinkedIn accounts run on gtm-api.com, and under 1% of them have ever been restricted. Full method: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
+20,000+ LinkedIn accounts run on this stack, and under 1% of them have ever been restricted. The safety layer in detail: [gtm-api.com/safe-linkedin-automation](https://gtm-api.com/safe-linkedin-automation/).
 
 ## How it compares to open-source LinkedIn MCP servers
 
@@ -196,11 +195,11 @@ Cookie-driven servers such as [`stickerdaniel/linkedin-mcp-server`](https://gith
 
 ## Pricing
 
-Volume pricing per connected account per month, from $10/account at scale, with unlimited API calls and no per-action fees. Forever free plan, no card: [gtm-api.com/pricing](https://gtm-api.com/pricing/).
+Volume pricing per connected account per month, from $10/account at scale, with no per-call or per-action fees. Forever free plan, no card: [gtm-api.com/pricing](https://gtm-api.com/pricing/).
 
 ## A note on LinkedIn's terms
 
-[LinkedIn's User Agreement](https://www.linkedin.com/legal/user-agreement) does not permit third-party automation, so every tool in this space carries risk and no vendor can honestly promise otherwise. gtm-api reduces that risk by acting only on accounts you own, with warm-up, human-like pacing and enforced limits, which is why under 1% of the accounts on it have ever been restricted. This is not legal advice.
+[LinkedIn's User Agreement](https://www.linkedin.com/legal/user-agreement) does not permit third-party automation, so every tool in this space carries risk and no vendor can promise otherwise. By design, gtm-api reduces that risk by acting only on accounts you own, with warm-up, randomized pacing and enforced limits. This is not legal advice.
 
 ## Links
 
