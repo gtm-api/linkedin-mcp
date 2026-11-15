@@ -5915,6 +5915,31 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Core\\Mail\\MailDomainVerdictEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Deliverable",
+                    "value": "deliverable"
+                },
+                {
+                    "name": "TestName",
+                    "value": "test_name"
+                },
+                {
+                    "name": "NoMailHost",
+                    "value": "no_mail_host"
+                },
+                {
+                    "name": "NullMx",
+                    "value": "null_mx"
+                },
+                {
+                    "name": "Unknown",
+                    "value": "unknown"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Core\\Services\\LatestPerGroup\\LatestPerGroupNarrowEnum": {
             "backing": "string",
             "cases": [
@@ -18453,7 +18478,8 @@
                         "required",
                         "string",
                         "email",
-                        "max:255"
+                        "max:255",
+                        "Gtm\\Lib\\Common\\Core\\Mail\\DeliverableEmailDomainRule"
                     ],
                     "required": true,
                     "nullable": false,
@@ -20055,7 +20081,8 @@
                         "required",
                         "string",
                         "email",
-                        "max:255"
+                        "max:255",
+                        "Gtm\\Lib\\Common\\Core\\Mail\\DeliverableEmailDomainRule"
                     ],
                     "required": true,
                     "nullable": false,
@@ -20922,7 +20949,8 @@
                         "required",
                         "string",
                         "email",
-                        "max:255"
+                        "max:255",
+                        "Gtm\\Lib\\Common\\Core\\Mail\\DeliverableEmailDomainRule"
                     ],
                     "required": true,
                     "nullable": false,
@@ -21182,7 +21210,8 @@
                         "required",
                         "string",
                         "email",
-                        "max:255"
+                        "max:255",
+                        "Gtm\\Lib\\Common\\Core\\Mail\\DeliverableEmailDomainRule"
                     ],
                     "required": true,
                     "nullable": false,
@@ -23979,6 +24008,38 @@
                     "between": null
                 },
                 {
+                    "field": "replace_on_blinks_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_blinks_total_7d",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "replace_on_captcha_enabled",
                     "rules": [
                         "sometimes",
@@ -25476,6 +25537,217 @@
                     "in": null,
                     "min": 1,
                     "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/linkedin-connects/search",
+            "controller": "App\\Ops\\Controllers\\OpsConnectCaseController",
+            "action": "search",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsConnectCaseSearchRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "show_internal",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "in:\"gtm\",\"getsales\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "gtm",
+                        "getsales"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "GET",
+            "uri": "ops/linkedin-connects/{sid}",
+            "controller": "App\\Ops\\Controllers\\OpsConnectCaseController",
+            "action": "show",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsClusterRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "ops/linkedin-connects/{sid}/verdict",
+            "controller": "App\\Ops\\Controllers\\OpsConnectCaseController",
+            "action": "verdict",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": "App\\Ops\\Requests\\OpsConnectCaseVerdictRequest",
+            "rules": [
+                {
+                    "field": "cluster_id",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "verdict",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"no_problem\",\"resolved\",\"unclear\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "no_problem",
+                        "resolved",
+                        "unclear"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "comment",
+                    "rules": [
+                        "required_unless:verdict,no_problem",
+                        "nullable",
+                        "string",
+                        "max:2000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2000,
                     "size": null,
                     "between": null
                 }

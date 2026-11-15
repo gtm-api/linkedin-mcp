@@ -2840,6 +2840,31 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Core\\Mail\\MailDomainVerdictEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Deliverable",
+                    "value": "deliverable"
+                },
+                {
+                    "name": "TestName",
+                    "value": "test_name"
+                },
+                {
+                    "name": "NoMailHost",
+                    "value": "no_mail_host"
+                },
+                {
+                    "name": "NullMx",
+                    "value": "null_mx"
+                },
+                {
+                    "name": "Unknown",
+                    "value": "unknown"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Core\\Services\\LatestPerGroup\\LatestPerGroupNarrowEnum": {
             "backing": "string",
             "cases": [

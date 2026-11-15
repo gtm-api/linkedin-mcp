@@ -7678,6 +7678,31 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Core\\Mail\\MailDomainVerdictEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Deliverable",
+                    "value": "deliverable"
+                },
+                {
+                    "name": "TestName",
+                    "value": "test_name"
+                },
+                {
+                    "name": "NoMailHost",
+                    "value": "no_mail_host"
+                },
+                {
+                    "name": "NullMx",
+                    "value": "null_mx"
+                },
+                {
+                    "name": "Unknown",
+                    "value": "unknown"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Core\\Services\\LatestPerGroup\\LatestPerGroupNarrowEnum": {
             "backing": "string",
             "cases": [
@@ -65014,7 +65039,7 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "in:\"auto_buy\",\"downtime\",\"captcha\",\"fraud_flagged\",\"manual\""
+                        "in:\"auto_buy\",\"downtime\",\"blinks\",\"captcha\",\"fraud_flagged\",\"manual\""
                     ],
                     "required": false,
                     "nullable": true,
@@ -65022,6 +65047,7 @@
                     "in": [
                         "auto_buy",
                         "downtime",
+                        "blinks",
                         "captcha",
                         "fraud_flagged",
                         "manual"
@@ -65202,6 +65228,38 @@
                 },
                 {
                     "field": "replace_downtime_total_minutes_7d",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_on_blinks_enabled",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "replace_blinks_total_7d",
                     "rules": [
                         "sometimes",
                         "integer",
@@ -65855,13 +65913,14 @@
                         "sometimes",
                         "nullable",
                         "string",
-                        "in:\"downtime\",\"captcha\",\"fraud_flagged\",\"manual\""
+                        "in:\"downtime\",\"blinks\",\"captcha\",\"fraud_flagged\",\"manual\""
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": [
                         "downtime",
+                        "blinks",
                         "captcha",
                         "fraud_flagged",
                         "manual"
@@ -66395,6 +66454,450 @@
                     "in": null,
                     "min": null,
                     "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/connect-cases/get",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "getConnectCase",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsConnectCaseGetRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_cc_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/connect-cases/search",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "searchConnectCases",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsConnectCaseSearchRequest",
+            "rules": [
+                {
+                    "field": "page",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "team_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "exclude_team_sids",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "exclude_team_sids.*",
+                    "rules": [
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "user_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:us_mb_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "antidetect_browser_sid",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ab_br_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "levels",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "levels.*",
+                    "rules": [
+                        "string",
+                        "in:\"no_issues\",\"delayed\",\"failed\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "no_issues",
+                        "delayed",
+                        "failed"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "outcomes",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "outcomes.*",
+                    "rules": [
+                        "string",
+                        "in:\"not_connected\",\"connected\",\"logged_out\",\"deleted\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "not_connected",
+                        "connected",
+                        "logged_out",
+                        "deleted"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "verdicts",
+                    "rules": [
+                        "sometimes",
+                        "array"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "verdicts.*",
+                    "rules": [
+                        "string",
+                        "in:\"no_problem\",\"resolved\",\"unclear\",\"none\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "no_problem",
+                        "resolved",
+                        "unclear",
+                        "none"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "via",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "in:\"app\",\"link\""
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": [
+                        "app",
+                        "link"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "opened_from",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "opened_to",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "updated_from",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "date",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/ops/connect-cases/verdict",
+            "controller": "App\\Ops\\InternalOpsController",
+            "action": "verdictConnectCase",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Ops\\Requests\\OpsConnectCaseVerdictRequest",
+            "rules": [
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ab_cc_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "verdict",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"no_problem\",\"resolved\",\"unclear\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "no_problem",
+                        "resolved",
+                        "unclear"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "comment",
+                    "rules": [
+                        "required_unless:verdict,no_problem",
+                        "nullable",
+                        "string",
+                        "max:2000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "verdict_by",
+                    "rules": [
+                        "required",
+                        "string",
+                        "max:191"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 191,
                     "size": null,
                     "between": null
                 }
