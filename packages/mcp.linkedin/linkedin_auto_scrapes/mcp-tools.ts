@@ -263,8 +263,11 @@ export const linkedinAutoScrapesTools: ToolDefinition[] = [
       linkedin_account_sid: ACCOUNT_SID,
       title: z.string().max(255).nullable().optional()
         .describe('Human label for the list view. Server derives "{result_kind} {source_method}" when omitted.'),
-      url: z.string().max(2048).optional()
-        .describe('LinkedIn or Sales Navigator people/company SEARCH url. Mutually exclusive with source_method plus source_input.'),
+      // 15000 is the backend's bound for a search link (LinkedinSearchUrlRule::MAX_LENGTH):
+      // Sales Navigator moves a search's arguments into the # past 4140 characters,
+      // so its links run to several thousand.
+      url: z.string().max(15000).optional()
+        .describe('LinkedIn or Sales Navigator people/company SEARCH url, up to 15000 characters (longer: 422 search_url_too_long, pass the saved search\'s link). Mutually exclusive with source_method plus source_input.'),
       source_method: SourceMethod.optional()
         .describe('The paginated verb to replay. Required (with source_input) for every non-search source.'),
       source_input: z.record(z.unknown()).optional()

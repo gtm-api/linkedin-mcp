@@ -21678,7 +21678,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/companies/"
                     ],
                     "required": false,
@@ -21686,7 +21686,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -21975,7 +21975,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/learning/"
                     ],
                     "required": false,
@@ -21983,7 +21983,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -22190,7 +22190,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/events/"
                     ],
                     "required": false,
@@ -22198,7 +22198,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -22330,7 +22330,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/groups/"
                     ],
                     "required": false,
@@ -22338,7 +22338,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -22470,7 +22470,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/jobs/search-results/"
                     ],
                     "required": false,
@@ -22478,7 +22478,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -22815,7 +22815,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/people/"
                     ],
                     "required": false,
@@ -22823,7 +22823,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -23354,7 +23354,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/content/"
                     ],
                     "required": false,
@@ -23362,7 +23362,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -23835,7 +23835,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/products/"
                     ],
                     "required": false,
@@ -23843,7 +23843,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -24056,7 +24056,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/talent/search"
                     ],
                     "required": false,
@@ -24064,7 +24064,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -26121,7 +26121,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/sales/search/company"
                     ],
                     "required": false,
@@ -26129,7 +26129,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -27060,7 +27060,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/sales/search/people"
                     ],
                     "required": false,
@@ -27068,7 +27068,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -28412,7 +28412,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/schools/"
                     ],
                     "required": false,
@@ -28420,7 +28420,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -28552,7 +28552,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/services/"
                     ],
                     "required": false,
@@ -28560,7 +28560,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -34961,15 +34961,14 @@
                     "rules": [
                         "sometimes",
                         "string",
-                        "url",
-                        "max:2048"
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -35016,6 +35015,22 @@
                     "required": false,
                     "nullable": false,
                     "type": "array",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "source_input.url",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
                     "in": null,
                     "min": null,
                     "max": null,
@@ -51751,7 +51766,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/companies/"
                     ],
                     "required": false,
@@ -51759,7 +51774,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -52048,7 +52063,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/learning/"
                     ],
                     "required": false,
@@ -52056,7 +52071,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -52263,7 +52278,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/events/"
                     ],
                     "required": false,
@@ -52271,7 +52286,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -52403,7 +52418,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/groups/"
                     ],
                     "required": false,
@@ -52411,7 +52426,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -52543,7 +52558,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/jobs/search-results/"
                     ],
                     "required": false,
@@ -52551,7 +52566,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -52888,7 +52903,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/people/"
                     ],
                     "required": false,
@@ -52896,7 +52911,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -53427,7 +53442,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/content/"
                     ],
                     "required": false,
@@ -53435,7 +53450,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -53908,7 +53923,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/products/"
                     ],
                     "required": false,
@@ -53916,7 +53931,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -54129,7 +54144,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/talent/search"
                     ],
                     "required": false,
@@ -54137,7 +54152,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -56194,7 +56209,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/sales/search/company"
                     ],
                     "required": false,
@@ -56202,7 +56217,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -57133,7 +57148,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/sales/search/people"
                     ],
                     "required": false,
@@ -57141,7 +57156,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -58485,7 +58500,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/schools/"
                     ],
                     "required": false,
@@ -58493,7 +58508,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
@@ -58625,7 +58640,7 @@
                         "prohibits:filters",
                         "nullable",
                         "string",
-                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinSearchUrlRule",
                         "starts_with:https://www.linkedin.com/search/results/services/"
                     ],
                     "required": false,
@@ -58633,7 +58648,7 @@
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 2048,
+                    "max": null,
                     "size": null,
                     "between": null
                 },
