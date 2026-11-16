@@ -165,14 +165,25 @@ without one); on the parent surface, the same missing `counts` block, and the `i
 `failed_items` / `cancelled_items` includes (only `metrics` is built, and only by `get`). Run-level
 aggregation is the parent's `metrics` tool.
 
-## mcp.id: 4 mounts / 85 tools defined, 56 served
+## mcp.id: 4 mounts / 86 tools defined, 56 served
 
 | Mount group | Mount | Registry packages (tools) | Tools | Status |
 |---|---|---|---|---|
 | identity | `/mcp/id/identity` | users (2 defined, 1 served), teams (6 defined, 4 served), team_members (6 defined, 5 served), sessions (2 defined, 0 served) | 10 | ✅ |
 | access | `/mcp/id/access` | api_keys (7 defined, 3 served), oauth_clients (5 defined, 0 served), oauth_authorizations (3 defined, 2 served), account_shares (5) | 10 | ✅ |
-| billing | `/mcp/id/billing` | billing_products (1 defined, 0 served), billing_subscriptions (14 defined, 7 served), billing_transactions (4 defined, 3 served), billing_payment_methods (3 defined, 2 served), email_boxes (9 defined, 7 served) | 19 | ✅ |
+| billing | `/mcp/id/billing` | billing_products (1 defined, 0 served), billing_subscriptions (14 defined, 7 served), billing_transactions (4 defined, 3 served), billing_payment_methods (3 defined, 2 served), email_boxes (10 defined, 7 served) | 19 | ✅ |
 | platform | `/mcp/id/platform` | notifications (4 defined, 3 served), ssl_certificates (7), support_requests (3), api_requests (2), media_uploads (1) | 16 | ✅ |
+
+2026-11-16 - id 85 defined to 86, served unchanged: `preview_email_box_create` (`surface: api`), the
+quote of a server purchase, and the `previewRoute` of `create_email_box`. Until then the first call of
+`create_email_box` carried no price, because no backend route priced a purchase, and an agent could not
+tell the user what buying a server costs; `resize_email_box` already quoted through `preview-resize`.
+The quote says how the purchase would be paid (`charged_now`, `checkout` or `kept_seat`), what it charges
+now, the server's recurring price and whether the plan's machine can be had (`available`,
+`unavailable_reason`). The resize quote carries the same two availability fields: since the same day
+gtm.service.id refuses a purchase or a plan change before any charge when the plan's machine type is out
+of stock (503 `email_server_out_of_stock`, `email_server_stock_unknown`) or, for a change down in place,
+when the server's disk grew past the smaller plan's (409 `email_box_disk_does_not_shrink`).
 
 2026-11-14 - id 84 defined and 55 served to 85 and 56: `mcp.id/email_account_directory`, one tool,
 `search_email_account_directory` over id's mailbox directory (ADR 001 D13: every mailbox of the workspace
