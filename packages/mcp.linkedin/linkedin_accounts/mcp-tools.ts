@@ -744,7 +744,8 @@ const LinkedinAccountInclude = z.enum([
   'linkedin_connection_invitations_counts',
   'linkedin_conversations_counts',
   'linkedin_followers_counts',
-]).describe('antidetect_browser carries the sender LOGIN and runtime state (browser status login_issue means signed out of LinkedIn, restricted means signed out and the public profile is gone, a LinkedIn restriction; also error_reason, logout_count, last_logout_at). The account item alone cannot answer "is this sender signed in": its status field is lifecycle. Health data: linkedin_account_smart_limits (budgets and holds), linkedin_account_snapshot (latest warmup score), linkedin_account_quota_hits / linkedin_account_block_log (last 50 incident rows each), *_counts (child tallies).');
+  'initial_sync',
+]).describe('antidetect_browser carries the sender LOGIN and runtime state (browser status login_issue means signed out of LinkedIn, restricted means signed out and the public profile is gone, a LinkedIn restriction; also error_reason, logout_count, last_logout_at). The account item alone cannot answer "is this sender signed in": its status field is lifecycle. Health data: linkedin_account_smart_limits (budgets and holds), linkedin_account_snapshot (latest warmup score), linkedin_account_quota_hits / linkedin_account_block_log (last 50 incident rows each), *_counts (child tallies). initial_sync is the first sync of a new account, null once it is done: state (syncing | waiting_for_reads = the day\'s reads are used and it goes on by itself at resumes_at | waiting_for_browser = start the browser or sign in again), conversations_synced, estimated_completion_at and estimated_days_left (0 = today; both null in the first minutes and while the browser is down). A large account takes days on purpose: reading it in one go is not safe, so the platform paces it. Until it is done outbound verbs wait and the limits are provisional, set when it finishes. Say that, not that something is stuck.');
 
 const LinkedinAccountSortable = z.enum([
   'created_at',
@@ -875,7 +876,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_accounts',
     description:
-      'List LinkedIn accounts (senders) on the team with operator filters, sort and cursor pagination, plus an always-present counts block (total, premium / SN / Recruiter, active_today, stale, signed_out). Also the way to find an account sid before calling account-scoped tools. For ANY health or availability question, request include antidetect_browser: login state lives on the bound browser row, whose status login_issue means the sender is signed out of LinkedIn. The item status field is platform lifecycle and stays active through a logout, so never read it as health. counts.signed_out_count flags signed-out senders even without the include; per-row attribution needs it. A full sender health summary combines antidetect_browser with linkedin_account_smart_limits, linkedin_account_snapshot (warmup score) and linkedin_account_block_log_counts. Items with includes are large: page a fleet with page_size 10 or less and follow next_cursor instead of asking for one big page.',
+      'List LinkedIn accounts (senders) on the team with operator filters, sort and cursor pagination, plus an always-present counts block (total, premium / SN / Recruiter, active_today, stale, signed_out). Also the way to find an account sid for account-scoped tools. For ANY health or availability question, request include antidetect_browser: login state lives on the bound browser row, whose status login_issue means the sender is signed out of LinkedIn. The item status field is platform lifecycle and stays active through a logout, so never read it as health. counts.signed_out_count flags signed-out senders even without the include; per-row attribution needs it. A full sender health summary combines antidetect_browser with linkedin_account_smart_limits, linkedin_account_snapshot (warmup score) and linkedin_account_block_log_counts. A new account syncs first: include initial_sync for its state and the estimated end. Items with includes are large: page a fleet with page_size 10 or less and follow next_cursor.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-accounts/search' },
     operation: 'search',
@@ -889,7 +890,7 @@ export const linkedinAccountsTools: ToolDefinition[] = [
   {
     ...base,
     name: 'get_linkedin_account',
-    description: 'Fetch a single LinkedIn account by sid, with optional eager-loaded relations. For login or health state add include antidetect_browser: browser status login_issue means the sender is signed out of LinkedIn, while the item status field is platform lifecycle, not login state.',
+    description: 'Fetch a single LinkedIn account by sid, with optional eager-loaded relations. For login or health state add include antidetect_browser: browser status login_issue means the sender is signed out of LinkedIn, while the item status field is platform lifecycle, not login state. While the first sync of the account runs (initial_sync_completed_at null) include initial_sync says what it is doing and about when it is through; outbound verbs wait and the limits are set when it is done.',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'GET', pathTemplate: '/api/linkedin-accounts/{sid}', sidParam: 'sid' },
     operation: 'get',

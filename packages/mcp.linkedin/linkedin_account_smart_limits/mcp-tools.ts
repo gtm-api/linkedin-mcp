@@ -158,10 +158,10 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_account_smart_limits',
     description:
-      'List per-limit_type policy rows (15 public buckets per account: send_connection_requests, send_messages, send_inmails, scraping, enrichment, …) with filters, sorting, cursor pages and counts (status / limit_type). Whether the warmup governs a row is the ACCOUNT\'s smart_limits_enabled, not a row field. ' +
-      'Use for: "which limits are held / blocked by LinkedIn" (status filter; held = the daily budget is spent), "can account X still send InMails today" (linkedin_account_sid + limit_type: status, daily_limit − done_today_count), fleet capacity. ' +
+      'List per-limit_type policy rows (15 public buckets per account: send_connection_requests, send_messages, send_inmails, scraping, enrichment, …) with filters, sorting, cursor pages and counts. Whether the warmup governs a row is the ACCOUNT\'s smart_limits_enabled, not a row field. ' +
+      'Use for: "which limits are held / blocked by LinkedIn" (status filter; held = the daily budget is spent), "can account X still send InMails today" (linkedin_account_sid + limit_type: status, daily_limit − done_today_count). ' +
       'Rows carry recommended_daily_limit / recommended_delay_in_seconds (the platform\'s numbers for THIS account) and risk_level (none | elevated | ban_likely) of the values set. ' +
-      'self_account_sync is the platform\'s own read budget, raised by it for the account\'s initial sync: held = that sync goes on by itself at hold_till, never lower it. ' +
+      'During an account\'s initial sync its rows are provisional (set when it ends) and self_account_sync is the platform\'s raised read budget: held = the sync goes on by itself at hold_till, never lower it. ' +
       'Single row = search(filter:{linkedin_account_sid, limit_type}, page_size:1). No q. include[]: linkedin_account, linkedin_account_quota_hits.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-account-smart-limits/search' },
