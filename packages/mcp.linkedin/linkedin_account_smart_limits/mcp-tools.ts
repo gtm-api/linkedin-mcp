@@ -158,10 +158,11 @@ export const linkedinAccountSmartLimitsTools: ToolDefinition[] = [
     ...base,
     name: 'search_linkedin_account_smart_limits',
     description:
-      'List per-limit_type policy rows (one account owns 15 public buckets: send_connection_requests, send_messages, send_inmails, scraping, enrichment, custom_request, …) with filters, sorting, cursor pagination and a counts block (status / limit_type breakdowns). Whether the warmup governs a row is the ACCOUNT\'s smart_limits_enabled, not a row field. ' +
-      'Use for: "which limits are at their daily cap / held / blocked by LinkedIn" (status filter; held means the daily budget is spent), "can account X still send InMails today" (filter linkedin_account_sid + limit_type, read status + daily_limit − done_today_count), fleet capacity, smart-limit adoption rate. ' +
-      'Every row also carries recommended_daily_limit / recommended_delay_in_seconds (what the platform would run this bucket at for THIS account) and risk_level (none | elevated | ban_likely) for the values currently set. ' +
-      'Single-row case = search(filter:{linkedin_account_sid, limit_type}, page_size:1). No q. include[]: linkedin_account, linkedin_account_quota_hits.',
+      'List per-limit_type policy rows (15 public buckets per account: send_connection_requests, send_messages, send_inmails, scraping, enrichment, …) with filters, sorting, cursor pages and counts (status / limit_type). Whether the warmup governs a row is the ACCOUNT\'s smart_limits_enabled, not a row field. ' +
+      'Use for: "which limits are held / blocked by LinkedIn" (status filter; held = the daily budget is spent), "can account X still send InMails today" (linkedin_account_sid + limit_type: status, daily_limit − done_today_count), fleet capacity. ' +
+      'Rows carry recommended_daily_limit / recommended_delay_in_seconds (the platform\'s numbers for THIS account) and risk_level (none | elevated | ban_likely) of the values set. ' +
+      'self_account_sync is the platform\'s own read budget, raised by it for the account\'s initial sync: held = that sync goes on by itself at hold_till, never lower it. ' +
+      'Single row = search(filter:{linkedin_account_sid, limit_type}, page_size:1). No q. include[]: linkedin_account, linkedin_account_quota_hits.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-account-smart-limits/search' },
     operation: 'search',

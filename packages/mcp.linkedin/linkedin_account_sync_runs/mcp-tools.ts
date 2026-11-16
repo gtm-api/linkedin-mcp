@@ -64,8 +64,10 @@ const LinkedinAccountSyncRun = z.object({
   attempt_count: z.number(),
 
   // Deferred-attempt gate
-  next_attempt_at: z.string().nullable(),
-  wait_reason: z.string().nullable(),
+  next_attempt_at: z.string().nullable()
+    .describe('When a parked run is tried again; null while it is runnable.'),
+  wait_reason: z.string().nullable()
+    .describe('Why an in_progress run is parked, null while it is runnable. limit:* = a smart-limit budget is spent or held (the included limit is that bucket), the run goes on by itself at next_attempt_at. browser:* = the bound browser is down or signed out. schedule:closed = outside the account\'s sync hours. worker:* = a platform retry.'),
 
   // Terminal
   started_at: z.string().nullable(),
@@ -139,7 +141,8 @@ export const linkedinAccountSyncRunsTools: ToolDefinition[] = [
     description:
       'List sync runs: the backend-owned progress tracker for one paginated sync of one data surface (connections, connection_requests, connection_invitations, conversations, sales_navigator_conversations, followers) or a §5.7 composition (snapshot, premium_check). ' +
       'Use for: "is account X fully synced / how far along" (filter linkedin_account_sid + status in [pending, in_progress]), "which accounts are stuck mid-sync" (status in_progress, sort last_progress_at), "how fresh is the connection data" (latest completed connections run → finished_at). ' +
-      'Runs are not created here; the write surface is linkedin-accounts.reset-sync / .sync. No q. Sort: created_at (default desc) | started_at | finished_at | last_progress_at | next_attempt_at | items_saved. include[]: linkedin_account, activity_log_pages, limit (default).',
+      'in_progress with a wait_reason is parked, not broken: limit:* = the day\'s read budget is spent and the run goes on by itself at next_attempt_at (a big inbox takes days); browser:* = start the browser or sign in again. ' +
+      'Read-only: runs come from linkedin-accounts.reset-sync / .sync. No q. Sort: created_at (default desc) | started_at | finished_at | last_progress_at | next_attempt_at | items_saved. include[]: linkedin_account, activity_log_pages, limit (default).',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-account-sync-runs/search' },
     operation: 'search',
