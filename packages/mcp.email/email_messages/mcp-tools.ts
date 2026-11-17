@@ -37,7 +37,7 @@ const flag = () => filterOp(z.boolean(), ['eq']).optional();
 
 const EmailMessageFilter = z.object({
   q: z.string().max(128).optional()
-    .describe('Words of the subject or the snippet. Bodies and mail older than the mirror: search_email_account_provider.'),
+    .describe('Words of the subject or the snippet: every word must be there, as a word or the start of one, in any order. Bodies and mail older than the mirror: search_email_account_provider.'),
   sid: str(['eq', 'in']),
   email_account_sid: str(['eq', 'in']).describe('One mailbox; absent, the search runs across the mailboxes of the server.'),
   email_thread_sid: str(['eq', 'in']).describe('Every message of a conversation.'),
@@ -69,7 +69,8 @@ const EmailMessageIncluded = z.object({ email_thread: EmailThread.nullable() }).
 const EmailMessageCounts = z.object({
   total_count: z.number().int(),
   unread_count: z.number().int().optional().describe('Unread inbound rows of the filter.'),
-  groups: z.record(z.unknown()).describe('Rows by email_account_sid, direction, status, folder_role, is_read and kind.'),
+  groups: z.record(z.unknown())
+    .describe('Rows by direction, status, folder_role, is_read (true, false) and kind, the largest value first; by email_account_sid too when the filter names mailboxes (eq or in).'),
 }).passthrough();
 
 const EmailMessageMetrics = z.object({
@@ -136,7 +137,7 @@ export const emailMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'search_email_messages',
     description:
-      "List single messages across the team's mailboxes, newest first: who wrote to whom, subject, snippet, status, folder, read and flag state, opens and clicks. Filter by mailbox, thread, direction, status, participants, folder and time; q matches words of the subject and the snippet. Rows come without bodies unless include_bodies is true, which carries the bodies already mirrored (it fetches nothing): keep such a page to 20 rows or fewer. status eq scheduled is the send queue. Trashed rows and bounce reports are left out unless deleted_at or kind is filtered. For one message with its body use get_email_message; for a whole conversation get_email_thread_llm_context. page_size 0 answers counts alone. Requires can_view_email_messages.",
+      "List single messages across the team's mailboxes, newest first: who wrote to whom, subject, snippet, status, folder, read and flag state, opens and clicks. Filter by mailbox, thread, direction, status, participants, folder and time; q matches words of the subject and the snippet. Rows come without bodies unless include_bodies is true, which carries the bodies already mirrored (it fetches nothing): keep such a page to 20 rows or fewer. status eq scheduled is the send queue. Trashed rows and bounce reports are left out unless deleted_at or kind is filtered. For one message with its body use get_email_message; for a whole conversation get_email_thread_llm_context. page_size 0 answers counts alone; counts.groups splits by mailbox only when the filter names mailboxes. Requires can_view_email_messages.",
     toolClass: 'typical',
     route: emailRoute('POST', '/api/email-messages/search'),
     operation: 'search',

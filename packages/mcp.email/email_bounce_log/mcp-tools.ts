@@ -43,7 +43,8 @@ const EmailBounceLogIncluded = z.object({
 
 const EmailBounceLogCounts = z.object({
   total_count: z.number().int(),
-  groups: z.record(z.unknown()),
+  groups: z.record(z.unknown())
+    .describe('Events by kind and bounce_type; by email_account_sid too when the filter names mailboxes (eq or in).'),
 }).passthrough();
 
 const EmailBounceLogMetrics = z.object({
