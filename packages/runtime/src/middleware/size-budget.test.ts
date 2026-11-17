@@ -377,6 +377,217 @@ describe('a scrape page under result.rows', () => {
   });
 });
 
+// The counts block of an email search on a server of many mailboxes: one entry
+// per mailbox under counts.groups.email_account_sid, over the whole filter, in
+// every answer. Measured on production on 2026-11-16 (504 mailboxes): 12 884 of
+// the 13 297 characters of a count-only answer, and search_email_messages asked
+// for 8 rows came back as a page of 5 with advice to drop 'include'.
+const mailboxSid = (i: number): string => `em_ac_${String(i).padStart(12, '0')}`;
+
+function emailMessageRow(i: number): Record<string, unknown> {
+  return {
+    item: {
+      sid: `em_ms_${String(i).padStart(12, '0')}`,
+      team_sid: 'ts_tm_seeddev00001',
+      email_account_sid: mailboxSid(i % 504),
+      email_thread_sid: `em_th_${String(i).padStart(12, '0')}`,
+      internet_message_id: `<${'a1b2c3d4e5f6a7b8c9d0'.repeat(2)}.${i}@loadtest-farm.example.com>`,
+      provider_message_id: `1763290000:${i}`,
+      direction: 'inbound',
+      status: 'received',
+      kind: 'regular',
+      in_reply_to_email_message_sid: null,
+      bounce_type: null,
+      bounce_code: null,
+      bounce_diagnostic: null,
+      from: { name: `Load Test ${i}`, email: `u${String(i).padStart(4, '0')}@loadtest-farm.example.com` },
+      to: [{ name: 'Load Test', email: `u${String(i + 1).padStart(4, '0')}@loadtest-farm.example.com` }],
+      cc: [],
+      bcc: [],
+      reply_to: [],
+      subject: `Follow up on the proposal ${i} for mailbox u${String(i).padStart(4, '0')}`,
+      snippet: `Hello, this is message ${i} of the load stand, written to a mailbox of the stand. ${'lorem ipsum dolor '.repeat(6)}`,
+      body_html: null,
+      body_text: null,
+      is_body_synced: false,
+      attachments: [],
+      has_attachments: false,
+      headers: null,
+      body_html_sanitized: null,
+      body_text_unquoted: null,
+      email_folder_sids: [`em_fd_${String(i).padStart(12, '0')}`],
+      folder_role: 'inbox',
+      is_read: false,
+      is_flagged: false,
+      is_answered: false,
+      client_reference: null,
+      first_opened_at: null,
+      opens_count: 0,
+      first_clicked_at: null,
+      clicks_count: 0,
+      unsubscribed_at: null,
+      sent_at: ISO,
+      scheduled_at: null,
+      created_by: { actor_type: 'system', actor_sid: 'sy_sc_system000001', team_sid: 'ts_tm_seeddev00001' },
+      created_at: ISO,
+      updated_at: ISO,
+      deleted_at: null,
+    },
+    included: {},
+  };
+}
+
+function emailCounts(mailboxes: number): Record<string, unknown> {
+  return {
+    total_count: mailboxes * 158,
+    unread_count: mailboxes * 33,
+    groups: {
+      email_account_sid: Object.fromEntries(Array.from({ length: mailboxes }, (_, i) => [mailboxSid(i), 158])),
+      direction: { inbound: mailboxes * 103, outbound: mailboxes * 55 },
+      status: { received: mailboxes * 103, sent: mailboxes * 55 },
+      folder_role: { inbox: mailboxes * 100, sent: mailboxes * 55, spam: mailboxes, trash: mailboxes, archive: mailboxes },
+      is_read: { true: mailboxes * 125, false: mailboxes * 33 },
+      kind: { regular: mailboxes * 158 },
+    },
+  };
+}
+
+function emailSearchEnvelope(rows: number, mailboxes: number): Record<string, unknown> {
+  return {
+    success: true,
+    operation: 'search',
+    items: Array.from({ length: rows }, (_, i) => emailMessageRow(i)),
+    counts: emailCounts(mailboxes),
+    pagination: { next_cursor: rows > 0 ? 'eyJzZW50X2F0IjoiMjAyNi0xMS0xNiJ9' : null, has_more: rows > 0, total_count: mailboxes * 158 },
+    applied_filters: {},
+    includes: [],
+    meta: { trace_id: '01920000-0000-7000-8000-000000000000', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 1537 },
+  };
+}
+
+describe('a counts block that takes the budget', () => {
+  const BUDGET = 48_000;
+  const countsChars = (mailboxes: number): number => JSON.stringify(emailCounts(mailboxes)).length * 2;
+
+  it('the fixture is the measured one: 504 mailboxes take over half the budget before any row', () => {
+    expect(JSON.stringify(emailCounts(504)).length).toBeGreaterThan(12_000);
+    expect(countsChars(504)).toBeGreaterThan(BUDGET / 2);
+    expect(countsChars(2000)).toBeGreaterThan(BUDGET * 2);
+  });
+
+  it('a page that lost rows to the counts block says which block took the room', () => {
+    const envelope = emailSearchEnvelope(8, 504);
+    const out = applySizeBudget(rendered(envelope), BUDGET, 'search_email_messages');
+    const kept = (out.structuredContent as { items: unknown[] }).items.length;
+    const sentence =
+      `The counts block is ${countsChars(504)} chars against the ${BUDGET}-char budget: ` +
+      'counts.groups.email_account_sid alone holds 504 entries.';
+
+    expect(kept).toBeGreaterThan(0);
+    expect(kept).toBeLessThan(8);
+    expect(resultChars(out)).toBeLessThanOrEqual(BUDGET);
+    expect(out.content[0].text).toContain(sentence);
+    expect(out.content[0].text).toContain("neither page_size nor 'include' shrinks it");
+    expect(String(truncationOf(out).how_to_get_the_rest)).toContain(sentence);
+    expect(truncationOf(out)).toMatchObject({
+      truncated: true,
+      over_budget: false,
+      counts_block: {
+        path: 'counts',
+        chars: countsChars(504),
+        largest_group: 'email_account_sid',
+        largest_group_entries: 504,
+      },
+    });
+    // The block itself is never cut: half a distribution reads as a whole one.
+    expect((out.structuredContent as { counts: unknown }).counts).toEqual(envelope.counts);
+  });
+
+  it('when not even one row fits beside the counts block, the rows are not blamed', () => {
+    const out = applySizeBudget(rendered(emailSearchEnvelope(8, 2000)), BUDGET, 'search_email_messages');
+    const text = out.content[0].text;
+
+    expect((out.structuredContent as { items: unknown[] }).items).toHaveLength(1);
+    expect(truncationOf(out)).toMatchObject({ truncated: true, over_budget: true, returned: 1, omitted: 7 });
+    expect(text).toContain('Even one row does not fit this budget');
+    expect(text).toContain('The rows are not what is oversized.');
+    expect(text).toContain('counts.groups.email_account_sid alone holds 2000 entries');
+    expect(text).not.toContain('the rows themselves are what is oversized');
+    // Nothing in the answer sends the caller to 'include', the rows' remedy.
+    expect(text).not.toContain("Dropping entries from 'include'");
+    expect(String(truncationOf(out).how_to_get_the_rest)).not.toContain("Dropping entries from 'include'");
+  });
+
+  it('a count-only answer over the budget names its counts block, not include', () => {
+    const envelope = emailSearchEnvelope(0, 2000);
+    const out = applySizeBudget(rendered(envelope), BUDGET, 'search_email_messages');
+    const advice = String(truncationOf(out).how_to_get_the_rest);
+
+    expect(out.structuredContent).toMatchObject({ items: [], counts: envelope.counts });
+    expect(truncationOf(out)).toMatchObject({
+      truncated: false,
+      over_budget: true,
+      list: null,
+      omitted: 0,
+      counts_block: { path: 'counts', largest_group: 'email_account_sid', largest_group_entries: 2000 },
+    });
+    expect(advice).toContain('its counts block is what does not fit');
+    expect(advice).toContain('counts.groups.email_account_sid alone holds 2000 entries');
+    expect(advice).toContain('narrow the filter until fewer email_account_sid values are in scope');
+    expect(advice).not.toContain("'include' to stop eager-loading");
+    expect(out.content[0].text).toContain('OVER THE RESPONSE BUDGET');
+    expect(out.content[0].text).toContain(advice);
+  });
+
+  it('a metrics answer names aggregated.counts', () => {
+    const envelope = {
+      success: true,
+      operation: 'metrics',
+      period: { from: ISO, to: ISO },
+      aggregated: { counts: emailCounts(2000), metrics: { sent_count: 110_000, received_count: 206_000, bounce_rate: 0.01 } },
+      applied_filters: {},
+      meta: { trace_id: 't', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 1773 },
+    };
+    const out = applySizeBudget(rendered(envelope), BUDGET, 'get_email_messages_metrics');
+
+    expect(truncationOf(out)).toMatchObject({
+      truncated: false,
+      over_budget: true,
+      counts_block: { path: 'aggregated.counts', largest_group: 'email_account_sid', largest_group_entries: 2000 },
+    });
+    expect(String(truncationOf(out).how_to_get_the_rest)).toContain(
+      'aggregated.counts.groups.email_account_sid alone holds 2000 entries',
+    );
+    expect((out.structuredContent as { aggregated: unknown }).aggregated).toEqual(envelope.aggregated);
+  });
+
+  it('a counts block of a few enum buckets is never mentioned', () => {
+    const envelope = { ...searchEnvelope(50), counts: { total_count: 412, groups: { status: { active: 400, paused: 12 } } } };
+    const out = applySizeBudget(rendered(envelope), BUDGET, 'search_linkedin_accounts');
+
+    expect(truncationOf(out)).toMatchObject({ truncated: true });
+    expect(truncationOf(out)).not.toHaveProperty('counts_block');
+    expect(out.content[0].text).not.toContain('counts block');
+    expect(out.content[0].text).toContain("Dropping entries from 'include' shrinks every row");
+  });
+
+  it('a single record that is itself oversized keeps the include advice, counts or not', () => {
+    const envelope = {
+      success: true,
+      operation: 'get',
+      item: accountRow(1).item,
+      counts: { total_count: 1, groups: { status: { active: 1 } } },
+      included: { history: Array.from({ length: 300 }, (_, i) => ({ at: ISO, event: `event-number-${i}` })) },
+      includes: ['history'],
+      meta: { trace_id: 't', span_id: '0123456789abcdef', timestamp: ISO, duration_ms: 9 },
+    };
+    const out = applySizeBudget(rendered(envelope), 4_000);
+
+    expect(truncationOf(out)).not.toHaveProperty('counts_block');
+    expect(String(truncationOf(out).how_to_get_the_rest)).toContain("'include'");
+  });
+});
+
 describe('size-budget middleware', () => {
   const tool: ToolDefinition = {
     name: 'search_linkedin_accounts',
@@ -665,6 +876,62 @@ describe('size-budget middleware', () => {
       expect(resultChars(out)).toBeGreaterThan(48_000);
       expect(paginationOf(out).next_cursor).toBe(String(rowsOf(out).length));
       expect(truncationOf(out)).toMatchObject({ truncated: false, page_shortened: true, over_budget: true });
+    });
+
+    // The production reading of 2026-11-16: 8 rows asked, a page of 5 answered,
+    // and the notice told the caller to drop 'include' and nothing else.
+    describe('with a counts block that takes the room', () => {
+      /** A backend over one email table: the counts ride every page, whatever its size. */
+      function emailTable(rows: number, mailboxes: number) {
+        const calls: Array<Record<string, unknown>> = [];
+        const next = async (c: DispatchContext): Promise<ToolResult> => {
+          calls.push(c.args);
+          const size = typeof c.args.page_size === 'number' ? c.args.page_size : 50;
+          const envelope = emailSearchEnvelope(Math.min(size, rows), mailboxes);
+          return rendered({
+            ...envelope,
+            pagination: { next_cursor: size < rows ? String(size) : null, has_more: size < rows, total_count: rows },
+          });
+        };
+        return { calls, next };
+      }
+      const emailCtx: DispatchContext = { ...searchCtx, tool: { ...searchTool, name: 'search_email_messages' } };
+
+      it('the shortened page says the counts block took the room, with its size and its axis', async () => {
+        const table = emailTable(100, 504);
+        const out = await gate({ ...emailCtx, args: { page_size: 8 } }, table.next);
+        const returned = rowsOf(out).length;
+        const text = out.content[0].text;
+
+        expect(table.calls).toHaveLength(2);
+        expect(returned).toBeGreaterThan(0);
+        expect(returned).toBeLessThan(8);
+        expect(resultChars(out)).toBeLessThanOrEqual(48_000);
+        expect(text.startsWith('PAGE SHORTENED BY THE MCP SERVER.')).toBe(true);
+        expect(text).toContain('counts.groups.email_account_sid alone holds 504 entries');
+        expect(truncationOf(out)).toMatchObject({
+          page_shortened: true,
+          over_budget: false,
+          returned,
+          counts_block: { path: 'counts', largest_group: 'email_account_sid', largest_group_entries: 504 },
+        });
+        expect(paginationOf(out)).toMatchObject({ next_cursor: String(returned), has_more: true });
+      });
+
+      it('a block over the whole budget goes out with one row, flagged, and the rows are not blamed', async () => {
+        const table = emailTable(100, 2000);
+        const out = await gate({ ...emailCtx, args: { page_size: 8 } }, table.next);
+        const text = out.content[0].text;
+
+        expect(table.calls).toEqual([{ page_size: 8 }, { page_size: 1 }]);
+        expect(rowsOf(out)).toHaveLength(1);
+        expect(truncationOf(out)).toMatchObject({ truncated: false, page_shortened: true, over_budget: true, omitted: 0 });
+        expect(text).toContain('over the budget all the same');
+        expect(text).toContain('The rows are not what is oversized: the counts block is, as said above.');
+        expect(text).toContain('counts.groups.email_account_sid alone holds 2000 entries');
+        expect(text).not.toContain('the rows themselves are what is oversized');
+        expect(text).not.toContain("dropping entries from 'include'");
+      });
     });
 
     it('logs the second read, with no row and no token in the line', async () => {
