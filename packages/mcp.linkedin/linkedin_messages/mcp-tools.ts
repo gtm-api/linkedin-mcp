@@ -453,7 +453,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       reply_to_linkedin_message_sid: MESSAGE_SID.nullable().optional()
         .describe("Quote one message of the thread under this one, as LinkedIn's own Reply does: our sid of the quoted message (the rows of get_my_latest_linkedin_messages and search_linkedin_messages carry it). The quote (its author and words) is filled from the stored row, never from you. It may stand alone: the quoted message names the thread, so linkedin_conversation_sid can be omitted; given both, they must name the same thread (422 reply_target_other_thread). Refused for a message deleted for everyone (422 reply_target_deleted), for LinkedIn's own notice or a row without a LinkedIn message id (422 reply_target_not_quotable), for a message a page or a company wrote (422 reply_target_sender_unknown), and next to ln_id / sn_id / public_identifier. The sent row carries the quote in reply_to. Regular messenger only."),
       stop_if_replied_after: z.string().datetime().nullable().optional()
-        .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 503 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
+        .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 409 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
       client_reference: sendKey('the thread, else the person'),
       confirmed_not_sent: CONFIRMED_NOT_SENT,
       confirmed_sent: CONFIRMED_SENT,
@@ -519,7 +519,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
       text: z.string().min(1).max(1900).describe('InMail body; 1..1900 chars. Sent verbatim: the platform renders no merge fields, a {{first_name}} goes out as those braces.'),
       attachments: z.array(Attachment).optional().describe('Exactly one of file_base64 / file_url per item; 35 MB decoded total per send. An item whose file_type is video/* is delivered as a playable video in the thread; any other type arrives as a generic file attachment.'),
       stop_if_replied_after: z.string().datetime().nullable().optional()
-        .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 503 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
+        .describe('ISO 8601 UTC moment. When given, the thread is read from LinkedIn before the send and the send is refused with 409 replied if the person wrote after this moment (context.linkedin_message_sid names their message: read it before you send again); 409 reply_check_unavailable when that read fails, nothing sent, retry after retry_after. Omit or null to send regardless.'),
       client_reference: sendKey('the thread, else the person'),
       confirmed_not_sent: CONFIRMED_NOT_SENT,
       confirmed_sent: CONFIRMED_SENT,
