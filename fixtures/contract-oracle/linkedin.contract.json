@@ -31257,7 +31257,7 @@
                     "field": "include.*",
                     "rules": [
                         "string",
-                        "in:\"antidetect_browser\",\"linkedin_account_smart_limits\",\"linkedin_account_snapshot\",\"linkedin_account_quota_hits\",\"linkedin_account_block_log\",\"linkedin_account_block_log_counts\",\"linkedin_connections_counts\",\"linkedin_connection_requests_counts\",\"linkedin_connection_invitations_counts\",\"linkedin_conversations_counts\",\"linkedin_followers_counts\""
+                        "in:\"antidetect_browser\",\"linkedin_account_smart_limits\",\"linkedin_account_snapshot\",\"linkedin_account_quota_hits\",\"linkedin_account_block_log\",\"linkedin_account_block_log_counts\",\"linkedin_connections_counts\",\"linkedin_connection_requests_counts\",\"linkedin_connection_invitations_counts\",\"linkedin_conversations_counts\",\"linkedin_followers_counts\",\"initial_sync\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -31273,7 +31273,8 @@
                         "linkedin_connection_requests_counts",
                         "linkedin_connection_invitations_counts",
                         "linkedin_conversations_counts",
-                        "linkedin_followers_counts"
+                        "linkedin_followers_counts",
+                        "initial_sync"
                     ],
                     "min": null,
                     "max": null,
@@ -31436,7 +31437,7 @@
                     "field": "include.*",
                     "rules": [
                         "string",
-                        "in:\"antidetect_browser\",\"linkedin_account_smart_limits\",\"linkedin_account_snapshot\",\"linkedin_account_quota_hits\",\"linkedin_account_block_log\",\"linkedin_account_block_log_counts\",\"linkedin_connections_counts\",\"linkedin_connection_requests_counts\",\"linkedin_connection_invitations_counts\",\"linkedin_conversations_counts\",\"linkedin_followers_counts\""
+                        "in:\"antidetect_browser\",\"linkedin_account_smart_limits\",\"linkedin_account_snapshot\",\"linkedin_account_quota_hits\",\"linkedin_account_block_log\",\"linkedin_account_block_log_counts\",\"linkedin_connections_counts\",\"linkedin_connection_requests_counts\",\"linkedin_connection_invitations_counts\",\"linkedin_conversations_counts\",\"linkedin_followers_counts\",\"initial_sync\""
                     ],
                     "required": false,
                     "nullable": false,
@@ -31452,7 +31453,8 @@
                         "linkedin_connection_requests_counts",
                         "linkedin_connection_invitations_counts",
                         "linkedin_conversations_counts",
-                        "linkedin_followers_counts"
+                        "linkedin_followers_counts",
+                        "initial_sync"
                     ],
                     "min": null,
                     "max": null,
