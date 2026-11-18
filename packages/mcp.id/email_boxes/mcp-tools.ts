@@ -1,18 +1,23 @@
 // Entity: Email Box (gtm.service.id), "email server" in the app
 // Source of truth: product/research/gtm.service.id/entities/email_boxes.md
 // Format: registry v2. Each tool carries route metadata so the generic
-// dispatcher can drive it. 9 definitions (the email-boxes route group, ADR 001
+// dispatcher can drive it. 10 definitions (the email-boxes route group, ADR 001
 // D12 of 2026-11-12: a workspace owns several email servers), mounted on
 // id.billing because a server is a paid unit of the workspace's subscription;
-// 7 served, 2 REST only (surface api). Authored 2026-11-12, after the backend
+// 7 served, 3 REST only (surface api). Authored 2026-11-12, after the backend
 // (gtm.service.id e2ee6be) and the Email Accounts screen settled the contract.
 //
 // Per route, what an agent gets and why:
 //   search          served. The read every other verb starts from.
-//   create          served, dangerous. A purchase: with an active subscription
-//                   the unit is charged in the call (prorated), so the preview
-//                   gate stands between the agent and the card. No backend route
-//                   prices a purchase, so its first call carries no quote.
+//   preview-create  REST only, and the previewRoute of create (2026-11-16): how
+//                   the purchase would be paid, what it charges now, the server's
+//                   recurring price and whether its machine can be had. Until then
+//                   the first call of create carried no price, and an agent could
+//                   not tell the user what a purchase costs.
+//   create          served, dangerous, previewRoute preview-create. A purchase:
+//                   with an active subscription the unit is charged in the call
+//                   (prorated), so the preview gate stands between the agent and
+//                   the card, and the first call carries the quote.
 //   confirm-checkout REST only. It follows a person's own gesture in the app:
 //                   paying in the Paddle checkout create opens for a workspace
 //                   with no subscription, which only the app can open. The
@@ -26,7 +31,8 @@
 //                   money (the precedent is preview-change, 2026-11-07). The app's
 //                   confirm dialog calls the route, so it stays.
 //   resize          served, dangerous, previewRoute preview-resize: the first
-//                   call carries the quote and the fit.
+//                   call carries the quote, the fit and whether the new plan's
+//                   machine can be had for this server.
 //   delete          served, dangerous. It destroys the machine and gives back its
 //                   paid unit, or keeps the unit paid when it is the subscription's
 //                   only item (Eugene, 2026-11-14).
@@ -38,7 +44,9 @@
 // run.verb / run.status are orchestration's EmailBoxRunVerbEnum and
 // EmailBoxRunStatusEnum, which the id contract oracle does not carry, and
 // price.interval is a class constant pair on EmailBoxPriceValue: plain strings
-// with the values in the description, so no enum here goes unpinned.
+// with the values in the description, so no enum here goes unpinned. The same
+// holds for the two quote enums of gtm.service.id (payment, unavailable_reason),
+// which are that service's own.
 
 import { z } from 'zod';
 import type { ToolDefinition } from '@gtm/mcp-runtime/types';
@@ -128,6 +136,16 @@ const EmailBoxCheckout = z.object({
   paddle_transaction_id: z.string().nullable(),
 }).passthrough();
 
+// Whether the machine of a plan can be had right now. Asked of the hosting
+// provider through gtm.service.orchestration before any money moves: the
+// confirmed call refuses when it cannot.
+const EmailBoxAvailability = {
+  available: z.boolean()
+    .describe("false: the plan's machine cannot be had right now, and the confirmed call would refuse with nothing charged."),
+  unavailable_reason: z.string().nullable()
+    .describe("out_of_stock: no capacity for the plan's machine type where the server would be. disk_does_not_shrink: a change down in place after the server's disk grew. stock_unknown: the check got no answer. Null when available."),
+};
+
 const EmailBoxResizeQuote = z.object({
   fits: z.boolean().describe("false: the server holds more mailboxes than the plan's cap, and the change would be refused."),
   seats_used: z.number().int().nonnegative(),
@@ -136,6 +154,17 @@ const EmailBoxResizeQuote = z.object({
   next_amount: Money.extend({
     interval: z.string().describe('month or year.'),
   }).describe('The recurring price of the server from the next period on.'),
+  ...EmailBoxAvailability,
+});
+
+const EmailBoxCreateQuote = z.object({
+  payment: z.string()
+    .describe("charged_now: the unit joins the live subscription and amount_due_now goes to its card in the purchase. checkout: no live subscription, the purchase charges nothing and answers a Paddle checkout only the app can open. kept_seat: a seat kept from a deleted server of the plan pays, nothing is charged."),
+  amount_due_now: Money.describe('Charged by the purchase itself, prorated for the rest of the period; 0.00 for checkout and kept_seat.'),
+  next_amount: Money.extend({
+    interval: z.string().describe('month or year.'),
+  }).describe('The recurring price of the server; with checkout, what the checkout asks for before tax.'),
+  ...EmailBoxAvailability,
 });
 
 const RO = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
@@ -171,9 +200,12 @@ export const emailBoxesTools: ToolDefinition[] = [
     ...base,
     name: 'create_email_box',
     description:
-      "Buy an email server, paid as one unit of the plan's price on the workspace's subscription. Spends money. With an active subscription the unit joins it on its own cycle and the prorated amount for the rest of the period is charged to its card in the call (409 payment_declined buys nothing); item is the new server in provisioning, run shows the build. Without one nothing is charged: item is null and checkout holds a Paddle checkout only the app can open, so the user pays on the Email Accounts screen (search_billing_subscriptions tells which case applies). A seat delete_email_box kept (retained subscription_seat) goes to the next server of its plan, free. Through MCP it takes two calls: the first, without commit_token, changes nothing and has no price quote; the second, same arguments plus commit_token, buys. The REST route takes no commit_token and buys on the call. Not idempotent: each confirmed call buys another server. 503 email_servers_not_offered: this deployment sells none. Requires can_manage_billing.",
+      "Buy an email server: one unit of the plan's price on the workspace's subscription. Spends money. Through MCP it takes two calls. The first, without commit_token, changes nothing: preview_result carries the quote beside the commit_token: payment (charged_now: amount_due_now, prorated, goes to the subscription's card; checkout: no subscription, nothing is charged and checkout holds a Paddle checkout only the app can open; kept_seat: a seat a deleted server left pays, free), next_amount (the recurring price) and available. Show the money to the user; do not commit when available is false; status unanswered means no quote came back, say so. The second call, same arguments plus commit_token, buys: item is the new server in provisioning, run shows the build. REST buys on the call; POST /api/email-boxes/preview-create is its preview. Each confirmed call buys another server. 409 payment_declined; 503 email_server_out_of_stock, email_server_stock_unknown, email_servers_not_offered. Requires can_manage_billing.",
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/email-boxes' },
+    // The first call's own backend read: what the purchase costs and whether its
+    // machine can be had, asked with the same arguments.
+    previewRoute: { service: 'id', method: 'POST', pathTemplate: '/api/email-boxes/preview-create' },
     operation: 'create',
     envelope: 'create',
     availability: 'ga',
@@ -191,6 +223,31 @@ export const emailBoxesTools: ToolDefinition[] = [
         .describe('Set instead of item when the workspace has no subscription: the purchase finishes in the app.'),
     }),
     annotations: { title: 'Buy email server', readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false },
+  },
+  {
+    ...base,
+    name: 'preview_email_box_create',
+    description:
+      "Quote the purchase of an email server without making it: how it would be paid (payment: charged_now, checkout or kept_seat), what the purchase itself charges (amount_due_now), the server's recurring price (next_amount) and whether the plan's machine can be had where it was asked for (available, unavailable_reason). No state change, no charge. Through MCP the first call of create_email_box runs this route and carries its answer as preview_result. Requires can_manage_billing.",
+    toolClass: 'typical',
+    route: { service: 'id', method: 'POST', pathTemplate: '/api/email-boxes/preview-create' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    surface: 'api',
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      name: z.string().min(1).max(60).describe("The server's label, 1 to 60 characters."),
+      plan: EmailBoxPlan,
+      location: EmailBoxLocation,
+      copy_settings_from: SID.nullable().optional()
+        .describe('A serving server of this workspace whose settings and stop-list the new one starts with.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), EmailBoxCreateQuote),
+    annotations: { title: 'Preview email server purchase', ...RO },
   },
   {
     ...base,
@@ -237,7 +294,7 @@ export const emailBoxesTools: ToolDefinition[] = [
     ...base,
     name: 'preview_email_box_resize',
     description:
-      "Quote a plan change of an email server without making it: whether its mailboxes fit the new plan (fits, seats_used, seats_cap_after), what Paddle would charge now (amount_due_now) and the server's recurring price from the next period (next_amount). No state change, no charge. Through MCP the first call of resize_email_box runs this route and carries its answer as preview_result. Requires can_manage_billing.",
+      "Quote a plan change of an email server without making it: whether its mailboxes fit the new plan (fits, seats_used, seats_cap_after), what Paddle would charge now (amount_due_now), the server's recurring price from the next period (next_amount) and whether the new plan's machine can be had for this server (available, unavailable_reason). No state change, no charge. Through MCP the first call of resize_email_box runs this route and carries its answer as preview_result. Requires can_manage_billing.",
     toolClass: 'typical',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/email-boxes/{sid}/preview-resize', sidParam: 'sid' },
     operation: 'action',
@@ -259,7 +316,7 @@ export const emailBoxesTools: ToolDefinition[] = [
     ...base,
     name: 'resize_email_box',
     description:
-      "Change an email server's plan. Spends money: its unit moves to the new plan's price in one subscription update, prorated now (an upgrade charges the difference for the rest of the period, a downgrade credits it). The server reads resizing until the run ends; to or from dedicated it moves to a new machine and its sid changes. Through MCP it takes two calls. The first, without commit_token, changes nothing: preview_result carries the quote (fits, seats_used, seats_cap_after, amount_due_now, next_amount) beside the commit_token. Show the money to the user; do not commit when fits is false; status unanswered means no quote came back, say so. The second call, same arguments plus commit_token, commits. The REST route takes no commit_token and commits on the call: POST /api/email-boxes/{sid}/preview-resize is its preview. 409 email_box_does_not_fit, email_box_busy, email_box_complimentary, email_box_not_billed; 422 email_box_already_on_plan. Requires can_manage_billing.",
+      "Change an email server's plan. Spends money: its unit moves to the new plan's price, prorated now (an upgrade charges the difference, a downgrade credits it). The server reads resizing until the run ends; to or from dedicated it moves to a new machine and its sid changes. Through MCP it takes two calls. The first, without commit_token, changes nothing: preview_result carries the quote (fits, seats_used, seats_cap_after, amount_due_now, next_amount, available) beside the commit_token. Show the money to the user; do not commit when fits or available is false; status unanswered means no quote came back, say so. The second call, same arguments plus commit_token, commits. REST commits on the call; POST /api/email-boxes/{sid}/preview-resize is its preview. 409 email_box_does_not_fit, email_box_busy, email_box_complimentary, email_box_not_billed, email_box_disk_does_not_shrink; 422 email_box_already_on_plan; 503 email_server_out_of_stock, email_server_stock_unknown. Requires can_manage_billing.",
     toolClass: 'complex',
     route: { service: 'id', method: 'POST', pathTemplate: '/api/email-boxes/{sid}/resize', sidParam: 'sid' },
     // The first call's own backend read: the route the app's confirm dialog

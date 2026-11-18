@@ -15285,6 +15285,104 @@
         },
         {
             "method": "POST",
+            "uri": "api/email-boxes/preview-create",
+            "controller": "App\\Entities\\EmailBox\\EmailBoxController",
+            "action": "previewCreate",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_manage_billing",
+            "internal": false,
+            "request_class": "App\\Entities\\EmailBox\\Requests\\EmailBoxCreateRequest",
+            "rules": [
+                {
+                    "field": "name",
+                    "rules": [
+                        "required",
+                        "string",
+                        "min:1",
+                        "max:60"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 60,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "plan",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"starter\",\"growth\",\"agency\",\"dedicated\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "starter",
+                        "growth",
+                        "agency",
+                        "dedicated"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "location",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"hel1\",\"fsn1\",\"nbg1\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "hel1",
+                        "fsn1",
+                        "nbg1"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "copy_settings_from",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/email-boxes/search",
             "controller": "App\\Entities\\EmailBox\\EmailBoxController",
             "action": "search",
@@ -27531,6 +27629,7 @@
         "email_box_already_on_plan": "This email server is already on that plan.",
         "email_box_busy": "This email server is in the middle of a change; wait for it to finish.",
         "email_box_complimentary": "This email server is included with the workspace and is not billed, so it cannot be resized or deleted here.",
+        "email_box_disk_does_not_shrink": "This email server's disk (context.server_disk_gb GB) is larger than the machine of the smaller plan holds (context.plan_disk_gb GB), so its plan cannot be changed down in place. Nothing was charged. Add a server of the smaller plan, move the mailboxes into it and delete this one.",
         "email_box_does_not_fit": "This email server holds more mailboxes than the chosen plan allows; move or remove mailboxes first, or choose a larger plan.",
         "email_box_has_mailboxes": "This email server still holds mailboxes; move or remove them before deleting it.",
         "email_box_has_no_bundle": "A secrets merge needs a stored bundle to merge into, and this box has none; send the full bundle.",
@@ -27540,7 +27639,9 @@
         "email_box_not_replaceable": "The box named in replaces_email_box_sid is not the workspace's single live box (or is not active or suspended), so it cannot be replaced.",
         "email_box_not_serving": "Settings can be copied from a server that is running; {field} names one that is not.",
         "email_box_unaddressable": "This box is not live or has no hostname and access key yet, so it cannot be addressed.",
+        "email_server_out_of_stock": "No machine for this email server plan is in stock right now (context.plan, and context.location for a new server). Nothing was charged; try again later or choose another plan.",
         "email_server_price_missing": "The billing catalog has no price for this email server plan yet; try again later.",
+        "email_server_stock_unknown": "Whether a machine for this email server plan is in stock could not be checked just now. Nothing was charged; try again in a minute.",
         "email_servers_not_offered": "Email servers cannot be bought on this deployment yet.",
         "email_taken": "An account with this email already exists; sign in and connect the agent from the app instead.",
         "handover_in_flight": "A handover of this account is already in progress; wait for it to finish.",

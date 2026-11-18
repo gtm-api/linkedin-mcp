@@ -7013,6 +7013,23 @@
         },
         {
             "method": "POST",
+            "uri": "internal/email-box-runs/capacity",
+            "controller": "App\\Entities\\EmailBoxRun\\InternalEmailBoxRunController",
+            "action": "capacity",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
             "uri": "internal/email-box-runs/list",
             "controller": "App\\Entities\\EmailBoxRun\\InternalEmailBoxRunController",
             "action": "list",
@@ -7880,6 +7897,7 @@
     ],
     "error_catalog": {
         "cancelled_cannot_retry": "This item's run was deleted (see context.status): a deleted run stays stopped and its items are not retried. Create a new run to reach this target again.",
+        "capacity_check_unavailable": "The hosting provider or the email-box registry did not answer the capacity question (see context.detail), so whether the plan's machine can be had is not known; retry in a minute.",
         "commit_in_progress": "This commit_token is being committed by another request right now; wait a moment and send the same commit again, it answers the run that request created.",
         "commit_token_expired": "commit_token has expired; run the preview again and commit with the new token.",
         "email_box_not_ready": "The email box is not in a state that can take part in a move (see context.status); the source must be active or suspended and the target active.",
