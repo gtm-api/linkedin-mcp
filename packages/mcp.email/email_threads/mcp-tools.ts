@@ -40,7 +40,8 @@ const EmailThreadIncluded = z.object({
 const EmailThreadCounts = z.object({
   total_count: z.number().int(),
   unread_threads_count: z.number().int().optional(),
-  groups: z.record(z.unknown()),
+  groups: z.record(z.unknown())
+    .describe('Threads by has_unanswered_inbound (true, false); by email_account_sid too when the filter names mailboxes (eq or in).'),
 }).passthrough();
 
 const EmailThreadMetrics = z.object({
