@@ -1118,7 +1118,10 @@ const PREFIX = {
  * value trips neither `prohibits` nor the other side's `required_without`).
  * Refusing it here would be stricter than the route for no gain.
  */
-const searchUrl = (prefix: string, note = '') => z.string().max(2048).startsWith(prefix).nullable().optional()
+// 15000 is the backend's bound for a search link (LinkedinSearchUrlRule::MAX_LENGTH):
+// a Sales Navigator link keeps its arguments in the # past 4140 characters and
+// runs to several thousand, so 2048 refused the links people actually copy.
+const searchUrl = (prefix: string, note = '') => z.string().max(15000).startsWith(prefix).nullable().optional()
   .describe(`EXCLUSIVE with \`filters\`: send url OR filters, never both (422) and never neither (422). A search URL built in the LinkedIn UI, and the escape hatch for everything the filter vocabulary cannot express. MUST start with ${prefix} : a URL from another LinkedIn search screen is refused here and again by the backend (422 invalid_search_url), because running it would silently scrape the wrong thing.${note}`);
 
 /** The `page` field, shared by the eleven page-numbered search verbs. */
