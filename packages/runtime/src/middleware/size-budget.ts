@@ -30,6 +30,19 @@ import type { ToolMiddleware } from '../chain';
 // carries a `truncation` block in structuredContent AND a plain-text notice
 // ahead of the payload, because the whole failure mode being prevented is an
 // agent reasoning over 12 rows while believing it has 50.
+//
+// One part of an answer is sized by the data and not by the page: the counts
+// block of a search (`counts`) and of a metrics answer (`aggregated.counts`),
+// which holds one entry per value of every groupable axis over the whole filter.
+// An axis keyed by a parent's sid grows with the workspace: on 2026-11-16 an
+// email server of 504 mailboxes answered 12 884 characters of
+// counts.groups.email_account_sid in every search, 25 768 of this budget over
+// the two copies, and search_email_messages asked for 8 rows came back as a page
+// of 5 with advice to drop 'include'. No lever here can shrink that block (it is
+// not a list, and half a distribution reads as a whole one), so when it takes a
+// real share of the budget the notice NAMES it, with its size and its largest
+// axis, and when it outweighs what the advice would otherwise blame the advice
+// blames it instead of the rows.
 
 /** Lists that are a page of DATA, so dropping the tail loses nothing but data. */
 const TRIMMABLE_LISTS = ['items', 'groups'] as const;
@@ -55,6 +68,85 @@ export function resultChars(result: ToolResult): number {
   const structured = result.structuredContent ? JSON.stringify(result.structuredContent).length : 0;
   return text + structured;
 }
+
+/** What the counts block of an answer weighs, when it has one. */
+interface CountsWeight {
+  /** Where the block sits: `counts` on a search, `aggregated.counts` on metrics. */
+  path: string;
+  /** Its characters in the result: the compact render, counted in both copies. */
+  chars: number;
+  /** The axis of its `groups` that holds the most characters, if it has any. */
+  largestGroup: string | null;
+  largestGroupEntries: number;
+}
+
+// The share of the budget from which the counts block is worth a sentence. Below
+// it the block is a few hundred characters of enum buckets and naming it would
+// only lengthen a notice that is itself counted against the budget.
+const COUNTS_NAMED_FROM_SHARE = 0.25;
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  !!value && typeof value === 'object' && !Array.isArray(value);
+
+/** The counts block of a search (`counts`) or of a metrics answer (`aggregated.counts`). */
+function countsBlockOf(structured: Record<string, unknown>): { path: string; block: Record<string, unknown> } | null {
+  if (isRecord(structured.counts)) return { path: 'counts', block: structured.counts };
+  const aggregated = structured.aggregated;
+  if (isRecord(aggregated) && isRecord(aggregated.counts)) return { path: 'aggregated.counts', block: aggregated.counts };
+  return null;
+}
+
+function countsWeightOf(structured: Record<string, unknown>): CountsWeight | null {
+  const found = countsBlockOf(structured);
+  if (!found) return null;
+  const { path, block } = found;
+
+  let largestGroup: string | null = null;
+  let largestGroupEntries = 0;
+  let largestGroupChars = 0;
+  if (isRecord(block.groups)) {
+    for (const [axis, values] of Object.entries(block.groups)) {
+      if (!isRecord(values)) continue;
+      const chars = JSON.stringify(values).length;
+      if (chars > largestGroupChars) {
+        largestGroup = axis;
+        largestGroupEntries = Object.keys(values).length;
+        largestGroupChars = chars;
+      }
+    }
+  }
+  return { path, chars: JSON.stringify(block).length * 2, largestGroup, largestGroupEntries };
+}
+
+/** The counts block, when it takes enough of the budget to be named in a notice. */
+function namedCounts(structured: Record<string, unknown>, budget: number): CountsWeight | null {
+  const counts = countsWeightOf(structured);
+  return counts && counts.chars >= budget * COUNTS_NAMED_FROM_SHARE ? counts : null;
+}
+
+function countsSentence(counts: CountsWeight, budget: number): string {
+  const inside = counts.largestGroup
+    ? `: ${counts.path}.groups.${counts.largestGroup} alone holds ${counts.largestGroupEntries} entries`
+    : '';
+  return (
+    `The ${counts.path} block is ${counts.chars} chars against the ${budget}-char budget${inside}. It is ` +
+    "computed over the whole filter and not over the page, so neither page_size nor 'include' shrinks it: narrow " +
+    `the filter until fewer ${counts.largestGroup ?? 'group'} values are in scope.`
+  );
+}
+
+/** The structured twin of the sentence, for a client that reads no prose. */
+const countsNote = (counts: CountsWeight | null): Record<string, unknown> =>
+  counts
+    ? {
+        counts_block: {
+          path: counts.path,
+          chars: counts.chars,
+          largest_group: counts.largestGroup,
+          largest_group_entries: counts.largestGroupEntries,
+        },
+      }
+    : {};
 
 interface TrimmableList {
   /** The list's path as the notice names it: `items`, or `result.rows`. */
@@ -105,6 +197,8 @@ function howToGetTheRest(
   listKey: string,
   kept: number,
   total: number,
+  /** false when the rows are not what is oversized: the include hint would send the caller the wrong way. */
+  rowsAreTheCause = true,
 ): string {
   const head =
     `Rows come off the END of the list, never sampled and never reordered, so ${listKey} holds the ` +
@@ -127,7 +221,8 @@ function howToGetTheRest(
     `${head} Do NOT follow pagination.next_cursor to collect the missing rows: that cursor resumes AFTER ` +
     `row ${total}, so rows ${kept + 1}..${total} would be skipped without a trace. Re-run this exact call ` +
     `with page_size: ${kept} (or smaller) and then follow next_cursor from THAT response, which resumes at ` +
-    `row ${kept + 1}. Dropping entries from 'include' shrinks every row and lets more of them fit.`
+    `row ${kept + 1}.` +
+    (rowsAreTheCause ? " Dropping entries from 'include' shrinks every row and lets more of them fit." : '')
   );
 }
 
@@ -194,10 +289,17 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
 
   // ── Lever 3 (no list to trim) ─────────────────────────────────────────────
   if (!list) {
-    const advice =
-      'Nothing was dropped: this payload has no row list, so the only way to shrink it here would be to ' +
-      "delete fields out of a single record. Drop entries from 'include' to stop eager-loading relations, " +
-      'or fetch a smaller unit (one sid at a time).';
+    // The counts block is to blame when it is the larger half of what is left
+    // after compacting: a count-only search, or a metrics answer, of a workspace
+    // with more values on one axis than the budget holds.
+    const counts = countsWeightOf(structured);
+    const blamed = counts && counts.chars * 2 > resultChars(compacted) ? counts : null;
+    const advice = blamed
+      ? `Nothing was dropped: this payload has no row list to trim, and its ${blamed.path} block is what does ` +
+        `not fit. ${countsSentence(blamed, budget)}`
+      : 'Nothing was dropped: this payload has no row list, so the only way to shrink it here would be to ' +
+        "delete fields out of a single record. Drop entries from 'include' to stop eager-loading relations, " +
+        'or fetch a smaller unit (one sid at a time).';
     const truncation: TruncationBlock = {
       truncated: false,
       over_budget: true,
@@ -210,6 +312,7 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
       char_budget: budget,
       full_response_chars: fullChars,
       how_to_get_the_rest: advice,
+      ...countsNote(blamed),
     };
     const notice =
       `OVER THE RESPONSE BUDGET. This result is ${fullChars} chars against this server's ${budget}-char ` +
@@ -219,6 +322,11 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
 
   // ── Lever 2: trim the data page ───────────────────────────────────────────
   const total = list.rows.length;
+  // Named whenever it takes a real share of the budget, since every character of
+  // it is a character the rows did not get; blamed in the rows' place when not
+  // even one row fits and the block outweighs that row.
+  const counts = namedCounts(structured, budget);
+  const countsOutweighARow = !!counts && counts.chars > JSON.stringify(list.rows[0]).length * 2;
 
   const trimmedAt = (kept: number, overBudget: boolean): Record<string, unknown> => {
     const truncation: TruncationBlock = {
@@ -233,7 +341,10 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
       rows_on_this_page: total,
       char_budget: budget,
       full_response_chars: fullChars,
-      how_to_get_the_rest: howToGetTheRest(structured, list.key, kept, total),
+      how_to_get_the_rest:
+        howToGetTheRest(structured, list.key, kept, total, !(overBudget && countsOutweighARow)) +
+        (counts ? ` ${countsSentence(counts, budget)}` : ''),
+      ...countsNote(counts),
     };
     return { ...list.withRows(structured, list.rows.slice(0, kept)), truncation };
   };
@@ -243,13 +354,17 @@ export function applySizeBudget(result: ToolResult, budget: number, toolName?: s
       `TRUNCATED BY THE MCP SERVER. The full response was ${fullChars} chars against this server's ` +
         `${budget}-char tool-result budget, so ${list.key} was cut to the first ${kept} of ${total} rows ` +
         `and ${total - kept} were dropped.`,
-      howToGetTheRest(structured, list.key, kept, total),
+      howToGetTheRest(structured, list.key, kept, total, !(overBudget && countsOutweighARow)),
     ];
     if (overBudget) {
       lines.push(
         `Even one row does not fit this budget, so this result is still over it at ${kept} row(s). ` +
-          "Drop entries from 'include': the rows themselves are what is oversized.",
+          (counts && countsOutweighARow
+            ? `The rows are not what is oversized. ${countsSentence(counts, budget)}`
+            : "Drop entries from 'include': the rows themselves are what is oversized."),
       );
+    } else if (counts) {
+      lines.push(countsSentence(counts, budget));
     }
     return lines.join('\n');
   };
@@ -322,11 +437,18 @@ function reaskable(
  */
 function shortenedPage(page: ToolResult, first: TruncationBlock, budget: number): ToolResult {
   const structured = page.structuredContent as Record<string, unknown>;
-  const returned = (structured.items as unknown[]).length;
-  const how =
+  const rows = structured.items as unknown[];
+  const returned = rows.length;
+  const counts = namedCounts(structured, budget);
+  const countsOutweighTheRows = !!counts && counts.chars > JSON.stringify(rows).length * 2;
+  const how = (overBudget: boolean): string =>
     `pagination describes these ${returned} rows, so nothing is skipped: follow next_cursor as usual, and ` +
     `has_more says whether rows remain. Asking page_size: ${returned} on the next call spares this server the ` +
-    "second read, and dropping entries from 'include' shrinks every row and lets more of them fit.";
+    'second read' +
+    (overBudget && countsOutweighTheRows
+      ? '.'
+      : ", and dropping entries from 'include' shrinks every row and lets more of them fit.") +
+    (counts ? ` ${countsSentence(counts, budget)}` : '');
 
   const block = (overBudget: boolean): TruncationBlock => ({
     truncated: false,
@@ -341,20 +463,23 @@ function shortenedPage(page: ToolResult, first: TruncationBlock, budget: number)
     full_page_rows: first.rows_on_this_page,
     char_budget: budget,
     full_response_chars: first.full_response_chars,
-    how_to_get_the_rest: how,
+    how_to_get_the_rest: how(overBudget),
+    ...countsNote(counts),
   });
-  const notice =
+  const notice = (overBudget: boolean): string =>
     `PAGE SHORTENED BY THE MCP SERVER. The full page was ${String(first.rows_on_this_page)} rows and ` +
     `${first.full_response_chars} chars against this server's ${budget}-char tool-result budget, so this answer ` +
-    `is a page of ${returned} rows.\n${how}`;
+    `is a page of ${returned} rows.\n${how(overBudget)}`;
 
   const build = rendererOf(page, structured);
-  const fitting = build({ ...structured, truncation: block(false) }, notice);
+  const fitting = build({ ...structured, truncation: block(false) }, notice(false));
   if (resultChars(fitting) <= budget) return fitting;
   return build(
     { ...structured, truncation: block(true) },
-    `${notice}\nThis page is over the budget all the same, and nothing was dropped from it. ` +
-      "Drop entries from 'include': the rows themselves are what is oversized.",
+    `${notice(true)}\nThis page is over the budget all the same, and nothing was dropped from it. ` +
+      (counts && countsOutweighTheRows
+        ? `The rows are not what is oversized: the ${counts.path} block is, as said above.`
+        : "Drop entries from 'include': the rows themselves are what is oversized."),
   );
 }
 
