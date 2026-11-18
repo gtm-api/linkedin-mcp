@@ -34,7 +34,7 @@ const SID = z.string().length(18).startsWith('wh_hk_')
 const WebhookStatus = z.enum(['on', 'off', 'failed']);
 
 // The subscribable event vocabulary, verbatim from the create/update rules()
-// (WebhookEventTypeEnum, 108 cases at gtm.lib.common c7702d7, and the '*'
+// (WebhookEventTypeEnum, 111 cases with email-boxes.ready of 2026-11-18, and the '*'
 // wildcard the rules add). It has to be a closed set on this side:
 // an in: rule 422s with "invalid", never with the list, and an agent cannot
 // subscribe to an event it has to guess the name of.
@@ -163,6 +163,11 @@ const WebhookEventType = z.enum([
   'email-tracking-domains.failed',
   'email-sending-domains.verified',
   'email-sending-domains.failed',
+  // A workspace's email server is ready: the row's first move to active, never a
+  // return from suspended or resizing, never a migrate's new server (2026-11-18;
+  // gtm.service.id EmailBoxReadyEvent). Payload: sid, team_sid, name, plan,
+  // seats_cap, provisioned_at.
+  'email-boxes.ready',
   'mass-actions.created',
   'mass-actions.paused',
   'mass-actions.resumed',
