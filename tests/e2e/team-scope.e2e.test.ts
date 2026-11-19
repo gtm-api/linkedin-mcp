@@ -46,15 +46,18 @@ async function rpcCallTool(params: Record<string, unknown>): Promise<any> {
   return json.result;
 }
 
-/** The seeded user's login-shaped JWT, for the /oauth/consent leg only. */
+/** The seeded user's own sign-in (a real session), for the /oauth/consent leg only. */
 function mintConsentJwt(): string {
+  // A real sign-in, not `jwt:fake`: the consent takes the app's own session alone
+  // since 2026-11-19 (gtm.service.id RequireAppSession), and a fake token's reason
+  // is refused there with 403 app_session_only.
   const out = execSync(
-    `docker exec gtm_id_app_dev php artisan jwt:fake --team-sid=${TEAM_A} --actor-sid=${USER} --ttl=600`,
+    `docker exec gtm_id_app_dev php artisan dev:session --sid=${USER} --team=${TEAM_A}`,
     { cwd: ID_DIR, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
   );
   const found = out.match(/eyJ[A-Za-z0-9_.-]{40,}/g);
-  if (!found?.length) throw new Error(`jwt:fake printed no JWT:\n${out.slice(0, 300)}`);
-  return found[found.length - 1];
+  if (!found?.length) throw new Error(`dev:session printed no JWT:\n${out.slice(0, 300)}`);
+  return found[0];
 }
 
 /** Full connect flow against the live id AS; returns the initial tokens. */
