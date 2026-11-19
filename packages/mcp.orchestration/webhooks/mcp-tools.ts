@@ -330,7 +330,7 @@ export const webhooksTools: ToolDefinition[] = [
     ...base,
     name: 'search_webhooks',
     description:
-      "List webhook subscriptions owned by the caller's team with filter, sort and cursor pagination. Filter by status, subscribed event types (events.contains / contains_any), account narrowing or name; include=latest_webhook_logs for the recent-delivery view. secret is masked (null) on every read. Use this to find a webhook sid before calling webhook-scoped tools.",
+      "List webhook subscriptions owned by the caller's team with filter, sort and cursor pagination. Filter by status, subscribed event types (events.contains / contains_any), account narrowing or name; include=latest_webhook_logs for the recent-delivery view. secret is masked (null) on every read. Use this to find a webhook sid before calling webhook-scoped tools. Refused with 403 account_slice_not_served for a key or member limited to selected accounts.",
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/webhooks/search' },
     operation: 'search',
@@ -428,7 +428,7 @@ export const webhooksTools: ToolDefinition[] = [
     ...base,
     name: 'create_webhook',
     description:
-      'Create a webhook subscription endpoint. The server generates a 32-char hex secret and returns it ONCE in this response (masked on every subsequent read). Store it client-side for HMAC verification. target_url must be https:// and public (non-RFC1918); each events[] value is validated against WebhookEventTypeEnum; the same target_url cannot be registered twice per team. State-changing.',
+      'Create a webhook subscription endpoint. The server generates a 32-char hex secret and returns it ONCE in this response (masked on every subsequent read). Store it client-side for HMAC verification. target_url must be https:// and public (non-RFC1918); each events[] value is validated against WebhookEventTypeEnum; the same target_url cannot be registered twice per team. State-changing. A key or member limited to selected accounts is refused (403 account_slice_not_served): use one that is not limited and narrow the webhook with filters.account_sid.',
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/webhooks' },
     operation: 'create',

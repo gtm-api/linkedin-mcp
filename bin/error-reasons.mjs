@@ -60,7 +60,7 @@ description: "Every machine reason the platform answers with, and what it means.
 
 An error envelope carries one of the 16 [error codes](/concepts/envelopes-and-errors#the-16-error-codes) and, under it, a
 **reason**: the machine word for what exactly went wrong. On \`validation_failed\` it is \`field_errors.<field>[].rule\`,
-on \`conflict\`, \`rate_limited\` and \`service_unavailable\` it is \`error.context.reason\`. The \`message\` next to it is the
+on \`conflict\`, \`forbidden\`, \`rate_limited\` and \`service_unavailable\` it is \`error.context.reason\`. The \`message\` next to it is the
 sentence below, so an agent branches on the reason and a person reads the message; the ids, dates and limits the sentence
 refers to are in \`error.context\` (a \`retry_after\` timestamp, a \`resend_available_at\`, a \`max_bytes\`).
 
