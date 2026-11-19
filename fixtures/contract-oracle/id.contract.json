@@ -16766,13 +16766,14 @@
                     "field": "permissions",
                     "rules": [
                         "sometimes",
-                        "array"
+                        "array",
+                        "min:1"
                     ],
                     "required": false,
                     "nullable": false,
                     "type": "array",
                     "in": null,
-                    "min": null,
+                    "min": 1,
                     "max": null,
                     "size": null,
                     "between": null
@@ -27729,6 +27730,7 @@
         "domain_required": "domain is required.",
         "email_account_on_another_box": "Some of these mailboxes are on a different email server than the one named as the source.",
         "email_box_already_on_plan": "This email server is already on that plan.",
+        "email_box_already_provisioned": "The failed operation of this email server is a build (context.run), and the server was built and has served since, so the build is not run again on it. Nothing was changed.",
         "email_box_busy": "This email server is in the middle of a change; wait for it to finish.",
         "email_box_complimentary": "This email server is included with the workspace and is not billed, so it cannot be resized or deleted here.",
         "email_box_disk_does_not_shrink": "This email server's disk (context.server_disk_gb GB) is larger than the machine of the smaller plan holds (context.plan_disk_gb GB), so its plan cannot be changed down in place. Nothing was charged. Add a server of the smaller plan, move the mailboxes into it and delete this one.",
@@ -27740,6 +27742,7 @@
         "email_box_not_ready": "The email server that holds this mailbox is not active right now.",
         "email_box_not_replaceable": "The box named in replaces_email_box_sid is not the workspace's single live box (or is not active or suspended), so it cannot be replaced.",
         "email_box_not_serving": "Settings can be copied from a server that is running; {field} names one that is not.",
+        "email_box_purchase_in_progress": "An email server purchase of this workspace has not finished, so this one was not started and nothing was charged for it. Search the servers in a minute: the same purchase asked again is answered with its server. When context.retry_after is set, an earlier purchase of the same name, plan and location stopped half-way; if its server is not there by that time, buy again.",
         "email_box_unaddressable": "This box is not live or has no hostname and access key yet, so it cannot be addressed.",
         "email_server_out_of_stock": "No machine for this email server plan is in stock right now (context.plan, and context.location for a new server). Nothing was charged; try again later or choose another plan.",
         "email_server_price_missing": "The billing catalog has no price for this email server plan yet; try again later.",

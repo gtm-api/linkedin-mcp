@@ -16812,13 +16812,13 @@
             "internal": false,
             "request_class": null,
             "rules": null,
-            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+            "rules_reason": "the action takes no request object"
         },
         {
             "method": "POST",
             "uri": "t/u/{token}",
             "controller": "App\\Entities\\EmailEngagement\\Tracking\\TrackingController",
-            "action": "unsubscribeOneClick",
+            "action": "unsubscribeByPost",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
