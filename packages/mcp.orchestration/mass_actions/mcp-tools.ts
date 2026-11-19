@@ -312,7 +312,7 @@ export const massActionsTools: ToolDefinition[] = [
     ...base,
     name: 'search_mass_actions',
     description:
-      "List the team's bulk runs with filter, sort and cursor pagination. Filter by title (eq / in, or q to search it), status (active / paused), paused_reason, target_entity, canary_satisfied_at (is_null:true = the canary gate is still closed), or the created / updated / started / settled time ranges. status is a CONTROL axis, not an outcome: to learn how a run went call get_mass_actions_metrics or get_mass_action with include=metrics. Stopped runs are excluded unless deleted_at is filtered explicitly. page_size:0 returns the count alone.",
+      "List the team's bulk runs with filter, sort and cursor pagination. Filter by title (eq / in, or q to search it), status (active / paused), paused_reason, target_entity, canary_satisfied_at (is_null:true = the canary gate is still closed), or the created / updated / started / settled time ranges. status is a CONTROL axis, not an outcome: to learn how a run went call get_mass_actions_metrics or get_mass_action with include=metrics. Stopped runs are excluded unless deleted_at is filtered explicitly. page_size:0 returns the count alone. Refused with 403 account_slice_not_served for a key or member limited to selected accounts.",
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/mass-actions/search' },
     operation: 'search',

@@ -7904,6 +7904,7 @@
         }
     ],
     "error_catalog": {
+        "account_slice_not_served": "Webhooks and mass actions are not available while your access is limited to selected accounts. Use a key or a member that is not limited, or ask a workspace admin to lift the limit.",
         "cancelled_cannot_retry": "This item's run was deleted (see context.status): a deleted run stays stopped and its items are not retried. Create a new run to reach this target again.",
         "capacity_check_unavailable": "The hosting provider or the email-box registry did not answer the capacity question (see context.detail), so whether the plan's machine can be had is not known; retry in a minute.",
         "commit_in_progress": "This commit_token is being committed by another request right now; wait a moment and send the same commit again, it answers the run that request created.",

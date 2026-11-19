@@ -163,7 +163,7 @@ export const webhookLogsTools: ToolDefinition[] = [
     ...base,
     name: 'search_webhook_logs',
     description:
-      "List webhook delivery rows for the caller's team with filter, sort, include and group-counts. Deliveries from every producer service (LinkedIn, email, …) land in this one log; filter per webhook, per account_sid, per source_service, per event type, per HTTP code or status; include=webhook. Returns a counts block (groups by status / event_type / response_code / webhook_sid / account_sid). Use for delivery auditing and integrator-outage debugging. Period-bound success rates are the metrics route of the REST API (no MCP tool since 2026-11-06); single-row lookup is a filter on sid.",
+      "List webhook delivery rows for the caller's team with filter, sort, include and group-counts. Deliveries from every producer service (LinkedIn, email, …) land in this one log; filter per webhook, per account_sid, per source_service, per event type, per HTTP code or status; include=webhook. Returns a counts block (groups by status / event_type / response_code / webhook_sid / account_sid). Use for delivery auditing and integrator-outage debugging. Period-bound success rates are the metrics route of the REST API (no MCP tool since 2026-11-06); single-row lookup is a filter on sid. Refused with 403 account_slice_not_served for a key or member limited to selected accounts.",
     toolClass: 'typical',
     route: { service: 'orchestration', method: 'POST', pathTemplate: '/api/webhook-logs/search' },
     operation: 'search',

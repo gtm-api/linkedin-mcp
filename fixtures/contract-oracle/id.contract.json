@@ -27758,6 +27758,7 @@
         "issuance_already_in_progress": "A certificate for this domain is being issued right now; wait for it.",
         "no_default_team": "This user belongs to no workspace yet; create one or accept an invitation first.",
         "no_erasure_pending": "No erasure is pending for this account.",
+        "not_available_with_account_slice": "Webhooks and mass actions are not available to a key or a member limited to selected accounts (context.permissions names the permissions that cannot be held): remove them, or set account_sids to null so every account is in reach.",
         "not_enough_seats": "The target email server has no room for these mailboxes; free up seats or resize it first.",
         "oauth_mint_lock_timeout": "Another token mint for this client is in progress; retry in a few seconds.",
         "owner_cannot_be_removed": "The workspace owner cannot be removed; transfer ownership first.",
