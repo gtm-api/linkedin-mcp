@@ -499,9 +499,9 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     ...base,
     name: 'send_linkedin_inmail',
     description:
-      'Send one premium InMail to a person (outward action). Person-addressed only via ln_id / sn_id, subject required (≤ 200), body ≤ 1900. '
+      'Send one premium InMail to a person. Person-addressed only via ln_id / sn_id, subject required (≤ 200), body ≤ 1900. '
       + sendOnce('person')
-      + ' Guards: send_inmails daily cap, Premium guard, InMail-credits guard (422 no_inmail_credits when the account\'s pool is known empty: the seat\'s grant inmail_credits with a Sales Navigator seat, premium_inmail_credits without; a balance never read does not block). Fire-on-success; the plugin\'s inmail_credits_remaining is written back onto that pool, and LinkedIn\'s own NOT_ENOUGH_INMAIL_CREDIT answers 422 no_inmail_credits and zeroes it (it is not a block of the target). When NOT: 1st-degree connection → send_linkedin_message (free); no Premium / zero credits → the guards 422; SN thread continuation → send_linkedin_sales_nav_message.',
+      + ' Routed by has_sn: with a Sales Navigator seat it goes out through SN (SN thread, reply in the SN inbox) and spends inmail_credits; without one through linkedin.com, spending premium_inmail_credits. No fallback. Guards: send_inmails daily cap, Premium guard, InMail-credits guard (422 no_inmail_credits when that pool is known empty; a balance never read does not block). Fire-on-success; inmail_credits_remaining is written back to that pool, and LinkedIn\'s NOT_ENOUGH_INMAIL_CREDIT answers 422 no_inmail_credits and zeroes it (not a block of the target). When NOT: 1st-degree connection → send_linkedin_message (free); no Premium / zero credits → the guards 422; SN thread continuation → send_linkedin_sales_nav_message.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send-inmail' },
     operation: 'action',
@@ -534,7 +534,7 @@ export const linkedinMessagesTools: ToolDefinition[] = [
     description:
       'Send one Sales Navigator message (outward action): continue an SN thread via linkedin_conversation_sid (messenger_type=sales_navigator), or open a new one via ln_id / sn_id. Guards: send_inmails daily cap, SN seat and surface, and on a NEW thread outside the network the InMail-credits guard (422 no_inmail_credits when the seat\'s inmail_credits are known to be 0). Fire-on-success. '
       + sendOnce('place')
-      + ' LinkedIn\'s 403 SALES_SEAT_REQUIRED is a stale SN session, not a lost seat: the send re-arms it once and retries; a second refusal is 409 sales_session_stale (run check_linkedin_account_premium_subscription with checks ["sales_nav"], retry), a seat the probe finds gone 422 sales_nav_required. When NOT: basic threads → send_linkedin_message / send_linkedin_voice_message; cold InMail outside SN → send_linkedin_inmail; no SN seat is 422, so check linkedin-accounts.has_sn first.',
+      + ' LinkedIn\'s 403 SALES_SEAT_REQUIRED is a stale SN session, not a lost seat: the send re-arms it once and retries; a second refusal is 409 sales_session_stale (run check_linkedin_account_premium_subscription with checks ["sales_nav"], retry), a seat the probe finds gone 422 sales_nav_required. When NOT: basic threads → send_linkedin_message / send_linkedin_voice_message; a cold InMail → send_linkedin_inmail; no SN seat is 422, so check linkedin-accounts.has_sn first.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-messages/send-sales-nav' },
     operation: 'action',
