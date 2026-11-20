@@ -12,7 +12,8 @@ backend change that is not reflected in the TypeScript contract fails a test.
 
 Do not hand-edit the `*.contract.json` dumps. Regenerate them. Every other file
 in this folder is the opposite: `ratchet.json`, `drift-ledger.json`,
-`mass-action-allowlist.json`, `step-eligible-allowlist.json` and
+`mass-action-allowlist.json`, `step-eligible-allowlist.json`,
+`item-parity-allowlist.json` and
 `enum-parity-baseline.json` are hand-maintained by whoever moves the coverage,
 and each is described at the bottom of this page. All of them shrink only.
 
@@ -376,6 +377,31 @@ Its sibling entry in `mass-action-allowlist.json` is an empty array, and that is
 different statement: `gtm.service.email` declares no `mass_action` route at all, so
 there is nothing to waive on that flag. Empty because the backend says so, not
 because we are covered.
+
+### The item-parity allow-list (`item-parity-allowlist.json`)
+
+Read by the item parity gate in `tests/contract-parity.test.ts`, which holds the
+`item` of every search and get tool to the `{Entity}Domain` it answers with, in
+both directions: a key the item invents fails, and so does a Domain field the item
+does not carry. The second half was a printed warning until 2026-11-20, which
+`pnpm test` does not show, and its first strict run here found 21 tools leaving out
+36 field slots (28 distinct Domain fields), many of them filterable or named in the tool's
+own description (the smart limits search describes `risk_level` and
+`recommended_daily_limit`, its item carries neither).
+
+A field left out is listed per tool as `{ tool, fields, reason }`. A decision names
+the ruling or the research section that keeps the field out; the gaps of the first
+run are recorded as `debt:`, nobody having decided them, and are closed by putting
+the field on the item (or by replacing the reason with the ruling). The same gate
+fails a Domain field typed nullable with no default (null by design) when the item
+says it is never null, unless the entry names it under `nullable`: the one today is
+`search_webhook_logs.webhook_sid`, null on a delivery to an integration sink since
+gtm.lib.common `7121958` (2026-09-12), whose `sink_ref` the item never took either.
+A nullable field with a default is not held to it (`created_at` and its kind are
+nullable in PHP only for the constructor's convenience). An entry that stops
+applying (the tool is gone or no longer checked, its item carries the field or
+accepts null, the Domain changed) fails the gate and prints the line to delete, so
+the list can only shrink.
 
 ### The bulk-flag declaration gate (no allow-list, by design)
 

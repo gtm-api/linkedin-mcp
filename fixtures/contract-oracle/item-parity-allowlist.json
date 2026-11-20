@@ -1,0 +1,181 @@
+{
+  "_comment": "Domain fields a search or get tool's item leaves out. Read by tests/contract-parity.test.ts (item parity). Since 2026-11-20 the item carries every field of the {Entity}Domain the tool answers with: a field the backend serializes and the contract omits never reaches the public reference or an agent, and until that day this half of the gate was a warning that pnpm test does not print. Two kinds of entry, both per tool with the reason: a decision names the ruling or the research section that keeps the field out; the gaps the stricter gate found on its first run are marked as debt, nobody having decided them. An entry that stops applying (the tool is gone or no longer checked, its item carries the field, the Domain lost it) FAILS the gate, so this list can only shrink. Regenerate the oracle (pnpm oracle:refresh) before touching it.",
+  "_keys": {
+    "tool": "The tool name, exactly as the registry has it.",
+    "fields": "The Domain fields its item leaves out, as the oracle names them.",
+    "nullable": "The Domain fields typed nullable with no default (null by design) that its item states as never null.",
+    "reason": "Why: the ruling or the research section that decided it, or 'debt:' for a gap nobody decided."
+  },
+  "linkedin": [
+    {
+      "tool": "search_linkedin_account_smart_limits",
+      "fields": [
+        "learned_ceiling",
+        "learned_ceiling_source",
+        "learned_ceiling_updated_at",
+        "clean_saturation_streak",
+        "probe_not_before",
+        "learning_enabled",
+        "recommended_daily_limit",
+        "recommended_delay_in_seconds",
+        "risk_level"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_linkedin_account_quota_hits",
+      "fields": [
+        "updated_at"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_linkedin_account_block_log",
+      "fields": [
+        "updated_at"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_linkedin_account_sync_runs",
+      "fields": [
+        "archived_at"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "get_linkedin_account_sync_run",
+      "fields": [
+        "archived_at"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_linkedin_conversations",
+      "fields": [
+        "is_group",
+        "title"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "get_linkedin_conversation",
+      "fields": [
+        "is_group",
+        "title"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_linkedin_messages",
+      "fields": [
+        "sender_ln_id",
+        "sender_ln_member_id"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_linkedin_connection_invitations",
+      "fields": [
+        "sent_at",
+        "full_name",
+        "avatar_url"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_data_requests",
+      "fields": [
+        "target_resolved_via"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "get_data_request",
+      "fields": [
+        "target_resolved_via"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_antidetect_browser_logs",
+      "fields": [
+        "updated_at"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_cloud_browser_sessions",
+      "fields": [
+        "updated_at"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    }
+  ],
+  "id": [
+    {
+      "tool": "search_teams",
+      "fields": [
+        "cluster_id",
+        "plan"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "get_team",
+      "fields": [
+        "cluster_id",
+        "plan"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_oauth_clients",
+      "fields": [
+        "actor_kind"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "get_oauth_client",
+      "fields": [
+        "actor_kind"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_billing_products",
+      "fields": [
+        "visibility"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "search_notifications",
+      "fields": [
+        "read_at"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    },
+    {
+      "tool": "get_notification",
+      "fields": [
+        "read_at"
+      ],
+      "reason": "debt: the item never carried it and no ruling keeps it out (recorded 2026-11-20, when this half of the gate began to fail). Close it by putting the field on the item with its description, or replace this reason with the ruling that keeps it out."
+    }
+  ],
+  "orchestration": [
+    {
+      "tool": "search_webhook_logs",
+      "fields": [
+        "sink_ref"
+      ],
+      "reason": "debt: a delivery may go to an integration sink since gtm.lib.common 7121958 (2026-09-12): the row then names sink_ref (client:<id_oc_> or partner:<id_pt_>) and no webhook_sid, exactly one of the two set. The item never took sink_ref and still says webhook_sid is never null; nobody decided whether a team's search shows its sink deliveries (recorded 2026-11-20, when the gate began to fail). Close it by putting both on the item, or replace this reason with the ruling.",
+      "nullable": [
+        "webhook_sid"
+      ]
+    }
+  ],
+  "email": []
+}

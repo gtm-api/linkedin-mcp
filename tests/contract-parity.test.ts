@@ -17,10 +17,18 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 //     PHP Filter class does not declare throws WrongFillableFromArrayFieldException
 //     inside the backend, which surfaces to the caller as a 500, NOT as a 422.
 //     An agent cannot recover from that, so the key must never leave our side.
-//  2. ITEM PARITY. The Zod item projection must be a subset of the
-//     {Entity}Domain field list: a key Zod invents is a field no envelope will
-//     ever carry. Domain fields the projection omits are only a coverage gap,
-//     so they are printed as a WARNING and do not fail.
+//  2. ITEM PARITY, in both directions. The Zod item projection must be a subset
+//     of the {Entity}Domain field list (a key Zod invents is a field no envelope
+//     will ever carry), and it must carry every Domain field: a field the backend
+//     serializes and the item leaves out never reaches the public reference or an
+//     agent. That half was only a printed warning until 2026-11-20, and 21 tools
+//     (28 Domain fields) went missing behind it, many of them filterable or named
+//     in the tool's own description.
+//     A field left out is named per tool, with its reason, in
+//     item-parity-allowlist.json, which may only shrink: a decision names its
+//     ruling, the gaps found that day are marked as debt. A Domain field typed
+//     nullable with no default (a constructor argument null by design, not by
+//     convenience) must accept null on the item too.
 //  3. MASS-ACTION PARITY, in BOTH directions. TS -> backend: massAction /
 //     scheduleRequired on an action tool must equal the mass_action /
 //     schedule_required the backend route reports, and the route must exist at
@@ -123,11 +131,13 @@ type OracleRule = {
 };
 type Oracle = { service: string; entities: Record<string, OracleEntity>; routes: OracleRoute[] };
 type AllowlistEntry = { route: string; reason: string };
+type ItemAllowlistEntry = { tool: string; fields?: string[]; nullable?: string[]; reason: string };
 type BaselineEntry = { tool: string; path: string; reason: string };
 type RequestBaseline = { unknown_keys: Record<string, BaselineEntry[]>; missing_keys: Record<string, BaselineEntry[]> };
 
 const ALLOWLIST_FILE = 'fixtures/contract-oracle/mass-action-allowlist.json';
 const STEP_ALLOWLIST_FILE = 'fixtures/contract-oracle/step-eligible-allowlist.json';
+const ITEM_ALLOWLIST_FILE = 'fixtures/contract-oracle/item-parity-allowlist.json';
 const REQUEST_BASELINE_FILE = 'fixtures/contract-oracle/request-parity-baseline.json';
 
 // Filter fields the PHP {Entity}Filter carries and a search tool deliberately does
@@ -183,6 +193,7 @@ const load = (file: string): Oracle => readJson(`../fixtures/contract-oracle/${f
 
 const massActionAllowlist: Record<string, AllowlistEntry[]> = readJson(`../${ALLOWLIST_FILE}`);
 const stepEligibleAllowlist: Record<string, AllowlistEntry[]> = readJson(`../${STEP_ALLOWLIST_FILE}`);
+const itemParityAllowlist: Record<string, ItemAllowlistEntry[]> = readJson(`../${ITEM_ALLOWLIST_FILE}`);
 const requestBaseline: RequestBaseline = readJson(`../${REQUEST_BASELINE_FILE}`);
 
 // A service with no MCP package is carried with an empty package set rather than
@@ -313,6 +324,36 @@ const zodEnumValues = (node: any): string[] | null => {
 };
 
 const typeNameOf = (node: any): string => String(node?._def?.typeName ?? 'unknown').replace(/^Zod/, '');
+
+/** Whether a response schema accepts null: .nullable(), z.null() in a union, or an open any/unknown, under any wrapper. */
+const acceptsNull = (schema: unknown): boolean => {
+  let current: any = schema;
+  for (let hops = 0; hops < 10 && current?._def; hops++) {
+    switch (current._def.typeName) {
+      case 'ZodNullable':
+      case 'ZodNull':
+      case 'ZodAny':
+      case 'ZodUnknown':
+        return true;
+      case 'ZodUnion':
+        return current._def.options.some((option: unknown) => acceptsNull(option));
+      case 'ZodOptional':
+      case 'ZodDefault':
+      case 'ZodReadonly':
+        current = current._def.innerType;
+        break;
+      case 'ZodEffects':
+        current = current._def.schema;
+        break;
+      case 'ZodLazy':
+        current = current._def.getter();
+        break;
+      default:
+        return false;
+    }
+  }
+  return false;
+};
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 // A rule key and a Zod path are compared segment by segment, because a rule key
@@ -609,12 +650,30 @@ for (const svc of SERVICES) {
       expect([...violations, ...stale]).toEqual([]);
     });
 
-    it('item parity: the Zod item never invents a field the {Entity}Domain lacks', () => {
+    it('item parity: the Zod item carries every {Entity}Domain field, invents none, and keeps a nullable one nullable', () => {
       const invented: string[] = [];
-      const uncovered: string[] = [];
       const skipped: string[] = [];
       const attributed: string[] = [];
       let checked = 0;
+      let waived = 0;
+      let waivedNull = 0;
+
+      // tool -> (field -> reason), from the allow-list's per-tool entries: the
+      // Domain fields an item leaves out (`fields`), and the fields null by design
+      // that it states as never null (`nullable`).
+      const waivers = new Map<string, Map<string, string>>();
+      const nullWaivers = new Map<string, Map<string, string>>();
+      const addWaivers = (into: Map<string, Map<string, string>>, tool: string, list: string[] | undefined, reason: string) => {
+        if (!list?.length) return;
+        const fields = into.get(tool) ?? new Map<string, string>();
+        for (const field of list) fields.set(field, reason);
+        into.set(tool, fields);
+      };
+      for (const entry of itemParityAllowlist[svc.name] ?? []) {
+        addWaivers(waivers, entry.tool, entry.fields, entry.reason);
+        addWaivers(nullWaivers, entry.tool, entry.nullable, entry.reason);
+      }
+      const checkedTools = new Set<string>();
 
       for (const tool of tools) {
         if (tool.operation !== 'search' && tool.operation !== 'get') continue;
@@ -658,24 +717,60 @@ for (const svc of SERVICES) {
         if (candidates.length > 1) attributed.push(`${tool.name} -> ${pick.key}Domain (of ${candidates.join(', ')})`);
 
         checked++;
+        checkedTools.add(tool.name);
         if (pick.extra.length) {
           invented.push(`${tool.name} -> ${pick.key}Domain has no ${pick.extra.join(', ')}`);
         }
-        const missing = svc.oracle.entities[pick.key].domain.fields
-          .map((field) => field.name)
-          .filter((field) => !(field in itemShape));
-        if (missing.length) {
-          uncovered.push(`${tool.name} -> ${pick.key}Domain field(s) not projected: ${missing.join(', ')}`);
+
+        const domainFields = svc.oracle.entities[pick.key].domain.fields;
+        const toolWaivers = waivers.get(tool.name) ?? new Map<string, string>();
+        const missing = domainFields.map((field) => field.name).filter((field) => !(field in itemShape));
+        const unwaived = missing.filter((field) => !toolWaivers.has(field));
+        waived += missing.length - unwaived.length;
+        if (unwaived.length) {
+          invented.push(`${tool.name} -> ${pick.key}Domain field(s) the item does not carry: ${unwaived.join(', ')} (add them to the item, or name them in ${ITEM_ALLOWLIST_FILE} with the reason)`);
+        }
+        for (const [field, reason] of toolWaivers) {
+          if (!domainFields.some((domainField) => domainField.name === field)) {
+            invented.push(`${ITEM_ALLOWLIST_FILE} lists ${tool.name}.${field}: ${pick.key}Domain has no such field any more, delete it (was: ${reason})`);
+          } else if (field in itemShape) {
+            invented.push(`${ITEM_ALLOWLIST_FILE} lists ${tool.name}.${field}: the item carries it now, delete it (was: ${reason})`);
+          }
+        }
+
+        const toolNullWaivers = nullWaivers.get(tool.name) ?? new Map<string, string>();
+        for (const field of domainFields) {
+          if (!field.nullable || field.has_default || !(field.name in itemShape)) continue;
+          if (acceptsNull(itemShape[field.name])) continue;
+          if (toolNullWaivers.has(field.name)) {
+            waivedNull++;
+            continue;
+          }
+          invented.push(`${tool.name} -> ${pick.key}Domain.${field.name} is ${field.type} with no default, null by design, and the item says it is never null (make it nullable on the item, or name it under nullable in ${ITEM_ALLOWLIST_FILE} with the reason)`);
+        }
+        for (const [field, reason] of toolNullWaivers) {
+          const domainField = domainFields.find((candidate) => candidate.name === field);
+          if (!domainField || !domainField.nullable || domainField.has_default) {
+            invented.push(`${ITEM_ALLOWLIST_FILE} lists ${tool.name}.${field} under nullable: ${pick.key}Domain no longer types it nullable with no default, delete it (was: ${reason})`);
+          } else if (!(field in itemShape) || acceptsNull(itemShape[field])) {
+            invented.push(`${ITEM_ALLOWLIST_FILE} lists ${tool.name}.${field} under nullable: the item ${field in itemShape ? 'accepts null now' : 'does not carry it'}, delete it (was: ${reason})`);
+          }
+        }
+      }
+
+      for (const map of [waivers, nullWaivers]) {
+        for (const [toolName, fields] of map) {
+          if (checkedTools.has(toolName)) continue;
+          for (const [field, reason] of fields) {
+            invented.push(`${ITEM_ALLOWLIST_FILE} lists ${toolName}.${field}: no search or get tool of that name was checked (gone, renamed, or skipped above), delete it (was: ${reason})`);
+          }
         }
       }
 
       report('item parity', checked, skipped);
       /* eslint-disable no-console */
+      console.log(`${svc.name} item parity: ${waived} Domain field(s) left out and ${waivedNull} null-by-design field(s) stated never null, by name in ${ITEM_ALLOWLIST_FILE}.`);
       for (const line of attributed) console.log(`  multi-domain folder, attributed by fit: ${line}`);
-      if (uncovered.length) {
-        console.log(`${svc.name} item parity WARNING: ${uncovered.length} tool(s) omit Domain fields (coverage gap, not a failure):`);
-        for (const line of uncovered) console.log(`  ${line}`);
-      }
       /* eslint-enable no-console */
       expect(invented).toEqual([]);
     });
