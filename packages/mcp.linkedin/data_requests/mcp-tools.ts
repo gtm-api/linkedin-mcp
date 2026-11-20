@@ -130,6 +130,8 @@ const DataRequest = z.object({
   executed_on: DataRequestExecutedOn.nullable(),
   served_from_cache: z.boolean(),
   cached_from_sid: z.string().nullable(),
+  target_resolved_via: z.enum(['ledger', 'corpus', 'browser']).nullable()
+    .describe('How the call found the key its LinkedIn request needs when you named the target by another one (2026-11-12): ledger or corpus (our records knew it, free), browser (one extra LinkedIn read, the one a metered caller charges). Null = nothing resolved, or a cache answered.'),
   idempotency_key: z.string().nullable(),
   // Polymorphic result reference: a string pointer OR the inline result payload
   // (object/array) depending on the request kind. Null on the row a scrape or

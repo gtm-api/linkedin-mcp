@@ -74,6 +74,10 @@ const LinkedinAccountSyncRun = z.object({
   finished_at: z.string().nullable(),
   error_message: z.string().nullable(),
 
+  // The generation cut (2026-08-01)
+  archived_at: z.string().nullable()
+    .describe('ISO 8601 UTC: the generation cut. A reset of this sync type stamps its finished runs when it wipes their data, since their counters describe rows the reset deleted. Null = a current-generation run (filter archived_at is_null).'),
+
   // Audit: shared AccessIdentityValue
   created_by: AccessIdentityValue,
 

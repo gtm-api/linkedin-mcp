@@ -14,7 +14,8 @@ import {
 } from '@gtm/mcp-shared';
 
 // Item projection: every field of LinkedinAccountBlockLogDomain (immutable,
-// append-only: no updated_at / deleted_at / created_by). .passthrough() keeps
+// append-only: no deleted_at / created_by; updated_at is written with the row
+// and never moves). .passthrough() keeps
 // forward-compat if the backend adds fields.
 const LinkedinAccountBlockLog = z.object({
   sid: z.string(),
@@ -31,8 +32,10 @@ const LinkedinAccountBlockLog = z.object({
   linkedin_account_activity_log_sid: z.string(),
   linkedin_connection_sid: z.string().nullable(),
 
-  // Timestamp: append-only
+  // Timestamps: append-only
   created_at: z.string(),
+  updated_at: z.string()
+    .describe('ISO 8601 UTC: written with the row and never moved (the log is append-only), so it equals created_at.'),
 }).passthrough();
 
 // Counts: distinctive documented shape (research §MCP Tools). Same object is

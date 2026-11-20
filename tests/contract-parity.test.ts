@@ -24,9 +24,9 @@ import { orchestrationPackages } from '@gtm/mcp-orchestration';
 //     agent. That half was only a printed warning until 2026-11-20, and 21 tools
 //     (28 Domain fields) went missing behind it, many of them filterable or named
 //     in the tool's own description.
-//     A field left out is named per tool, with its reason, in
-//     item-parity-allowlist.json, which may only shrink: a decision names its
-//     ruling, the gaps found that day are marked as debt. A Domain field typed
+//     They were put on their items the same day. A field left out on purpose is
+//     named per tool, with the ruling that keeps it out, in
+//     item-parity-allowlist.json, which may only shrink. A Domain field typed
 //     nullable with no default (a constructor argument null by design, not by
 //     convenience) must accept null on the item too.
 //  3. MASS-ACTION PARITY, in BOTH directions. TS -> backend: massAction /

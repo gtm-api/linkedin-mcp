@@ -50,6 +50,10 @@ const Team = z.object({
   subscription_sid: z.string().nullable(),
   name: z.string(),
   status: TeamStatus,
+  plan: z.enum(['none', 'free', 'paid', 'partner']).nullable()
+    .describe('The plan kind, derived by the same recompute that writes status and limits: none, free, paid or partner. Null on a workspace that has not been recomputed since plans were stored; read it as unknown.'),
+  cluster_id: z.number().int()
+    .describe('Which cluster holds the workspace\'s LinkedIn and calendar data, assigned once at create and never writable. A routing fact: nothing a caller sends depends on it.'),
   limits: z.object({                        // TeamLimitsValue (cache snapshot, NOT NULL)
     accounts: z.number(),
     cloud_browser: z.number(),

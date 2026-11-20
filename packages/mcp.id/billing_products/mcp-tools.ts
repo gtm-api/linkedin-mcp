@@ -37,6 +37,8 @@ const BillingProduct = z.object({
     webhooks: z.number(),
   }),
   is_active: z.boolean(),
+  visibility: z.enum(['public', 'private']).nullable()
+    .describe('Whether the product is listed in the public catalog. This search lists public products only, so it reads public here; a private product never appears in it.'),
   created_at: z.string(),
   updated_at: z.string(),
   deleted_at: z.string().nullable(),

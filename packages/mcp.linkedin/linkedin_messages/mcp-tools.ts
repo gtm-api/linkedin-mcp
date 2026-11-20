@@ -147,6 +147,10 @@ const LinkedinMessage = z.object({
   recruiter_id: z.string().nullable()
     .describe("The counterpart's LinkedIn Recruiter (talent) profile id, denormalized from the parent recruiter thread. Null off the recruiter surface."),
   nickname: z.string().nullable(),
+  sender_ln_id: z.string().nullable()
+    .describe('Who wrote THIS message, as a LinkedIn profile URN (max 128; 2026-09-24): how a group thread\'s members are told apart. Null on an organization sender and on rows synced before it was stored.'),
+  sender_ln_member_id: z.string().nullable()
+    .describe('The same sender as a member id (max 64). On a 1:1 inbound message it equals ln_member_id; on an outbound one it is the account\'s own member id.'),
   subject: z.string().nullable(),
   text: z.string(),
   client_reference: z.string().nullable(), // the caller's own key given at send time; null on synced rows

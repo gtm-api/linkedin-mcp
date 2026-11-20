@@ -386,17 +386,21 @@ both directions: a key the item invents fails, and so does a Domain field the it
 does not carry. The second half was a printed warning until 2026-11-20, which
 `pnpm test` does not show, and its first strict run here found 21 tools leaving out
 36 field slots (28 distinct Domain fields), many of them filterable or named in the tool's
-own description (the smart limits search describes `risk_level` and
-`recommended_daily_limit`, its item carries neither).
+own description (the smart limits search described `risk_level` and
+`recommended_daily_limit`, its item carried neither). All of them were put on their
+items the same day.
 
-A field left out is listed per tool as `{ tool, fields, reason }`. A decision names
-the ruling or the research section that keeps the field out; the gaps of the first
-run are recorded as `debt:`, nobody having decided them, and are closed by putting
-the field on the item (or by replacing the reason with the ruling). The same gate
-fails a Domain field typed nullable with no default (null by design) when the item
-says it is never null, unless the entry names it under `nullable`: the one today is
-`search_webhook_logs.webhook_sid`, null on a delivery to an integration sink since
-gtm.lib.common `7121958` (2026-09-12), whose `sink_ref` the item never took either.
+A field left out on purpose is listed per tool as `{ tool, fields, reason }`, the
+reason naming the ruling or the research section that keeps it out; a gap nobody
+has decided may be recorded as `debt:` and is closed by putting the field on the
+item. The same gate fails a Domain field typed nullable with no default (null by
+design) when the item says it is never null, unless the entry names it under
+`nullable`. The one entry today is a ruling of both kinds: `search_webhook_logs`
+leaves out `sink_ref` and states `webhook_sid` never null, because a delivery to an
+integration sink (the only row with a null `webhook_sid`, since gtm.lib.common
+`7121958`, 2026-09-12) is the integration's and the team's search never lists one
+(research `webhook_logs.md`; `WebhookLogService`'s base query is
+`whereNull('sink_ref')`).
 A nullable field with a default is not held to it (`created_at` and its kind are
 nullable in PHP only for the constructor's convenience). An entry that stops
 applying (the tool is gone or no longer checked, its item carries the field or

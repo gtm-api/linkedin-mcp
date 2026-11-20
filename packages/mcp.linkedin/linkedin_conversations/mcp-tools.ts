@@ -60,6 +60,10 @@ const LinkedinConversation = z.object({
     headline: z.string().nullable().optional(),
     picture_url: z.string().nullable().optional(),
   }).passthrough()).nullable(),
+  is_group: z.boolean().nullable()
+    .describe('LinkedIn\'s own group flag (2026-09-24). true = a group thread: the counterpart fields above are null and participants holds every other member. null = not observed yet (a row synced before the flag was stored).'),
+  title: z.string().nullable()
+    .describe('The group\'s name as LinkedIn shows it (max 256), refreshed by every conversations sync; null on a 1:1 thread and on a group nobody named.'),
   // [ro]: notifications muted on LinkedIn (raw notificationStatus === "MUTE"); synced from the
   // basic get-conversations wire and optimistically mirrored by the mute verb. NULL = unknown /
   // never synced (Sales Navigator threads never carry it).

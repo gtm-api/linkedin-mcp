@@ -13,7 +13,8 @@ import {
 } from '@gtm/mcp-shared';
 
 // Tight item projection: every AntidetectBrowserLogDomain field (research §Domain),
-// correct type + nullability. Append-only log: no updated_at / deleted_at columns.
+// correct type + nullability. Append-only log: no deleted_at column, and the
+// updated_at Laravel writes with the row never moves.
 // `body` is genuinely free-form (shape varies by event_type), so it is typed as the
 // documented object|string union, nullable. passthrough tolerates future additions.
 const AntidetectBrowserLog = z.object({
@@ -43,6 +44,8 @@ const AntidetectBrowserLog = z.object({
   code: z.number().nullable(),
   body: z.union([z.record(z.unknown()), z.string()]).nullable(),
   created_at: z.string(),
+  updated_at: z.string()
+    .describe('ISO 8601 UTC: written with the row and never moved (the log is append-only), so it equals created_at.'),
 }).passthrough();
 
 // Counts block: concrete shape from research (search per-tool block).

@@ -64,6 +64,29 @@ const LinkedinAccountSmartLimit = z.object({
   daily_limit: z.number(),
   smart_limit: z.number().nullable(),
   target_limit: z.number().nullable(),
+
+  // The learner (2026-08-14): the evidence-driven ceiling inside the warmup
+  // formula, written only by the platform, never by an operator.
+  learned_ceiling: z.number().int().nullable()
+    .describe('The ceiling the learner found for this account and bucket, in actions a day (1..4500); it replaces the platform maximum inside the warmup formula. Written only by the learner. Null = no evidence yet, the default applies.'),
+  learned_ceiling_source: z.enum(['probe', 'backoff']).nullable()
+    .describe('What last moved learned_ceiling: probe (a step up after enough qualifying days) or backoff (a step down after a LinkedIn refusal). Null while learned_ceiling is null.'),
+  learned_ceiling_updated_at: z.string().nullable()
+    .describe('ISO 8601 UTC: when learned_ceiling last moved; null while it is null.'),
+  clean_saturation_streak: z.number().int().nonnegative()
+    .describe('Qualifying days since the last ceiling move: days the bucket spent its whole budget and that budget was the learned ceiling (other days neither count nor reset it). Enough of them is one condition for a step up.'),
+  probe_not_before: z.string().nullable()
+    .describe('ISO 8601 UTC: the learner will not move learned_ceiling up before this; every move sets it and each backoff in a row pushes it further. Null = no cooldown.'),
+  learning_enabled: z.boolean()
+    .describe('false pins learned_ceiling where it stands (no probe, no backoff). It is not a safety switch: a LinkedIn refusal still holds the bucket.'),
+
+  // The risk read (2026-09-03): computed on every read, never stored.
+  recommended_daily_limit: z.number().int().nullable()
+    .describe('Read-time, never stored: where the platform would run this bucket for this account now (the smart limit once the warmup has computed one, else the bucket\'s platform ceiling). A reading, not a promise.'),
+  recommended_delay_in_seconds: z.number().int().nullable()
+    .describe('Read-time, never stored: the bucket\'s default cooldown between two actions, in seconds.'),
+  risk_level: z.enum(['none', 'elevated', 'ban_likely']).nullable()
+    .describe('Read-time verdict on the values set: none at or below the recommendations; elevated up to twice the daily one (or a delay down to half); ban_likely beyond that, expect LinkedIn to restrict the account.'),
   // The flat delay between any two dispatches of the bucket (pacing plan §8.3): the
   // "burst N, then hold X" pair left the contract on 2026-09-19.
   delay_in_seconds: z.number(),

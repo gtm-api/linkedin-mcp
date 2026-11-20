@@ -36,9 +36,15 @@ const LinkedinConnectionInvitation = z.object({
   ln_id: z.string().nullable(),
   sn_id: z.string().nullable(),
   nickname: z.string().nullable(),
+  full_name: z.string().nullable()
+    .describe('The inviter\'s name as LinkedIn printed it (max 255); null when LinkedIn hides the member, and on rows stored before 2026-11-02 until a sync sees them again.'),
+  avatar_url: z.string().nullable()
+    .describe('The inviter\'s picture, LinkedIn\'s media URL for the card (max 2048); null when the card has none.'),
   note: z.string().nullable(),
   linkedin_invitation_id: z.string().nullable(),
   shared_secret: z.string().nullable(),
+  sent_at: z.string().nullable()
+    .describe('ISO 8601 UTC: LinkedIn\'s own time of the invitation, set once; null when LinkedIn gave none, and on rows stored before 2026-11-02 until a sync sees them again. received_at is when we stored it.'),
   received_at: z.string(),
   last_check_at: z.string().nullable(),
   removal_kind: LinkedinConnectionInvitationRemovalKind.nullable(),

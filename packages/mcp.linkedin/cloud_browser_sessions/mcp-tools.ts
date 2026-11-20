@@ -15,7 +15,8 @@ import {
 } from '@gtm/mcp-shared';
 
 // Tight item projection: every CloudBrowserSessionDomain field (research §Domain),
-// correct type + nullability. Append-only log: no updated_at / deleted_at columns.
+// correct type + nullability. No deleted_at column; updated_at moves when the
+// session's login result or its disconnect is written.
 // access_key is masked on the public read surface to cb_ak_ + stars + the key's
 // last 4, never the raw token. Null only means there was no key at all (an
 // internal session). The tail is what makes a session attributable to one of the
@@ -60,6 +61,8 @@ const CloudBrowserSession = z.object({
   ]).nullable(),
   disconnect_reason: z.string().nullable(),
   created_at: z.string(),
+  updated_at: z.string()
+    .describe('ISO 8601 UTC: the row\'s last change, such as the login result or the disconnect being written.'),
 }).passthrough();
 
 // Metrics block: concrete scalar shape from research (metrics per-tool block).

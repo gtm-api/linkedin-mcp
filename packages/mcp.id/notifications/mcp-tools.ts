@@ -46,6 +46,8 @@ const Notification = z.object({
   delivered_at: z.string().nullable(),
   failed_at: z.string().nullable(),
   failure_reason: z.string().nullable(),
+  read_at: z.string().nullable()
+    .describe('ISO 8601 UTC: when the recipient read an in-app notification. Every notification this platform writes is an email, so it is null here and no verb marks one read.'),
   retry_count: z.number(),
   // Shared AccessIdentityValue (general/KNOWLEDGE.md); passthrough tolerates
   // cross-service serialization drift.

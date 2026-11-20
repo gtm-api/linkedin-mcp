@@ -50,6 +50,8 @@ const OauthClient = z.object({
   permissions: z.array(z.string()),         // Permission[] ceiling (unified token list)
   is_confidential: z.boolean(),
   registration_kind: OauthRegistrationKind,
+  actor_kind: OauthClientActorKind.nullable()
+    .describe('What acts through the client: agent (an AI agent that registered itself or was registered as one) or integration (an app a person set up). Null = unclassified, a client from before the field (2026-08-02), never backfilled.'),
   status: OauthClientStatus,
   created_by: AccessIdentityValue,
   created_at: z.string(),
