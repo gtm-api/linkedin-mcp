@@ -85,7 +85,7 @@ export const emailTrackingDomainsTools: ToolDefinition[] = [
     ...base,
     name: 'verify_email_tracking_domain_dns',
     description:
-      "Check a tracking domain's DNS record now, against public DNS, and answer the refreshed row: item.status and, per record in item.dns_records, what was seen; result.previous_status is what it was before. Use it after the CNAME was installed or to see why a domain is still pending or failed (the invalid record names the host and value to fix). DNS takes time to spread, so do not call it in a loop: a daily check moves the status by itself. Requires can_manage_email_tracking_domains.",
+      "Check a tracking domain's DNS record now, against public DNS, and answer the refreshed row: item.status and, per record in item.dns_records, what was seen; result.previous_status is what it was before. Use it after the CNAME was installed or to see why a domain is still pending or failed (the invalid record names the host and value to fix). A valid record is not enough: once it is in place the host itself is asked, and the domain turns verified only when the host serves the tracking links. A domain whose record reads valid and that stays pending waits on its host: result.host_served is false, result.host_reason says why (host_no_address, host_not_public, host_no_certificate, host_not_routed, host_did_not_answer) and result.host_message says it in words; null means the host was not asked or the look did not complete. DNS takes time to spread, so do not call it in a loop: a daily check moves the status by itself. Requires can_manage_email_tracking_domains.",
     toolClass: 'typical',
     route: emailRoute('POST', '/api/email-tracking-domains/{sid}/verify-dns'),
     operation: 'action',
@@ -95,7 +95,15 @@ export const emailTrackingDomainsTools: ToolDefinition[] = [
     massAction: false,
     scheduleRequired: false,
     inputSchema: z.object({ sid: sid('em_td_'), ...emailCommon }),
-    outputSchema: McpActionResponse(EmailTrackingDomain, z.object({ previous_status: EmailDomainVerificationStatus })),
+    outputSchema: McpActionResponse(
+      EmailTrackingDomain,
+      z.object({
+        previous_status: EmailDomainVerificationStatus,
+        host_served: z.boolean().nullable().describe('Whether the host answered the tracking links with this server\'s own proof; null when it was not asked (the record is not in place) or the look did not complete.'),
+        host_reason: z.string().nullable().describe('Why the host does not serve them, as a token: host_no_address, host_not_public, host_no_certificate, host_not_routed or host_did_not_answer; null when it serves them or was not asked.'),
+        host_message: z.string().nullable().describe('The same reason in words, for a person.'),
+      }),
+    ),
     annotations: { title: 'Verify email tracking domain DNS', readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: true },
   },
 ];
