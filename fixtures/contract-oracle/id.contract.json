@@ -26552,6 +26552,24 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "totp_secret",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:512",
+                        "regex:/^(?:[A-Za-z2-7][\\s-]*){16,128}={0,6}$/u"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -26840,6 +26858,24 @@
                     "in": null,
                     "min": 0,
                     "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "totp_secret",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:512",
+                        "regex:/^(?:[A-Za-z2-7][\\s-]*){16,128}={0,6}$/u"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
                     "size": null,
                     "between": null
                 }

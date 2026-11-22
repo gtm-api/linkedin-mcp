@@ -59894,6 +59894,36 @@
                     "max": 32,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "verification_code_submitted",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "signed_in",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -67668,6 +67698,25 @@
                     "max": null,
                     "size": null,
                     "between": null
+                },
+                {
+                    "field": "totp_secret",
+                    "rules": [
+                        "bail",
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:512",
+                        "regex:/^[A-Z2-7]{16,128}$/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
+                    "size": null,
+                    "between": null
                 }
             ],
             "rules_reason": null
@@ -67905,6 +67954,25 @@
                     "in": null,
                     "min": 0,
                     "max": 100000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "totp_secret",
+                    "rules": [
+                        "bail",
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:512",
+                        "regex:/^[A-Z2-7]{16,128}$/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 512,
                     "size": null,
                     "between": null
                 }
