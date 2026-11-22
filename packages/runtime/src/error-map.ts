@@ -89,11 +89,10 @@ export function mapErrorEnvelope(
       if (e.suggestion) lines.push(e.suggestion);
       break;
     }
-    // 402. Every one of these is a slot/plan decision (seat cap, add-on headroom,
-    // webhook cap), never a transient failure, and the backend ships a
-    // machine-readable code plus a `context` that usually names the repair
-    // (insufficient_proxy_5g_slots carries suggested_action: buy_proxy_5g_slot),
-    // so the context is surfaced rather than dropped.
+    // 402. Every one of these is a slot/plan decision (seat cap, webhook cap),
+    // never a transient failure, and the backend ships a machine-readable code
+    // plus a `context` that usually names the repair, so the context is surfaced
+    // rather than dropped.
     case 'payment_required':
       lines.push(e.message);
       if (e.context) lines.push(`context: ${JSON.stringify(e.context)}`);

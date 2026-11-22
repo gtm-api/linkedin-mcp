@@ -144,12 +144,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "proxy_5g",
-                        "type": "bool",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
                         "name": "cloud_browser_access",
                         "type": "?array",
                         "nullable": true,
@@ -335,12 +329,6 @@
                         "has_default": true
                     },
                     {
-                        "name": "proxy_5g",
-                        "type": "bool",
-                        "nullable": false,
-                        "has_default": true
-                    },
-                    {
                         "name": "cloud_browser_access",
                         "type": "?array",
                         "nullable": true,
@@ -401,7 +389,6 @@
                     "logout_count",
                     "antidetect_browser_proxy_sid",
                     "proxy_country_code",
-                    "proxy_5g",
                     "last_fail_at",
                     "last_logout_at",
                     "last_start_at",
@@ -12074,21 +12061,6 @@
                     "max": null,
                     "size": null,
                     "between": null
-                },
-                {
-                    "field": "proxy_5g",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
                 }
             ],
             "rules_reason": null
@@ -13082,21 +13054,6 @@
                         "socks4",
                         "socks5"
                     ],
-                    "min": null,
-                    "max": null,
-                    "size": null,
-                    "between": null
-                },
-                {
-                    "field": "proxy_5g",
-                    "rules": [
-                        "sometimes",
-                        "boolean"
-                    ],
-                    "required": false,
-                    "nullable": false,
-                    "type": "boolean",
-                    "in": null,
                     "min": null,
                     "max": null,
                     "size": null,

@@ -97,7 +97,7 @@ const CustomProxyConfig = z.object({
   username: z.string().optional(),
   password: z.string().optional(),
   mode: z.enum(['http', 'socks4', 'socks5']).optional().describe('Default http.'),
-}).describe('Custom proxy connection tuple (customer BYO path). Probed before it is written; 5G Proxy cannot ride it.');
+}).describe('Custom proxy connection tuple (customer BYO path). Probed before it is written.');
 
 // envelope.result of update-proxy / replace-proxy. `restarted` is the field that matters to
 // an agent: the swap powers a live browser off and back on, so a sender that was running is
@@ -165,8 +165,6 @@ const AntidetectBrowser = z.object({
     exit_ip: z.string().nullable(),
     latency_ms: z.number().int().nullable(),
   }).nullable(),
-  proxy_5g: z.boolean()
-    .describe('5G Proxy add-on: the browser runs on the dedicated 5G mobile route (faster command execution, fewer retries). Each flagged browser occupies one add-on slot.'),
   // Cloud-browser access
   cloud_browser_access: z.array(CloudBrowserAccessEntry)
     .describe('The smart links minted on this browser; the key itself only for a caller holding can_manage_cloud_browser_external_links, null otherwise (2026-09-16). Each console open used to leave a throwaway entry here; minting now sweeps entries that expired over 24h ago, so this is the live link list rather than a log.'),
@@ -213,8 +211,6 @@ const AntidetectBrowserFilter = z.object({
     .describe('is_null:true = ops scan for browsers not assigned to a server.'),
   antidetect_browser_proxy_sid: filterOp(z.string(), ['eq', 'in', 'is_null']).optional(),
   proxy_country_code: filterOp(z.string(), ['eq', 'in']).optional(),
-  proxy_5g: filterOp(z.boolean(), ['eq']).optional()
-    .describe('eq:true = the browsers occupying a 5G Proxy add-on slot (that is how slot usage is counted).'),
   fail_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
   logout_count: filterOp(z.number().int(), ['eq', 'gte', 'lte', 'gt', 'lt']).optional(),
   last_start_at: filterOp(z.string(), ['gte', 'lte', 'gt', 'lt', 'is_null']).optional(),
@@ -336,7 +332,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'get_antidetect_browser_seat_usage',
     description:
-      'Seats and 5G proxy slots the workspace occupies: every live browser row, whatever its status and whether a LinkedIn account is bound. Team-wide; compare against limits.accounts and limits.proxy_5g.',
+      'Seats the workspace occupies: every live browser row, whatever its status and whether a LinkedIn account is bound. Team-wide; compare against limits.accounts.',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/seat-usage' },
     operation: 'action',
@@ -353,8 +349,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     outputSchema: McpActionResponse(z.null(), z.object({
       accounts_used: z.number().int().nonnegative()
         .describe('Live browser rows the team holds. This is the count the create gate refuses on (402 insufficient_slots).'),
-      proxy_5g_used: z.number().int().nonnegative()
-        .describe('Of those, the ones carrying the 5G Proxy add-on.'),
     })),
     annotations: { title: 'Get seat usage', ...RO },
   },
@@ -362,7 +356,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'create_antidetect_browser',
     description:
-      'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code is the default, custom_proxy_config routes that minted profile through a proxy the caller supplies (probed first, 422 custom_proxy_unreachable_* when dead, never with proxy_5g). Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the BYO-PROFILE path instead, with no proxy source: that profile carries its own. If no LinkedIn account signs in on it for 30 days, it is deleted and its seat freed. DANGEROUS: creates real vendor + proxy infrastructure. For SEVERAL browsers under ONE approval, do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key), then read the connect links off each row when it finishes.',
+      'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code is the default, custom_proxy_config routes that minted profile through a proxy the caller supplies (probed first, 422 custom_proxy_unreachable_* when dead). Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the BYO-PROFILE path instead, with no proxy source: that profile carries its own. If no LinkedIn account signs in on it for 30 days, it is deleted and its seat freed. DANGEROUS: creates real vendor + proxy infrastructure. For SEVERAL browsers under ONE approval, do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key), then read the connect links off each row when it finishes.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers' },
     operation: 'create',
@@ -378,8 +372,6 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
         .describe('Assign an already-chosen pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
       proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy. The default way to pick a proxy.'),
       custom_proxy_config: CustomProxyConfig.optional(),
-      proxy_5g: z.boolean().optional()
-        .describe('Provision the browser on the 5G Proxy add-on: the dedicated 5G mobile route, sold for speed (faster command execution, fewer retries). Each flagged browser takes one add-on slot; with no headroom left the create is refused 402 insufficient_proxy_5g_slots.'),
       ...usageMetaField,
     }),
     outputSchema: McpCreateResponse(AntidetectBrowser),
@@ -492,7 +484,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'update_antidetect_browser_proxy',
     description:
-      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. EVERY arm needs browser_owner=platform or adopted: a profile you own at GoLogin keeps its proxy there (422 managed_proxy_forbidden_for_owner / 422 custom_proxy_forbidden_for_owner). custom_proxy_config is probed first (422 custom_proxy_unreachable_* changes nothing), takes the exit country measured there, and RELEASES any armed 5G slot. Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty, 5G on a BYO proxy 422 proxy_5g_requires_managed_proxy. proxy_5g alone is a valid body: it moves the add-on binding only. DANGEROUS twice over: a location flip mid-campaign can trip a LinkedIn risk check, and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
+      'Change the proxy of an existing antidetect browser, country included. Supply EXACTLY ONE source: antidetect_browser_proxy_sid, proxy_country_code or custom_proxy_config. EVERY arm needs browser_owner=platform or adopted: a profile you own at GoLogin keeps its proxy there (422 managed_proxy_forbidden_for_owner / 422 custom_proxy_forbidden_for_owner). custom_proxy_config is probed first (422 custom_proxy_unreachable_* changes nothing), and takes the exit country measured there. Zero sources 422 proxy_assignment_missing, more than one 422 proxy_assignment_conflict, empty pool 422 proxy_pool_empty. DANGEROUS twice over: a location flip mid-campaign can trip a LinkedIn risk check, and a running browser is restarted, since a live session keeps the old proxy until it respawns. Read result.restarted. To rotate the IP in place, use replace_antidetect_browser_proxy.',
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/update-proxy' },
     operation: 'action',
@@ -507,9 +499,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
         .describe('Pin a specific pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
       proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy. The default way to pick a proxy.'),
       custom_proxy_config: CustomProxyConfig.optional()
-        .describe('Custom proxy connection tuple (customer BYO path). Probed before it is written; 5G Proxy cannot ride it. A password left out keeps the one this browser stores when ip and username stay the same, never for another host.'),
-      proxy_5g: z.boolean().optional()
-        .describe('Arm (true) or release (false) the 5G Proxy add-on binding on this browser. Omit to leave the binding untouched. A body carrying proxy_5g alone is a valid source-less call: it moves only the add-on binding and leaves the IP where it is.'),
+        .describe('Custom proxy connection tuple (customer BYO path). Probed before it is written. A password left out keeps the one this browser stores when ip and username stay the same, never for another host.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(AntidetectBrowser, ProxySwapResult),
