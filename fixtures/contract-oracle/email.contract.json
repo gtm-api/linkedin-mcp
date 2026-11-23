@@ -6748,6 +6748,22 @@
                     "between": null
                 },
                 {
+                    "field": "client_reference",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "_meta",
                     "rules": [
                         "nullable",
