@@ -1,10 +1,16 @@
 // Entity: LinkedIn Posting (gtm.service.linkedin)
 // Source of truth: product/research/gtm.service.linkedin/entities/linkedin_posting.md
 // Format: registry v2, each tool carries route metadata so the generic
-// dispatcher can drive it. 10 tools (the linkedin-posting route group), mounted
+// dispatcher can drive it. 18 tools (the linkedin-posting route group), mounted
 // on linkedin.content: four writes (create-post, repost, comment, react), the
 // undo of each (delete-post takes a post and a repost), the scheduled-posts queue
-// pair (a private read + a draft delete, 2026-08-21) and check-sent (2026-10-05).
+// pair (a private read + a draft delete, 2026-08-21), check-sent (2026-10-05),
+// the article family (2026-11-21: create-article, update-article, publish-article,
+// get-articles, get-article, delete-article, get-newsletters; LinkedIn's long-form
+// posts and newsletter issues, as drafts, scheduled shares or published, as the
+// member or as a company page) and get-administered-companies (2026-11-22: the
+// company pages the account may publish as, the source of every
+// author_organization_id on this surface).
 //
 // This is the stateless content-AUTHORING surface: no table, no Domain, no
 // events. Each action dispatches the matching plugin wire verb on the account's
@@ -70,6 +76,13 @@ const ENTITY_URN = z.string().min(1).max(512)
 // another comment than the member's at the same place, under one key or the
 // same words. No read shows a comment as the page's, so a page comment in doubt
 // waits for a person, as a group post does.
+//
+// 2026-11-21: an article's share is under the rule too. create-article with
+// state SCHEDULED or PUBLISHED and publish-article take the key (the share is a
+// post where it lands: the member's feed or the page's, its slot no part of the
+// key, as create-post's); a DRAFT create refuses it, because a draft is in front
+// of nobody and a key on it would be a promise the outcome machinery cannot
+// keep. update-article and delete-article are keyless like the other undos.
 const postingKey = (what: string, place: string, keyless: string) => z.string().max(255).nullable().optional()
   .describe(`Your key for this ONE ${what} (max 255, byte for byte): one key per ${what}, the same key on every repeat of it. The key and its place (${place}) are one ${what} whatever it says, and a repeat never goes out twice: it answers 200 with what the first send made (result.idempotent_replay, result.content_differs when this request says something else) or 409 naming error.context.send_outcome (in_flight, unknown with retry_after and send_decisive_at, or sent; not_sent with blocking_activity_log_sid when another ${what} in doubt holds the place). The same key at another place is another ${what}. Without a key ${keyless} count as a repeat for an hour after they went out. check_linkedin_posting_sent asks by it.`);
 
@@ -95,8 +108,10 @@ const PostingSendItem = z.object({
   created_at: z.string().nullable().optional(),
   text: z.string().optional(),
   parent_post_urn: z.string().nullable().optional().describe('A repost: the post it reposted.'),
+  article: z.object({}).passthrough().nullable().optional().describe('An article share: the article read back after it (article_id, state, post_urn, scheduled_at).'),
+  post: z.object({}).passthrough().nullable().optional().describe('An article share: the share itself (post_urn; activity_urn and url when published now).'),
 }).passthrough()
-  .describe('What the send made, in the shape its own verb answers: a comment the comment_urn; a post its urns, url, time and body; a repost its kind, urns, url, time, body and the reposted post.');
+  .describe('What the send made, in the shape its own verb answers: a comment the comment_urn; a post its urns, url, time and body; a repost its kind, urns, url, time, body and the reposted post; an article share its article and post.');
 
 // check-sent's `result` (LinkedinSendCheckResult::toResult, the shape every family
 // answers; the S1 candidates, attempts of a build that kept no key, were removed on
@@ -116,8 +131,8 @@ const CheckSentResult = z.object({
     .describe("ISO 8601: the moment a send in doubt can no longer land; a person's confirmed_not_sent is taken from then on. A plain repost carries no deadline of its own, so it is an hour after its answer was lost."),
 }).passthrough();
 
-// The form check-sent takes a post's place in (InternalLinkedinPostingCheckSentRequest::POST_PLACE_PATTERN, gtm.lib.common 37961fc).
-const POST_PLACE_RE = /^(?:feed:member|feed:org:\d+|group:\d+(?::org:\d+)?)(?::scheduled:\d+)?$/;
+// The form check-sent takes a post's place in (InternalLinkedinPostingCheckSentRequest::POST_PLACE_PATTERN, gtm.lib.common 37961fc; article:<id> for publish-article since 2026-11-22).
+const POST_PLACE_RE = /^(?:feed:member|feed:org:\d+|group:\d+(?::org:\d+)?|article:\d+)(?::scheduled:\d+)?$/;
 
 // react / unreact take the same handles as a comment, but a POST handle is
 // re-addressed at the post's social thread before the wire (2026-09-16, live
@@ -182,6 +197,61 @@ const LinkedinPostingMention = z.object({
     .describe('Span start in text, in UTF-16 code units (JS String offsets).'),
   length: z.number().int().min(1)
     .describe('Span length in UTF-16 code units. start+length must fit inside text - out of bounds is a 422 here, not a spent dispatch.'),
+});
+
+// ─── The article family (2026-11-21) ───
+//
+// An article is LinkedIn's long-form post (urn:li:fsd_firstPartyArticle:<id>,
+// the editor at /article/new/), public at /pulse/<permalink> once published. Its
+// publication is a SHARE (urn:li:ugcPost:<id>) whose media is the article, so a
+// scheduled article is a scheduled share and LinkedIn's own queue
+// (get_linkedin_scheduled_posts) lists it as a post. A newsletter is a
+// urn:li:fsd_contentSeries:<id> the member or a page owns, and an issue is an
+// article whose series is that newsletter. What was captured: the owner's HARs of
+// 2026-11-21 (Melnikov's member and page articles, Fabian's page newsletter);
+// what was probed live the same day: the one-shot create, the scheduled share
+// with an empty commentary, the single read answering no scheduledAt, the share
+// delete leaving the article behind, the restli DELETE, latestDraftById on every
+// state, the reader by url (wire facts §6 and §7). Not probed: publishing now
+// through this surface (the owner's rule: scheduled variants only).
+//
+// The ids on this surface are the DIGITS of the urns (as company_id is the
+// digits of a company urn). The backend takes the urn too and normalizes it
+// before the dispatch (TakesArticleIds, design D4), so the two patterns below are
+// its regex rules character for character; request-parity holds them against the
+// FormRequest, and the public spec carries them as `pattern`.
+const ARTICLE_ID_RE = /^(?:urn:li:fsd_firstPartyArticle:)?\d{1,20}$/;
+const NEWSLETTER_ID_RE = /^(?:urn:li:fsd_contentSeries:)?\d{1,20}$/;
+// A pulse link on any linkedin.com host (a locale host like de.linkedin.com is
+// one too); the permalink may be percent-encoded (probe F8), and nothing after a
+// query or a fragment is read into it (LinkedinPostingGetArticleRequest::PULSE_URL_PATTERN).
+const PULSE_URL_RE = /^https:\/\/(?:[a-z0-9-]+\.)?linkedin\.com\/pulse\/[^\s?#]+/i;
+
+const ARTICLE_ID = z.string().regex(ARTICLE_ID_RE)
+  .describe('The article: the digits of urn:li:fsd_firstPartyArticle:<id>, exactly as every article row answers article_id, or that urn.');
+
+// The wire's own read vocabulary (ARTICLE_STATES in the SDK's articleValues.ts,
+// LinkedinPostingCreateArticleRequest::STATES): the write sends AUTOSAVED and a
+// read answers DRAFT, so AUTOSAVED never appears on this surface. Closed on both
+// sides (Rule::in on the backend), which is what resolves it for enum-parity.
+const LinkedinPostingArticleState = z.enum(['DRAFT', 'SCHEDULED', 'PUBLISHED']);
+
+// The cover picture of an article (TakesArticleContent::coverImageRules, mirrored
+// bound for bound). Image-shaped like LinkedinPostingImageValue, but a schema of
+// its own: it carries a caption (the wire's caption.text) in place of alt_text,
+// and its file members are not nullable, because request-parity holds every key
+// against the FormRequest's enumerated children and alt_text is not one of them.
+// Uploaded as PUBLISHING_COVER_IMAGE on LinkedIn's media endpoint.
+const LinkedinPostingArticleCoverImage = z.object({
+  file_base64: z.string().min(1).optional()
+    .describe('The picture bytes of a PNG, JPEG, GIF or WEBP: a data:<mime>;base64,<...> URL or bare base64. Exactly one of file_base64 or url. Checked before anything is dispatched (image_corrupt / image_format_unrecognized / image_not_base64 are 422s on this member). Base64 typed out by hand is the usual source of damage: prefer url.'),
+  url: z.string().url().max(2048).optional()
+    .describe('An https URL of the picture, downloaded by us (public hosts only, within the 35 MB article media budget the inline pictures share, typed by content). Exactly one of file_base64 or url. A request_media_upload file_url works once its upload is done.'),
+  file_byte_size: z.number().int().min(1).optional(),
+  file_name: z.string().min(1).optional(),
+  file_type: z.string().min(1).optional(),
+  caption: z.string().max(1000).nullable().optional()
+    .describe('The caption shown under the cover; empty is what LinkedIn\'s editor sends for none.'),
 });
 
 // The §4.12a dispatch row (linkedin-account-activity-log). Kept open rather than
@@ -268,6 +338,158 @@ const GetScheduledPostsResult = z.object({
 const DeleteScheduledPostResult = z.object({
   deleted: z.literal(true)
     .describe('Always true on a 200: a refused delete is a 409 scheduled_post_not_deleted, never a success body.'),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+// One article as the backend projects the node's Article record (design §2 of
+// 2026-11-21; LinkedinPostingService::articleRowOf): the wire's unix ms rendered
+// ISO 8601, every member but title and content_html nullable. state is a
+// described z.string(), not a z.enum: no PHP enum backs it for the enum-parity
+// gate to pin (the CheckSentResult precedent above).
+const ArticleRow = z.object({
+  article_id: z.string().nullable()
+    .describe('The digits of urn:li:fsd_firstPartyArticle:<id>: the handle update_linkedin_article, publish_linkedin_article, get_linkedin_article and delete_linkedin_article take.'),
+  article_urn: z.string().nullable().describe('urn:li:fsd_firstPartyArticle:<id>.'),
+  linkedin_article_urn: z.string().nullable()
+    .describe('urn:li:linkedInArticle:<id>, the same digits: the media urn of the article\'s share.'),
+  title: z.string(),
+  state: z.string().nullable()
+    .describe('DRAFT | SCHEDULED | PUBLISHED, the wire\'s own read vocabulary. Only a DRAFT can be patched or published.'),
+  content_html: z.string()
+    .describe("LinkedIn's own html of the body, normalized server-side: not an echo of what was sent (a code block comes back as an empty pre, an inline picture gains its src, the editor's link attributes are rewritten)."),
+  url: z.string().nullable()
+    .describe('https://www.linkedin.com/pulse/<permalink>, PUBLISHED only: the handle get_linkedin_article takes as url.'),
+  cover_image_url: z.string().nullable().describe('The largest rendition of the cover picture, when one is set.'),
+  cover_image_caption: z.string().nullable(),
+  author_profile_id: z.string().nullable()
+    .describe("The member's ACoA id when the article is the member's own; null for a page article."),
+  author_organization_id: z.string().nullable()
+    .describe("The numeric company id when the article is a page's; null for a member article."),
+  newsletter_id: z.string().nullable()
+    .describe('The digits of the newsletter (content series) this article is an issue of; null when it is none.'),
+  post_urn: z.string().nullable()
+    .describe('The share LinkedIn made for a SCHEDULED or PUBLISHED article (urn:li:ugcPost:<id>); null on a DRAFT. A scheduled article sits in get_linkedin_scheduled_posts under it.'),
+  activity_urn: z.string().nullable()
+    .describe('The feed entry of a published article. Only the read by url (the Article Reader) carries it; null on every other read.'),
+  created_at: z.string().nullable().describe('ISO 8601; null on a read by url (the reader omits it).'),
+  updated_at: z.string().nullable().describe('ISO 8601; null on a read by url.'),
+  published_at: z.string().nullable().describe('ISO 8601, PUBLISHED only.'),
+  scheduled_at: z.string().nullable()
+    .describe("ISO 8601 of the planned publication. Carried by get_linkedin_articles (state SCHEDULED) and by the create or publish answer that scheduled it. LinkedIn's single read by id answers none (probe B5 of 2026-11-21), so a null here on get_linkedin_article does NOT mean unscheduled: read state and post_urn, or list with state SCHEDULED."),
+  version: z.number().int().nullable().describe('LinkedIn\'s edit counter: 0 on create, one more per patch.'),
+}).passthrough();
+
+// The share step's answer, create-post's shape without the activity-log row
+// (LinkedinPostingService::articlePostOf): null for a DRAFT.
+const ArticleShare = z.object({
+  activity_urn: z.string().nullable().describe('The feed entry, PUBLISHED now only; null for a scheduled share.'),
+  post_urn: z.string().nullable()
+    .describe('The share, urn:li:ugcPost:<id>: the proof it was made, the same value article.post_urn carries.'),
+  url: z.string().nullable().describe('The feed url of the share, query string stripped; null for a scheduled share.'),
+  created_at: z.string().nullable().describe('ISO 8601.'),
+  text: z.string().describe('The commentary LinkedIn published above the article; empty when none was given.'),
+  lifecycle_state: z.string().nullable().describe('PUBLISHED when LinkedIn said so; null for a scheduled share.'),
+}).passthrough();
+
+// create-article and publish-article answer the same `{article, post}`: the
+// article read back after the last write (latestDraftById) and the share.
+const ArticleShareResult = z.object({
+  article: ArticleRow.describe('The article read back after the last write.'),
+  post: ArticleShare.nullable()
+    .describe('The share: null when state was DRAFT (nothing is public yet); for a scheduled share post_urn alone, for one published now its activity_urn and url too.'),
+  activity_log: ACTIVITY_LOG,
+  idempotent_replay: z.boolean().optional()
+    .describe('true when this answers a repeat (under the key, or without one the same commentary and article at the same place) with what the first send made: nothing was sent now.'),
+  content_differs: z.boolean().optional()
+    .describe('With idempotent_replay: true when this request\'s commentary or article differs from the send that made it.'),
+}).passthrough();
+
+const UpdateArticleResult = z.object({
+  article: ArticleRow
+    .describe('The draft read back after the patch: version moved by one, content_html LinkedIn\'s normalized form of what was sent, post_urn null.'),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+const GetArticlesResult = z.object({
+  rows: z.array(ArticleRow).describe('Newest edit first: LinkedIn orders the list by updated_at descending.'),
+  paging: z.object({
+    next_cursor: z.string().nullable().describe('Offset cursor for the next page; null when the list is exhausted.'),
+    total: z.number().int().nullable().describe("LinkedIn's total for this author and state; reliable on this finder (probe F1 of 2026-11-21)."),
+  }).passthrough(),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+const GetArticleResult = z.object({
+  article: ArticleRow.nullable()
+    .describe("null, in a 200, when LinkedIn has no article under the id or the url (deleted, another account's, a pulse link the reader does not resolve): never an error, as get-post answers a deleted post."),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+const DeleteArticleResult = z.object({
+  deleted: z.literal(true)
+    .describe('Always true on a 200: a refused delete is a 409 article_not_deleted, never a success body.'),
+  post_urn: z.string().nullable()
+    .describe('The share that was deleted first, when the article had one (SCHEDULED or PUBLISHED); null for a draft.'),
+  state_before: z.string().nullable()
+    .describe('DRAFT | SCHEDULED | PUBLISHED: what the article was when it was read, before the delete.'),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+// One newsletter (content series) as the backend projects the node's record
+// (LinkedinPostingService::newsletterRowOf); every member but the title nullable.
+const NewsletterRow = z.object({
+  newsletter_id: z.string().nullable()
+    .describe('The digits of urn:li:fsd_contentSeries:<id>: what create_linkedin_article and update_linkedin_article take as newsletter_id.'),
+  newsletter_urn: z.string().nullable().describe('urn:li:fsd_contentSeries:<id>.'),
+  title: z.string(),
+  description: z.string().nullable(),
+  url: z.string().nullable().describe('https://www.linkedin.com/newsletters/<slug>-<id>.'),
+  issue_count: z.number().int().nullable(),
+  subscriber_count: z.number().int().nullable().describe('From LinkedIn\'s subscribe row, when it rides along.'),
+  publish_frequency: z.object({ duration: z.number().int(), unit: z.string() }).nullable()
+    .describe('The cadence LinkedIn states for it, such as {duration: 2, unit: MONTH}.'),
+  author_profile_id: z.string().nullable().describe("The member's ACoA id when the newsletter is the member's own."),
+  author_organization_id: z.string().nullable().describe("The numeric company id when the newsletter is a page's."),
+  logo_url: z.string().nullable(),
+}).passthrough();
+
+const GetNewslettersResult = z.object({
+  rows: z.array(NewsletterRow),
+  paging: z.object({
+    next_cursor: z.string().nullable().describe('Offset cursor for the next page; null when the list is exhausted: the ONLY end-of-list signal here.'),
+    total: z.number().int().nullable()
+      .describe('NOT reliable on this finder: LinkedIn answered 0 with two newsletters live (probe F4 of 2026-11-21). Read next_cursor instead.'),
+  }).passthrough(),
+  creation_enabled: z.boolean().nullable()
+    .describe("LinkedIn's metadata.creationEnabled: whether this owner may create newsletters. A product flag, not the entitlement to publish into one: an account with no newsletter answers rows [] with creation_enabled true (probe A6)."),
+  activity_log: ACTIVITY_LOG,
+}).passthrough();
+
+// One company page the account may publish as, as the backend projects the
+// node's record (LinkedinPostingService::administeredCompanyRowOf): every
+// member but name and roles nullable.
+const AdministeredCompanyRow = z.object({
+  company_id: z.string().nullable()
+    .describe('The digits of urn:li:fsd_company:<id>: what author_organization_id takes on every verb of this surface.'),
+  company_urn: z.string().nullable().describe('urn:li:fsd_company:<id>.'),
+  name: z.string(),
+  universal_name: z.string().nullable().describe('The vanity in the page url, such as jobs-psa-page.'),
+  url: z.string().nullable().describe('https://www.linkedin.com/company/<vanity>/ or /showcase/<vanity>/.'),
+  page_type: z.string().nullable().describe('COMPANY or SHOWCASE, as the wire says.'),
+  logo_url: z.string().nullable().describe('The largest rendition of the page logo, when it has one.'),
+  roles: z.array(z.string())
+    .describe("The account's roles on the page as LinkedIn names them (SUPER_ADMINISTRATOR, CONTENT_ADMINISTRATOR); empty when the wire named none."),
+  follower_count: z.number().int().nullable()
+    .describe("The page's follower count from LinkedIn's following row, when it rides along."),
+}).passthrough();
+
+const GetAdministeredCompaniesResult = z.object({
+  rows: z.array(AdministeredCompanyRow).describe('In the order LinkedIn lists them: not alphabetical, not by id.'),
+  paging: z.object({
+    next_cursor: z.string().nullable().describe('Offset cursor for the next page; null when the list is exhausted.'),
+    total: z.number().int().nullable()
+      .describe('How many pages the account may publish as; reliable on this finder (probes O2 and O3 of 2026-11-22).'),
+  }).passthrough(),
   activity_log: ACTIVITY_LOG,
 }).passthrough();
 
@@ -397,7 +619,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
       brand_partnership: z.boolean().optional()
         .describe('true adds LinkedIn\'s "Brand partnership" label (paid endorsement). false and absent both send nothing - the wire\'s own shape.'),
       author_organization_id: z.string().max(2048).optional()
-        .describe('Post AS a company page the account administers: its numeric id in any spelling (the digits, a company urn, a /company/<id>/ link), or its page link or slug when a company read of your workspace already knows the id (else 422 company_not_readable). Omit to post as the member.'),
+        .describe('Post AS a company page the account administers: its numeric id in any spelling (the digits, a company urn, a /company/<id>/ link), or its page link or slug when a company read of your workspace already knows the id (else 422 company_not_readable). get_linkedin_administered_companies lists the pages this account may post as, with their ids. Omit to post as the member.'),
       group_id: z.string().regex(/^\d+$/).optional()
         .describe('Post INTO a group: the bare numeric group id. Mutually exclusive with visibility - a group post sets container visibility, not member-feed visibility. No read serves a group\'s feed, so a group post whose answer was lost stays in doubt until a person gives their word.'),
       client_reference: postingKey(
@@ -446,7 +668,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
       })).optional()
         .describe('Mentions of members (profile_id) and company pages (company_id, 2026-10-29). Names are matched in text left to right in list order, each search starting after the previous mention. The node computes the character offsets itself.'),
       author_organization_id: z.string().max(2048).optional()
-        .describe('Comment AS a company page the account administers: its numeric id in any spelling (the digits, a company urn, a /company/<id>/ link; the company_ln_id enrich_linkedin_company_posts takes), or its link or slug when your workspace already knows the id, for a top-level comment and a reply alike. Omit to comment as the member. The member and a page are two authors, so their comments at one place are two comments: give each a client_reference of its own, because check_linkedin_posting_sent takes no author and, asked by a key both share, answers for whichever went out. No read lists a comment as made by a page, so a page comment whose answer was lost stays in doubt until a person gives their word (confirmed_sent or confirmed_not_sent). A mass-action comment step does not take this field: a step comments as the member.'),
+        .describe('Comment AS a company page the account administers: its numeric id in any spelling (the digits, a company urn, a /company/<id>/ link; the company_ln_id enrich_linkedin_company_posts takes), or its link or slug when your workspace already knows the id, for a top-level comment and a reply alike. get_linkedin_administered_companies lists the pages this account may act as, with their ids. Omit to comment as the member. The member and a page are two authors, so their comments at one place are two comments: give each a client_reference of its own, because check_linkedin_posting_sent takes no author and, asked by a key both share, answers for whichever went out. No read lists a comment as made by a page, so a page comment whose answer was lost stays in doubt until a person gives their word (confirmed_sent or confirmed_not_sent). A mass-action comment step does not take this field: a step comments as the member.'),
       client_reference: postingKey('comment', 'the post as LinkedIn files it, named by any of its urns, or for a reply the comment it answers', 'the same words at the same place by the same author'),
       confirmed_not_sent: CONFIRMED_NOT_SENT,
       confirmed_sent: CONFIRMED_SENT,
@@ -573,7 +795,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
       cursor: z.string().min(1).max(200).optional()
         .describe('The previous page\'s paging.next_cursor, verbatim. Omit for the first page.'),
       author_organization_id: z.string().max(2048).optional()
-        .describe("Read a company page's queue instead of the member's own: its numeric id in any spelling (the digits, a company urn, a linkedin.com/company/<id>/ link), or its link or slug when your workspace already knows the id. The account must administer that page or the queue comes back empty."),
+        .describe("Read a company page's queue instead of the member's own: its numeric id in any spelling (the digits, a company urn, a linkedin.com/company/<id>/ link), or its link or slug when your workspace already knows the id. The account must administer that page or the queue comes back empty; get_linkedin_administered_companies lists those pages and their ids."),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(z.null(), GetScheduledPostsResult),
@@ -603,8 +825,275 @@ export const linkedinPostingTools: ToolDefinition[] = [
     outputSchema: McpActionResponse(z.null(), DeleteScheduledPostResult),
     annotations: { title: 'Delete scheduled LinkedIn post', ...DANGER },
   },
+  // ─── The article family (2026-11-21; design D10) ───
+  //
+  // Seven verbs on the same route group, mount and bucket as the posts: the four
+  // writes are dangerous (preview then confirm), the three reads are the queue's
+  // kind (a browser dispatch, nothing mutated). Two of the writes are sends
+  // (create-article with a share, publish-article) and carry the key with the
+  // check tool below; a DRAFT create, a patch and a delete are keyless.
+  {
+    ...base,
+    name: 'create_linkedin_article',
+    description:
+      'Create ONE LinkedIn article (LinkedIn\'s long-form post) as the member or AS a company page it administers (author_organization_id), as a newsletter issue (newsletter_id; excludes visibility), with a cover_image; wire create-article. state decides: DRAFT creates and stops (nothing public, no key); SCHEDULED also schedules its share (scheduled_at REQUIRED, ISO 8601 with timezone, in the future); PUBLISHED shares now. content_html is the HTML subset the field describes; any other tag is a 422 naming it. Spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4). Answers the article read back and its post (a scheduled share has post_urn only). '
+      + sendOnce('place (your feed or the page; a new scheduled_at is the same share)')
+      + ' 409 article_not_published is send_outcome unknown: repeat after retry_after; context.article_id names a draft left behind.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/create-article' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    pacedBucket: 'posting',
+    sentCheck: { tool: 'check_linkedin_posting_sent', args: { verb: 'create-article' } },
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      title: z.string().min(1)
+        .describe('The article\'s title, never blank (a blank one is a 422 here). No cap of ours: a title LinkedIn refuses comes back as its own answer.'),
+      content_html: z.string()
+        .describe('The body as HTML, always present; "" is legal for a DRAFT (an empty article). The subset: p, h1-h6 (LinkedIn has one heading level), blockquote, pre or pre>code, ul/ol>li, hr, img (a data: URL, or an https url we download) alone or in a figure with a figcaption, iframe[src] embeds LinkedIn can ingest (YouTube and the like), br, and inline strong/b, em/i, a[href]; u, s, code, span and unknown inline tags are unwrapped. table, video, audio, script, style or any other block tag is a 422 naming the tag. Pictures (the cover included) share one 35 MB decoded budget; the html itself is capped at 1,000,000 characters without them.'),
+      state: LinkedinPostingArticleState
+        .describe('DRAFT: create the draft and stop. SCHEDULED: create it and schedule its share at scheduled_at (REQUIRED then). PUBLISHED: create it, share it now and mark it published. The share is what makes an article public.'),
+      scheduled_at: z.string().optional()
+        .describe('With state SCHEDULED only (REQUIRED there, refused with DRAFT or PUBLISHED): ISO 8601 with timezone, in the future (a strictly past time is a 422; within a minute of now is passed through for LinkedIn to judge). The share lives in LinkedIn\'s own queue (get_linkedin_scheduled_posts); the article is listed by get_linkedin_articles with state SCHEDULED. The slot is no part of a key: a retry under the same client_reference with a new scheduled_at is the same share.'),
+      commentary: z.string().max(3000).optional()
+        .describe('The share\'s text above the article (3000, LinkedIn\'s post cap); "" when omitted, which LinkedIn accepts. Meaningless for a DRAFT and ignored there.'),
+      visibility: LinkedinPostingVisibility.optional()
+        .describe('The share\'s visibility: ANYONE (the node default) or CONNECTIONS_ONLY. Mutually exclusive with newsletter_id: an issue takes container visibility on its newsletter.'),
+      allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional()
+        .describe('Who may comment on the share: ALL (the node default), CONNECTIONS_ONLY, or NONE to disable comments.'),
+      author_organization_id: z.string().max(2048).optional()
+        .describe('Write AS a company page the account administers: its numeric id in any spelling (the digits, a company urn, a /company/<id>/ link), or its page link or slug when a company read of your workspace already knows the id (else 422 company_not_readable). get_linkedin_administered_companies lists the pages this account may write as, with their ids. The article and its share both go as the page. Omit to write as the member (the backend supplies the member\'s own id; no profile_id field exists here).'),
+      newsletter_id: z.string().regex(NEWSLETTER_ID_RE).optional()
+        .describe('Make the article an issue of this newsletter: the digits of urn:li:fsd_contentSeries:<id> (rows[].newsletter_id of get_linkedin_newsletters) or that urn. The owner must match author_organization_id (a page\'s newsletter needs the page). Excludes visibility.'),
+      cover_image: LinkedinPostingArticleCoverImage.optional()
+        .describe('ONE cover picture (file_base64 XOR url, plus an optional caption), uploaded before the create. Shares the 35 MB budget with the inline pictures.'),
+      client_reference: postingKey(
+        'article share',
+        'where it lands: your own feed or the company page of author_organization_id',
+        'the same commentary and article at the same place and slot',
+      ),
+      confirmed_not_sent: CONFIRMED_NOT_SENT,
+      confirmed_sent: CONFIRMED_SENT,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), ArticleShareResult),
+    annotations: { title: 'Create LinkedIn article', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'update_linkedin_article',
+    description:
+      "Patch one of the account's DRAFT LinkedIn articles (wire update-article): title, content_html (replaces the whole body; the same HTML subset and pictures as create_linkedin_article), cover_image, newsletter_id, at least one of them. The article is read first: a SCHEDULED or PUBLISHED one is refused 409 article_not_draft (delete it with delete_linkedin_article and create it again, or leave it), an id LinkedIn has nothing under is 404 article_not_found. newsletter_id takes no null: omit it to keep the series as it is (the wire for leaving a newsletter is not captured). Spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4). Not a send: a draft is in front of nobody, so it takes no client_reference. Answers the draft read back after the patch (version moved by one; content_html is LinkedIn's normalized form of what was sent).",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/update-article' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    pacedBucket: 'posting',
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      article_id: ARTICLE_ID,
+      title: z.string().min(1).optional().describe('A new title, never blank. Omit to keep the title.'),
+      content_html: z.string().optional()
+        .describe('A new body, replacing the whole one: the same HTML subset, pictures and ceilings as create_linkedin_article; "" empties the draft. Omit to keep the body.'),
+      newsletter_id: z.string().regex(NEWSLETTER_ID_RE).optional()
+        .describe('Move the draft into this newsletter: the digits of urn:li:fsd_contentSeries:<id> or that urn. Not nullable: omit it to keep the series.'),
+      cover_image: LinkedinPostingArticleCoverImage.optional()
+        .describe('A new cover picture (file_base64 XOR url, plus an optional caption), replacing the current one. Omit to keep it.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), UpdateArticleResult),
+    annotations: { title: 'Update LinkedIn article draft', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'publish_linkedin_article',
+    description:
+      "Share one of the account's DRAFT LinkedIn articles, now or at a slot (wire publish-article): scheduled_at (ISO 8601 with timezone, in the future) schedules the share; absent, the share goes out now and the article is marked PUBLISHED. The article is read first and its author (the member or the page) and newsletter come from it, so there is no author field; a SCHEDULED or PUBLISHED article is refused 409 article_not_draft, a gone one 404 article_not_found. commentary is the share's text above the article (empty when omitted); visibility and allowed_commenters_scope as on create_linkedin_post. Public; take it back with delete_linkedin_article. Spends the posting bucket (20/day in series of 3 at a 1200 s pause; free plan 4). "
+      + sendOnce('article (a new scheduled_at is the same share)')
+      + ' 409 article_not_published is send_outcome unknown: repeat after retry_after.',
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/publish-article' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    pacedBucket: 'posting',
+    sentCheck: { tool: 'check_linkedin_posting_sent', args: { verb: 'publish-article' } },
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      article_id: ARTICLE_ID,
+      scheduled_at: z.string().optional()
+        .describe('Schedule the share instead of publishing now: ISO 8601 with timezone, in the future (a strictly past time is a 422; within a minute of now is passed through for LinkedIn to judge). The share lives in LinkedIn\'s own queue. The slot is no part of a key: a retry under the same client_reference with a new scheduled_at is the same share.'),
+      commentary: z.string().max(3000).optional()
+        .describe('The share\'s text above the article (3000, LinkedIn\'s post cap); "" when omitted, which LinkedIn accepts.'),
+      visibility: LinkedinPostingVisibility.optional()
+        .describe('ANYONE (the node default) or CONNECTIONS_ONLY. Ignored for a newsletter issue, whose share takes container visibility on its newsletter.'),
+      allowed_commenters_scope: LinkedinPostingAllowedCommentersScope.optional()
+        .describe('Who may comment on the share: ALL (the node default), CONNECTIONS_ONLY, or NONE to disable comments.'),
+      client_reference: postingKey(
+        'article share',
+        'the article it shares, article:<id> with the slot after it when scheduled, whatever the article\'s author: the author is read from the article after the key is taken, so no feed is named and a lost answer stays unknown until a person confirms it',
+        'the same commentary and article at the same place and slot',
+      ),
+      confirmed_not_sent: CONFIRMED_NOT_SENT,
+      confirmed_sent: CONFIRMED_SENT,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), ArticleShareResult),
+    annotations: { title: 'Publish LinkedIn article', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'get_linkedin_articles',
+    description:
+      "One page of the account's own LinkedIn articles in ONE state, DRAFT, SCHEDULED or PUBLISHED (wire get-articles): each row with article_id, title, state, post_urn, url, the timestamps and scheduled_at (this list is the one read that carries it). Pass author_organization_id (the page's numeric id) to read a COMPANY PAGE's articles the account administers instead of the member's own. A PRIVATE read, nobody on LinkedIn sees it, but it spends the one Content bucket, posting (20/day in series of 3 at a 1200 s pause; free plan 4), shared with publishing. Offset-paged, newest edit first: page_size 1-100 (default 20), pass paging.next_cursor back as cursor; paging.total is reliable here. rows[].article_id is the handle the other article verbs take.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/get-articles' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    pacedBucket: 'posting',
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      state: LinkedinPostingArticleState
+        .describe('Which list: DRAFT (unshared drafts), SCHEDULED (a share is queued) or PUBLISHED. One state per call.'),
+      page_size: z.number().int().min(1).max(100).optional()
+        .describe("Rows per page, the node's own [1, 100] gate. Defaults to 20."),
+      cursor: z.string().min(1).max(200).optional()
+        .describe('The previous page\'s paging.next_cursor, verbatim. Omit for the first page.'),
+      author_organization_id: z.string().max(2048).optional()
+        .describe("Read a company page's articles instead of the member's own: its numeric id in any spelling (the digits, a company urn, a linkedin.com/company/<id>/ link), or its link or slug when your workspace already knows the id. The account must administer that page or the list comes back empty; get_linkedin_administered_companies lists those pages and their ids."),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), GetArticlesResult),
+    annotations: { title: 'Get LinkedIn articles', ...QUEUE_READ },
+  },
+  {
+    ...base,
+    name: 'get_linkedin_article',
+    description:
+      "One LinkedIn article by article_id (any state) or by its public pulse url, exactly one of the two (wire get-article). By id, LinkedIn's latestDraftById answers a DRAFT, a SCHEDULED or a PUBLISHED article; by url, the Article Reader answers a PUBLISHED one and is the only read that carries activity_urn (and none of created_at, updated_at, version). result.article is null, in a 200, when LinkedIn has nothing under the id or the url (deleted, another account's, a link that is not a pulse url): never an error. scheduled_at is null on a read by id even for a SCHEDULED article (LinkedIn's single read omits it): read state and post_urn, or list with get_linkedin_articles state SCHEDULED. A PRIVATE read that spends the one Content bucket, posting (20/day in series of 3 at a 1200 s pause; free plan 4).",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/get-article' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    pacedBucket: 'posting',
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      article_id: ARTICLE_ID.optional()
+        .describe('The article by id: the digits of urn:li:fsd_firstPartyArticle:<id> or that urn, every state. Exactly one of article_id or url.'),
+      url: z.string().url().max(2048).regex(PULSE_URL_RE).optional()
+        .describe('The article by its public link: https://www.linkedin.com/pulse/<permalink> (a locale host such as de.linkedin.com works; the permalink may be percent-encoded). PUBLISHED articles only, the one read with activity_urn. Exactly one of article_id or url.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), GetArticleResult),
+    annotations: { title: 'Get LinkedIn article', ...QUEUE_READ },
+  },
+  {
+    ...base,
+    name: 'delete_linkedin_article',
+    description:
+      "Delete one of the account's LinkedIn articles by article_id, a draft, a scheduled or a published one (wire delete-article). The undo of create_linkedin_article and publish_linkedin_article: the article is read, its share is deleted first when it has one (so the queued slot or the public post goes with it), then the article itself. The handle is the ARTICLE, never its share: delete_linkedin_scheduled_post on the share alone leaves a scheduled article behind. Spends the one Content bucket, posting (20/day in series of 3 at a 1200 s pause; free plan 4), paced as an undo so a create and its delete fit back to back. A refusal, not this account's or already gone, comes back as 409 article_not_deleted with context.state_before (null when nothing was found), never as a success; on a 200 result.state_before says what it was.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/delete-article' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: true,
+    pacedBucket: 'posting',
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      article_id: ARTICLE_ID,
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), DeleteArticleResult),
+    annotations: { title: 'Delete LinkedIn article', ...DANGER },
+  },
+  {
+    ...base,
+    name: 'get_linkedin_newsletters',
+    description:
+      "One page of the newsletters (LinkedIn content series) the account, or a COMPANY PAGE it administers (author_organization_id), may publish articles into (wire get-newsletters): newsletter_id (what create_linkedin_article takes), title, url, issue_count, subscriber_count, publish_frequency. An account without the newsletter feature answers rows [] (creation_enabled describes the product, not the entitlement). A PRIVATE read that spends the one Content bucket, posting (20/day in series of 3 at a 1200 s pause; free plan 4). Offset-paged: page_size 1-100 (default 20), pass paging.next_cursor back as cursor; paging.total is NOT reliable on this finder (LinkedIn answered 0 with two newsletters live), the end of the list is a null next_cursor.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/get-newsletters' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    pacedBucket: 'posting',
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      page_size: z.number().int().min(1).max(100).optional()
+        .describe("Rows per page, the node's own [1, 100] gate. Defaults to 20."),
+      cursor: z.string().min(1).max(200).optional()
+        .describe('The previous page\'s paging.next_cursor, verbatim. Omit for the first page.'),
+      author_organization_id: z.string().max(2048).optional()
+        .describe("Read a company page's newsletters instead of the member's own: its numeric id in any spelling (the digits, a company urn, a linkedin.com/company/<id>/ link), or its link or slug when your workspace already knows the id. The account must administer that page or the list comes back empty; get_linkedin_administered_companies lists those pages and their ids."),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), GetNewslettersResult),
+    annotations: { title: 'Get LinkedIn newsletters', ...QUEUE_READ },
+  },
+  // get-administered-companies (2026-11-22): the one read here that is NOT on the
+  // posting bucket. It is the editor's own "which pages may I post as" list, a
+  // discovery read before every page post, so it spends self_account_sync (the
+  // own account's data, as the get_my_* reads do) and never a posting unit.
+  {
+    ...base,
+    name: 'get_linkedin_administered_companies',
+    description:
+      "One page of the company pages (COMPANY and SHOWCASE) the account may publish as (wire get-administered-companies): the source of every author_organization_id on this surface (create_linkedin_post, create_linkedin_comment, create_linkedin_article and the three paged reads) and, through get_linkedin_newsletters, of a page's newsletter_id. Each row: company_id (the digits of urn:li:fsd_company:<id>, what author_organization_id takes), company_urn, name, universal_name, url, page_type, logo_url, roles (SUPER_ADMINISTRATOR, CONTENT_ADMINISTRATOR, as LinkedIn names them) and follower_count. The filter is LinkedIn's own (canCreateOrganicShare): a page the account may not post as never lists, an account administering no page answers rows []. A PRIVATE read that spends one self_account_sync unit (the own account's read budget), NOT the posting bucket. Offset-paged: page_size 1-100 (default 10, LinkedIn's own), pass paging.next_cursor back as cursor; paging.total is reliable here.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/get-administered-companies' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    pacedBucket: 'self_account_sync',
+    massAction: false,
+    stepEligible: false,
+    scheduleRequired: false,
+    inputSchema: z.object({
+      linkedin_account_sid: ACCOUNT_SID,
+      page_size: z.number().int().min(1).max(100).optional()
+        .describe("Rows per page, the node's own [1, 100] gate. Defaults to 10, LinkedIn's own page."),
+      cursor: z.string().min(1).max(200).optional()
+        .describe('The previous page\'s paging.next_cursor, verbatim. Omit for the first page.'),
+      ...usageMetaField,
+    }),
+    outputSchema: McpActionResponse(z.null(), GetAdministeredCompaniesResult),
+    annotations: { title: 'Get the LinkedIn company pages the account administers', ...QUEUE_READ },
+  },
   // check-sent (2026-10-05, round 5; product KNOWLEDGE §4.9a): what a comment, a
-  // post or a repost came to, asked without sending. No pacedBucket, as
+  // post, a repost or an article share (2026-11-21) came to, asked without sending. No pacedBucket, as
   // check_linkedin_message_sent: the look rides the account's own-sync budget, and
   // a look that budget holds back reads nothing while the call still answers
   // (unknown, with retry_after), never 429.
@@ -612,7 +1101,7 @@ export const linkedinPostingTools: ToolDefinition[] = [
     ...base,
     name: 'check_linkedin_posting_sent',
     description:
-      "Ask what a LinkedIn comment, post or repost came to, without sending: by the client_reference it went out under and its verb (comment, create-post, repost), optionally at one place (entity_urn: the post a comment or a repost went to, in any of its forms, or the comment a reply answers; parent_comment_urn for a reply; post_place for a post), or by the activity_log_sid a 409 named. result.outcome: sent (item is what it made, or null with reason result_pending or caller_confirmed), in_flight, unknown (LinkedIn has not shown it yet; retry_after, send_decisive_at), or not_sent (no_send_under_key, refused, not_on_linkedin, caller_confirmed). Send the same request again only on not_sent, under the same key. result.activity_log_sid is the attempt a person's word names (confirmed_not_sent / confirmed_sent on the send). A send in doubt has LinkedIn read now when the last look is old enough. A key sent to several places is 422 place_required, a place LinkedIn could not be read for 422 place_unmatched (context.places).",
+      "Ask what a LinkedIn comment, post, repost or article share came to, without sending: by the client_reference it went out under and its verb (comment, create-post, repost, create-article, publish-article), optionally at one place (entity_urn: the post a comment or a repost went to, or the comment a reply answers; parent_comment_urn for a reply; post_place for a post or an article share), or by the activity_log_sid a 409 named. result.outcome: sent (item is what it made, or null with reason result_pending or caller_confirmed), in_flight, unknown (not shown yet; retry_after, send_decisive_at), or not_sent (no_send_under_key, refused, not_on_linkedin, caller_confirmed). Repeat the send only on not_sent, under the same key. result.activity_log_sid is the attempt confirmed_not_sent / confirmed_sent name on the send. A send in doubt has LinkedIn read now when the last look is old enough. A key sent to several places is 422 place_required, a place LinkedIn could not be read for 422 place_unmatched.",
     toolClass: 'complex',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-posting/check-sent' },
     operation: 'action',
@@ -626,18 +1115,18 @@ export const linkedinPostingTools: ToolDefinition[] = [
       client_reference: z.string().min(1).max(255).nullable().optional()
         .describe('The key the send went out under, byte for byte. Exactly one of client_reference / activity_log_sid. Found at any age: a send in doubt never ages out of its key.'),
       activity_log_sid: z.string().length(18).startsWith('ln_al_').nullable().optional()
-        .describe('The attempt a 409 or an earlier check named (ln_al_…); it takes no verb and no place. An attempt of another account, or one that is no comment, post or repost, is 404.'),
-      verb: z.enum(['comment', 'create-post', 'repost']).nullable().optional()
-        .describe('Required with client_reference: the verb the key was sent by (create_linkedin_comment, create_linkedin_post, repost_linkedin_post). A key is one send per verb.'),
+        .describe('The attempt a 409 or an earlier check named (ln_al_…); it takes no verb and no place. An attempt of another account, or one that is no comment, post, repost or article share, is 404.'),
+      verb: z.enum(['comment', 'create-post', 'repost', 'create-article', 'publish-article']).nullable().optional()
+        .describe('Required with client_reference: the verb the key was sent by (create_linkedin_comment, create_linkedin_post, repost_linkedin_post, create_linkedin_article with a share, publish_linkedin_article). A key is one send per verb.'),
       entity_urn: z.string().max(512).nullable().optional()
-        .describe('Place, next to client_reference: the post a comment or a repost went to, as the send took it or in any other of its forms (it is read for its thread, on the post-details cache), or a comment urn for a reply. Not with create-post.'),
+        .describe('Place, next to client_reference: the post a comment or a repost went to, as the send took it or in any other of its forms (it is read for its thread, on the post-details cache), or a comment urn for a reply. Not with create-post, create-article or publish-article.'),
       parent_comment_urn: z.string().max(512).nullable().optional()
         .describe('Place, next to client_reference and verb comment: the comment a reply answers, in either of its forms.'),
       post_place: z.string().max(128).regex(POST_PLACE_RE).nullable().optional()
-        .describe('Place, next to client_reference and verb create-post: where the post landed: feed:member (your own feed), feed:org:<id> (a company page it was posted as), group:<id> (a group; group:<id>:org:<id> when a page posted into it), optionally :scheduled:<unix ms> after it. A key is read at the feed, page or group whatever its slot.'),
+        .describe('Place, next to client_reference and verb create-post, create-article or publish-article: where the post or the article share landed: feed:member (your own feed), feed:org:<id> (a company page it was posted as), group:<id> (a group; group:<id>:org:<id> when a page posted into it), and for publish-article article:<id> (the article shared: its author is read by the node, so no feed is named and a lost answer stays unknown until confirmed_sent or confirmed_not_sent), optionally :scheduled:<unix ms> after any of them. A key is read at the feed, page, group or article whatever its slot.'),
       ...usageMetaField,
     }),
     outputSchema: McpActionResponse(PostingSendItem, CheckSentResult),
-    annotations: { title: 'Check whether a LinkedIn comment, post or repost went out', ...LIVE_READ },
+    annotations: { title: 'Check whether a LinkedIn comment, post, repost or article share went out', ...LIVE_READ },
   },
 ];

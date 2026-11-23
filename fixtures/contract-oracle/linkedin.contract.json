@@ -8479,6 +8479,22 @@
                     "value": "get_my_services"
                 },
                 {
+                    "name": "GetArticles",
+                    "value": "get_articles"
+                },
+                {
+                    "name": "GetArticle",
+                    "value": "get_article"
+                },
+                {
+                    "name": "GetNewsletters",
+                    "value": "get_newsletters"
+                },
+                {
+                    "name": "GetAdministeredCompanies",
+                    "value": "get_administered_companies"
+                },
+                {
                     "name": "EditMyProfile",
                     "value": "edit_my_profile"
                 },
@@ -8621,6 +8637,22 @@
                 {
                     "name": "DeleteScheduledPost",
                     "value": "delete_scheduled_post"
+                },
+                {
+                    "name": "CreateArticle",
+                    "value": "create_article"
+                },
+                {
+                    "name": "UpdateArticle",
+                    "value": "update_article"
+                },
+                {
+                    "name": "PublishArticle",
+                    "value": "publish_article"
+                },
+                {
+                    "name": "DeleteArticle",
+                    "value": "delete_article"
                 },
                 {
                     "name": "MarkConversationAsRead",
@@ -45767,7 +45799,7 @@
                         "required_with:client_reference",
                         "nullable",
                         "string",
-                        "in:\"comment\",\"create-post\",\"repost\""
+                        "in:\"comment\",\"create-post\",\"repost\",\"create-article\",\"publish-article\""
                     ],
                     "required": false,
                     "nullable": true,
@@ -45775,7 +45807,9 @@
                     "in": [
                         "comment",
                         "create-post",
-                        "repost"
+                        "repost",
+                        "create-article",
+                        "publish-article"
                     ],
                     "min": null,
                     "max": null,
@@ -45789,7 +45823,7 @@
                         "nullable",
                         "string",
                         "max:512",
-                        "prohibited_if:verb,create-post"
+                        "prohibited_if:verb,create-post,create-article,publish-article"
                     ],
                     "required": false,
                     "nullable": true,
@@ -45827,8 +45861,9 @@
                         "max:128",
                         "regex:~^(?:feed:member",
                         "feed:org:\\d+",
-                        "group:\\d+(?::org:\\d+)?)(?::scheduled:\\d+)?$~",
-                        "prohibited_unless:verb,create-post"
+                        "group:\\d+(?::org:\\d+)?",
+                        "article:\\d+)(?::scheduled:\\d+)?$~",
+                        "prohibited_unless:verb,create-post,create-article,publish-article"
                     ],
                     "required": false,
                     "nullable": true,
@@ -46069,6 +46104,375 @@
                         "starts_with:ln_al_",
                         "size:18",
                         "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/create-article",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "createArticle",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingCreateArticleRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "title",
+                    "rules": [
+                        "required",
+                        "string"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "content_html",
+                    "rules": [
+                        "present",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "state",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"DRAFT\",\"SCHEDULED\",\"PUBLISHED\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "DRAFT",
+                        "SCHEDULED",
+                        "PUBLISHED"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scheduled_at",
+                    "rules": [
+                        "required_if:state,SCHEDULED",
+                        "prohibited_unless:state,SCHEDULED",
+                        "string",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "commentary",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:3000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 3000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "visibility",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"ANYONE\",\"CONNECTIONS_ONLY\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ANYONE",
+                        "CONNECTIONS_ONLY"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allowed_commenters_scope",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"ALL\",\"CONNECTIONS_ONLY\",\"NONE\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ALL",
+                        "CONNECTIONS_ONLY",
+                        "NONE"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "author_organization_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "newsletter_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:~^(?:urn:li:fsd_contentSeries:)?(\\d{1,20})$~"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.file_base64",
+                    "rules": [
+                        "exclude_without:cover_image",
+                        "required_without:cover_image.url",
+                        "prohibits:cover_image.url",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.url",
+                    "rules": [
+                        "exclude_without:cover_image",
+                        "required_without:cover_image.file_base64",
+                        "string",
+                        "max:2048",
+                        "url:https"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:~^image/[^/\\s]+$~"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.caption",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:1000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 1000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255",
+                        "prohibited_if:state,DRAFT"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibited_if:state,DRAFT"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent",
+                        "prohibited_if:state,DRAFT"
                     ],
                     "required": false,
                     "nullable": true,
@@ -46700,6 +47104,62 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-posting/delete-article",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "deleteArticle",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingDeleteArticleRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "article_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:~^(?:urn:li:fsd_firstPartyArticle:)?(\\d{1,20})$~"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-posting/delete-comment",
             "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
             "action": "deleteComment",
@@ -46871,6 +47331,357 @@
         },
         {
             "method": "POST",
+            "uri": "api/linkedin-posting/get-administered-companies",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "getAdministeredCompanies",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingGetAdministeredCompaniesRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/get-article",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "getArticle",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingGetArticleRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "article_id",
+                    "rules": [
+                        "required_without:url",
+                        "prohibits:url",
+                        "string",
+                        "regex:~^(?:urn:li:fsd_firstPartyArticle:)?(\\d{1,20})$~"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "url",
+                    "rules": [
+                        "required_without:article_id",
+                        "string",
+                        "max:2048",
+                        "url:https",
+                        "regex:~^https://(?:www\\.)?linkedin\\.com/pulse/[^/?#]+/?(?:[?#].*)?$~"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/get-articles",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "getArticles",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingGetArticlesRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "state",
+                    "rules": [
+                        "required",
+                        "string",
+                        "in:\"DRAFT\",\"SCHEDULED\",\"PUBLISHED\""
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "DRAFT",
+                        "SCHEDULED",
+                        "PUBLISHED"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "author_organization_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/get-newsletters",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "getNewsletters",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingGetNewslettersRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "page_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1",
+                        "max:100"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": 100,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cursor",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1",
+                        "max:200"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": 200,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "author_organization_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:2048",
+                        "Gtm\\Lib\\Common\\Microservices\\Linkedin\\Support\\Rules\\LinkedinCompanyAddressRule"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "api/linkedin-posting/get-scheduled-posts",
             "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
             "action": "getScheduledPosts",
@@ -46955,6 +47766,187 @@
                     "min": null,
                     "max": 2048,
                     "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/publish-article",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "publishArticle",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingPublishArticleRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "article_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:~^(?:urn:li:fsd_firstPartyArticle:)?(\\d{1,20})$~"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "scheduled_at",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "date"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "commentary",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "max:3000"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 3000,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "visibility",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"ANYONE\",\"CONNECTIONS_ONLY\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ANYONE",
+                        "CONNECTIONS_ONLY"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "allowed_commenters_scope",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "in:\"ALL\",\"CONNECTIONS_ONLY\",\"NONE\""
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": [
+                        "ALL",
+                        "CONNECTIONS_ONLY",
+                        "NONE"
+                    ],
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "client_reference",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:255"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 255,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_not_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "confirmed_sent",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "starts_with:ln_al_",
+                        "size:18",
+                        "prohibits:confirmed_not_sent"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
                     "between": null
                 }
             ],
@@ -47354,6 +48346,225 @@
                     "in": null,
                     "min": 1,
                     "max": 512,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "api/linkedin-posting/update-article",
+            "controller": "App\\Entities\\LinkedinPosting\\LinkedinPostingController",
+            "action": "updateArticle",
+            "operation": "action",
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [
+                "description",
+                "massAction",
+                "operation",
+                "requiredPermission"
+            ],
+            "required_permission": "can_act_linkedin_engagements",
+            "internal": false,
+            "request_class": "App\\Entities\\LinkedinPosting\\Requests\\LinkedinPostingUpdateArticleRequest",
+            "rules": [
+                {
+                    "field": "linkedin_account_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ln_ac_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "article_id",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:~^(?:urn:li:fsd_firstPartyArticle:)?(\\d{1,20})$~"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "title",
+                    "rules": [
+                        "sometimes",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "content_html",
+                    "rules": [
+                        "sometimes",
+                        "string"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "newsletter_id",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:~^(?:urn:li:fsd_contentSeries:)?(\\d{1,20})$~"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image",
+                    "rules": [
+                        "sometimes",
+                        "array",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "array",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.file_base64",
+                    "rules": [
+                        "exclude_without:cover_image",
+                        "required_without:cover_image.url",
+                        "prohibits:cover_image.url",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.url",
+                    "rules": [
+                        "exclude_without:cover_image",
+                        "required_without:cover_image.file_base64",
+                        "string",
+                        "max:2048",
+                        "url:https"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 2048,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.file_byte_size",
+                    "rules": [
+                        "sometimes",
+                        "integer",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "integer",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.file_name",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "min:1"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": 1,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.file_type",
+                    "rules": [
+                        "sometimes",
+                        "string",
+                        "regex:~^image/[^/\\s]+$~"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
+                    "field": "cover_image.caption",
+                    "rules": [
+                        "sometimes",
+                        "nullable",
+                        "string",
+                        "max:1000"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 1000,
                     "size": null,
                     "between": null
                 }
@@ -64498,7 +65709,7 @@
                         "required_with:client_reference",
                         "nullable",
                         "string",
-                        "in:\"comment\",\"create-post\",\"repost\""
+                        "in:\"comment\",\"create-post\",\"repost\",\"create-article\",\"publish-article\""
                     ],
                     "required": false,
                     "nullable": true,
@@ -64506,7 +65717,9 @@
                     "in": [
                         "comment",
                         "create-post",
-                        "repost"
+                        "repost",
+                        "create-article",
+                        "publish-article"
                     ],
                     "min": null,
                     "max": null,
@@ -64520,7 +65733,7 @@
                         "nullable",
                         "string",
                         "max:512",
-                        "prohibited_if:verb,create-post"
+                        "prohibited_if:verb,create-post,create-article,publish-article"
                     ],
                     "required": false,
                     "nullable": true,
@@ -64558,8 +65771,9 @@
                         "max:128",
                         "regex:~^(?:feed:member",
                         "feed:org:\\d+",
-                        "group:\\d+(?::org:\\d+)?)(?::scheduled:\\d+)?$~",
-                        "prohibited_unless:verb,create-post"
+                        "group:\\d+(?::org:\\d+)?",
+                        "article:\\d+)(?::scheduled:\\d+)?$~",
+                        "prohibited_unless:verb,create-post,create-article,publish-article"
                     ],
                     "required": false,
                     "nullable": true,
@@ -68295,6 +69509,12 @@
         "account_not_lendable": "This account cannot be lent: it has not completed its login yet.",
         "account_shared_out": "This LinkedIn member is lent to another workspace right now, and only that workspace acts with it; recall the share before connecting it again or sending from it.",
         "account_slice_not_served": "An auto-scrape cannot be linked to a mass action while your access is limited to selected accounts. Create it without mass_action_sid, use a key or a member that is not limited, or ask a workspace admin to lift the limit.",
+        "article_needs_account_identity": "An article under the account's own name needs the account's own member id, which arrives with its initial sync; retry once the account has synced, or name a company page with author_organization_id.",
+        "article_not_created": "LinkedIn answered the create without naming an article, so no draft is known to exist; check the title and the content_html, and for a company page (author_organization_id) that this account administers it, then create it again.",
+        "article_not_deleted": "LinkedIn did not delete this article: it is not this account's, or it is already gone (context.state_before says what it was when read, null when it was not found).",
+        "article_not_draft": "This article is already scheduled or published (context.state), and only a DRAFT can be patched or published; delete it with delete-article and create it again, or leave it as it is.",
+        "article_not_found": "LinkedIn has no article under this article_id for this account: it was deleted, or the id is another account's; list the articles with get-articles to find the one you mean.",
+        "article_not_published": "LinkedIn answered the publish without naming the article's share, so whether this article went out is not known yet and LinkedIn is read to find out; do not publish it again, repeat this same request after retry_after. A company page article (author_organization_id) also needs an account that administers that page.",
         "attachments_too_large": "The attachments together exceed the 35 MB a send may carry; send fewer or smaller files.",
         "attributes_not_supported_in_thread": "Rich-text attributes apply to the first message that opens a Recruiter thread only; a reply into an existing thread takes plain text.",
         "audio_transcoder_unavailable": "The audio converter is not available on this host right now; retry in a minute.",

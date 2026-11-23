@@ -25,7 +25,7 @@ still calls. Two of gtm's own joined them on 2026-11-12, the email-boxes `previe
 section says which and why), 36 in all. So a row below reads **defined (served)** where the two differ,
 and a mount's count is what it serves.
 
-## mcp.linkedin: 12 mounts / 190 tools
+## mcp.linkedin: 12 mounts / 200 tools
 
 > 2026-07-24 service split: `linkedin-tracked-posts` / `-comments` / `-engagements` / `-searches` /
 > `-search-results` left this backend for `gs.service.signals`, and the outbound authoring verbs
@@ -41,7 +41,7 @@ and a mount's count is what it serves.
 | messaging | `/mcp/linkedin/messaging` | linkedin_conversations (14 of its 16), linkedin_messages (14 of its 16): the four Recruiter messenger verbs ride on recruiter | 28 | ✅ (budget **28**, at cap) |
 | recruiter | `/mcp/linkedin/recruiter` | the LinkedIn Recruiter messenger (the third `messenger_type`, 2026-09-03), mounted by tool selector: 4 from linkedin_accounts (get-my-recruiter-seat, get-my-hiring-projects, get-my-recruiter-contracts, select-recruiter-contract) + 2 from linkedin_conversations (sync-my-recruiter-conversations, get-my-latest-recruiter) + 3 from linkedin_messages (get-my-latest-recruiter, send-recruiter, and check-sent, which is served on messaging too). Stored recruiter rows stay searchable on messaging (filter.messenger_type = recruiter) | 9 | ✅ |
 | network | `/mcp/linkedin/network` | linkedin_connections (6), linkedin_connection_requests (7), linkedin_connection_invitations (6), linkedin_followers (3) + 1 from linkedin_accounts (invite-to-event, 2026-10-08: up to 25 connections invited to an event in one batch, gated with the invitation verbs) | 23 | ✅ |
-| content | `/mcp/linkedin/content` | linkedin_posting (10: create-post, repost, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post, check-sent) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 12 | ✅ |
+| content | `/mcp/linkedin/content` | linkedin_posting (18: create-post, repost, comment, react, delete-post, delete-comment, unreact, get-scheduled-posts, delete-scheduled-post, check-sent, create-article, update-article, publish-article, get-articles, get-article, delete-article, get-newsletters, get-administered-companies) + 2 from linkedin_accounts (endorse-skill-by-id, unendorse-skill: the accounts mount is at cap, and they are engagement writes) | 20 | ✅ |
 | scraping | `/mcp/linkedin/scraping` | linkedin_scraping (25; the Recruiter people search + its facet typeahead joined 2026-09-05, one home per live list, seat gate or not; the search-URL builder 2026-10-08, one tool for the four people and company searches) | 25 | ✅ (budget 25, at cap) |
 | auto_scrapes | `/mcp/linkedin/auto-scrapes` | linkedin_auto_scrapes (10), linkedin_auto_scrape_runs (2), linkedin_auto_scrape_results (1) | 13 | ✅ |
 | enrichment | `/mcp/linkedin/enrichment` | linkedin_enrichment (22) | 22 | ✅ |
@@ -87,6 +87,27 @@ behind the registry and are read off it now: content counted 8 posting tools and
 (`repost_linkedin_post` joined the package on 2026-09-22 and was never counted, so it is 10 and 12 with
 check-sent), and accounts counted 23 of 29 and 26 on the mount (the 2026-09-22 raise to 29: the
 position and services tools), which is 26 of 32 and 29.
+
+2026-11-21 - linkedin 192 to 199, content 12 to 19: the article family joined `linkedin_posting`
+(`create_linkedin_article`, `update_linkedin_article`, `publish_linkedin_article`,
+`get_linkedin_articles`, `get_linkedin_article`, `delete_linkedin_article`,
+`get_linkedin_newsletters`): LinkedIn's long-form posts and newsletter issues, as a draft, a
+scheduled share or a publication, as the member or as a company page, on the same route group
+(`/api/linkedin-posting/*`), mount and `posting` bucket as the posts, with no `maxTools` change
+(19 of 25). The two sends (a create with a share, publish) take the one key and ask
+`check_linkedin_posting_sent` by the verbs `create-article` and `publish-article`; the four writes
+are protected, the three reads are the queue's kind (a browser dispatch, nothing mutated). The
+heading was two behind the registry before this change (192 served against 190 written), so it
+reads 199 now.
+
+2026-11-22 - linkedin 199 to 200, content 19 to 20: `get_linkedin_administered_companies` joined
+`linkedin_posting` on the owner's word of 2026-11-22 (without it a caller cannot learn the values of
+`author_organization_id`): one page of the company pages (COMPANY and SHOWCASE) the account may
+publish as, each with its `company_id`, the digits every `author_organization_id` on the mount takes,
+and through `get_linkedin_newsletters` the way to a page's `newsletter_id`. A read of the queue's kind
+(a browser dispatch, nothing mutated) on the same route group and mount, but on the `self_account_sync`
+bucket, not `posting`: a discovery read before a page post must not spend a posting unit. 20 of 25, no
+`maxTools` change.
 
 `resolveMounts` throws at module scope on the 29th tool, which kills the worker isolate rather than
 degrading one mount, and `tests/worker-boot.test.ts` is the only thing that catches it: read its
@@ -351,8 +372,8 @@ than answering from stale local data (Eugene, 2026-08-14).
 
 ## Facade
 
-`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all five services, **331 tools served**
-(linkedin 192 + id 56 + orchestration 20 + email 61 + support 2) of 367 defined: the 36 REST-only
+`/mcp`: `facade: 'toolsets'` (3 meta-tools) over all five services, **339 tools served**
+(linkedin 200 + id 56 + orchestration 20 + email 61 + support 2) of 375 defined: the 36 REST-only
 definitions (surface api) are in no toolset, and `call_tool` refuses them by name.
 
 The support row used to be left out of the facade's selectors, with the note that "support is not a
@@ -368,8 +389,8 @@ facade's declared set equals the registry, which is what stops that number drift
 running on a local handler over the docs index instead of a backend service is a dispatch detail
 (`localHandler`), not a reason to hide it from the one endpoint that is meant to be the whole platform.
 
-Totals: **66 registry packages / 367 tools defined, 331 served**, over **22 mounts + 1 facade**. By
-service: linkedin 192 (27 packages), id 85 defined and 56 served (19), orchestration 23 defined and 20
+Totals: **66 registry packages / 375 tools defined, 339 served**, over **22 mounts + 1 facade**. By
+service: linkedin 200 (27 packages), id 85 defined and 56 served (19), orchestration 23 defined and 20
 served (4), email 65 defined and 61 served (15), support 2 (1). Every number in this file is read off
 the built registry (`buildRegistry` over the five barrels, then `resolveMounts` over `MOUNTS`); the per-mount ones are the headroom table
 `tests/worker-boot.test.ts` prints on a green run, so re-run it rather than editing a count by hand.
