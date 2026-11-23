@@ -2432,13 +2432,13 @@
                         "has_default": false
                     },
                     {
-                        "name": "amount_granted",
+                        "name": "amount_granted_usd",
                         "type": "float",
                         "nullable": false,
                         "has_default": false
                     },
                     {
-                        "name": "amount_remaining",
+                        "name": "amount_remaining_usd",
                         "type": "float",
                         "nullable": false,
                         "has_default": false
@@ -2509,13 +2509,13 @@
                         "has_default": false
                     },
                     {
-                        "name": "amount_granted",
+                        "name": "amount_granted_usd",
                         "type": "float",
                         "nullable": false,
                         "has_default": false
                     },
                     {
-                        "name": "amount_remaining",
+                        "name": "amount_remaining_usd",
                         "type": "float",
                         "nullable": false,
                         "has_default": false
@@ -2595,7 +2595,7 @@
                         "has_default": false
                     },
                     {
-                        "name": "amount",
+                        "name": "amount_usd",
                         "type": "float",
                         "nullable": false,
                         "has_default": false
@@ -2726,7 +2726,7 @@
                         "has_default": false
                     },
                     {
-                        "name": "amount",
+                        "name": "amount_usd",
                         "type": "float",
                         "nullable": false,
                         "has_default": false
@@ -3341,6 +3341,211 @@
                     "status"
                 ]
             }
+        },
+        "EmailTrackingHost": {
+            "domain": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailTrackingHost\\EmailTrackingHostDomain",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "email_box_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "hostname",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "provider",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailTrackingHost\\Enums\\EmailTrackingHostProviderEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "cname_target",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "connection_group_id",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailTrackingHost\\Enums\\EmailTrackingHostStatusEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "tenant_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "certificate_status",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "certificate_ref",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_error",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_checked_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "response": {
+                "class": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailTrackingHost\\Responses\\EmailTrackingHostResponse",
+                "fields": [
+                    {
+                        "name": "sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "team_sid",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "email_box_sid",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": false
+                    },
+                    {
+                        "name": "hostname",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "provider",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailTrackingHost\\Enums\\EmailTrackingHostProviderEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "cname_target",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "connection_group_id",
+                        "type": "string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "status",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\EmailTrackingHost\\Enums\\EmailTrackingHostStatusEnum|string",
+                        "nullable": false,
+                        "has_default": false
+                    },
+                    {
+                        "name": "tenant_id",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "certificate_status",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "certificate_ref",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_error",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "last_checked_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "created_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "deleted_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    }
+                ]
+            },
+            "filter": null
         },
         "Notification": {
             "domain": {
@@ -4260,6 +4465,18 @@
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
+                    },
+                    {
+                        "name": "provider",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "cname_target",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
                     }
                 ]
             },
@@ -4341,6 +4558,18 @@
                     {
                         "name": "deleted_at",
                         "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "provider",
+                        "type": "?string",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "cname_target",
+                        "type": "?string",
                         "nullable": true,
                         "has_default": true
                     }
@@ -5419,6 +5648,12 @@
                         "has_default": true
                     },
                     {
+                        "name": "config",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Values\\WhitelabelConfigValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
                         "name": "created_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
@@ -5522,6 +5757,12 @@
                     {
                         "name": "email_domain",
                         "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Values\\WhitelabelEmailDomainValue|array|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "config",
+                        "type": "Gtm\\Lib\\Common\\Microservices\\Id\\Whitelabel\\Values\\WhitelabelConfigValue|array|null",
                         "nullable": true,
                         "has_default": true
                     },
@@ -6986,6 +7227,44 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\EmailTrackingHost\\Enums\\EmailTrackingHostProviderEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "CloudFrontSaas",
+                    "value": "cloudfront_saas"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\EmailTrackingHost\\Enums\\EmailTrackingHostStatusEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Reserved",
+                    "value": "reserved"
+                },
+                {
+                    "name": "Registering",
+                    "value": "registering"
+                },
+                {
+                    "name": "CertificateFailed",
+                    "value": "certificate_failed"
+                },
+                {
+                    "name": "Active",
+                    "value": "active"
+                },
+                {
+                    "name": "Failed",
+                    "value": "failed"
+                },
+                {
+                    "name": "Removing",
+                    "value": "removing"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\MediaUpload\\Enums\\MediaUploadFileTypeEnum": {
             "backing": "string",
             "cases": [
@@ -7326,6 +7605,30 @@
                 {
                     "name": "AccountTransferReceived",
                     "value": "account_transfer_received"
+                },
+                {
+                    "name": "Welcome",
+                    "value": "welcome"
+                },
+                {
+                    "name": "SignalsDigest",
+                    "value": "signals_digest"
+                },
+                {
+                    "name": "DataSourceFailed",
+                    "value": "data_source_failed"
+                },
+                {
+                    "name": "WorkflowFailed",
+                    "value": "workflow_failed"
+                },
+                {
+                    "name": "WhitelabelActivated",
+                    "value": "whitelabel_activated"
+                },
+                {
+                    "name": "WhitelabelActivationFailed",
+                    "value": "whitelabel_activation_failed"
                 }
             ]
         },
@@ -7558,6 +7861,19 @@
                 {
                     "name": "Expired",
                     "value": "expired"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\SslCertificate\\Enums\\SslCertificateProviderEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Acme",
+                    "value": "acme"
+                },
+                {
+                    "name": "CloudFrontSaas",
+                    "value": "cloudfront_saas"
                 }
             ]
         },
@@ -22892,6 +23208,211 @@
         },
         {
             "method": "POST",
+            "uri": "internal/email-tracking-hosts/register",
+            "controller": "App\\Entities\\EmailTrackingHost\\InternalEmailTrackingHostController",
+            "action": "register",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailTrackingHost\\Requests\\EmailTrackingHostRegisterRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_td_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "retry_certificate",
+                    "rules": [
+                        "sometimes",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": false,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-tracking-hosts/release",
+            "controller": "App\\Entities\\EmailTrackingHost\\InternalEmailTrackingHostController",
+            "action": "release",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailTrackingHost\\Requests\\EmailTrackingHostReleaseRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_td_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
+            "uri": "internal/email-tracking-hosts/reserve",
+            "controller": "App\\Entities\\EmailTrackingHost\\InternalEmailTrackingHostController",
+            "action": "reserve",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": true,
+            "request_class": "App\\Entities\\EmailTrackingHost\\Requests\\EmailTrackingHostReserveRequest",
+            "rules": [
+                {
+                    "field": "team_sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:ts_tm_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "email_box_sid",
+                    "rules": [
+                        "present",
+                        "nullable",
+                        "string",
+                        "starts_with:em_bx_",
+                        "size:18"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "sid",
+                    "rules": [
+                        "required",
+                        "string",
+                        "starts_with:em_td_",
+                        "size:18"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": 18,
+                    "between": null
+                },
+                {
+                    "field": "hostname",
+                    "rules": [
+                        "required",
+                        "string",
+                        "regex:/^(?=.{4,255}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?)(\\.[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?){2,}$/"
+                    ],
+                    "required": true,
+                    "nullable": false,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                }
+            ],
+            "rules_reason": null
+        },
+        {
+            "method": "POST",
             "uri": "internal/handover/report-end",
             "controller": "App\\Entities\\Handover\\InternalHandoverController",
             "action": "reportEnd",
@@ -27763,6 +28284,7 @@
         "confirmation_count_mismatch": "confirmation_count does not match the number of accounts the filter matched; re-read the count and confirm again.",
         "domain_active_in_another_team": "This domain has an active certificate in another workspace.",
         "domain_already_active": "This domain already has an active certificate.",
+        "domain_bound_other_team": "This hostname is already a tracking domain of another workspace.",
         "domain_required": "domain is required.",
         "email_account_on_another_box": "Some of these mailboxes are on a different email server than the one named as the source.",
         "email_box_already_on_plan": "This email server is already on that plan.",
@@ -27787,6 +28309,8 @@
         "email_taken": "An account with this email already exists; sign in and connect the agent from the app instead.",
         "handover_in_flight": "A handover of this account is already in progress; wait for it to finish.",
         "holder_team_unavailable": "The receiving workspace does not exist or is not active.",
+        "hostname_being_removed": "This hostname is still being taken off the edge after its tracking domain was deleted; try again in a few minutes.",
+        "hostname_registered_elsewhere": "This hostname is already a tracking domain on another email server of this workspace.",
         "incident_tally_busy": "The provider incident tally is busy for this provider; retry shortly.",
         "invalid_transition": "This status change is not allowed from the member's current status.",
         "invitation_already_redeemed": "This invitation was already used.",
@@ -27816,6 +28340,7 @@
         "requester_has_no_email": "The requester's account has no email to reply to; add one before opening a support request.",
         "scheduled_change_is_not_cancel": "The scheduled change on this subscription is not a cancellation, so there is no cancellation to undo.",
         "share_not_active": "This share is not active, so it cannot be recalled or returned.",
+        "sid_names_another_hostname": "This tracking domain is registered under another hostname; a tracking domain keeps the hostname it was made with.",
         "slug_collision": "Another product already carries this slug; the catalog cannot map two products to one slug.",
         "subscription_canceled": "This subscription is canceled and cannot be changed.",
         "subscription_has_no_plan": "This subscription has no plan line to change; it carries add-ons only.",
@@ -27825,6 +28350,7 @@
         "team_partner_managed": "This workspace is managed by a partner; billing changes come through the partner.",
         "team_unavailable": "That workspace does not exist or was deleted.",
         "too_many_splits": "group_by would produce more than 500 groups; narrow the filter or split on a field with fewer values.",
+        "tracking_edge_not_configured": "Custom tracking domains are not available on this deployment yet.",
         "unknown_filter_operator": "{field} uses an operator this filter does not know; use eq, in or is_null."
     }
 }
