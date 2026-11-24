@@ -150,8 +150,10 @@ const WebhookEventType = z.enum([
   // Payload: sid, team_sid, provider, address, status (the mailbox's after the
   // sign-in: connecting while its first sync runs), connected_at, created_by,
   // client_reference (the link's, as request_email_account_connect_link took
-  // it) and outcome (created, restored, reconnected, unchanged). Every other
-  // email-accounts.* payload carries client_reference too, as its last key.
+  // it; null for a link that carried none) and outcome (created, restored,
+  // reconnected, unchanged). The reference is said here alone (2026-11-24):
+  // the mailbox keeps no trace of its link and no other email-accounts.*
+  // payload has the key.
   'email-accounts.signed-in',
   'email-messages.received',
   'email-messages.sent',

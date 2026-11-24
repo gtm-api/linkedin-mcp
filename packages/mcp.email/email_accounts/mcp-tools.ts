@@ -287,14 +287,15 @@ export const emailAccountsTools: ToolDefinition[] = [
       backfill_days: z.number().int().min(0).max(3650).nullable().optional().describe('Days of history to mirror. Default 90.'),
       display_name: z.string().max(255).nullable().optional(),
       label: z.string().max(64).nullable().optional().describe("The customer's own tag; carried by the IMAP form."),
-      client_reference: z.string().max(255).nullable().optional()
-        .describe('Your own id of this link: stamped on the mailbox when its owner signs in, and carried by email-accounts.signed-in and every later email-accounts.* webhook of that mailbox.'),
+      client_reference: z.string().max(128).regex(/^[A-Za-z0-9._:-]+$/).nullable().optional()
+        .describe("Your own id of this link, an id and not text: up to 128 ASCII letters, digits, '.', '_', ':' and '-'. email-accounts.signed-in says it when the owner signs the mailbox in. No other webhook carries it and the mailbox keeps none."),
       ...emailCommon,
     }),
     outputSchema: McpActionResponse(z.null(), z.object({
       connect_url: z.string(),
       expires_at: z.string(),
       email_oauth_app_sid: z.string().nullable().optional().describe('The application the sign-in will run through; null: the platform\'s.'),
+      client_reference: z.string().nullable().optional().describe('The reference the link carries, as it was taken; null for none.'),
     })),
     annotations: { title: 'Request email account connect link', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },

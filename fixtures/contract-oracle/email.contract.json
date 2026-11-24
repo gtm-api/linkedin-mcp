@@ -6752,14 +6752,15 @@
                     "rules": [
                         "nullable",
                         "string",
-                        "max:255"
+                        "max:128",
+                        "regex:/\\A[A-Za-z0-9._:\\-]{1,128}\\z/"
                     ],
                     "required": false,
                     "nullable": true,
                     "type": "string",
                     "in": null,
                     "min": null,
-                    "max": 255,
+                    "max": 128,
                     "size": null,
                     "between": null
                 },
