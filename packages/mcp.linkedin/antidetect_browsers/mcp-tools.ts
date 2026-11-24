@@ -277,7 +277,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'list_antidetect_browser_proxy_countries',
     description:
-      'Proxy countries a new browser can be given right now, with how many active proxies back each. Empty list = the pool is dry; create refuses a country with no stock (422 proxy_pool_empty).',
+      'Proxy countries a new browser can be given right now, with how many active proxies back each. Empty list = the pool is dry; create refuses a country with no stock (422 proxy_pool_empty) and one whose stock does not answer its probe (503 proxy_pool_unreachable, retry later).',
     toolClass: 'trivial',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers/proxy-countries' },
     operation: 'action',
@@ -356,7 +356,7 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
     ...base,
     name: 'create_antidetect_browser',
     description:
-      'Provision ONE antidetect browser for the team. The main flow mints a fresh vendor (GoLogin) profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code is the default, custom_proxy_config routes that minted profile through a proxy the caller supplies (probed first, 422 custom_proxy_unreachable_* when dead). Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the BYO-PROFILE path instead, with no proxy source: that profile carries its own. If no LinkedIn account signs in on it for 30 days, it is deleted and its seat freed. DANGEROUS: creates real vendor + proxy infrastructure. For SEVERAL browsers under ONE approval, do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key), then read the connect links off each row when it finishes.',
+      'Provision ONE antidetect browser for the team. The main flow mints a fresh GoLogin profile and pushes the resolved proxy into it, so supply exactly one proxy source: proxy_country_code (the default; probed before the mint, 503 proxy_pool_unreachable when no proxy of that country answers) or custom_proxy_config (the caller\'s own, probed first, 422 custom_proxy_unreachable_* when dead). Pick the branch yourself, never ask an end user for a sid. Bind an existing vendor_profile_id for the BYO-PROFILE path instead, with no proxy source: that profile carries its own. No LinkedIn sign-in on it for 30 days: deleted, seat freed. DANGEROUS: creates real vendor + proxy infrastructure. For SEVERAL browsers under ONE approval, do not call this per browser: author a mass action on /mcp/orchestration/mass-actions with scope {kind:"generate", count:N} and a plan of antidetect-browsers.create (+ antidetect-browsers.generate-cloud-browser-access-key), then read the connect links off each row when it finishes.',
     toolClass: 'typical',
     route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/antidetect-browsers' },
     operation: 'create',
@@ -369,8 +369,8 @@ export const antidetectBrowsersTools: ToolDefinition[] = [
         .describe('Bind an EXISTING vendor profile (BYO): the GoLogin profile id, 24 hex characters. NOT a profile URL, share link or LinkedIn slug. Omit to mint a fresh one. The profile must be shared with our GoLogin account, or the create is 422 vendor_profile_not_found; if the owning GoLogin account is over its plan the create is 402 vendor_profile_plan_limit and retrying will not help. A profile held in our own GoLogin account (no share needed) is adopted (browser_owner=adopted), and when its proxy is one of ours it is linked to that proxy at create.'),
       os: z.enum(['win', 'mac', 'lin', 'android']).optional().describe('OS for a freshly-minted profile (default win).'),
       antidetect_browser_proxy_sid: PROXY_SID.optional()
-        .describe('Assign an already-chosen pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one.'),
-      proxy_country_code: z.string().length(2).optional().describe('ISO country. Picks the least-loaded active proxy. The default way to pick a proxy.'),
+        .describe('Assign an already-chosen pooled proxy. Resolve the sid yourself with search_antidetect_browser_proxies; never ask an end user for one. It is probed before the mint: 422 proxy_unreachable when it does not answer, nothing created.'),
+      proxy_country_code: z.string().length(2).optional().describe('ISO 3166-1 alpha-2. Picks the least-loaded active proxy of the country, probed before the mint, the next one when it does not answer. 503 proxy_pool_unreachable when none answers (nothing created, retry later); 422 proxy_pool_empty when it has no stock.'),
       custom_proxy_config: CustomProxyConfig.optional(),
       ...usageMetaField,
     }),
