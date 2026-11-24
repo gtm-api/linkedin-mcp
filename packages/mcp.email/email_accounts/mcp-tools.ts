@@ -164,7 +164,7 @@ export const emailAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'get_email_account',
     description:
-      'Read one mailbox by sid: its status and why it is held or needs a reconnect, the sending limits, window and warmup ramp, tracking, signature, sync and webhook settings, and the IMAP and SMTP servers of an imap_smtp mailbox (never a password). include health adds the latest health snapshot: score, bounce and complaint rates, DNS state and what to fix. Requires can_view_email_accounts.',
+      'Read one mailbox by sid: its status and why it is held or needs a reconnect, the sending limits, window and warmup ramp, tracking, sync and webhook settings, the stored signature (read-only, deprecated), and the IMAP and SMTP servers of an imap_smtp mailbox (never a password). include health adds the latest health snapshot: score, bounce and complaint rates, DNS state and what to fix. Requires can_view_email_accounts.',
     toolClass: 'trivial',
     route: { ...emailRoute('GET', '/api/email-accounts/{sid}'), queryParams: ['include'] },
     operation: 'get',
@@ -212,7 +212,7 @@ export const emailAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'update_email_account',
     description:
-      "Change a mailbox's settings: display name, label, signature, sending limits, the warmup ramp, open and click tracking, the tracking domain, sync cadence and which events it emits. Only the fields sent change. sending_limits and warmup_config are replaced whole: send every key of the object, with sending_window null for no window. Turning warmup on starts the ramp at ramp_start_daily. Credentials are not changed here: reconnect_email_account. To stop sending without touching limits use pause_email_account_sending. Requires can_update_email_accounts.",
+      "Change a mailbox's settings: display name, label, sending limits, the warmup ramp, open and click tracking, the tracking domain, sync cadence and which events it emits. Only the fields sent change. sending_limits and warmup_config are replaced whole: send every key of the object, with sending_window null for no window. Turning warmup on starts the ramp at ramp_start_daily. The signature is not kept here: write it into body_html of each send. Credentials are not changed here: reconnect_email_account. To stop sending without touching limits use pause_email_account_sending. Requires can_update_email_accounts.",
     toolClass: 'typical',
     route: emailRoute('PATCH', '/api/email-accounts/{sid}'),
     operation: 'update',
@@ -223,7 +223,6 @@ export const emailAccountsTools: ToolDefinition[] = [
       sid: sid('em_ac_'),
       display_name: z.string().max(255).nullable().optional(),
       label: z.string().max(64).nullable().optional().describe('null or an empty string clears it.'),
-      signature_html: z.string().max(8192).nullable().optional(),
       sending_limits: SendingLimitsInput.optional(),
       warmup_config: WarmupConfigInput.optional(),
       track_opens: z.boolean().optional(),

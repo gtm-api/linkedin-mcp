@@ -7319,17 +7319,16 @@
                 {
                     "field": "signature_html",
                     "rules": [
-                        "sometimes",
-                        "nullable",
-                        "string",
-                        "max:8192"
+                        "bail",
+                        "prohibited",
+                        "missing"
                     ],
                     "required": false,
-                    "nullable": true,
-                    "type": "string",
+                    "nullable": false,
+                    "type": null,
                     "in": null,
                     "min": null,
-                    "max": 8192,
+                    "max": null,
                     "size": null,
                     "between": null
                 },

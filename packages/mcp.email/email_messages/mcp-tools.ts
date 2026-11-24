@@ -256,7 +256,8 @@ export const emailMessagesTools: ToolDefinition[] = [
       body_html: z.string().nullable().optional().describe('Exactly one of body_html and body_text.'),
       body_text: z.string().nullable().optional(),
       attachments: z.array(OutboundAttachment).nullable().optional().describe('Bytes, or a stored attachment by reference. 20 MB in total.'),
-      include_signature: z.boolean().nullable().optional().describe("Append the mailbox's signature. Default true."),
+      include_signature: z.boolean().nullable().optional()
+        .describe('Deprecated and ignored: no signature is added to any mail. Accepted so a call that still sends it is not refused. Write the signature into body_html.'),
       scheduled_at: z.string().nullable().optional()
         .describe('ISO 8601 UTC, in the future: queue it for then. Absent: send now. A past time is refused.'),
       client_reference: z.string().max(255).nullable().optional()
