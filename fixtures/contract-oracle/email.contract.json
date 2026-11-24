@@ -11114,6 +11114,21 @@
                     "between": null
                 },
                 {
+                    "field": "require_to",
+                    "rules": [
+                        "nullable",
+                        "boolean"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "boolean",
+                    "in": null,
+                    "min": null,
+                    "max": null,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "track_opens",
                     "rules": [
                         "nullable",

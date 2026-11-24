@@ -269,6 +269,8 @@ export const emailMessagesTools: ToolDefinition[] = [
         .describe("A person's word that the attempt named here arrived: it is settled sent and nothing is sent. Never with confirmed_not_sent."),
       override_suppression: z.boolean().nullable().optional()
         .describe('Send to addresses on the stop-list anyway. Requires can_manage_email_suppressions; each one is audited.'),
+      require_to: z.boolean().nullable().optional()
+        .describe('true: when every address in to is on the stop-list, refuse the whole send (409 recipient_suppressed) and send nothing to the cc and bcc that remain. Default false: it goes to them. Never with scheduled_at (422).'),
       track_opens: z.boolean().nullable().optional().describe("Default: the mailbox's setting. true needs a verified tracking domain."),
       track_clicks: z.boolean().nullable().optional(),
       custom_headers: z.array(z.object({
