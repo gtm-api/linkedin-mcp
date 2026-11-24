@@ -169,15 +169,20 @@ const WebhookEventType = z.enum([
   // seats_cap, provisioned_at.
   'email-boxes.ready',
   // An email server suspended for billing on its way to deletion (2026-11-23): one
-  // event a step, `suspended` when the clock starts, `three_days`, `one_day`.
-  // Payload: sid, team_sid, name, plan, suspended_reason, step, destroy_at, seats_used.
+  // event a step, `suspended` when the clock starts, `three_days`, `one_day`; a final
+  // warning that could not be proven delivered is said again with a later day.
+  // Payload: sid, team_sid, name, plan, step, reason (payment_failed | unpaid),
+  // seats_used (every mailbox on the server, a parked one too), suspended_at,
+  // destroy_at (when it is deleted unless it is paid for again).
   'email-boxes.deletion-warning',
   // An email server is gone, for the cause named: deleted, unpaid,
   // subscription_canceled, team_deleted, replaced. Payload: sid, team_sid, name,
-  // plan, cause, email_account_sids (the mailboxes that went with it).
+  // plan, cause, email_account_sids (the mailboxes that went with it; none for
+  // `replaced`, they live on the new machine), destroyed_at.
   'email-boxes.destroyed',
   // A plan change finished on a new machine: the server's sid changed. Payload:
-  // sid, team_sid, name, plan, seats_cap, replaces_email_box_sid (the old sid).
+  // sid (the new one), team_sid, replaces_email_box_sid (the old sid), name, plan,
+  // seats_cap, provisioned_at.
   'email-boxes.replaced',
   'mass-actions.created',
   'mass-actions.paused',
