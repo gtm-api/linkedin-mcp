@@ -101,6 +101,8 @@ const EmailBox = z.object({
     .describe('resizing from the moment a plan change is accepted, destroying from the moment a delete is.'),
   suspended_reason: EmailBoxSuspendedReason.nullable()
     .describe('payment_failed: the subscription is past due beyond its grace, or paused. unpaid: more servers of the plan than paid units.'),
+  destroy_at: z.string().nullable().optional()
+    .describe('ISO 8601 UTC, on a server suspended for billing: when it is deleted with every mailbox on it unless it is paid for again (seven days after the pause, with warning mails before); null otherwise.'),
   complimentary: z.boolean()
     .describe('The server granted without a paid unit; it cannot be resized or deleted.'),
   seats_cap: z.number().int().nonnegative().describe('Mailboxes the server can hold.'),

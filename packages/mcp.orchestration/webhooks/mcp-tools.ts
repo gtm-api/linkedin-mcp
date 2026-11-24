@@ -34,7 +34,7 @@ const SID = z.string().length(18).startsWith('wh_hk_')
 const WebhookStatus = z.enum(['on', 'off', 'failed']);
 
 // The subscribable event vocabulary, verbatim from the create/update rules()
-// (WebhookEventTypeEnum, 111 cases with email-boxes.ready of 2026-11-18, and the '*'
+// (WebhookEventTypeEnum, 114 cases with the email-boxes.* of 2026-11-18 and 2026-11-23, and the '*'
 // wildcard the rules add). It has to be a closed set on this side:
 // an in: rule 422s with "invalid", never with the list, and an agent cannot
 // subscribe to an event it has to guess the name of.
@@ -168,6 +168,17 @@ const WebhookEventType = z.enum([
   // gtm.service.id EmailBoxReadyEvent). Payload: sid, team_sid, name, plan,
   // seats_cap, provisioned_at.
   'email-boxes.ready',
+  // An email server suspended for billing on its way to deletion (2026-11-23): one
+  // event a step, `suspended` when the clock starts, `three_days`, `one_day`.
+  // Payload: sid, team_sid, name, plan, suspended_reason, step, destroy_at, seats_used.
+  'email-boxes.deletion-warning',
+  // An email server is gone, for the cause named: deleted, unpaid,
+  // subscription_canceled, team_deleted, replaced. Payload: sid, team_sid, name,
+  // plan, cause, email_account_sids (the mailboxes that went with it).
+  'email-boxes.destroyed',
+  // A plan change finished on a new machine: the server's sid changed. Payload:
+  // sid, team_sid, name, plan, seats_cap, replaces_email_box_sid (the old sid).
+  'email-boxes.replaced',
   'mass-actions.created',
   'mass-actions.paused',
   'mass-actions.resumed',
