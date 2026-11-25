@@ -2114,6 +2114,18 @@
                     "value": "email-boxes.ready"
                 },
                 {
+                    "name": "EmailBoxesDeletionWarning",
+                    "value": "email-boxes.deletion-warning"
+                },
+                {
+                    "name": "EmailBoxesDestroyed",
+                    "value": "email-boxes.destroyed"
+                },
+                {
+                    "name": "EmailBoxesReplaced",
+                    "value": "email-boxes.replaced"
+                },
+                {
                     "name": "MassActionsCreated",
                     "value": "mass-actions.created"
                 },
@@ -5093,6 +5105,9 @@
                         "email-sending-domains.verified",
                         "email-sending-domains.failed",
                         "email-boxes.ready",
+                        "email-boxes.deletion-warning",
+                        "email-boxes.destroyed",
+                        "email-boxes.replaced",
                         "mass-actions.created",
                         "mass-actions.paused",
                         "mass-actions.resumed",
@@ -5594,6 +5609,9 @@
                         "email-sending-domains.verified",
                         "email-sending-domains.failed",
                         "email-boxes.ready",
+                        "email-boxes.deletion-warning",
+                        "email-boxes.destroyed",
+                        "email-boxes.replaced",
                         "mass-actions.created",
                         "mass-actions.paused",
                         "mass-actions.resumed",
@@ -5911,6 +5929,9 @@
                         "email-sending-domains.verified",
                         "email-sending-domains.failed",
                         "email-boxes.ready",
+                        "email-boxes.deletion-warning",
+                        "email-boxes.destroyed",
+                        "email-boxes.replaced",
                         "mass-actions.created",
                         "mass-actions.paused",
                         "mass-actions.resumed",
@@ -7718,6 +7739,9 @@
                         "email-sending-domains.verified",
                         "email-sending-domains.failed",
                         "email-boxes.ready",
+                        "email-boxes.deletion-warning",
+                        "email-boxes.destroyed",
+                        "email-boxes.replaced",
                         "mass-actions.created",
                         "mass-actions.paused",
                         "mass-actions.resumed",

@@ -3200,6 +3200,12 @@
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
+                    },
+                    {
+                        "name": "destroy_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
                     }
                 ]
             },
@@ -3328,6 +3334,12 @@
                     },
                     {
                         "name": "updated_at",
+                        "type": "Carbon\\Carbon|string|null",
+                        "nullable": true,
+                        "has_default": true
+                    },
+                    {
+                        "name": "destroy_at",
                         "type": "Carbon\\Carbon|string|null",
                         "nullable": true,
                         "has_default": true
@@ -6902,6 +6914,48 @@
                 }
             ]
         },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Enums\\EmailBoxDeletionWarningEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Suspended",
+                    "value": "suspended"
+                },
+                {
+                    "name": "ThreeDays",
+                    "value": "three_days"
+                },
+                {
+                    "name": "OneDay",
+                    "value": "one_day"
+                }
+            ]
+        },
+        "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Enums\\EmailBoxDestroyCauseEnum": {
+            "backing": "string",
+            "cases": [
+                {
+                    "name": "Deleted",
+                    "value": "deleted"
+                },
+                {
+                    "name": "Unpaid",
+                    "value": "unpaid"
+                },
+                {
+                    "name": "SubscriptionCanceled",
+                    "value": "subscription_canceled"
+                },
+                {
+                    "name": "TeamDeleted",
+                    "value": "team_deleted"
+                },
+                {
+                    "name": "Replaced",
+                    "value": "replaced"
+                }
+            ]
+        },
         "Gtm\\Lib\\Common\\Microservices\\Id\\EmailBox\\Enums\\EmailBoxLocationEnum": {
             "backing": "string",
             "cases": [
@@ -7262,6 +7316,14 @@
                 {
                     "name": "EmailBoxReady",
                     "value": "email_box_ready"
+                },
+                {
+                    "name": "EmailBoxDeletionWarning",
+                    "value": "email_box_deletion_warning"
+                },
+                {
+                    "name": "EmailBoxDeleted",
+                    "value": "email_box_deleted"
                 },
                 {
                     "name": "EmailAccountReconnectRequired",
@@ -27594,6 +27656,23 @@
             "uri": "partner/teams/{sid}/capacity",
             "controller": "App\\Http\\Controllers\\PartnerController",
             "action": "setCapacity",
+            "operation": null,
+            "mass_action": false,
+            "step_eligible": false,
+            "step_tool": null,
+            "schedule_required": false,
+            "declared_arguments": [],
+            "required_permission": null,
+            "internal": false,
+            "request_class": null,
+            "rules": null,
+            "rules_reason": "the action reads the raw request, so no rule set declares its body"
+        },
+        {
+            "method": "POST",
+            "uri": "partner/teams/{sid}/email-servers/release",
+            "controller": "App\\Http\\Controllers\\PartnerController",
+            "action": "releaseEmailServers",
             "operation": null,
             "mass_action": false,
             "step_eligible": false,
