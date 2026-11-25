@@ -31,7 +31,7 @@ Not using MCP? Every tool is also a typed REST endpoint with webhooks. One schem
 
 **1. Sign up.** Create an account at [app.gtm-api.com](https://app.gtm-api.com/signup) (forever free plan, no card) and connect a LinkedIn account. It opens in a dedicated anti-detect cloud browser with its own proxy.
 
-**2. Add the server to your MCP client.** On claude.ai and in Claude Desktop, open Customize, Connectors, then Add, "Add custom connector", paste `https://mcp.gtm-api.com/mcp` and approve access ([Anthropic's steps](https://claude.com/docs/connectors/custom/add-unlisted)). Clients that read a server URL from their config file, such as Cursor's `mcp.json`, take this entry (the repo's own [`.mcp.json`](./.mcp.json) is the same):
+**2. Add the server to your MCP client.** On claude.ai and in Claude Desktop, open Customize, Connectors, then Add, "Add custom connector", paste `https://mcp.gtm-api.com/mcp`, pick Sign in now and Register automatically on the sign-in screen, and approve access ([Anthropic's steps](https://claude.com/docs/connectors/custom/add-unlisted)). Clients that read a server URL from their config file, such as Cursor's `mcp.json`, take this entry (the repo's own [`.mcp.json`](./.mcp.json) is the same):
 
 ```json
 {
