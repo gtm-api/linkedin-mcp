@@ -23,7 +23,7 @@ and each is described at the bottom of this page. All of them shrink only.
 |---|---|---|---|---|
 | `linkedin.contract.json` | `gtm.service.linkedin` | 25 | 173 (150) | coverage gate, ledger gate, contract parity, step-eligibility |
 | `id.contract.json` | `gtm.service.id` | 22 | 130 (81) | coverage gate, ledger gate, contract parity, step-eligibility |
-| `orchestration.contract.json` | `gtm.service.orchestration` | 4 | 30 (21) | coverage gate, ledger gate, contract parity, step-eligibility |
+| `orchestration.contract.json` | `gtm.service.orchestration` | 4 | 46 (23) | coverage gate, ledger gate, contract parity, step-eligibility |
 | `email.contract.json` | `gtm.service.email` | 15 | 109 (65) | coverage gate, ledger gate, contract parity, step-eligibility |
 
 `email.contract.json` landed on 2026-07-27 with the `step_eligible` field, for the
