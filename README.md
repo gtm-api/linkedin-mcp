@@ -3,6 +3,8 @@
 [![Site](https://img.shields.io/badge/site-gtm--api.com-bef264)](https://gtm-api.com/linkedin-mcp-server/)
 [![Protocol](https://img.shields.io/badge/protocol-MCP-blue)](https://modelcontextprotocol.io/)
 [![License](https://img.shields.io/badge/license-MIT-lightgrey)](./LICENSE)
+[![gtm-api/linkedin-mcp MCP server](https://glama.ai/mcp/servers/gtm-api/linkedin-mcp/badges/score.svg)](https://glama.ai/mcp/servers/gtm-api/linkedin-mcp)
+[![gtm-api MCP connector](https://glama.ai/mcp/connectors/com.gtm-api/linkedin-mcp/badges/score.svg)](https://glama.ai/mcp/connectors/com.gtm-api/linkedin-mcp)
 
 A managed LinkedIn MCP server from gtm-api.com: it gives an AI agent one endpoint, three MCP tools and 190+ typed LinkedIn actions over the [Model Context Protocol](https://modelcontextprotocol.io/), so Claude, ChatGPT or Cursor can search, connect, message and enrich on a LinkedIn account you own, with account safety enforced server side.
 
