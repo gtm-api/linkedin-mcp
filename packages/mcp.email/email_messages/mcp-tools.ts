@@ -256,7 +256,8 @@ export const emailMessagesTools: ToolDefinition[] = [
       body_html: z.string().nullable().optional().describe('Exactly one of body_html and body_text.'),
       body_text: z.string().nullable().optional(),
       attachments: z.array(OutboundAttachment).nullable().optional().describe('Bytes, or a stored attachment by reference. 20 MB in total.'),
-      include_signature: z.boolean().nullable().optional().describe("Append the mailbox's signature. Default true."),
+      include_signature: z.boolean().nullable().optional()
+        .describe('Deprecated and ignored: no signature is added to any mail. Accepted so a call that still sends it is not refused. Write the signature into body_html.'),
       scheduled_at: z.string().nullable().optional()
         .describe('ISO 8601 UTC, in the future: queue it for then. Absent: send now. A past time is refused.'),
       client_reference: z.string().max(255).nullable().optional()
@@ -269,6 +270,8 @@ export const emailMessagesTools: ToolDefinition[] = [
         .describe("A person's word that the attempt named here arrived: it is settled sent and nothing is sent. Never with confirmed_not_sent."),
       override_suppression: z.boolean().nullable().optional()
         .describe('Send to addresses on the stop-list anyway. Requires can_manage_email_suppressions; each one is audited.'),
+      require_to: z.boolean().nullable().optional()
+        .describe('true: when every address in to is on the stop-list, refuse the whole send (409 recipient_suppressed) and send nothing to the cc and bcc that remain. Default false: it goes to them. Never with scheduled_at (422).'),
       track_opens: z.boolean().nullable().optional().describe("Default: the mailbox's setting. true needs a verified tracking domain."),
       track_clicks: z.boolean().nullable().optional(),
       custom_headers: z.array(z.object({

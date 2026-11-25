@@ -170,7 +170,8 @@ export const EmailAccount = z.object({
   connection: EmailAccountConnection.nullable(),
   sending_limits: EmailAccountSendingLimits,
   warmup_config: EmailAccountWarmupConfig,
-  signature_html: z.string().nullable(),
+  signature_html: z.string().nullable()
+    .describe('Read-only and deprecated: the value stored before 2026-11-24, kept for one release. No mail gets it added; write the signature into body_html of each send.'),
   track_opens: z.boolean(),
   track_clicks: z.boolean(),
   email_tracking_domain_sid: z.string().nullable(),
