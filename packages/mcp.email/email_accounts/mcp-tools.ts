@@ -270,7 +270,7 @@ export const emailAccountsTools: ToolDefinition[] = [
     ...base,
     name: 'request_email_account_connect_link',
     description:
-      "Get a link the owner of a mailbox opens to connect it: they sign in with Google or Microsoft, or type their IMAP and SMTP details, on a hosted page, so no password ever passes through you. result.connect_url lives 24 hours; hand it to the person. The mailbox appears (search_email_accounts) once they finish, on the server this call named. Without provider the page lets them choose. With no free seat on the server the mailbox lands held (subscription_required). A mailbox that needs new credentials takes reconnect_email_account instead. Requires can_manage_email_accounts.",
+      "Get a link the owner of a mailbox opens to connect it: they sign in with Google or Microsoft, or type their IMAP and SMTP details, on a hosted page, so no password ever passes through you. result.connect_url lives 24 hours; hand it to the person. The mailbox appears (search_email_accounts) once they finish, on the server this call named: the email-accounts.signed-in webhook says so at once, email-accounts.connected when its first sync ends. With no free seat on the server the mailbox lands held (subscription_required). A mailbox that needs new credentials takes reconnect_email_account instead. Requires can_manage_email_accounts.",
     toolClass: 'typical',
     route: emailRoute('POST', '/api/email-accounts/request-connect-link'),
     operation: 'action',
@@ -287,12 +287,15 @@ export const emailAccountsTools: ToolDefinition[] = [
       backfill_days: z.number().int().min(0).max(3650).nullable().optional().describe('Days of history to mirror. Default 90.'),
       display_name: z.string().max(255).nullable().optional(),
       label: z.string().max(64).nullable().optional().describe("The customer's own tag; carried by the IMAP form."),
+      client_reference: z.string().max(128).regex(/^[A-Za-z0-9._:-]+$/).nullable().optional()
+        .describe("Your own id of this link, an id and not text: up to 128 ASCII letters, digits, '.', '_', ':' and '-'. email-accounts.signed-in says it when the owner signs the mailbox in. No other webhook carries it and the mailbox keeps none."),
       ...emailCommon,
     }),
     outputSchema: McpActionResponse(z.null(), z.object({
       connect_url: z.string(),
       expires_at: z.string(),
       email_oauth_app_sid: z.string().nullable().optional().describe('The application the sign-in will run through; null: the platform\'s.'),
+      client_reference: z.string().nullable().optional().describe('The reference the link carries, as it was taken; null for none.'),
     })),
     annotations: { title: 'Request email account connect link', readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   },

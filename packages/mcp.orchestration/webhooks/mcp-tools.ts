@@ -34,7 +34,7 @@ const SID = z.string().length(18).startsWith('wh_hk_')
 const WebhookStatus = z.enum(['on', 'off', 'failed']);
 
 // The subscribable event vocabulary, verbatim from the create/update rules()
-// (WebhookEventTypeEnum, 111 cases with email-boxes.ready of 2026-11-18, and the '*'
+// (WebhookEventTypeEnum, 112 cases with email-accounts.signed-in of 2026-11-23, and the '*'
 // wildcard the rules add). It has to be a closed set on this side:
 // an in: rule 422s with "invalid", never with the list, and an agent cannot
 // subscribe to an event it has to guess the name of.
@@ -144,6 +144,17 @@ const WebhookEventType = z.enum([
   'email-accounts.sync-completed',
   'email-accounts.subscription-hold-applied',
   'email-accounts.subscription-hold-released',
+  // The owner signed the mailbox in through a hosted connect link and its
+  // credentials are stored: said at the sign-in, while connected waits for the
+  // end of the first sync (2026-11-23; gtm.service.email EmailAccountSignedInEvent).
+  // Payload: sid, team_sid, provider, address, status (the mailbox's after the
+  // sign-in: connecting while its first sync runs), connected_at, created_by,
+  // client_reference (the link's, as request_email_account_connect_link took
+  // it; null for a link that carried none) and outcome (created, restored,
+  // reconnected, unchanged). The reference is said here alone (2026-11-24):
+  // the mailbox keeps no trace of its link and no other email-accounts.*
+  // payload has the key.
+  'email-accounts.signed-in',
   'email-messages.received',
   'email-messages.sent',
   'email-messages.bounced',

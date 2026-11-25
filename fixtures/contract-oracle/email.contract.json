@@ -6748,6 +6748,23 @@
                     "between": null
                 },
                 {
+                    "field": "client_reference",
+                    "rules": [
+                        "nullable",
+                        "string",
+                        "max:128",
+                        "regex:/\\A[A-Za-z0-9._:\\-]{1,128}\\z/"
+                    ],
+                    "required": false,
+                    "nullable": true,
+                    "type": "string",
+                    "in": null,
+                    "min": null,
+                    "max": 128,
+                    "size": null,
+                    "between": null
+                },
+                {
                     "field": "_meta",
                     "rules": [
                         "nullable",
