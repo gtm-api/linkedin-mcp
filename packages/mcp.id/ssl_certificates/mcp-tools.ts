@@ -54,6 +54,10 @@ const SslCertificate = z.object({
   issued_at: z.string().nullable(),
   expires_at: z.string().nullable(),
   last_error: z.string().nullable(),
+  // Two members of the shared Domain that this service keeps out of its table: a
+  // certificate here is issued by the service itself over HTTP-01, so both read null.
+  provider: z.string().nullable().describe('The edge provider that issued the certificate, where one does; always null here: the platform issues it itself.'),
+  cname_target: z.string().nullable().describe('The CNAME target an edge provider deals for the domain; always null here: the target to point at is challenge.cname_target.'),
   // Shared AccessIdentityValue (general/KNOWLEDGE.md); passthrough tolerates
   // cross-service serialization drift.
   created_by: z.object({
