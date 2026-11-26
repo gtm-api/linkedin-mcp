@@ -40,6 +40,21 @@ describe('buildPush', () => {
     ]);
   });
 
+  it('ships an exception of an invocation that answered as a WARN line', () => {
+    const payload = buildPush([
+      {
+        outcome: 'ok',
+        logs: [],
+        exceptions: [{ timestamp: 1787222968000, name: 'Error', message: 'Network connection lost.' }],
+      },
+    ]);
+    expect(payload!.streams.find((s) => s.stream['level'] === 'ERROR')).toBeUndefined();
+    const warn = payload!.streams.find((s) => s.stream['level'] === 'WARN')!;
+    expect(warn.values.map(([, line]) => JSON.parse(line))).toEqual([
+      { exception: 'Error', message: 'Network connection lost.', outcome: 'ok' },
+    ]);
+  });
+
   it('returns null when there is nothing to ship', () => {
     expect(buildPush([{ outcome: 'ok', logs: [], exceptions: [] }])).toBeNull();
     expect(buildPush([{ outcome: 'canceled', logs: [], exceptions: [] }])).toBeNull();

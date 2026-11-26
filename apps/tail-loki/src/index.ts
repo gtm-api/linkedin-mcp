@@ -63,8 +63,12 @@ export function buildPush(items: readonly TailItemLike[]): { streams: LokiStream
 
   for (const item of items) {
     for (const log of item.logs) add(LEVELS[log.level] ?? 'INFO', log.timestamp, lineOf(log.message));
+    // An exception that did not end the invocation (outcome ok) is a WARN: the runtime records
+    // the client going away mid-stream ("Network connection lost.", 23 lines on 2026-11-20..26,
+    // every one with outcome ok) and a background task's throw this way, and the call itself
+    // answered. ERROR is kept for an invocation that failed.
     for (const ex of item.exceptions) {
-      add('ERROR', ex.timestamp, JSON.stringify({ exception: ex.name, message: ex.message, outcome: item.outcome }));
+      add(item.outcome === 'ok' ? 'WARN' : 'ERROR', ex.timestamp, JSON.stringify({ exception: ex.name, message: ex.message, outcome: item.outcome }));
     }
     // exceededCpu / exceededMemory end an invocation without an exception line.
     if (item.outcome !== 'ok' && item.outcome !== 'canceled' && item.exceptions.length === 0) {
