@@ -8888,6 +8888,10 @@
                     "value": "stuck_disconnecting"
                 },
                 {
+                    "name": "TunnelNeverConnected",
+                    "value": "tunnel_never_connected"
+                },
+                {
                     "name": "Maintenance",
                     "value": "maintenance"
                 }

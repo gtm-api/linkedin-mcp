@@ -57,7 +57,7 @@ const CloudBrowserSession = z.object({
   session_duration_seconds: z.number().nullable(),
   // Disconnect attribution (disconnect_cause enum owned by cloud_browsers)
   disconnect_cause: z.enum([
-    'user', 'keep_alive_stale', 'ttl_expired', 'stuck_disconnecting', 'maintenance',
+    'user', 'keep_alive_stale', 'ttl_expired', 'stuck_disconnecting', 'tunnel_never_connected', 'maintenance',
   ]).nullable(),
   disconnect_reason: z.string().nullable(),
   created_at: z.string(),
