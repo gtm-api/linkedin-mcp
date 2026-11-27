@@ -189,6 +189,11 @@
         "reason": "the cache bypass of 2026-11-03 (gtm.service.linkedin 17dba116): a live read whatever the caches hold, made for a partner's own feed column (GetSales' posts), every read billed and paced. Agents read through the caches; a tool learns the knob when an agent use case asks for it. Class-wide: one decision for every enrichment and scraping surface that accepts it."
       },
       {
+        "tool": "*",
+        "path": "trust_cache_max_age_days",
+        "reason": "the stored-payload window of the enrichment surface left the tools on 2026-11-27: it is the partner plane's argument. The FormRequests still validate it for every caller, so a client written before that day is not refused, and the service honours it for a team on the partner plan alone; for any other caller the read runs live on the team's own account. A tool that offered it would advertise a knob that does nothing. Class-wide: one decision for all 22 enrichment methods."
+      },
+      {
         "tool": "get_antidetect_browser",
         "path": "cursor",
         "reason": "GET /api/antidetect-browsers/{sid} is bound to AntidetectBrowserSearchRequest, the SEARCH FormRequest, so its rule set describes a list call: this tool reads ONE row by sid and the controller passes none of these through. Delete when the show action gets a FormRequest of its own."

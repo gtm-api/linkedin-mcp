@@ -501,7 +501,10 @@ recorded: the enrichment surface got `trust_cache_max_age_days` (all 22 methods)
 and company `domain` addressing, `include[]` came back on `search_data_requests`
 and both account-share list tools (the comments claiming the controllers built no
 `included` block had gone stale), plus `actor_kind`, `group_by`, `learning_enabled`,
-`reason` and the `archived_at` filter axis.
+`reason` and the `archived_at` filter axis. `trust_cache_max_age_days` left the
+tools again on 2026-11-27 and is the third class-wide line (after `limit` and
+`fresh`): the backend keeps validating it and honours it on the partner plan
+alone, so a tool that offered it would advertise a knob that does nothing.
 
 `unknown_keys` holds 118 keys in three shapes, and the shape matters because only
 one of them is a tool bug:
