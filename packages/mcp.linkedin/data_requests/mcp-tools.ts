@@ -39,7 +39,7 @@ const DataRequestExecutedOn = z.enum(['own_account', 'infra_pool']);
 // One value per owned scraping/enrichment method, the whole matrix.
 const DataRequestMethod = z.enum([
   // enrich (22)
-  'person_lite_profile', 'person_full_profile', 'person_experience',
+  'person_lite_profile', 'person_full_profile', 'person_standard_profile', 'person_experience',
   'person_skills', 'person_education', 'person_posts', 'person_featured',
   'person_contact_info', 'person_languages', 'person_certifications',
   'person_recommendations', 'person_comment_activity', 'person_reaction_activity',

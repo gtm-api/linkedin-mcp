@@ -383,6 +383,174 @@ const LiteProfileResult = PersonRef.extend({
   pending_invitation: PendingInvitation,
 });
 
+// person-standard-profile result (row 150, 2026-11-27): the node's
+// get-profile-with-entities answer, ONE LinkedIn request (the mobile app's
+// profile call), with the full profile's normalizations (avatar_url re-hosted,
+// full_name computed, the identifier quad overlaid). Every list is the FIRST
+// PAGE LinkedIn answers with its own count of the whole list, so a cut list
+// reads as cut. Picture links that are not saved to our storage are not in it:
+// only avatar_url and each education's school_logo_url carry a picture.
+const StandardList = (item: z.ZodTypeAny) => z.object({
+  elements: z.array(item),
+  total: z.number().nullable().describe("LinkedIn's count of the whole list: more than elements.length when the list is longer than its first page; null when the answer states none."),
+}).passthrough();
+
+const StandardDate = z.object({ year: z.number().nullable(), month: z.number().nullable(), day: z.number().nullable() }).passthrough()
+  .describe('A year alone, a month of a year, or a whole day.');
+
+const StandardCompany = z.object({
+  id: z.string(),
+  urn: z.string(),
+  name: z.string().nullable(),
+  public_identifier: z.string().nullable().describe('The page vanity: linkedin.com/company/<vanity>/.'),
+  url: z.string().nullable(),
+  industries: z.array(z.object({ id: z.string(), name: z.string().nullable() }).passthrough()).describe("The page's industries, on a position's employer only ([] elsewhere)."),
+  employee_count_range: z.object({ start: z.number().nullable(), end: z.number().nullable() }).passthrough().nullable()
+    .describe("The staff bracket the page states (51..200); an open top bracket has no end. On a position's employer only."),
+}).passthrough().describe('The page a row points at. No logo here: enrich_linkedin_company_lite_profile saves and answers it.');
+
+const StandardMedia = z.object({
+  urn: z.string(),
+  title: z.string().nullable(),
+  description: z.string().nullable(),
+  kind: z.string().nullable().describe('"link", "image" or "document"; null for a kind this reader does not know.'),
+  url: z.string().nullable().describe("A link item's address."),
+  provider_name: z.string().nullable(),
+  document: z.object({ title: z.string().nullable(), page_count: z.number().nullable() }).passthrough().nullable(),
+}).passthrough().describe('A link, an image or a document attached to the profile, a position or an education (its picture and file links are not served).');
+
+const StandardPerson = z.object({
+  id: z.string().nullable(),
+  urn: z.string().nullable(),
+  public_identifier: z.string().nullable(),
+  first_name: z.string().nullable(),
+  last_name: z.string().nullable(),
+  name: z.string().nullable().describe('For a person named by text alone, not a LinkedIn member.'),
+  headline: z.string().nullable(),
+}).passthrough();
+
+const StandardAssociatedWith = {
+  position_urn: z.string().nullable().describe('The position the row is associated with (a urn of position_groups[].positions).'),
+  education_urn: z.string().nullable().describe('The education the row is associated with (a urn of educations).'),
+};
+
+const StandardPosition = z.object({
+  id: z.string().nullable().describe('The position id, the one the position editing verbs take on your own profile.'),
+  urn: z.string(),
+  title: z.string().nullable(),
+  company_name: z.string().nullable(),
+  company: StandardCompany.nullable(),
+  employment_type: z.string().nullable(),
+  location: z.string().nullable(),
+  location_geo_id: z.string().nullable(),
+  description: z.string().nullable(),
+  start: StandardDate.nullable(),
+  end: StandardDate.nullable().describe('Null while the position is current.'),
+  source_of_hire: z.string().nullable().describe("How the member says they got the job, LinkedIn's value (REFERRAL, CONTACTED_BY_RECRUITER, LINKEDIN, COMPANY_WEBSITE, OTHER)."),
+  media: StandardList(StandardMedia),
+}).passthrough();
+
+const StandardProfileResult = PersonRef.extend({
+  first_name: z.string(),
+  last_name: z.string(),
+  full_name: z.string().describe("The name as one line: first_name and last_name joined; '' when unknown."),
+  maiden_name: z.string().nullable(),
+  headline: z.string().nullable(),
+  localized: z.array(z.object({
+    locale: z.string(),
+    first_name: z.string().nullable(),
+    last_name: z.string().nullable(),
+    maiden_name: z.string().nullable(),
+    headline: z.string().nullable(),
+    about: z.string().nullable(),
+  }).passthrough()).describe('The name, the headline and About in every language the member wrote them in.'),
+  about: z.string().nullable().describe('About. For some members LinkedIn answers it with the paragraph breaks collapsed; enrich_linkedin_person_full_profile keeps them.'),
+  avatar_url: z.string().nullable().describe('The photo, re-hosted on our storage (a durable link). Null when the member shows none.'),
+  location: z.string().nullable(),
+  location_without_country: z.string().nullable(),
+  location_geo_id: z.string().nullable().describe("The location's geo id, the value LinkedIn's location search filter takes."),
+  country: z.string().nullable(),
+  country_geo_id: z.string().nullable(),
+  country_code: z.string().nullable(),
+  industry: z.string().nullable().describe("The industry the member chose for the profile ('Software Development')."),
+  industry_id: z.string().nullable(),
+  primary_locale: z.string().nullable().describe("The profile's primary locale ('en_US'), not a spoken language."),
+  primary_language: z.string().nullable(),
+  supported_locales: z.array(z.string()),
+  supported_languages: z.array(z.string()).describe('Profile locales, not spoken languages: those are `languages`.'),
+  is_premium: z.boolean().nullable(),
+  has_premium_subscriber_badge: z.boolean().nullable(),
+  is_influencer: z.boolean().nullable(),
+  is_creator: z.boolean().nullable(),
+  is_open_to_work: z.boolean().nullable().describe("The public #OpenToWork frame on the photo; false = no public frame (not 'not looking'); null with no photo."),
+  is_hiring: z.boolean().nullable().describe("The public #Hiring frame on the photo; false = no #Hiring frame; null with no photo."),
+  is_memorialized: z.boolean().nullable(),
+  birthday: z.object({ day: z.number().nullable(), month: z.number().nullable(), year: z.number().nullable() }).passthrough().nullable().describe('Shared with the reading account only.'),
+  name_pronunciation: z.object({ audio_url: z.string().nullable(), duration_ms: z.number().nullable() }).passthrough().nullable(),
+  volunteer_causes: z.array(z.string()),
+  position_groups: StandardList(z.object({
+    urn: z.string(),
+    company_name: z.string().nullable(),
+    company: StandardCompany.nullable().describe('Null for an employer with no LinkedIn page.'),
+    start: StandardDate.nullable(),
+    end: StandardDate.nullable().describe('Null while the member still works there.'),
+    positions: StandardList(StandardPosition).describe('The positions of the stay: its first 20, with their count.'),
+  }).passthrough()).describe('The stays with employers, newest first: the first 10 of them.'),
+  educations: StandardList(z.object({
+    id: z.string().nullable(),
+    urn: z.string(),
+    school_name: z.string().nullable(),
+    school_id: z.string().nullable(),
+    company_id: z.string().nullable(),
+    school_public_identifier: z.string().nullable(),
+    school_url: z.string().nullable(),
+    school_logo_url: z.string().nullable().describe("The school's logo, re-hosted on our storage."),
+    degree: z.string().nullable(),
+    field_of_study: z.string().nullable(),
+    grade: z.string().nullable(),
+    activities: z.string().nullable(),
+    description: z.string().nullable(),
+    start: StandardDate.nullable(),
+    end: StandardDate.nullable(),
+    media: StandardList(StandardMedia),
+  }).passthrough()),
+  skills: StandardList(z.object({ id: z.string().nullable(), urn: z.string(), name: z.string() }).passthrough()).describe('The first 20 skills; the whole list is enrich_linkedin_person_skills.'),
+  certifications: StandardList(z.object({
+    urn: z.string(),
+    name: z.string().nullable(),
+    authority: z.string().nullable(),
+    company: StandardCompany.nullable(),
+    license_number: z.string().nullable(),
+    url: z.string().nullable(),
+    display_source: z.string().nullable(),
+    start: StandardDate.nullable().describe('Issued.'),
+    end: StandardDate.nullable().describe('Expires; null for one that does not.'),
+  }).passthrough()),
+  languages: StandardList(z.object({ urn: z.string(), name: z.string().nullable(), proficiency: z.string().nullable() }).passthrough())
+    .describe("Spoken languages; proficiency is LinkedIn's value (ELEMENTARY, LIMITED_WORKING, PROFESSIONAL_WORKING, FULL_PROFESSIONAL, NATIVE_OR_BILINGUAL)."),
+  honors: StandardList(z.object({ urn: z.string(), title: z.string().nullable(), issuer: z.string().nullable(), issued_on: StandardDate.nullable(), description: z.string().nullable(), ...StandardAssociatedWith }).passthrough()),
+  publications: StandardList(z.object({ urn: z.string(), name: z.string().nullable(), publisher: z.string().nullable(), published_on: StandardDate.nullable(), description: z.string().nullable(), url: z.string().nullable(), authors: z.array(StandardPerson) }).passthrough()),
+  patents: StandardList(z.object({
+    urn: z.string(),
+    title: z.string().nullable(),
+    issuer: z.string().nullable(),
+    patent_number: z.string().nullable(),
+    application_number: z.string().nullable(),
+    is_pending: z.boolean().nullable(),
+    issued_on: StandardDate.nullable(),
+    filed_on: StandardDate.nullable(),
+    url: z.string().nullable(),
+    description: z.string().nullable(),
+    inventors: z.array(StandardPerson),
+  }).passthrough()),
+  projects: StandardList(z.object({ urn: z.string(), title: z.string().nullable(), description: z.string().nullable(), url: z.string().nullable(), start: StandardDate.nullable(), end: StandardDate.nullable(), contributors: z.array(StandardPerson), ...StandardAssociatedWith }).passthrough()),
+  courses: StandardList(z.object({ urn: z.string(), name: z.string().nullable(), number: z.string().nullable(), ...StandardAssociatedWith }).passthrough()),
+  test_scores: StandardList(z.object({ urn: z.string(), name: z.string().nullable(), score: z.string().nullable(), date_on: StandardDate.nullable(), description: z.string().nullable(), ...StandardAssociatedWith }).passthrough()),
+  organizations: StandardList(z.object({ urn: z.string(), name: z.string().nullable(), position_held: z.string().nullable(), description: z.string().nullable(), start: StandardDate.nullable(), end: StandardDate.nullable(), ...StandardAssociatedWith }).passthrough()),
+  volunteer_experiences: StandardList(z.object({ urn: z.string(), role: z.string().nullable(), company_name: z.string().nullable(), company: StandardCompany.nullable(), cause: z.string().nullable(), description: z.string().nullable(), start: StandardDate.nullable(), end: StandardDate.nullable() }).passthrough()),
+  media: StandardList(StandardMedia).describe('The media attached to the profile; the first page of 10 can be shorter than total.'),
+});
+
 // person-languages item (row 56, LIVE 2026-08-27; shape finalized against the wire).
 const LanguageItem = z.object({
   name: z.string(),
@@ -644,6 +812,23 @@ export const linkedinEnrichmentTools: ToolDefinition[] = [
     inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
     outputSchema: McpActionResponse(NullItem, z.object({ profile: FullProfileResult, data_request: DataRequestRow }).passthrough()),
     annotations: { title: 'Enrich person full profile', ...LIVE },
+  },
+  {
+    ...base,
+    name: 'enrich_linkedin_person_standard_profile',
+    description:
+      "The middle person read: ONE LinkedIn request (one delay of the bucket, where the full profile waits eight), and the header, About and the FIRST PAGE of every list on the profile with LinkedIn's count of each: the first 10 stays with employers (each with its first 20 positions and the employer's industry and staff bracket), and 20 rows of educations, skills, certifications, languages, honors, publications, patents, projects, courses, test scores, organizations and volunteering. A list longer than its first page comes cut and its total says so. No contact card, follower or connection counts, verification or relationship to your account: enrich_linkedin_person_full_profile and enrich_linkedin_person_lite_profile. cached 24h. Address by ONE identifier of any kind.",
+    toolClass: 'typical',
+    route: { service: 'linkedin', method: 'POST', pathTemplate: '/api/linkedin-enrichment/person-standard-profile' },
+    operation: 'action',
+    envelope: 'action',
+    availability: 'ga',
+    dangerous: false,
+    massAction: false,
+    scheduleRequired: false,
+    inputSchema: z.object({ ...personTargetFields, ...executorFields, ...usageMetaField }),
+    outputSchema: McpActionResponse(NullItem, z.object({ profile: StandardProfileResult, data_request: DataRequestRow }).passthrough()),
+    annotations: { title: 'Enrich person standard profile', ...LIVE },
   },
   {
     ...base,

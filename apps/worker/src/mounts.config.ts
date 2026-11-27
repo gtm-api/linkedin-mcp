@@ -294,7 +294,7 @@ export const MOUNTS: MountConfig[] = [
     path: '/mcp/linkedin/enrichment',
     name: 'gtm-linkedin-enrichment',
     instructions:
-      'GTM LinkedIn profile / company / post enrichment (lite & full profile, experience, skills, education, posts, featured, and more), run on your own connected accounts.',
+      'GTM LinkedIn profile / company / post enrichment (lite, standard & full profile, experience, skills, education, posts, featured, and more), run on your own connected accounts.',
     selectors: [p('linkedin_enrichment')],
     maxTools: 25,
     facade: 'none',
